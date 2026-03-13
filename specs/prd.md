@@ -1,7 +1,7 @@
 # Product Requirements Document (PRD)
 
 ## Overview
-What are we building? A concise description of the project or feature.
+What are we building and who is it for? A concise description of the project or feature.
 
 ## Goals
 - Goal 1: Describe what success looks like.

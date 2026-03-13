@@ -1,12 +1,14 @@
-0a. Study `specs/*` with up to 10 parallel Sonnet subagents to learn the application specifications. Pay close attention to `specs/prd.md` Technical Constraints for language, framework, base image, and test command.
-0b. Study @IMPLEMENTATION_PLAN.md.
-0c. Study relevant files in `app/**` with up to 10 parallel Sonnet subagents before making changes.
+0a. Read `practices/general/coding.md` — these are the standing rules for how to write code in this project.
+0b. Read the language-specific practices file if it exists: `practices/lang/[language].md` (language from `specs/prd.md`). Read the framework-specific file if it exists: `practices/framework/[framework].md`.
+0c. Study `specs/*` with up to 10 parallel Sonnet subagents to learn the application specifications. Pay close attention to `specs/prd.md` Technical Constraints for language, framework, base image, and test command.
+0d. Study @IMPLEMENTATION_PLAN.md.
+0e. Study relevant files in `app/**` with up to 10 parallel Sonnet subagents before making changes.
 
 1. Follow @IMPLEMENTATION_PLAN.md and choose the most important unchecked item. Before making changes, search `app/**` (don't assume not implemented) using up to 15 Sonnet subagents. Use 1 Sonnet subagent for build/tests. Use an Opus subagent for complex reasoning (debugging, architectural decisions).
 
 2. All application code goes in `app/`. All infrastructure config lives in `infra/` — update `infra/Dockerfile` and `infra/docker-compose.yml` as needed when dependencies or the runtime change.
 
-3. After implementing, run tests:
+3. Before running tests, read `practices/general/verification.md`. Then run:
    ```
    docker compose -f infra/docker-compose.yml build
    docker compose -f infra/docker-compose.yml run --rm test
@@ -28,3 +30,4 @@
 - Implement functionality completely. Placeholders and stubs waste future iterations.
 - If you find inconsistencies in `specs/*`, use an Opus subagent to update them.
 - Update `infra/k8s/deployment.yaml` when ports, environment variables, or resource needs change.
+- If you discover a pattern worth preserving (a gotcha, a convention, a hard-won lesson), append it to the relevant practices file: `practices/general/coding.md`, `practices/lang/[language].md`, or `practices/framework/[framework].md`. Keep entries terse.

@@ -1,6 +1,6 @@
 # unpossible
 
-A reusable bootstrap template for AI-assisted development using the **Ralph Wiggum Loop** — an autonomous Claude loop that reads your specs, executes tasks one at a time, commits code, and iterates until done.
+A reusable bootstrap template for AI-assisted development based on the dev work of Clayton Farr and its inventor Geoffrey Huntley. The **Ralph Wiggum Loop** — an autonomous Claude loop that reads your specs, executes tasks one at a time, commits code, and iterates until done.
 
 Generated code runs in Docker, so the loop works with **any language or framework** — Claude writes the `Dockerfile` based on your specs and all tests run inside the container.
 
@@ -16,6 +16,16 @@ Each loop iteration:
 The loop uses `--dangerously-skip-permissions` so Claude auto-approves all tool calls. Run it in a throwaway environment or a branch you can review before merging.
 
 ## Quickstart
+
+### Development
+
+To set the initial requirementschat locally with clause in a Docker sandbox as described [here](https://docs.docker.com/ai/sandboxes/get-started/).
+Rename the template directory to your project name.
+
+```bash
+cd [my-project]
+docker sandbox run claude
+```
 
 ```bash
 # 1. Copy this template
@@ -52,6 +62,18 @@ $EDITOR specs/plan.md         # What are the tasks?
 │   ├── docker-compose.yml     # `app` service (run) + `test` service (tests)
 │   └── k8s/
 │       └── deployment.yaml    # Kubernetes Deployment + Service (agent maintains)
+│
+├── practices/                 # Coding standards — loaded selectively, not every iteration
+│   ├── general/
+│   │   ├── coding.md          # Language-agnostic rules (comments, naming, structure)
+│   │   ├── planning.md        # How to analyze specs and produce a plan (incl. JTBD scope test)
+│   │   ├── verification.md    # Backpressure, LLM-as-judge, test discipline
+│   │   └── prompting.md       # Load-bearing word choices for editing PROMPT_*.md files
+│   ├── lang/
+│   │   ├── go.md              # Go-specific patterns (add your language here)
+│   │   ├── rust.md
+│   │   └── ruby.md
+│   └── framework/             # Framework-specific patterns (agent creates as needed)
 │
 └── specs/
     ├── prd.md                 # Product requirements — MUST include base image + test command
@@ -110,8 +132,35 @@ The loop itself is language-agnostic — swap in `node:20-alpine` + `npm test`, 
 
 `infra/k8s/deployment.yaml` is maintained by the agent as the app evolves. For local clusters (kind, minikube), `imagePullPolicy: Never` lets you use locally-built images without a registry. For real deployments, update the `image:` field to a registry path and remove that flag.
 
+## Operating the Loop
+
+The loop works best when you sit *on* it, not *in* it. Your job is to observe and adjust, not to direct each step.
+
+### Let it run
+The loop is designed for eventual consistency — trust it to self-correct through iteration. Resist the urge to intervene after every imperfect output. If the agent makes a wrong turn, the next iteration often self-corrects; if it doesn't, that's the signal to act.
+
+### When to regenerate the plan
+`IMPLEMENTATION_PLAN.md` is disposable state, not a source of truth. Regenerate it freely:
+```bash
+./loop.sh plan 1
+```
+Regenerate when: the agent seems off-track, the plan has accumulated clutter, specs changed significantly, or the agent appears confused about what's complete.
+
+### Tuning prompts
+When the agent fails in a *specific, repeatable* way, add one targeted line to `PROMPT_build.md` or `PROMPT_plan.md` addressing that exact failure. Don't rewrite the whole prompt — small, precise additions compound well. See `practices/general/prompting.md` for the word choices that matter.
+
+### Backpressure is the control mechanism
+The agent cannot mark a task complete until tests, typechecks, and lints pass. This is intentional — it is the only reliable way to enforce correctness across a fresh context window every iteration. If the validation suite is weak, the loop produces the appearance of progress. Invest in tests before running the loop at scale.
+
+### Emergency stops
+- `Ctrl+C` stops the loop immediately
+- `git reset --hard` reverts any uncommitted changes
+- The loop only pushes after a successful commit, so remote state is always green
+
 ## Tips
 
+- **Context budget**: Claude's 200K context window yields ~176K truly usable tokens. Every file loaded every iteration costs from that budget — keep specs, prompts, and practices files lean. Brevity compounds.
+- **Markdown over JSON** for any files the agent reads — it tokenizes more efficiently.
 - **Keep specs lean.** Every spec file loads into every loop iteration. Shorter = cheaper.
 - **One task per iteration.** The loop is designed for focused, verifiable increments.
 - **Review `specs/activity.md`** to see what the agent did in each iteration.

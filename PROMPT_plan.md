@@ -1,6 +1,8 @@
-0a. Study `specs/*` with up to 10 parallel Sonnet subagents to learn the application specifications. Pay close attention to the Technical Constraints section of `specs/prd.md` — it defines the language, framework, base image, and test command.
-0b. Study @IMPLEMENTATION_PLAN.md (if present) to understand the plan so far.
-0c. Study `app/**` with up to 10 parallel Sonnet subagents to understand what has been implemented so far.
+0a. Read `practices/general/planning.md` — these are the standing rules for how to plan this project.
+0b. Study `specs/*` with up to 10 parallel Sonnet subagents to learn the application specifications. Pay close attention to the Technical Constraints section of `specs/prd.md` — it defines the language, framework, base image, and test command.
+0c. Read the language-specific practices file if it exists: `practices/lang/[language].md` (language from `specs/prd.md`). Read the framework-specific file if it exists: `practices/framework/[framework].md`.
+0d. Study @IMPLEMENTATION_PLAN.md (if present) to understand the plan so far.
+0e. Study `app/**` with up to 10 parallel Sonnet subagents to understand what has been implemented so far.
 
 1. Perform a gap analysis: compare what exists in `app/**` against what is required by `specs/prd.md` and `specs/plan.md`. Use an Opus subagent to analyze findings, prioritize gaps, and create/update @IMPLEMENTATION_PLAN.md as a bullet point list sorted by priority. Ultrathink. Consider: missing features, TODOs, placeholders, skipped/flaky tests, and inconsistent patterns.
 
