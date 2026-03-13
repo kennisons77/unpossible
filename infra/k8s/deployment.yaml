@@ -1,0 +1,51 @@
+# Agent generates and maintains this file as the application evolves.
+# Image tag is "app:latest" for local builds. Update to a registry path for real deployments.
+#
+# Apply:  kubectl apply -f infra/k8s/
+# Delete: kubectl delete -f infra/k8s/
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app
+  labels:
+    app: app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app
+  template:
+    metadata:
+      labels:
+        app: app
+    spec:
+      containers:
+        - name: app
+          image: app:latest
+          imagePullPolicy: Never   # for local clusters (kind, minikube); remove for registry images
+          ports:
+            - containerPort: 8080  # update from specs/prd.md "Port"
+          # env:
+          #   - name: APP_ENV
+          #     value: production
+          # resources:
+          #   requests:
+          #     cpu: "100m"
+          #     memory: "128Mi"
+          #   limits:
+          #     cpu: "500m"
+          #     memory: "256Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: app
+spec:
+  selector:
+    app: app
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080   # update from specs/prd.md "Port"
+  type: ClusterIP
