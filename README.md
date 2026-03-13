@@ -76,11 +76,13 @@ $EDITOR specs/plan.md         # What are the tasks?
 │   └── framework/             # Framework-specific patterns (agent creates as needed)
 │
 └── specs/
-    ├── prd.md                 # Product requirements — MUST include base image + test command
-    ├── plan.md                # Task checklist
-    ├── activity.md            # Agent activity log (auto-updated)
+    ├── audience.md            # Audiences, JTBDs, story map, current target SLC release
+    ├── prd.md                 # Technical constraints (language, base image, test command, port)
+    ├── [activity].md          # One spec per activity — acceptance criteria drive required tests
+    ├── plan.md                # High-level human checklist (agent maintains IMPLEMENTATION_PLAN.md)
+    ├── activity.md            # Agent activity log (auto-updated each iteration)
     ├── testing.md             # Testing strategy
-    └── README.md              # Explains the specs directory
+    └── README.md              # Explains the specs directory and how to write good specs
 ```
 
 ## Usage
@@ -96,12 +98,67 @@ $EDITOR specs/plan.md         # What are the tasks?
 
 **Build mode** implements tasks, tests via `docker compose run --rm test`, and commits after each green run.
 
+## Phase 1: Define Requirements (before running the loop)
+
+This is human + LLM work done in a normal conversation — not in the loop. The goal is to produce
+`specs/audience.md` and a set of activity spec files before Ralph touches any code.
+
+### 1. Define your audience and their JTBDs
+Open `specs/audience.md` and fill in:
+- **Audiences** — who is this built for?
+- **Jobs to Be Done** — what outcomes do they want? (why they'd use this, not what features it has)
+
+### 2. Map activities and capability depths
+For each JTBD, identify the activities users perform to accomplish it. Activities are **verbs** in
+a user journey, not system capabilities:
+
+```
+✓  "upload photo"  →  specs/upload-photo.md
+✗  "image system"  →  too broad, bundles multiple activities
+```
+
+For each activity, define capability depths (basic → enhanced → advanced). These become the rows
+of your story map.
+
+### 3. Draw your story map and choose a release slice
+Arrange activities as columns, capability depths as rows. A horizontal slice is a candidate release:
+
+```
+UPLOAD      →   EXTRACT     →   ARRANGE     →   SHARE
+
+basic           auto                            export        ← Release 1: Palette Picker
+────────────────────────────────────────────────────────
+                palette         manual                        ← Release 2: Mood Board
+────────────────────────────────────────────────────────
+batch           AI themes       templates       embed         ← Release 3: Design Studio
+```
+
+Mark your **Current target release** in `specs/audience.md`. The planning agent uses this to
+scope `IMPLEMENTATION_PLAN.md` to that slice only — not the entire feature space.
+
+A good release slice is **Simple** (narrow scope), **Lovable** (people actually want it),
+and **Complete** (fully accomplishes a job — not a broken preview).
+
+### 4. Write activity specs
+One `specs/[activity-name].md` per activity in your target release. Each spec describes:
+- What the user does and why
+- **Acceptance criteria** — observable outcomes, not implementation details
+- Capability depth in scope for this release
+
+The acceptance criteria become the required tests the planning agent derives tasks from.
+
+### 5. Fill in technical constraints
+Complete `specs/prd.md` Technical Constraints: Language, Framework, Base image, Test command, Port.
+
+Then run the loop.
+
 ## Setup Checklist
 
 Before running the loop:
 
-- [ ] Fill in `specs/prd.md` — include **Language**, **Base image**, **Test command**, and **Port**
-- [ ] Fill in `specs/plan.md` — break work into discrete, testable tasks
+- [ ] Fill in `specs/audience.md` — audiences, JTBDs, activities, story map, current target release
+- [ ] Write one `specs/[activity].md` per activity in the target release, with acceptance criteria
+- [ ] Fill in `specs/prd.md` — **Language**, **Base image**, **Test command**, **Port**
 - [ ] Ensure your repo has a remote (the loop pushes after each iteration)
 - [ ] Docker is running locally (the loop builds and tests inside containers)
 
