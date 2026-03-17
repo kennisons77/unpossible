@@ -1,7 +1,7 @@
 # Ralph Wiggum Loop Prompt
 
 You are an autonomous AI agent working in a "Ralph Wiggum Loop". 
-Your goal is to complete the project described in `specs/prd.md` by executing the tasks in `specs/plan.md`.
+Your goal is to complete the project described in `specs/prd.md` by executing the tasks in `specs/plan.md`. Token spend is an issue and the process should use 
 
 ## Instructions
 

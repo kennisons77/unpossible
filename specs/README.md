@@ -5,6 +5,9 @@ these files every iteration to understand what to build and verify what exists.
 
 ## Files
 
+### `pitch.md` — The main idea of the project
+Lays out the initial vision and goals for the project. It is intended as a starting point of the project and will be refined as the project progresses. It should also serve as a reference for the project team. If this document changes throughout the project, it should be updated accordingly.
+
 ### `audience.md` — Audience & Jobs to Be Done
 Fill this in first, before running the loop. Defines who you're building for, what outcomes they
 want (JTBDs), what activities they perform, and how those activities map to SLC releases. The

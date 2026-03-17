@@ -1,65 +1,48 @@
 # Audience & Jobs to Be Done
 
-Fill this in during Phase 1 (before running the loop). The planning agent reads it to scope each
-release to a coherent SLC slice rather than planning the entire feature space at once.
-
 ## Audiences
-
-Describe who this is built for. There may be more than one connected audience.
 
 | Audience | Role / context |
 |---|---|
-| [e.g., Designer] | [Creates mood boards for client presentations] |
-| [e.g., Client] | [Reviews and approves designer's work] |
+| Ken (solo developer) | Building and using the system personally. Technical, motivated by local AI exploration and genuine document chaos pain. |
 
 ## Jobs to Be Done
 
-For each audience, what outcome do they want? JTBDs are high-level — they describe *why* someone
-uses the product, not what features it has.
+**Ken (solo user):**
 
-**[Audience 1]:**
-- JTBD: [e.g., "Quickly extract a color palette from reference images so I can present cohesive options to clients"]
-- JTBD: [e.g., "..."]
-
-**[Audience 2]:**
-- JTBD: [e.g., "Review and give feedback on design work without needing design tools"]
+- JTBD: "Stop losing documents — I need one place where I can actually find any record I own"
+- JTBD: "Never wonder if a passport is expired or a bill is due — surface the metadata I've already paid to extract"
+- JTBD: "Keep sensitive personal records (IDs, medical) under my own control — not in Google Drive or Evernote"
+- JTBD: "Build and experiment with a real LLM-powered pipeline I understand end-to-end"
 
 ## Activities
 
-For each JTBD, what do users *do* to accomplish it? Activities are verbs — steps in a journey,
-not system capabilities. Each activity becomes one spec file in `specs/`.
-
 | Activity | JTBD it serves | Capability depths |
 |---|---|---|
-| [e.g., upload photo] | [Extract palette] | basic → bulk → batch |
-| [e.g., see extracted colors] | [Extract palette] | auto → palette → AI themes |
-| [e.g., arrange layout] | [Present to client] | manual → templates → auto-layout |
-| [e.g., share result] | [Present to client] | export → collab → embed |
+| Ingest a document | Stop losing docs | upload → folder watch → API |
+| Review / correct extraction | Trust the data | manual fill → diff view → confidence gating |
+| Search for a document | Find anything | keyword FTS → semantic (v2) |
+| Browse concern / type | Navigate the library | scaffold browse → filtered browse |
+| Audit pipeline results | Improve over time | per-field provenance → accuracy metrics |
+| Configure concerns | Shape the taxonomy | LLM-proposed → user-confirmed → custom |
+| View upcoming metadata | Act on records | dashboard surface → alerts (v2+) |
 
 ## Story Map
 
-Arrange activities as columns (the journey backbone) with capability depths as rows. This is the
-full space of what *could* be built — release slices are horizontal cuts through it.
-
 ```
-[ACTIVITY 1] → [ACTIVITY 2] → [ACTIVITY 3] → [ACTIVITY 4]
+[INGEST] → [REVIEW] → [SEARCH] → [BROWSE] → [AUDIT]
 
-basic            auto            manual           export
-enhanced         palette         templates        collab
-advanced         AI themes       auto-layout      embed
+upload           manual fill      keyword FTS     scaffold view    per-field provenance
+folder watch     diff view        filters         concern nav      LLM accuracy trends
+API webhook      confidence gate  semantic (v2)   smart grouping   backfill triggers
 ```
 
 ## Release Plan
 
-Define named SLC releases as horizontal slices. Each release must be:
-- **Simple** — narrow scope, shippable fast
-- **Lovable** — people actually want to use it within its scope
-- **Complete** — fully accomplishes a job; not a broken preview
-
-| Release | Activity 1 | Activity 2 | Activity 3 | Activity 4 | Value delivered |
+| Release | Ingest | Review | Search | Browse | Value delivered |
 |---|---|---|---|---|---|
-| [Name] | basic | auto | — | export | [One sentence] |
-| [Name] | — | palette | manual | — | [One sentence] |
-| [Name] | batch | AI themes | templates | embed | [One sentence] |
+| **POC** | upload + folder watch + API | manual fill + diff view + confidence gate | keyword FTS | scaffold admin | Full pipeline proven on 10 real docs; find any ingested document by text query |
+| **v1** | + email adapter | + bulk review | + filters | concern-based nav | Usable daily library with navigable structure and actionable metadata surfaced |
+| **v2** | + camera/mobile | + backfill triggers | + semantic (pgvector) | smart grouping | Conceptual queries ("how much did I spend on healthcare last year") return correct answers |
 
-**Current target release:** [Name] — [one sentence describing what this release makes possible]
+**Current target release:** POC — full 6-stage ETL pipeline working end-to-end on real Government ID and Medical Record documents, searchable via full-text, with human review queue operational.
