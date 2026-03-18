@@ -1,0 +1,20 @@
+# Data directories (postgres, minio)
+.data/
+
+# Rails
+app/log/*
+app/tmp/*
+app/storage/*
+app/public/assets
+
+# Git-tracked library (separate repo)
+library/
+
+# Secrets
+.env
+*.key
+app/config/master.key
+app/config/credentials/*.key
+
+# OS
+.DS_Store

@@ -6,7 +6,7 @@ Check off tasks as they are completed. The agent should pick the next unchecked 
 
 ## Phase 1: Foundation
 
-- [ ] **Rails 8 app init** — new Rails 8 app with PostgreSQL, Solid Queue, Solid Cache; remove unnecessary defaults
+- [x] **Rails 8 app init** — new Rails 8 app with PostgreSQL, Solid Queue, Solid Cache; remove unnecessary defaults
 - [ ] **Auth scaffold** — Rails 8 built-in authentication (has_secure_password); single user seed
 - [ ] **Core models** — `User`, `Document` (with stage enum, owner_id FK, content_hash, confidence_score, minio_blob_key, markdown_path, embedding vector column), `Concern`, `DocumentField` (per-field provenance)
 - [ ] **MinIO setup** — local Docker container + Active Storage configuration for S3-compatible storage

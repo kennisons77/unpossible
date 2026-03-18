@@ -1,25 +1,73 @@
-# docker-compose.yml — used for local development and running tests in the loop.
+# docker-compose.yml — local development and test runner
 #
 # Build image:  docker compose -f infra/docker-compose.yml build
 # Run app:      docker compose -f infra/docker-compose.yml up app
 # Run tests:    docker compose -f infra/docker-compose.yml run --rm test
 
 services:
+  db:
+    image: pgvector/pgvector:pg16
+    tmpfs:
+      - /var/lib/postgresql/data
+    shm_size: 256mb
+    environment:
+      POSTGRES_DB: sovereign_library_development
+      POSTGRES_USER: sovereign
+      POSTGRES_PASSWORD: sovereign
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sovereign"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  minio:
+    image: minio/minio
+    command: server /data --console-address ":9001"
+    volumes:
+      - ../.data/minio:/data
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
   app:
     build:
       context: ..
       dockerfile: infra/Dockerfile
     ports:
-      - "[port]:[ port]"   # fill in from specs/prd.md "Port"
+      - "3000:3000"
     volumes:
-      - ../app:/app        # hot-reload during development (remove in prod)
+      - ../app:/app
+    depends_on:
+      db:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://sovereign:sovereign@db:5432/sovereign_library_development
+      RAILS_ENV: development
+      AWS_ACCESS_KEY_ID: minioadmin
+      AWS_SECRET_ACCESS_KEY: minioadmin
+      AWS_ENDPOINT: http://minio:9000
 
   test:
     build:
       context: ..
       dockerfile: infra/Dockerfile
-    command: [your test command]   # fill in from specs/prd.md "Test command"
+    command: bash -c "bin/rails db:create db:migrate 2>/dev/null; bundle exec rspec"
     volumes:
       - ../app:/app
+    depends_on:
+      db:
+        condition: service_healthy
     environment:
-      - APP_ENV=test
+      DATABASE_URL: postgres://sovereign:sovereign@db:5432/sovereign_library_test
+      RAILS_ENV: test
+      APP_ENV: test

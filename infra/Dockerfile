@@ -1,29 +1,45 @@
-# Agent fills in this file based on specs/prd.md "Base image", "Language", and "Framework".
-#
-# Example (Python/FastAPI):
-#   FROM python:3.12-slim
-#   WORKDIR /app
-#   COPY app/requirements.txt .
-#   RUN pip install --no-cache-dir -r requirements.txt
-#   COPY app/ .
-#   CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080"]
-#
-# Example (Node/Express):
-#   FROM node:20-alpine
-#   WORKDIR /app
-#   COPY app/package*.json .
-#   RUN npm ci --omit=dev
-#   COPY app/ .
-#   CMD ["node", "src/index.js"]
+# The Sovereign Library — Rails 8 + PostgreSQL + OCR tooling
+FROM ruby:3.3-slim
 
-FROM [base-image]
+ARG HTTP_PROXY
+ARG HTTPS_PROXY
+ARG NO_PROXY
+ARG PROXY_CA_CERT_B64
+
+# Install proxy CA cert if provided
+RUN if [ -n "$PROXY_CA_CERT_B64" ]; then \
+      echo "$PROXY_CA_CERT_B64" | base64 -d > /usr/local/share/ca-certificates/proxy-ca.crt && \
+      update-ca-certificates; \
+    fi
+
+ENV SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
+
+RUN apt-get update -qq && \
+    apt-get install --no-install-recommends -y \
+      build-essential \
+      libpq-dev \
+      libyaml-dev \
+      tesseract-ocr \
+      tesseract-ocr-eng \
+      poppler-utils \
+      git \
+      curl \
+      libvips \
+      pkg-config \
+      nodejs \
+      npm && \
+    rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
-# Copy and install dependencies
-# COPY app/[dependency-file] .
-# RUN [install command]
+# Install gems first (cached layer)
+COPY app/Gemfile ./
+RUN bundle lock --add-platform ruby && bundle install
 
+# Copy app code — but preserve the generated Gemfile.lock
 COPY app/ .
+RUN bundle lock --add-platform ruby
 
-# CMD ["your", "start", "command"]
+EXPOSE 3000
+
+CMD ["bin/rails", "server", "-b", "0.0.0.0"]

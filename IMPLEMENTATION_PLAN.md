@@ -37,16 +37,11 @@ Per-activity spec files do not yet exist for the four POC activities defined in 
 
 The `infra/Dockerfile` and `infra/docker-compose.yml` contain placeholder values that must be resolved before any containerized development or testing.
 
-- [ ] **Fix Dockerfile placeholders** — Replace `FROM [base-image]` with `FROM ruby:3.3-slim`; `apt-get install` build-essential, libpq-dev, tesseract-ocr, tesseract-ocr-eng, poppler-utils (pdftotext), git; `COPY Gemfile* ./`, `RUN bundle install`; set `CMD ["bin/rails", "server", "-b", "0.0.0.0"]` (files: `infra/Dockerfile`)
-  Required tests: `docker build` completes without error
-- [ ] **Fix docker-compose.yml placeholders** — Replace `[port]:[port]` with `3000:3000`; replace `[your test command]` with `bundle exec rspec`; add `depends_on` for db and minio services; add `DATABASE_URL` env var to app and test services (files: `infra/docker-compose.yml`)
-  Required tests: `docker compose config` validates without error
-- [ ] **Add PostgreSQL service to docker-compose** — `pgvector/pgvector:pg16` image, persistent volume, `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD` env vars (files: `infra/docker-compose.yml`)
-  Required tests: `docker compose up db` starts, `psql` connects, `CREATE EXTENSION vector` succeeds
-- [ ] **Add MinIO service to docker-compose** — `minio/minio` image, persistent volume, console port 9001, API port 9000, `MINIO_ROOT_USER` and `MINIO_ROOT_PASSWORD` env vars; app service gets `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_ENDPOINT` env vars (files: `infra/docker-compose.yml`)
-  Required tests: `docker compose up minio` starts, health check passes
-- [ ] **Confirm Solid Queue/Cache backing** — Verify Rails 8 Solid Queue and Solid Cache use database-backed adapters by default (no Redis needed). Document decision in this plan (files: `infra/docker-compose.yml` — no Redis service added unless needed)
-  Required tests: documented decision; if database-backed, no Redis service present
+- [x] **Fix Dockerfile placeholders** — `FROM ruby:3.3-slim`, apt-get installs build-essential/libpq-dev/libyaml-dev/tesseract/poppler/git/nodejs, bundle install, CMD rails server. Includes proxy CA cert support for sandboxed builds.
+- [x] **Fix docker-compose.yml placeholders** — Ports 3000:3000, test command `bundle exec rspec`, `depends_on` with health checks, `DATABASE_URL` env vars for app and test services.
+- [x] **Add PostgreSQL service to docker-compose** — `pgvector/pgvector:pg16` with tmpfs (bind mounts caused initdb corruption in sandbox), health check via pg_isready.
+- [x] **Add MinIO service to docker-compose** — `minio/minio` with console port 9001, API port 9000, health check, app service gets AWS env vars.
+- [x] **Confirm Solid Queue/Cache backing** — Rails 8.1 Solid Queue and Solid Cache are database-backed by default. No Redis service needed. Confirmed: no Redis service in docker-compose.
 
 ---
 
@@ -54,10 +49,8 @@ The `infra/Dockerfile` and `infra/docker-compose.yml` contain placeholder values
 
 ### 1.1 App Initialization
 
-- [ ] **Rails 8 app init** — `rails new` with PostgreSQL adapter, skip Action Mailer/Mailbox/Cable; configure Solid Queue and Solid Cache; add `pgvector` gem to Gemfile; generate RSpec scaffold so `bundle exec rspec` runs (empty suite) (files: `Gemfile`, `Gemfile.lock`, `config/database.yml`, `config/application.rb`, `config/environments/development.rb`, `config/environments/test.rb`, `config/environments/production.rb`, `.rspec`, `spec/spec_helper.rb`, `spec/rails_helper.rb`)
-  Required tests: `bundle exec rspec` exits 0 with no examples, `bin/rails db:create` succeeds
-- [ ] **RSpec and testing gems** — Add `rspec-rails`, `factory_bot_rails`, `shoulda-matchers`, `capybara`, `selenium-webdriver` to Gemfile test group; configure `spec/rails_helper.rb` with FactoryBot and Shoulda includes (files: `Gemfile`, `spec/spec_helper.rb`, `spec/rails_helper.rb`, `spec/support/factory_bot.rb`, `spec/support/shoulda.rb`)
-  Required tests: `bundle exec rspec` runs with FactoryBot available, Shoulda matchers loaded
+- [x] **Rails 8 app init** — Hand-crafted Rails 8.1 app (no network for `rails new`): PostgreSQL adapter, skipped Mailer/Mailbox/Cable, Solid Queue + Solid Cache configured, pgvector gem, Propshaft asset pipeline. `bundle exec rspec` exits 0, `bin/rails db:create` succeeds.
+- [x] **RSpec and testing gems** — rspec-rails 7.0, factory_bot_rails 6.4, shoulda-matchers 6.0, capybara, selenium-webdriver. Configured in spec/rails_helper.rb with support files for FactoryBot and Shoulda.
 - [ ] **RuboCop setup** — Add `rubocop`, `rubocop-rails`, `rubocop-rspec` gems; create `.rubocop.yml` with project-appropriate config (files: `Gemfile`, `.rubocop.yml`)
   Required tests: `bundle exec rubocop` runs without crash (warnings acceptable at this stage)
 

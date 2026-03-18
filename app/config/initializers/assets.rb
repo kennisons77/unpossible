@@ -1,0 +1,1 @@
+# Propshaft handles asset pipeline

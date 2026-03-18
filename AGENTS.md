@@ -1,6 +1,6 @@
 ## Build & Run
 
-- Build image:  `docker compose -f infra/docker-compose.yml build`
+- Build image:  `docker compose -f infra/docker-compose.yml build --build-arg HTTP_PROXY="$HTTP_PROXY" --build-arg HTTPS_PROXY="$HTTPS_PROXY" --build-arg NO_PROXY="$NO_PROXY" --build-arg PROXY_CA_CERT_B64="$PROXY_CA_CERT_B64"`
 - Run app:      `docker compose -f infra/docker-compose.yml up app`
 - Run tests:    `docker compose -f infra/docker-compose.yml run --rm test`
 
@@ -9,25 +9,26 @@
 Run after each implementation:
 
 - Tests:    `docker compose -f infra/docker-compose.yml run --rm test`
-- Lint/typecheck: `[add command here — can run inside the test container or as a separate target]`
+- Lint:     `docker compose -f infra/docker-compose.yml run --rm test bundle exec rubocop` (once RuboCop is set up)
 
 ## Infra Notes
 
 - Application code lives in `app/` — the Dockerfile copies this directory into the container.
-- `infra/Dockerfile` — update when the base image, dependencies, or start command changes.
-- `infra/docker-compose.yml` — defines `app` (run) and `test` (run tests) service targets.
-- `infra/k8s/` — Kubernetes manifests. `imagePullPolicy: Never` is set for local clusters (kind, minikube); remove this for registry-based deployments.
+- `infra/Dockerfile` — `ruby:3.3-slim` base, includes build-essential, libpq-dev, tesseract-ocr, poppler-utils, git, nodejs. Proxy CA cert support via `PROXY_CA_CERT_B64` build arg.
+- `infra/docker-compose.yml` — services: `app` (web), `test` (rspec), `db` (pgvector/pg16), `minio` (S3-compatible storage). DB uses tmpfs (bind mounts cause initdb corruption in sandbox).
+- `infra/k8s/` — Kubernetes manifests. `imagePullPolicy: Never` for local clusters.
 
 ## Codebase Patterns
 
-Key conventions the agent should follow:
-
-- `[e.g., Entry point is app/main.py]`
-- `[e.g., All routes are defined in app/routes/]`
-- `[e.g., Use the shared logger, not print/console.log]`
+- Rails 8.1 app with PostgreSQL, Solid Queue (jobs), Solid Cache
+- Propshaft asset pipeline, Tailwind CSS, Turbo/Stimulus
+- RSpec with FactoryBot and Shoulda Matchers
+- Services in `app/services/`, jobs in `app/jobs/`
+- Git operations use CLI (not rugged gem) — git is installed in the container
 
 ## Gotchas
 
-Things that wasted time and shouldn't happen again:
-
-- `[e.g., Must rebuild the Docker image after changing dependencies]`
+- Dockerfile `COPY app/ .` overwrites generated Gemfile.lock — must run `bundle lock` after the copy step
+- Named Docker volumes don't work in this sandbox — use tmpfs or bind mounts
+- Docker build needs proxy build args passed explicitly (sandbox firewall)
+- After changing Gemfile, extract Gemfile.lock from image: `docker run --rm infra-test cat Gemfile.lock > app/Gemfile.lock`

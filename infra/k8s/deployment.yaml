@@ -25,7 +25,7 @@ spec:
           image: app:latest
           imagePullPolicy: Never   # for local clusters (kind, minikube); remove for registry images
           ports:
-            - containerPort: 8080  # update from specs/prd.md "Port"
+            - containerPort: 3000
           # env:
           #   - name: APP_ENV
           #     value: production
@@ -47,5 +47,5 @@ spec:
   ports:
     - protocol: TCP
       port: 80
-      targetPort: 8080   # update from specs/prd.md "Port"
+      targetPort: 3000
   type: ClusterIP
