@@ -22,9 +22,25 @@ The loop uses `--dangerously-skip-permissions` so Claude auto-approves all tool 
 To set the initial requirementschat locally with clause in a Docker sandbox as described [here](https://docs.docker.com/ai/sandboxes/get-started/).
 Rename the template directory to your project name.
 
+Start our sandbox
 ```bash
 cd [my-project]
 docker sandbox run claude
+```
+
+List active sandboxes:
+```bash
+docker sandbox ls
+```
+
+Access a running sandbox:
+```bash
+docker sandbox exec -it <sandbox-name> bash
+```
+
+Remove a sandbox:
+```bash
+docker sandbox rm <sandbox-name>
 ```
 
 ```bash
