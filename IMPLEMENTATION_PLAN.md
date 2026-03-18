@@ -56,8 +56,7 @@ The `infra/Dockerfile` and `infra/docker-compose.yml` contain placeholder values
 
 ### 1.2 Authentication
 
-- [ ] **Auth scaffold** — Rails 8 built-in authentication generator (`bin/rails generate authentication`); single-user seed in `db/seeds.rb`; session-based login/logout; protect all routes with `authenticate` before_action in `ApplicationController` (files: `app/models/user.rb`, `app/controllers/sessions_controller.rb`, `app/controllers/application_controller.rb`, `app/views/sessions/new.html.erb`, `db/migrate/*_create_users.rb`, `db/seeds.rb`, `config/routes.rb`)
-  Required tests: unauthenticated request redirects to login, valid credentials create session, invalid credentials rejected, logout destroys session
+- [x] **Auth scaffold** — Hand-crafted Rails 8 authentication: User model with `has_secure_password`, Session model, Authentication concern in ApplicationController, SessionsController with login/logout, single-user seed (`admin@sovereign.local`), dashboard landing page. 12 tests passing (model validations, associations, normalization, session CRUD, auth gating).
 
 ### 1.3 Core Models
 

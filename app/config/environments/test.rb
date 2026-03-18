@@ -12,5 +12,6 @@ Rails.application.configure do
   config.active_support.deprecation = :stderr
   config.active_support.disallowed_deprecation = :raise
   config.active_support.disallowed_deprecation_warnings = []
+  config.action_controller.allow_forgery_protection = false
   config.active_record.migration_error = :page_load
 end
