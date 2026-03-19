@@ -87,12 +87,11 @@ The `infra/Dockerfile` and `infra/docker-compose.yml` contain placeholder values
 
 ### 1.3 Core Models
 
-- [ ] **Document model** — stage enum (`acquired`, `categorized`, `identified`, `normalized`, `stored`, `enriched`), `review_required` boolean default false, `review_reason` string, `content_hash` string, `confidence_score` float, `minio_blob_key` string, `markdown_path` string, `owner_id` FK to users, `concern_id` FK, `concern_tags` PostgreSQL array column, `document_type` string, `embedding` vector(1536) via pgvector; Active Storage attachment for original blob (files: `app/models/document.rb`, `db/migrate/*_create_documents.rb`, `spec/models/document_spec.rb`, `spec/factories/documents.rb`)
-  Required tests: validates presence of stage, stage defaults to `acquired`, `review_required` defaults to false, owner association works, concern association optional, concern_tags stores/retrieves array values
-- [ ] **Concern model** — `name` string, `owner_id` FK, `llm_proposed` boolean default true, `confirmed_at` timestamp nullable; scopes for confirmed/unconfirmed; validates name uniqueness per owner (files: `app/models/concern.rb`, `db/migrate/*_create_concerns.rb`, `spec/models/concern_spec.rb`, `spec/factories/concerns.rb`)
-  Required tests: LLM-proposed concerns have `confirmed_at: nil`, confirming sets timestamp, `confirmed` scope returns only confirmed, `unconfirmed` scope returns only unconfirmed, validates name uniqueness scoped to owner_id
-- [ ] **DocumentField model** — `document_id` FK, `field_name` string, `value` text, `source` enum (`:llm`, `:ocr`, `:human`); composite index on `[document_id, field_name]` (files: `app/models/document_field.rb`, `db/migrate/*_create_document_fields.rb`, `spec/models/document_field_spec.rb`, `spec/factories/document_fields.rb`)
-  Required tests: validates presence of field_name and source, source enum rejects invalid values, document association works, persists with each valid source value
+- [x] **Document model** — stage enum (6 stages), review_required, content_hash, confidence_score, minio_blob_key, markdown_path, owner_id FK, concern_id FK, concern_tags array, document_type, embedding vector(1536), Active Storage attachment. 11 tests passing.
+- [x] **Concern model** — name, owner_id FK, llm_proposed default true, confirmed_at nullable, confirmed/unconfirmed scopes, confirm! method. 9 tests passing.
+- [x] **DocumentField model** — document_id FK, field_name, value, source enum (llm/ocr/human), composite index. 8 tests passing.
+- [x] **Active Storage migration** — Added `create_active_storage_tables` migration for blobs/attachments/variant_records.
+- [x] **Infra fixes** — docker-compose volume mounts corrected (`src/` not `app/`), disabled schema dump after migration (pgvector vector type not supported by Ruby schema dumper), `check_all_pending!` in rails_helper, `TimeHelpers` included in RSpec config.
 
 ### 1.4 Storage Configuration
 

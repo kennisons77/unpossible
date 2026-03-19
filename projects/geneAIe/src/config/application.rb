@@ -14,6 +14,8 @@ module SovereignLibrary
   class Application < Rails::Application
     config.load_defaults 8.0
 
+    config.active_record.dump_schema_after_migration = false
+
     config.active_job.queue_adapter = :solid_queue
     config.active_storage.service = Rails.env.test? ? :test : :local
 

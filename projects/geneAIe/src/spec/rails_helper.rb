@@ -8,7 +8,7 @@ require "rspec/rails"
 Dir[Rails.root.join("spec/support/**/*.rb")].each { |f| require f }
 
 begin
-  ActiveRecord::Migration.maintain_test_schema!
+  ActiveRecord::Migration.check_all_pending!
 rescue ActiveRecord::PendingMigrationError => e
   abort e.to_s.strip
 end
@@ -18,4 +18,5 @@ RSpec.configure do |config|
   config.use_transactional_fixtures = true
   config.infer_spec_type_from_file_location!
   config.filter_rails_from_backtrace!
+  config.include ActiveSupport::Testing::TimeHelpers
 end
