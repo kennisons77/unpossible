@@ -1,11 +1,17 @@
 # Data directories (postgres, minio)
 .data/
+projects/*/infra/.data/
 
-# Rails
-app/log/*
-app/tmp/*
-app/storage/*
-app/public/assets
+# Rails (project src directories)
+projects/*/src/log/*
+projects/*/src/tmp/*
+projects/*/src/storage/*
+projects/*/src/public/assets
+projects/*/src/temp/*
+
+# Rails secrets (project-level)
+projects/*/src/config/master.key
+projects/*/src/config/credentials/*.key
 
 # Git-tracked library (separate repo)
 library/
@@ -13,8 +19,6 @@ library/
 # Secrets
 .env
 *.key
-app/config/master.key
-app/config/credentials/*.key
 
 # OS
 .DS_Store

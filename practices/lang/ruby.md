@@ -27,4 +27,31 @@ Loaded when specs/prd.md Language is Ruby.
 
 ## Dependencies (Gems)
 - Pin exact versions in `Gemfile.lock` — commit it
+- Constrain with tilde-minor: `gem 'rails', '~> 8'` — not exact, allows patch updates
 - Audit new gems for maintenance status before adding
+- Add `rack-attack` to any app with public endpoints — rate limiting from day one
+- Run `brakeman` on every PR — treat high-severity findings as blockers
+
+## Code Metrics (Rubocop enforced)
+- Line length: 120 chars max
+- Method length: 15 lines max
+- Block length: 25 lines max
+- Cyclomatic complexity: 6 max
+- Perceived complexity: 7 max
+- Max parameters: 5
+- String literals: single quotes
+- Hash syntax: ruby19 (`key: value`, not `key => value`)
+- Required plugins: `rubocop-performance`, `rubocop-rails`, `rubocop-rspec`
+
+## Test Coverage
+- Enforce 90%+ line coverage via SimpleCov — CI fails below threshold
+- Add to `spec/rails_helper.rb` with `SimpleCov.minimum_coverage 90`
+- Track branch coverage in addition to line coverage
+
+## Auth Patterns
+- `activerecord-session_store` over cookie sessions for auditability
+- SAML/OAuth2 (`omniauth-saml`, `doorkeeper`) only when the spec requires it — don't add speculatively
+
+## Structured Logging
+- Add Lograge from day one — structured request logs are worth the one-line config
+- Filter sensitive params in `config/initializers/filter_parameter_logging.rb`

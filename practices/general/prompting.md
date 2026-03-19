@@ -30,3 +30,30 @@ Treat prompts like a feedback loop, not a one-time config:
 - When the agent fails in a specific, repeatable way — add one targeted line to the relevant prompt
 - When the agent adds unnecessary complexity — add a constraint, don't rewrite the whole prompt
 - When the plan goes stale or the agent seems confused about completion status — regenerate planning with `./loop.sh plan 1` rather than trying to patch the prompt
+
+## Cost Discipline
+
+Token spend compounds across iterations. These rules keep each loop iteration under $1.
+
+**Model selection (by task):**
+
+| Task | Model | Why |
+|---|---|---|
+| Reading files, searching, summarising | Haiku | Cheapest capable reader |
+| Code generation, editing, tests | Sonnet | Best cost/quality for generation |
+| Debugging, architecture, root-cause analysis | Opus | Justified only when cheaper models stall |
+
+**Subagent limits:**
+- Reading/searching: `up to 3 Haiku subagents`, each ≤5 turns
+- Build/test: `only 1 Sonnet subagent`
+- Kill any subagent that exceeds 10 turns — it is stuck, not thinking
+
+**Context loading rules:**
+- Load `specs/prd.md` and `specs/plan.md` directly via Read — no subagent needed
+- Only load framework/lang practices files relevant to the current task
+- Don't reload files already in context from the same iteration
+
+**Prompt caching:**
+- Large repeated context (prd.md, practices files) benefits from `cache_control: {type: "ephemeral", ttl: "1h"}`
+- The default 5-minute TTL expires between loop iterations; always specify `ttl: "1h"` for shared context blocks
+- Cached tokens cost ~10% of uncached input tokens — worth it for any block > 1000 tokens reused across turns

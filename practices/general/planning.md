@@ -12,13 +12,13 @@ capability. Use the **One Sentence Without "And"** test:
 
 Activities are naturally scoped by user intent. Capability-named specs tend to grow unbounded.
 
-If `specs/audience.md` exists, the activity names and their capability depths are defined there —
+If `projects/<name>/specs/audience.md` exists, the activity names and their capability depths are defined there —
 use them as the authoritative list of spec topics.
 
 ## SLC Release Scoping
 
-If `specs/audience.md` exists and defines a **Current target release**, scope
-`IMPLEMENTATION_PLAN.md` to that release only — not the full feature space.
+If `projects/<name>/specs/audience.md` exists and defines a **Current target release**, scope
+`projects/<name>/IMPLEMENTATION_PLAN.md` to that release only — not the full feature space.
 
 A good release slice is:
 - **Simple** — narrow enough to ship in a focused build loop
@@ -45,9 +45,9 @@ Example task entry:
 This prevents tasks from being marked done without the required verification existing and passing.
 
 ## Gap Analysis
-- Read `app/**` before declaring anything missing — never assume unimplemented
-- Compare against each spec file in `specs/` explicitly, item by item
-- Flag `infra/Dockerfile` and `infra/docker-compose.yml` placeholder values as high-priority
+- Read `projects/<name>/src/` before declaring anything missing — never assume unimplemented
+- Compare against each spec file in `projects/<name>/specs/` explicitly, item by item
+- Flag `projects/<name>/infra/Dockerfile` and `projects/<name>/infra/docker-compose.yml` placeholder values as high-priority
 
 ## Task Structure
 - Each task in `IMPLEMENTATION_PLAN.md` must be independently verifiable
@@ -59,6 +59,26 @@ This prevents tasks from being marked done without the required verification exi
 - If specs contradict each other, resolve the conflict before planning implementation
 - If a requirement is ambiguous, make the ambiguity explicit in `IMPLEMENTATION_PLAN.md`
 - Never invent requirements — if something seems missing, flag it, don't add it silently
+
+## Development Phases
+
+New projects advance through phases. Each phase must be stable before the next begins.
+The current phase is recorded in `specs/prd.md` under `## Phase`. Default to Phase 0 for new projects.
+
+| Phase | Name | Infrastructure | Goal |
+|---|---|---|---|
+| 0 | Local | `docker-compose up`, `docker-compose run test` | App runs and tests pass on dev machine |
+| 1 | CI | GitHub Actions (or equivalent) | Tests run automatically on every push |
+| 2 | Staging | Remote deploy (platform-specific) | App reachable at a non-production URL |
+| 3 | Production | Multi-env, secrets mgmt, monitoring | Production-ready, security hardened |
+
+**Phase rules:**
+- Plan tasks only for the current phase. Future-phase infrastructure (k8s, secrets managers, staging pipelines) must not appear in the implementation plan until that phase is active.
+- To advance a phase, add a task: `[ ] Advance to Phase N` — it requires the previous phase's acceptance criteria to all be passing.
+- When planning Phase 0, the only infra files needed are `infra/Dockerfile` and `infra/docker-compose.yml`.
+- When planning Phase 1, add CI config (e.g. `.github/workflows/ci.yml`). Do not add deploy jobs yet.
+- When planning Phase 2, add a deploy workflow and a staging environment. Do not add production config yet.
+- When planning Phase 3, add production config, secrets management, and security hardening.
 
 ## IMPLEMENTATION_PLAN.md
 - It is the agent's only memory across context windows — keep it current
