@@ -36,9 +36,16 @@ WORKDIR /app
 COPY src/Gemfile src/Gemfile.lock* ./
 RUN bundle lock --add-platform ruby && bundle install
 
+# Install npm packages (cached layer)
+COPY src/package.json ./
+RUN npm install
+
 # Copy app code — but preserve the generated Gemfile.lock
 COPY src/ .
 RUN bundle lock --add-platform ruby
+
+# Build CSS and JS assets
+RUN mkdir -p app/assets/builds && npm run build
 
 EXPOSE 3000
 

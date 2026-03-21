@@ -1,15 +1,43 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
     <title>The Sovereign Library</title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
   </head>
-  <body class="min-h-screen bg-gray-50">
-    <main class="container mx-auto px-4 py-8">
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+      <div class="container">
+        <%= link_to "The Sovereign Library", root_path, class: "navbar-brand" %>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav me-auto">
+            <li class="nav-item">
+              <%= link_to "Dashboard", root_path, class: "nav-link" %>
+            </li>
+          </ul>
+          <form class="d-flex me-3" role="search" action="/search" method="get">
+            <input class="form-control me-2" type="search" name="q" placeholder="Search documents..." aria-label="Search">
+            <button class="btn btn-outline-light" type="submit">Search</button>
+          </form>
+          <% if authenticated? %>
+            <span class="navbar-text me-3"><%= Current.user.email_address %></span>
+            <%= button_to "Log out", session_path, method: :delete, class: "btn btn-outline-light btn-sm" %>
+          <% end %>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container py-4">
+      <%= render "layouts/flash" %>
       <%= yield %>
-    </main>
+    </div>
+
+    <%= javascript_include_tag "bootstrap.bundle.min", "data-turbo-track": "reload" %>
   </body>
 </html>

@@ -9,7 +9,8 @@ gem "solid_cache", "~> 1.0"
 gem "propshaft"
 gem "turbo-rails"
 gem "stimulus-rails"
-gem "tailwindcss-rails"
+gem "cssbundling-rails"
+gem "importmap-rails"
 gem "aws-sdk-s3", require: false
 gem "pgvector", "~> 0.3"
 # git operations use the CLI (git is installed in the container)

@@ -101,8 +101,8 @@ The `infra/Dockerfile` and `infra/docker-compose.yml` contain placeholder values
 
 ### 1.5 Frontend Base
 
-- [ ] **Tailwind CSS + Hotwire setup** — `tailwindcss-rails` gem; `turbo-rails` and `stimulus-rails`; base application layout with navigation skeleton (login/logout, search bar placeholder, nav links) (files: `Gemfile`, `app/views/layouts/application.html.erb`, `app/assets/stylesheets/application.tailwind.css`, `config/tailwind.config.js`, `app/javascript/controllers/index.js`)
-  Required tests: application layout renders without error, Tailwind classes present in rendered HTML
+- [x] **Bootstrap 5 + Bootswatch Yeti + Hotwire setup** — `cssbundling-rails` + `importmap-rails` gems; `turbo-rails` and `stimulus-rails`; Bootstrap 5 via npm with Bootswatch Yeti theme; base application layout with Bootstrap navbar (login/logout, search bar placeholder, nav links), flash partials, container wrapper (files: `Gemfile`, `package.json`, `app/assets/stylesheets/application.bootstrap.scss`, `config/importmap.rb`, `app/javascript/application.js`, `app/javascript/controllers/application.js`, `app/javascript/controllers/index.js`, `app/views/layouts/application.html.erb`, `app/views/layouts/_flash.html.erb`, `infra/Dockerfile`, `infra/docker-compose.yml`)
+  Required tests: application layout renders without error, Bootstrap classes present in rendered HTML
 
 ### 1.6 Scaffold Views
 

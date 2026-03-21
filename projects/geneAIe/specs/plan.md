@@ -11,7 +11,7 @@ Check off tasks as they are completed. The agent should pick the next unchecked 
 - [x] **Core models** — `User`, `Document` (with stage enum, owner_id FK, content_hash, confidence_score, minio_blob_key, markdown_path, embedding vector column), `Concern`, `DocumentField` (per-field provenance)
 - [x] **MinIO setup** — local Docker container + Active Storage configuration for S3-compatible storage
 - [x] **Git library service** — `LibraryGitService`: writes `.md` files to `library/` folder and auto-commits on every create/update with structured commit messages
-- [ ] **Frontend base** — Bootstrap 5 + Bootswatch Yeti theme + Hotwire (Turbo/Stimulus) wired up; replaces Tailwind. Steps:
+- [x] **Frontend base** — Bootstrap 5 + Bootswatch Yeti theme + Hotwire (Turbo/Stimulus) wired up; replaces Tailwind. Steps:
   1. Add `cssbundling-rails` gem; run `./bin/rails css:install:bootstrap` to install Bootstrap 5 via npm
   2. Add Bootswatch Yeti via npm (`yarn add bootswatch` or `npm install bootswatch`); import in `app/assets/stylesheets/application.bootstrap.scss`: replace `@import "bootstrap/scss/bootstrap"` with `@import "bootswatch/dist/yeti/variables"; @import "bootstrap/scss/bootstrap"; @import "bootswatch/dist/yeti/bootswatch"`
   3. Update `application.html.erb`: remove Tailwind body classes, add Bootstrap navbar, flash alert/notice partials using Bootstrap alert components, and `<div class="container py-4">` wrapper
