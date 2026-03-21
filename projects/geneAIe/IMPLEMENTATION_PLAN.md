@@ -96,7 +96,7 @@ The `infra/Dockerfile` and `infra/docker-compose.yml` contain placeholder values
 ### 1.4 Storage Configuration
 
 - [x] **Active Storage + MinIO config** — Development env uses `:minio` service (S3-compatible); test env uses `:test` disk adapter; `aws-sdk-s3` gem present; `config/initializers/active_storage.rb` auto-creates MinIO bucket on boot; docker-compose forwards proxy build args. 5 specs passing.
-- [ ] **Git library service** — `LibraryGitService` class: initializes/opens git repo at configurable library path (env var `LIBRARY_PATH`, default `library/`); writes `.md` file to `{concern}/{document_type}/{doc_id}.md`; auto-commits with structured message including document ID, stage, source, timestamp; handles first-commit edge case; app repo `.gitignore` excludes `library/` (files: `app/services/library_git_service.rb`, `spec/services/library_git_service_spec.rb`, `.gitignore`)
+- [x] **Git library service** — `LibraryGitService` class: initializes/opens git repo at configurable library path (env var `LIBRARY_PATH`, default `library/`); writes `.md` file to `{concern}/{document_type}/{doc_id}.md`; auto-commits with structured message including document ID, stage, source, timestamp; handles first-commit edge case; app repo `.gitignore` excludes `library/` (files: `app/services/library_git_service.rb`, `spec/services/library_git_service_spec.rb`, `.gitignore`)
   Required tests: creates file at correct nested path, commits with expected message format, creates missing subdirectories, handles first commit in empty repo, updates existing file and creates new commit
 
 ### 1.5 Frontend Base

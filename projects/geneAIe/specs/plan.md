@@ -10,9 +10,15 @@ Check off tasks as they are completed. The agent should pick the next unchecked 
 - [x] **Auth scaffold** — Rails 8 built-in authentication (has_secure_password); single user seed
 - [x] **Core models** — `User`, `Document` (with stage enum, owner_id FK, content_hash, confidence_score, minio_blob_key, markdown_path, embedding vector column), `Concern`, `DocumentField` (per-field provenance)
 - [x] **MinIO setup** — local Docker container + Active Storage configuration for S3-compatible storage
-- [ ] **Git library service** — `LibraryGitService`: writes `.md` files to `library/` folder and auto-commits on every create/update with structured commit messages
-- [ ] **Frontend base** — Tailwind CSS + shadcn-style component library + Hotwire (Turbo/Stimulus) wired up
-- [ ] **Scaffold admin views** — Rails scaffold for Document, Concern, DocumentField (Tailwind-styled; POC UI)
+- [x] **Git library service** — `LibraryGitService`: writes `.md` files to `library/` folder and auto-commits on every create/update with structured commit messages
+- [ ] **Frontend base** — Bootstrap 5 + Bootswatch Yeti theme + Hotwire (Turbo/Stimulus) wired up; replaces Tailwind. Steps:
+  1. Add `cssbundling-rails` gem; run `./bin/rails css:install:bootstrap` to install Bootstrap 5 via npm
+  2. Add Bootswatch Yeti via npm (`yarn add bootswatch` or `npm install bootswatch`); import in `app/assets/stylesheets/application.bootstrap.scss`: replace `@import "bootstrap/scss/bootstrap"` with `@import "bootswatch/dist/yeti/variables"; @import "bootstrap/scss/bootstrap"; @import "bootswatch/dist/yeti/bootswatch"`
+  3. Update `application.html.erb`: remove Tailwind body classes, add Bootstrap navbar, flash alert/notice partials using Bootstrap alert components, and `<div class="container py-4">` wrapper
+  4. Add `javascript_include_tag "application"` with Bootstrap JS bundle (popper included) via importmap or esbuild
+  5. Remove Tailwind gem/config (`tailwind.config.js`, `Procfile.dev` tw entry) — Tailwind was installed in Phase 1.1 but no views use it yet so removal is safe
+  6. Run existing test suite (`rspec`) to confirm no regressions; no view specs yet so green is expected
+- [ ] **Scaffold admin views** — Rails scaffold for Document, Concern, DocumentField (Bootstrap/Yeti-styled; POC UI)
 
 ---
 
