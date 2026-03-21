@@ -41,6 +41,11 @@ services:
     build:
       context: ..
       dockerfile: infra/Dockerfile
+      args:
+        HTTP_PROXY: ${HTTP_PROXY:-}
+        HTTPS_PROXY: ${HTTPS_PROXY:-}
+        NO_PROXY: ${NO_PROXY:-}
+        PROXY_CA_CERT_B64: ${PROXY_CA_CERT_B64:-}
     ports:
       - "3000:3000"
     volumes:
@@ -61,6 +66,11 @@ services:
     build:
       context: ..
       dockerfile: infra/Dockerfile
+      args:
+        HTTP_PROXY: ${HTTP_PROXY:-}
+        HTTPS_PROXY: ${HTTPS_PROXY:-}
+        NO_PROXY: ${NO_PROXY:-}
+        PROXY_CA_CERT_B64: ${PROXY_CA_CERT_B64:-}
     command: bash -c "bin/rails db:drop db:create db:migrate; bundle exec rspec"
     volumes:
       - ../src:/app

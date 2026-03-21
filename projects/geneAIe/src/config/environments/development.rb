@@ -8,7 +8,7 @@ Rails.application.configure do
 
   config.cache_store = :solid_cache_store if ENV["RAILS_CACHE"]
 
-  config.active_storage.service = :local
+  config.active_storage.service = :minio
   config.active_support.deprecation = :log
   config.active_support.disallowed_deprecation = :raise
   config.active_support.disallowed_deprecation_warnings = []
