@@ -48,7 +48,7 @@ Built for personal use first, designed to scale. The system prioritizes human co
 | PII Redaction | Rule-based regex | Strip known PII patterns before any LLM call |
 | Blob Storage | MinIO (S3-compatible, local Docker) | Via Active Storage; blobs are write-once/immutable |
 | Markdown Store | Git-tracked folder on disk | Rails auto-commits on every record write |
-| Frontend | Tailwind CSS + shadcn-style components + Hotwire (Turbo/Stimulus) | Rails scaffold views for POC |
+| Frontend | Bootstrap 5 (Bootswatch Yeti theme) + Hotwire (Turbo/Stimulus) | Rails scaffold views for POC; Yeti chosen for clean readable UI with minimal custom CSS |
 | Auth | Rails 8 built-in (has_secure_password) | Single user; session-based |
 | Remote Access | Tailscale | Network-layer security; no open ports |
 | Deployment | Docker Compose (dev) → Kamal (when pipeline is proven on real docs) | |
