@@ -33,11 +33,11 @@ RUN apt-get update -qq && \
 WORKDIR /app
 
 # Install gems first (cached layer)
-COPY app/Gemfile ./
+COPY src/Gemfile src/Gemfile.lock* ./
 RUN bundle lock --add-platform ruby && bundle install
 
 # Copy app code — but preserve the generated Gemfile.lock
-COPY app/ .
+COPY src/ .
 RUN bundle lock --add-platform ruby
 
 EXPOSE 3000
