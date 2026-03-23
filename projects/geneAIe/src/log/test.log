@@ -5830,3 +5830,492 @@ Processing by SessionsController#destroy as HTML
 Redirected to http://www.example.com/session/new
 Completed 302 Found in 9ms (ActiveRecord: 0.8ms (2 queries, 0 cached) | GC: 0.2ms)
   [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+Generating image variants require the image_processing gem. Please add `gem "image_processing", "~> 1.2"` to your Gemfile or set `config.active_storage.variant_processor = :disabled`.
+  [1m[36mActiveRecord::SchemaMigration Load (3.2ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC[0m
+  [1m[36mActiveRecord::InternalMetadata Load (0.4ms)[0m  [1m[34mSELECT * FROM "ar_internal_metadata" WHERE "ar_internal_metadata"."key" = $1 ORDER BY "ar_internal_metadata"."key" ASC LIMIT 1[0m  [[nil, "environment"]]
+  [1m[36mActiveRecord::SchemaMigration Load (0.1ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC[0m
+  [1m[36mActiveRecord::InternalMetadata Load (0.1ms)[0m  [1m[34mSELECT * FROM "ar_internal_metadata" WHERE "ar_internal_metadata"."key" = $1 ORDER BY "ar_internal_metadata"."key" ASC LIMIT 1[0m  [[nil, "environment"]]
+  [1m[36mActiveRecord::SchemaMigration Load (0.0ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC[0m
+  [1m[36mActiveRecord::InternalMetadata Load (0.1ms)[0m  [1m[34mSELECT * FROM "ar_internal_metadata" WHERE "ar_internal_metadata"."key" = $1 ORDER BY "ar_internal_metadata"."key" ASC LIMIT 1[0m  [[nil, "environment"]]
+  [1m[35mSQL (0.1ms)[0m  [1m[35mSET search_path TO public[0m
+  [1m[35m (14.3ms)[0m  [1m[35mDROP DATABASE IF EXISTS "sovereign_library_test"[0m
+  [1m[35mSQL (0.2ms)[0m  [1m[35mSET search_path TO public[0m
+  [1m[35m (18.8ms)[0m  [1m[35mCREATE DATABASE "sovereign_library_test" ENCODING = 'unicode'[0m
+  [1m[35m (0.6ms)[0m  [1m[35mCREATE TABLE "schema_migrations" ("version" character varying NOT NULL PRIMARY KEY)[0m
+  [1m[35m (0.4ms)[0m  [1m[35mCREATE TABLE "ar_internal_metadata" ("key" character varying NOT NULL PRIMARY KEY, "value" character varying, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL)[0m
+  [1m[35m (0.1ms)[0m  [1m[34mSELECT pg_try_advisory_lock(2808742124724416055)[0m
+  [1m[36mActiveRecord::SchemaMigration Load (0.2ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC[0m
+  [1m[36mActiveRecord::InternalMetadata Load (0.2ms)[0m  [1m[34mSELECT * FROM "ar_internal_metadata" WHERE "ar_internal_metadata"."key" = $1 ORDER BY "ar_internal_metadata"."key" ASC LIMIT 1[0m  [[nil, "environment"]]
+  [1m[36mActiveRecord::InternalMetadata Create (0.2ms)[0m  [1m[32mINSERT INTO "ar_internal_metadata" ("key", "value", "created_at", "updated_at") VALUES ('environment', 'test', '2026-03-21 17:48:10.084336', '2026-03-21 17:48:10.084358') RETURNING "key"[0m
+Migrating to CreateUsers (20260318000001)
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[35m (1.1ms)[0m  [1m[35mCREATE TABLE "users" ("id" bigserial primary key, "email_address" character varying NOT NULL, "password_digest" character varying NOT NULL, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL)[0m
+  [1m[35m (0.2ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_users_on_email_address" ON "users" ("email_address")[0m
+  [1m[36mActiveRecord::SchemaMigration Create (0.1ms)[0m  [1m[32mINSERT INTO "schema_migrations" ("version") VALUES ('20260318000001') RETURNING "version"[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mCOMMIT[0m
+Migrating to CreateSessions (20260318000002)
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[35m (0.9ms)[0m  [1m[35mCREATE TABLE "sessions" ("id" bigserial primary key, "user_id" bigint NOT NULL, "ip_address" character varying, "user_agent" character varying, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL, CONSTRAINT "fk_rails_758836b4f0"
+FOREIGN KEY ("user_id")
+  REFERENCES "users" ("id")
+)[0m
+  [1m[35m (0.1ms)[0m  [1m[35mCREATE INDEX "index_sessions_on_user_id" ON "sessions" ("user_id")[0m
+  [1m[36mActiveRecord::SchemaMigration Create (0.1ms)[0m  [1m[32mINSERT INTO "schema_migrations" ("version") VALUES ('20260318000002') RETURNING "version"[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mCOMMIT[0m
+Migrating to CreateActiveStorageTables (20260319000000)
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[35m (1.8ms)[0m  [1m[35mCREATE TABLE "active_storage_blobs" ("id" bigserial primary key, "key" character varying NOT NULL, "filename" character varying NOT NULL, "content_type" character varying, "metadata" text, "service_name" character varying NOT NULL, "byte_size" bigint NOT NULL, "checksum" character varying, "created_at" timestamp(6) NOT NULL)[0m
+  [1m[35m (0.1ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_active_storage_blobs_on_key" ON "active_storage_blobs" ("key")[0m
+  [1m[35m (0.5ms)[0m  [1m[35mCREATE TABLE "active_storage_attachments" ("id" bigserial primary key, "name" character varying NOT NULL, "record_type" character varying NOT NULL, "record_id" bigint NOT NULL, "blob_id" bigint NOT NULL, "created_at" timestamp(6) NOT NULL, CONSTRAINT "fk_rails_c3b3935057"
+FOREIGN KEY ("blob_id")
+  REFERENCES "active_storage_blobs" ("id")
+)[0m
+  [1m[35m (0.2ms)[0m  [1m[35mCREATE INDEX "index_active_storage_attachments_on_blob_id" ON "active_storage_attachments" ("blob_id")[0m
+  [1m[35m (0.2ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_active_storage_attachments_uniqueness" ON "active_storage_attachments" ("record_type", "record_id", "name", "blob_id")[0m
+  [1m[35m (0.7ms)[0m  [1m[35mCREATE TABLE "active_storage_variant_records" ("id" bigserial primary key, "blob_id" bigint NOT NULL, "variation_digest" character varying NOT NULL, CONSTRAINT "fk_rails_993965df05"
+FOREIGN KEY ("blob_id")
+  REFERENCES "active_storage_blobs" ("id")
+)[0m
+  [1m[35m (0.4ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_active_storage_variant_records_uniqueness" ON "active_storage_variant_records" ("blob_id", "variation_digest")[0m
+  [1m[36mActiveRecord::SchemaMigration Create (0.1ms)[0m  [1m[32mINSERT INTO "schema_migrations" ("version") VALUES ('20260319000000') RETURNING "version"[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mCOMMIT[0m
+Migrating to CreateConcerns (20260319000001)
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[35m (0.8ms)[0m  [1m[35mCREATE TABLE "concerns" ("id" bigserial primary key, "owner_id" bigint NOT NULL, "name" character varying NOT NULL, "llm_proposed" boolean DEFAULT TRUE NOT NULL, "confirmed_at" timestamp(6), "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL, CONSTRAINT "fk_rails_43660fd53d"
+FOREIGN KEY ("owner_id")
+  REFERENCES "users" ("id")
+)[0m
+  [1m[35m (0.2ms)[0m  [1m[35mCREATE INDEX "index_concerns_on_owner_id" ON "concerns" ("owner_id")[0m
+  [1m[35m (0.2ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_concerns_on_owner_id_and_name" ON "concerns" ("owner_id", "name")[0m
+  [1m[36mActiveRecord::SchemaMigration Create (0.2ms)[0m  [1m[32mINSERT INTO "schema_migrations" ("version") VALUES ('20260319000001') RETURNING "version"[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mCOMMIT[0m
+Migrating to CreateDocuments (20260319000002)
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[35mSQL (6.5ms)[0m  [1m[35mCREATE EXTENSION IF NOT EXISTS "vector"[0m
+  [1m[35m (0.9ms)[0m  [1m[35mCREATE TABLE "documents" ("id" bigserial primary key, "owner_id" bigint NOT NULL, "concern_id" bigint, "stage" integer DEFAULT 0 NOT NULL, "review_required" boolean DEFAULT FALSE NOT NULL, "review_reason" character varying, "content_hash" character varying, "confidence_score" float, "minio_blob_key" character varying, "markdown_path" character varying, "document_type" character varying, "concern_tags" character varying[] DEFAULT '{}', "embedding" vector, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL, CONSTRAINT "fk_rails_d57828d9bc"
+FOREIGN KEY ("owner_id")
+  REFERENCES "users" ("id")
+, CONSTRAINT "fk_rails_cfd6380f3c"
+FOREIGN KEY ("concern_id")
+  REFERENCES "concerns" ("id")
+)[0m
+  [1m[35m (0.1ms)[0m  [1m[35mCREATE INDEX "index_documents_on_owner_id" ON "documents" ("owner_id")[0m
+  [1m[35m (0.2ms)[0m  [1m[35mCREATE INDEX "index_documents_on_concern_id" ON "documents" ("concern_id")[0m
+  [1m[35m (0.2ms)[0m  [1m[35mCREATE INDEX "index_documents_on_stage" ON "documents" ("stage")[0m
+  [1m[35m (0.2ms)[0m  [1m[35mCREATE INDEX "index_documents_on_content_hash" ON "documents" ("content_hash")[0m
+  [1m[35m (0.1ms)[0m  [1m[35mCREATE INDEX "index_documents_on_review_required" ON "documents" ("review_required")[0m
+  [1m[36mActiveRecord::SchemaMigration Create (0.1ms)[0m  [1m[32mINSERT INTO "schema_migrations" ("version") VALUES ('20260319000002') RETURNING "version"[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mCOMMIT[0m
+Migrating to CreateDocumentFields (20260319000003)
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[35m (0.8ms)[0m  [1m[35mCREATE TABLE "document_fields" ("id" bigserial primary key, "document_id" bigint NOT NULL, "field_name" character varying NOT NULL, "value" text, "source" integer NOT NULL, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL, CONSTRAINT "fk_rails_6dd107ce03"
+FOREIGN KEY ("document_id")
+  REFERENCES "documents" ("id")
+)[0m
+  [1m[35m (0.1ms)[0m  [1m[35mCREATE INDEX "index_document_fields_on_document_id" ON "document_fields" ("document_id")[0m
+  [1m[35m (0.1ms)[0m  [1m[35mCREATE INDEX "index_document_fields_on_document_id_and_field_name" ON "document_fields" ("document_id", "field_name")[0m
+  [1m[36mActiveRecord::SchemaMigration Create (0.1ms)[0m  [1m[32mINSERT INTO "schema_migrations" ("version") VALUES ('20260319000003') RETURNING "version"[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mCOMMIT[0m
+  [1m[35m (0.1ms)[0m  [1m[34mSELECT pg_advisory_unlock(2808742124724416055)[0m
+Generating image variants require the image_processing gem. Please add `gem "image_processing", "~> 1.2"` to your Gemfile or set `config.active_storage.variant_processor = :disabled`.
+  [1m[36mActiveRecord::SchemaMigration Load (0.3ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mConcern Exists? (0.6ms)[0m  [1m[34mSELECT 1 AS one FROM "concerns" WHERE "concerns"."name" IS NULL AND "concerns"."owner_id" IS NULL LIMIT $1[0m  [["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mConcern Exists? (0.4ms)[0m  [1m[34mSELECT 1 AS one FROM "concerns" WHERE "concerns"."name" = $1 AND "concerns"."owner_id" IS NULL LIMIT $2[0m  [["name", ""], ["LIMIT", 1]]
+  [1m[36mConcern Exists? (0.3ms)[0m  [1m[34mSELECT 1 AS one FROM "concerns" WHERE "concerns"."name" IS NULL AND "concerns"."owner_id" IS NULL LIMIT $1[0m  [["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.5ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mConcern Load (0.8ms)[0m  [1m[34mSELECT "concerns".* FROM "concerns" ORDER BY "concerns"."id" ASC LIMIT $1[0m  [["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.3ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mUser Exists? (0.8ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."email_address" = $1 LIMIT $2[0m  [["email_address", "[FILTERED]"], ["LIMIT", 1]]
+  [1m[36mUser Create (0.4ms)[0m  [1m[32mINSERT INTO "users" ("email_address", "password_digest", "created_at", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["email_address", "[FILTERED]"], ["password_digest", "[FILTERED]"], ["created_at", "2026-03-21 17:48:11.633441"], ["updated_at", "2026-03-21 17:48:11.633441"]]
+  [1m[36mConcern Create (0.4ms)[0m  [1m[32mINSERT INTO "concerns" ("owner_id", "name", "llm_proposed", "confirmed_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["owner_id", 1], ["name", "Concern 2"], ["llm_proposed", true], ["confirmed_at", nil], ["created_at", "2026-03-21 17:48:11.635112"], ["updated_at", "2026-03-21 17:48:11.635112"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mUser Load (0.6ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = $1 LIMIT $2[0m  [["id", 1], ["LIMIT", 1]]
+  [1m[36mConcern Exists? (0.4ms)[0m  [1m[34mSELECT 1 AS one FROM "concerns" WHERE "concerns"."name" = $1 AND "concerns"."owner_id" = $2 LIMIT $3[0m  [["name", "Concern 2"], ["owner_id", 1], ["LIMIT", 1]]
+  [1m[36mConcern Exists? (0.3ms)[0m  [1m[34mSELECT 1 AS one FROM "concerns" WHERE "concerns"."name" = $1 AND "concerns"."owner_id" = $2 LIMIT $3[0m  [["name", "cONCERN 2"], ["owner_id", 1], ["LIMIT", 1]]
+  [1m[36mConcern Load (0.2ms)[0m  [1m[34mSELECT "concerns".* FROM "concerns"[0m
+  [1m[36mUser Load (0.2ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = $1 LIMIT $2[0m  [["id", 2], ["LIMIT", 1]]
+  [1m[36mConcern Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "concerns" WHERE "concerns"."name" = $1 AND "concerns"."owner_id" = $2 LIMIT $3[0m  [["name", "Concern 2"], ["owner_id", 2], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mUser Exists? (0.4ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."email_address" = $1 LIMIT $2[0m  [["email_address", "[FILTERED]"], ["LIMIT", 1]]
+  [1m[36mUser Create (0.2ms)[0m  [1m[32mINSERT INTO "users" ("email_address", "password_digest", "created_at", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["email_address", "[FILTERED]"], ["password_digest", "[FILTERED]"], ["created_at", "2026-03-21 17:48:11.663668"], ["updated_at", "2026-03-21 17:48:11.663668"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mConcern Exists? (0.4ms)[0m  [1m[34mSELECT 1 AS one FROM "concerns" WHERE "concerns"."name" = $1 AND "concerns"."owner_id" = $2 LIMIT $3[0m  [["name", "Concern 3"], ["owner_id", 2], ["LIMIT", 1]]
+  [1m[36mConcern Create (0.3ms)[0m  [1m[32mINSERT INTO "concerns" ("owner_id", "name", "llm_proposed", "confirmed_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["owner_id", 2], ["name", "Concern 3"], ["llm_proposed", true], ["confirmed_at", nil], ["created_at", "2026-03-21 17:48:11.666899"], ["updated_at", "2026-03-21 17:48:11.666899"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mUser Exists? (0.7ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."email_address" = $1 LIMIT $2[0m  [["email_address", "[FILTERED]"], ["LIMIT", 1]]
+  [1m[36mUser Create (0.2ms)[0m  [1m[32mINSERT INTO "users" ("email_address", "password_digest", "created_at", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["email_address", "[FILTERED]"], ["password_digest", "[FILTERED]"], ["created_at", "2026-03-21 17:48:11.672833"], ["updated_at", "2026-03-21 17:48:11.672833"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mConcern Exists? (0.3ms)[0m  [1m[34mSELECT 1 AS one FROM "concerns" WHERE "concerns"."name" = $1 AND "concerns"."owner_id" = $2 LIMIT $3[0m  [["name", "Concern 4"], ["owner_id", 3], ["LIMIT", 1]]
+  [1m[36mConcern Create (0.2ms)[0m  [1m[32mINSERT INTO "concerns" ("owner_id", "name", "llm_proposed", "confirmed_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["owner_id", 3], ["name", "Concern 4"], ["llm_proposed", true], ["confirmed_at", nil], ["created_at", "2026-03-21 17:48:11.676051"], ["updated_at", "2026-03-21 17:48:11.676051"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.3ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mConcern Update (0.3ms)[0m  [1m[33mUPDATE "concerns" SET "confirmed_at" = $1, "updated_at" = $2 WHERE "concerns"."id" = $3[0m  [["confirmed_at", "2026-03-21 17:48:11"], ["updated_at", "2026-03-21 17:48:11"], ["id", 3]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mUser Exists? (0.4ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."email_address" = $1 LIMIT $2[0m  [["email_address", "[FILTERED]"], ["LIMIT", 1]]
+  [1m[36mUser Create (0.1ms)[0m  [1m[32mINSERT INTO "users" ("email_address", "password_digest", "created_at", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["email_address", "[FILTERED]"], ["password_digest", "[FILTERED]"], ["created_at", "2026-03-21 17:48:11.688527"], ["updated_at", "2026-03-21 17:48:11.688527"]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mConcern Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "concerns" WHERE "concerns"."name" = $1 AND "concerns"."owner_id" = $2 LIMIT $3[0m  [["name", "Concern 5"], ["owner_id", 4], ["LIMIT", 1]]
+  [1m[36mConcern Create (0.1ms)[0m  [1m[32mINSERT INTO "concerns" ("owner_id", "name", "llm_proposed", "confirmed_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["owner_id", 4], ["name", "Concern 5"], ["llm_proposed", true], ["confirmed_at", "2026-03-21 17:48:11.689515"], ["created_at", "2026-03-21 17:48:11.690105"], ["updated_at", "2026-03-21 17:48:11.690105"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mUser Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."email_address" = $1 LIMIT $2[0m  [["email_address", "[FILTERED]"], ["LIMIT", 1]]
+  [1m[36mUser Create (0.5ms)[0m  [1m[32mINSERT INTO "users" ("email_address", "password_digest", "created_at", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["email_address", "[FILTERED]"], ["password_digest", "[FILTERED]"], ["created_at", "2026-03-21 17:48:11.693161"], ["updated_at", "2026-03-21 17:48:11.693161"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mConcern Exists? (0.5ms)[0m  [1m[34mSELECT 1 AS one FROM "concerns" WHERE "concerns"."name" = $1 AND "concerns"."owner_id" = $2 LIMIT $3[0m  [["name", "Concern 6"], ["owner_id", 5], ["LIMIT", 1]]
+  [1m[36mConcern Create (0.3ms)[0m  [1m[32mINSERT INTO "concerns" ("owner_id", "name", "llm_proposed", "confirmed_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["owner_id", 5], ["name", "Concern 6"], ["llm_proposed", true], ["confirmed_at", nil], ["created_at", "2026-03-21 17:48:11.696721"], ["updated_at", "2026-03-21 17:48:11.696721"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mConcern Load (0.3ms)[0m  [1m[34mSELECT "concerns".* FROM "concerns" WHERE "concerns"."confirmed_at" IS NULL[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mUser Exists? (0.8ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."email_address" = $1 LIMIT $2[0m  [["email_address", "[FILTERED]"], ["LIMIT", 1]]
+  [1m[36mUser Create (0.2ms)[0m  [1m[32mINSERT INTO "users" ("email_address", "password_digest", "created_at", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["email_address", "[FILTERED]"], ["password_digest", "[FILTERED]"], ["created_at", "2026-03-21 17:48:11.704588"], ["updated_at", "2026-03-21 17:48:11.704588"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mConcern Exists? (0.4ms)[0m  [1m[34mSELECT 1 AS one FROM "concerns" WHERE "concerns"."name" = $1 AND "concerns"."owner_id" = $2 LIMIT $3[0m  [["name", "Concern 7"], ["owner_id", 6], ["LIMIT", 1]]
+  [1m[36mConcern Create (0.3ms)[0m  [1m[32mINSERT INTO "concerns" ("owner_id", "name", "llm_proposed", "confirmed_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["owner_id", 6], ["name", "Concern 7"], ["llm_proposed", true], ["confirmed_at", "2026-03-21 17:48:11.708605"], ["created_at", "2026-03-21 17:48:11.710678"], ["updated_at", "2026-03-21 17:48:11.710678"]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mUser Exists? (0.6ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."email_address" = $1 LIMIT $2[0m  [["email_address", "[FILTERED]"], ["LIMIT", 1]]
+  [1m[36mUser Create (1.3ms)[0m  [1m[32mINSERT INTO "users" ("email_address", "password_digest", "created_at", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["email_address", "[FILTERED]"], ["password_digest", "[FILTERED]"], ["created_at", "2026-03-21 17:48:11.715391"], ["updated_at", "2026-03-21 17:48:11.715391"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mConcern Exists? (0.5ms)[0m  [1m[34mSELECT 1 AS one FROM "concerns" WHERE "concerns"."name" = $1 AND "concerns"."owner_id" = $2 LIMIT $3[0m  [["name", "Concern 8"], ["owner_id", 7], ["LIMIT", 1]]
+  [1m[36mConcern Create (0.3ms)[0m  [1m[32mINSERT INTO "concerns" ("owner_id", "name", "llm_proposed", "confirmed_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["owner_id", 7], ["name", "Concern 8"], ["llm_proposed", true], ["confirmed_at", nil], ["created_at", "2026-03-21 17:48:11.718707"], ["updated_at", "2026-03-21 17:48:11.718707"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mConcern Load (1.1ms)[0m  [1m[34mSELECT "concerns".* FROM "concerns" WHERE "concerns"."confirmed_at" IS NOT NULL[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mUser Exists? (0.6ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."email_address" = $1 LIMIT $2[0m  [["email_address", "[FILTERED]"], ["LIMIT", 1]]
+  [1m[36mUser Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."email_address" IS NULL LIMIT $1[0m  [["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mUser Load (0.4ms)[0m  [1m[34mSELECT "users".* FROM "users" ORDER BY "users"."id" ASC LIMIT $1[0m  [["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mUser Create (0.4ms)[0m  [1m[32mINSERT INTO "users" ("email_address", "password_digest", "created_at", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["email_address", "[FILTERED]"], ["password_digest", "[FILTERED]"], ["created_at", "2026-03-21 17:48:11.759492"], ["updated_at", "2026-03-21 17:48:11.759492"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mUser Exists? (0.3ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."email_address" = $1 LIMIT $2[0m  [["email_address", "[FILTERED]"], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.8ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mUser Exists? (0.5ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."email_address" = $1 LIMIT $2[0m  [["email_address", "[FILTERED]"], ["LIMIT", 1]]
+  [1m[36mUser Create (0.2ms)[0m  [1m[32mINSERT INTO "users" ("email_address", "password_digest", "created_at", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["email_address", "[FILTERED]"], ["password_digest", "[FILTERED]"], ["created_at", "2026-03-21 17:48:11.769374"], ["updated_at", "2026-03-21 17:48:11.769374"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mUser Exists? (0.3ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."email_address" = $1 LIMIT $2[0m  [["email_address", "[FILTERED]"], ["LIMIT", 1]]
+  [1m[36mUser Create (0.1ms)[0m  [1m[32mINSERT INTO "users" ("email_address", "password_digest", "created_at", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["email_address", "[FILTERED]"], ["password_digest", "[FILTERED]"], ["created_at", "2026-03-21 17:48:11.789940"], ["updated_at", "2026-03-21 17:48:11.789940"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.3ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mDocument Create (1.6ms)[0m  [1m[32mINSERT INTO "documents" ("owner_id", "concern_id", "stage", "review_required", "review_reason", "content_hash", "confidence_score", "minio_blob_key", "markdown_path", "document_type", "concern_tags", "embedding", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING "id"[0m  [["owner_id", 10], ["concern_id", nil], ["stage", 0], ["review_required", false], ["review_reason", nil], ["content_hash", nil], ["confidence_score", nil], ["minio_blob_key", "[FILTERED]"], ["markdown_path", nil], ["document_type", nil], ["concern_tags", "{health,legal}"], ["embedding", nil], ["created_at", "2026-03-21 17:48:11.791369"], ["updated_at", "2026-03-21 17:48:11.791369"]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mDocument Load (0.5ms)[0m  [1m[34mSELECT "documents".* FROM "documents" WHERE "documents"."id" = $1 LIMIT $2[0m  [["id", 1], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mUser Exists? (0.4ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."email_address" = $1 LIMIT $2[0m  [["email_address", "[FILTERED]"], ["LIMIT", 1]]
+  [1m[36mUser Create (0.1ms)[0m  [1m[32mINSERT INTO "users" ("email_address", "password_digest", "created_at", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["email_address", "[FILTERED]"], ["password_digest", "[FILTERED]"], ["created_at", "2026-03-21 17:48:11.805008"], ["updated_at", "2026-03-21 17:48:11.805008"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mDocument Create (0.2ms)[0m  [1m[32mINSERT INTO "documents" ("owner_id", "concern_id", "stage", "review_required", "review_reason", "content_hash", "confidence_score", "minio_blob_key", "markdown_path", "document_type", "concern_tags", "embedding", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING "id"[0m  [["owner_id", 11], ["concern_id", nil], ["stage", 0], ["review_required", true], ["review_reason", "Low confidence score"], ["content_hash", nil], ["confidence_score", nil], ["minio_blob_key", "[FILTERED]"], ["markdown_path", nil], ["document_type", nil], ["concern_tags", "{}"], ["embedding", nil], ["created_at", "2026-03-21 17:48:11.805708"], ["updated_at", "2026-03-21 17:48:11.805708"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mUser Exists? (0.3ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."email_address" = $1 LIMIT $2[0m  [["email_address", "[FILTERED]"], ["LIMIT", 1]]
+  [1m[36mUser Create (0.1ms)[0m  [1m[32mINSERT INTO "users" ("email_address", "password_digest", "created_at", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["email_address", "[FILTERED]"], ["password_digest", "[FILTERED]"], ["created_at", "2026-03-21 17:48:11.809109"], ["updated_at", "2026-03-21 17:48:11.809109"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mDocument Create (0.4ms)[0m  [1m[32mINSERT INTO "documents" ("owner_id", "concern_id", "stage", "review_required", "review_reason", "content_hash", "confidence_score", "minio_blob_key", "markdown_path", "document_type", "concern_tags", "embedding", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING "id"[0m  [["owner_id", 12], ["concern_id", nil], ["stage", 0], ["review_required", false], ["review_reason", nil], ["content_hash", nil], ["confidence_score", nil], ["minio_blob_key", "[FILTERED]"], ["markdown_path", nil], ["document_type", nil], ["concern_tags", "{}"], ["embedding", nil], ["created_at", "2026-03-21 17:48:11.810358"], ["updated_at", "2026-03-21 17:48:11.810358"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mDocument Load (0.3ms)[0m  [1m[34mSELECT "documents".* FROM "documents" WHERE "documents"."review_required" = $1[0m  [["review_required", true]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mUser Exists? (0.7ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."email_address" = $1 LIMIT $2[0m  [["email_address", "[FILTERED]"], ["LIMIT", 1]]
+  [1m[36mUser Create (0.3ms)[0m  [1m[32mINSERT INTO "users" ("email_address", "password_digest", "created_at", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["email_address", "[FILTERED]"], ["password_digest", "[FILTERED]"], ["created_at", "2026-03-21 17:48:11.861123"], ["updated_at", "2026-03-21 17:48:11.861123"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mConcern Exists? (0.4ms)[0m  [1m[34mSELECT 1 AS one FROM "concerns" WHERE "concerns"."name" = $1 AND "concerns"."owner_id" = $2 LIMIT $3[0m  [["name", "Financial"], ["owner_id", 13], ["LIMIT", 1]]
+  [1m[36mConcern Create (0.3ms)[0m  [1m[32mINSERT INTO "concerns" ("owner_id", "name", "llm_proposed", "confirmed_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["owner_id", 13], ["name", "Financial"], ["llm_proposed", true], ["confirmed_at", nil], ["created_at", "2026-03-21 17:48:11.866683"], ["updated_at", "2026-03-21 17:48:11.866683"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mDocument Create (0.5ms)[0m  [1m[32mINSERT INTO "documents" ("owner_id", "concern_id", "stage", "review_required", "review_reason", "content_hash", "confidence_score", "minio_blob_key", "markdown_path", "document_type", "concern_tags", "embedding", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING "id"[0m  [["owner_id", 13], ["concern_id", 8], ["stage", 1], ["review_required", false], ["review_reason", nil], ["content_hash", nil], ["confidence_score", 0.85], ["minio_blob_key", "[FILTERED]"], ["markdown_path", nil], ["document_type", "utility_bill"], ["concern_tags", "{}"], ["embedding", nil], ["created_at", "2026-03-21 17:48:11.870686"], ["updated_at", "2026-03-21 17:48:11.870686"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mUser Exists? (0.3ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."email_address" = $1 LIMIT $2[0m  [["email_address", "[FILTERED]"], ["LIMIT", 1]]
+  [1m[36mUser Create (0.4ms)[0m  [1m[32mINSERT INTO "users" ("email_address", "password_digest", "created_at", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["email_address", "[FILTERED]"], ["password_digest", "[FILTERED]"], ["created_at", "2026-03-21 17:48:11.923115"], ["updated_at", "2026-03-21 17:48:11.923115"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mConcern Exists? (0.4ms)[0m  [1m[34mSELECT 1 AS one FROM "concerns" WHERE "concerns"."name" = $1 AND "concerns"."owner_id" = $2 LIMIT $3[0m  [["name", "Financial"], ["owner_id", 14], ["LIMIT", 1]]
+  [1m[36mConcern Create (0.2ms)[0m  [1m[32mINSERT INTO "concerns" ("owner_id", "name", "llm_proposed", "confirmed_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["owner_id", 14], ["name", "Financial"], ["llm_proposed", true], ["confirmed_at", nil], ["created_at", "2026-03-21 17:48:11.925676"], ["updated_at", "2026-03-21 17:48:11.925676"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mDocument Create (0.7ms)[0m  [1m[32mINSERT INTO "documents" ("owner_id", "concern_id", "stage", "review_required", "review_reason", "content_hash", "confidence_score", "minio_blob_key", "markdown_path", "document_type", "concern_tags", "embedding", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING "id"[0m  [["owner_id", 14], ["concern_id", 9], ["stage", 1], ["review_required", false], ["review_reason", nil], ["content_hash", nil], ["confidence_score", 0.85], ["minio_blob_key", "[FILTERED]"], ["markdown_path", nil], ["document_type", "utility_bill"], ["concern_tags", "{}"], ["embedding", nil], ["created_at", "2026-03-21 17:48:11.927626"], ["updated_at", "2026-03-21 17:48:11.927626"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mUser Exists? (0.4ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."email_address" = $1 LIMIT $2[0m  [["email_address", "[FILTERED]"], ["LIMIT", 1]]
+  [1m[36mUser Create (0.2ms)[0m  [1m[32mINSERT INTO "users" ("email_address", "password_digest", "created_at", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["email_address", "[FILTERED]"], ["password_digest", "[FILTERED]"], ["created_at", "2026-03-21 17:48:11.969841"], ["updated_at", "2026-03-21 17:48:11.969841"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mConcern Exists? (0.5ms)[0m  [1m[34mSELECT 1 AS one FROM "concerns" WHERE "concerns"."name" = $1 AND "concerns"."owner_id" = $2 LIMIT $3[0m  [["name", "Financial"], ["owner_id", 15], ["LIMIT", 1]]
+  [1m[36mConcern Create (0.2ms)[0m  [1m[32mINSERT INTO "concerns" ("owner_id", "name", "llm_proposed", "confirmed_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["owner_id", 15], ["name", "Financial"], ["llm_proposed", true], ["confirmed_at", nil], ["created_at", "2026-03-21 17:48:11.972979"], ["updated_at", "2026-03-21 17:48:11.972979"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mDocument Create (0.6ms)[0m  [1m[32mINSERT INTO "documents" ("owner_id", "concern_id", "stage", "review_required", "review_reason", "content_hash", "confidence_score", "minio_blob_key", "markdown_path", "document_type", "concern_tags", "embedding", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING "id"[0m  [["owner_id", 15], ["concern_id", 10], ["stage", 1], ["review_required", false], ["review_reason", nil], ["content_hash", nil], ["confidence_score", 0.85], ["minio_blob_key", "[FILTERED]"], ["markdown_path", nil], ["document_type", "utility_bill"], ["concern_tags", "{}"], ["embedding", nil], ["created_at", "2026-03-21 17:48:11.976709"], ["updated_at", "2026-03-21 17:48:11.976709"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mUser Exists? (0.4ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."email_address" = $1 LIMIT $2[0m  [["email_address", "[FILTERED]"], ["LIMIT", 1]]
+  [1m[36mUser Create (0.1ms)[0m  [1m[32mINSERT INTO "users" ("email_address", "password_digest", "created_at", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["email_address", "[FILTERED]"], ["password_digest", "[FILTERED]"], ["created_at", "2026-03-21 17:48:12.010307"], ["updated_at", "2026-03-21 17:48:12.010307"]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mConcern Exists? (0.3ms)[0m  [1m[34mSELECT 1 AS one FROM "concerns" WHERE "concerns"."name" = $1 AND "concerns"."owner_id" = $2 LIMIT $3[0m  [["name", "Financial"], ["owner_id", 16], ["LIMIT", 1]]
+  [1m[36mConcern Create (0.2ms)[0m  [1m[32mINSERT INTO "concerns" ("owner_id", "name", "llm_proposed", "confirmed_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["owner_id", 16], ["name", "Financial"], ["llm_proposed", true], ["confirmed_at", nil], ["created_at", "2026-03-21 17:48:12.013871"], ["updated_at", "2026-03-21 17:48:12.013871"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mDocument Create (0.7ms)[0m  [1m[32mINSERT INTO "documents" ("owner_id", "concern_id", "stage", "review_required", "review_reason", "content_hash", "confidence_score", "minio_blob_key", "markdown_path", "document_type", "concern_tags", "embedding", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING "id"[0m  [["owner_id", 16], ["concern_id", 11], ["stage", 1], ["review_required", false], ["review_reason", nil], ["content_hash", nil], ["confidence_score", 0.85], ["minio_blob_key", "[FILTERED]"], ["markdown_path", nil], ["document_type", "utility_bill"], ["concern_tags", "{}"], ["embedding", nil], ["created_at", "2026-03-21 17:48:12.016852"], ["updated_at", "2026-03-21 17:48:12.016852"]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.3ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mUser Exists? (0.4ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."email_address" = $1 LIMIT $2[0m  [["email_address", "[FILTERED]"], ["LIMIT", 1]]
+  [1m[36mUser Create (0.2ms)[0m  [1m[32mINSERT INTO "users" ("email_address", "password_digest", "created_at", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["email_address", "[FILTERED]"], ["password_digest", "[FILTERED]"], ["created_at", "2026-03-21 17:48:12.045861"], ["updated_at", "2026-03-21 17:48:12.045861"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mConcern Exists? (0.4ms)[0m  [1m[34mSELECT 1 AS one FROM "concerns" WHERE "concerns"."name" = $1 AND "concerns"."owner_id" = $2 LIMIT $3[0m  [["name", "Financial"], ["owner_id", 17], ["LIMIT", 1]]
+  [1m[36mConcern Create (0.2ms)[0m  [1m[32mINSERT INTO "concerns" ("owner_id", "name", "llm_proposed", "confirmed_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["owner_id", 17], ["name", "Financial"], ["llm_proposed", true], ["confirmed_at", nil], ["created_at", "2026-03-21 17:48:12.048632"], ["updated_at", "2026-03-21 17:48:12.048632"]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mDocument Create (0.2ms)[0m  [1m[32mINSERT INTO "documents" ("owner_id", "concern_id", "stage", "review_required", "review_reason", "content_hash", "confidence_score", "minio_blob_key", "markdown_path", "document_type", "concern_tags", "embedding", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING "id"[0m  [["owner_id", 17], ["concern_id", 12], ["stage", 1], ["review_required", false], ["review_reason", nil], ["content_hash", nil], ["confidence_score", 0.85], ["minio_blob_key", "[FILTERED]"], ["markdown_path", nil], ["document_type", "utility_bill"], ["concern_tags", "{}"], ["embedding", nil], ["created_at", "2026-03-21 17:48:12.049891"], ["updated_at", "2026-03-21 17:48:12.049891"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mUser Exists? (0.8ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."email_address" = $1 LIMIT $2[0m  [["email_address", "[FILTERED]"], ["LIMIT", 1]]
+  [1m[36mUser Create (0.2ms)[0m  [1m[32mINSERT INTO "users" ("email_address", "password_digest", "created_at", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["email_address", "[FILTERED]"], ["password_digest", "[FILTERED]"], ["created_at", "2026-03-21 17:48:12"], ["updated_at", "2026-03-21 17:48:12"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mConcern Exists? (0.3ms)[0m  [1m[34mSELECT 1 AS one FROM "concerns" WHERE "concerns"."name" = $1 AND "concerns"."owner_id" = $2 LIMIT $3[0m  [["name", "Financial"], ["owner_id", 18], ["LIMIT", 1]]
+  [1m[36mConcern Create (0.1ms)[0m  [1m[32mINSERT INTO "concerns" ("owner_id", "name", "llm_proposed", "confirmed_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["owner_id", 18], ["name", "Financial"], ["llm_proposed", true], ["confirmed_at", nil], ["created_at", "2026-03-21 17:48:12"], ["updated_at", "2026-03-21 17:48:12"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mDocument Create (0.5ms)[0m  [1m[32mINSERT INTO "documents" ("owner_id", "concern_id", "stage", "review_required", "review_reason", "content_hash", "confidence_score", "minio_blob_key", "markdown_path", "document_type", "concern_tags", "embedding", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING "id"[0m  [["owner_id", 18], ["concern_id", 13], ["stage", 1], ["review_required", false], ["review_reason", nil], ["content_hash", nil], ["confidence_score", 0.85], ["minio_blob_key", "[FILTERED]"], ["markdown_path", nil], ["document_type", "utility_bill"], ["concern_tags", "{}"], ["embedding", nil], ["created_at", "2026-03-21 17:48:12"], ["updated_at", "2026-03-21 17:48:12"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mUser Exists? (3.5ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."email_address" = $1 LIMIT $2[0m  [["email_address", "[FILTERED]"], ["LIMIT", 1]]
+  [1m[36mUser Create (0.2ms)[0m  [1m[32mINSERT INTO "users" ("email_address", "password_digest", "created_at", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["email_address", "[FILTERED]"], ["password_digest", "[FILTERED]"], ["created_at", "2026-03-21 17:48:12.142028"], ["updated_at", "2026-03-21 17:48:12.142028"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mConcern Exists? (1.7ms)[0m  [1m[34mSELECT 1 AS one FROM "concerns" WHERE "concerns"."name" = $1 AND "concerns"."owner_id" = $2 LIMIT $3[0m  [["name", "Health & Medical"], ["owner_id", 19], ["LIMIT", 1]]
+  [1m[36mConcern Create (0.2ms)[0m  [1m[32mINSERT INTO "concerns" ("owner_id", "name", "llm_proposed", "confirmed_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["owner_id", 19], ["name", "Health & Medical"], ["llm_proposed", true], ["confirmed_at", nil], ["created_at", "2026-03-21 17:48:12.148640"], ["updated_at", "2026-03-21 17:48:12.148640"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mDocument Create (0.5ms)[0m  [1m[32mINSERT INTO "documents" ("owner_id", "concern_id", "stage", "review_required", "review_reason", "content_hash", "confidence_score", "minio_blob_key", "markdown_path", "document_type", "concern_tags", "embedding", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING "id"[0m  [["owner_id", 19], ["concern_id", 14], ["stage", 1], ["review_required", false], ["review_reason", nil], ["content_hash", nil], ["confidence_score", 0.85], ["minio_blob_key", "[FILTERED]"], ["markdown_path", nil], ["document_type", "utility_bill"], ["concern_tags", "{}"], ["embedding", nil], ["created_at", "2026-03-21 17:48:12.154444"], ["updated_at", "2026-03-21 17:48:12.154444"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mUser Exists? (0.5ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."email_address" = $1 LIMIT $2[0m  [["email_address", "[FILTERED]"], ["LIMIT", 1]]
+  [1m[36mUser Create (0.3ms)[0m  [1m[32mINSERT INTO "users" ("email_address", "password_digest", "created_at", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["email_address", "[FILTERED]"], ["password_digest", "[FILTERED]"], ["created_at", "2026-03-21 17:48:12.211414"], ["updated_at", "2026-03-21 17:48:12.211414"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mDocument Create (0.4ms)[0m  [1m[32mINSERT INTO "documents" ("owner_id", "concern_id", "stage", "review_required", "review_reason", "content_hash", "confidence_score", "minio_blob_key", "markdown_path", "document_type", "concern_tags", "embedding", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING "id"[0m  [["owner_id", 20], ["concern_id", nil], ["stage", 0], ["review_required", false], ["review_reason", nil], ["content_hash", nil], ["confidence_score", nil], ["minio_blob_key", "[FILTERED]"], ["markdown_path", nil], ["document_type", nil], ["concern_tags", "{}"], ["embedding", nil], ["created_at", "2026-03-21 17:48:12.212926"], ["updated_at", "2026-03-21 17:48:12.212926"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mUser Exists? (0.4ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."email_address" = $1 LIMIT $2[0m  [["email_address", "[FILTERED]"], ["LIMIT", 1]]
+  [1m[36mUser Create (0.2ms)[0m  [1m[32mINSERT INTO "users" ("email_address", "password_digest", "created_at", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["email_address", "[FILTERED]"], ["password_digest", "[FILTERED]"], ["created_at", "2026-03-21 17:48:12.241685"], ["updated_at", "2026-03-21 17:48:12.241685"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mConcern Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "concerns" WHERE "concerns"."name" = $1 AND "concerns"."owner_id" = $2 LIMIT $3[0m  [["name", "Financial"], ["owner_id", 21], ["LIMIT", 1]]
+  [1m[36mConcern Create (0.2ms)[0m  [1m[32mINSERT INTO "concerns" ("owner_id", "name", "llm_proposed", "confirmed_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["owner_id", 21], ["name", "Financial"], ["llm_proposed", true], ["confirmed_at", nil], ["created_at", "2026-03-21 17:48:12.243623"], ["updated_at", "2026-03-21 17:48:12.243623"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mDocument Create (0.3ms)[0m  [1m[32mINSERT INTO "documents" ("owner_id", "concern_id", "stage", "review_required", "review_reason", "content_hash", "confidence_score", "minio_blob_key", "markdown_path", "document_type", "concern_tags", "embedding", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING "id"[0m  [["owner_id", 21], ["concern_id", 15], ["stage", 0], ["review_required", false], ["review_reason", nil], ["content_hash", nil], ["confidence_score", nil], ["minio_blob_key", "[FILTERED]"], ["markdown_path", nil], ["document_type", nil], ["concern_tags", "{}"], ["embedding", nil], ["created_at", "2026-03-21 17:48:12.245085"], ["updated_at", "2026-03-21 17:48:12.245085"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mUser Exists? (0.3ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."email_address" = $1 LIMIT $2[0m  [["email_address", "[FILTERED]"], ["LIMIT", 1]]
+  [1m[36mUser Create (0.1ms)[0m  [1m[32mINSERT INTO "users" ("email_address", "password_digest", "created_at", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["email_address", "[FILTERED]"], ["password_digest", "[FILTERED]"], ["created_at", "2026-03-21 17:48:12.271509"], ["updated_at", "2026-03-21 17:48:12.271509"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+Started POST "/session" for 127.0.0.1 at 2026-03-21 17:48:12 +0000
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mActiveRecord::SchemaMigration Load (0.3ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC[0m
+Processing by SessionsController#create as HTML
+  Parameters: {"email_address"=>"[FILTERED]", "password"=>"[FILTERED]"}
+  [1m[36mUser Load (0.3ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."email_address" = $1 LIMIT $2[0m  [["email_address", "[FILTERED]"], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mSession Create (0.6ms)[0m  [1m[32mINSERT INTO "sessions" ("user_id", "ip_address", "user_agent", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5) RETURNING "id"[0m  [["user_id", 22], ["ip_address", "127.0.0.1"], ["user_agent", nil], ["created_at", "2026-03-21 17:48:12.400696"], ["updated_at", "2026-03-21 17:48:12.400696"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+Redirected to http://www.example.com/
+Completed 302 Found in 54ms (ActiveRecord: 1.1ms (2 queries, 0 cached) | GC: 6.8ms)
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mUser Exists? (0.6ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."email_address" = $1 LIMIT $2[0m  [["email_address", "[FILTERED]"], ["LIMIT", 1]]
+  [1m[36mUser Create (0.2ms)[0m  [1m[32mINSERT INTO "users" ("email_address", "password_digest", "created_at", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["email_address", "[FILTERED]"], ["password_digest", "[FILTERED]"], ["created_at", "2026-03-21 17:48:12.426259"], ["updated_at", "2026-03-21 17:48:12.426259"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+Started POST "/session" for 127.0.0.1 at 2026-03-21 17:48:12 +0000
+Processing by SessionsController#create as HTML
+  Parameters: {"email_address"=>"[FILTERED]", "password"=>"[FILTERED]"}
+  [1m[36mUser Load (0.3ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."email_address" = $1 LIMIT $2[0m  [["email_address", "[FILTERED]"], ["LIMIT", 1]]
+Redirected to http://www.example.com/session/new
+Completed 302 Found in 2ms (ActiveRecord: 0.3ms (1 query, 0 cached) | GC: 0.0ms)
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mUser Exists? (0.3ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."email_address" = $1 LIMIT $2[0m  [["email_address", "[FILTERED]"], ["LIMIT", 1]]
+  [1m[36mUser Create (0.2ms)[0m  [1m[32mINSERT INTO "users" ("email_address", "password_digest", "created_at", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["email_address", "[FILTERED]"], ["password_digest", "[FILTERED]"], ["created_at", "2026-03-21 17:48:12.435264"], ["updated_at", "2026-03-21 17:48:12.435264"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+Started POST "/session" for 127.0.0.1 at 2026-03-21 17:48:12 +0000
+Processing by SessionsController#create as HTML
+  Parameters: {"email_address"=>"[FILTERED]", "password"=>"[FILTERED]"}
+  [1m[36mUser Load (0.1ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."email_address" = $1 LIMIT $2[0m  [["email_address", "[FILTERED]"], ["LIMIT", 1]]
+Redirected to http://www.example.com/session/new
+Completed 302 Found in 2ms (ActiveRecord: 0.1ms (1 query, 0 cached) | GC: 0.0ms)
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mUser Exists? (0.3ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."email_address" = $1 LIMIT $2[0m  [["email_address", "[FILTERED]"], ["LIMIT", 1]]
+  [1m[36mUser Create (0.1ms)[0m  [1m[32mINSERT INTO "users" ("email_address", "password_digest", "created_at", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["email_address", "[FILTERED]"], ["password_digest", "[FILTERED]"], ["created_at", "2026-03-21 17:48:12.442467"], ["updated_at", "2026-03-21 17:48:12.442467"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+Started GET "/session/new" for 127.0.0.1 at 2026-03-21 17:48:12 +0000
+Processing by SessionsController#new as HTML
+  Rendering layout layouts/application.html.erb
+  Rendering sessions/new.html.erb within layouts/application
+  Rendered sessions/new.html.erb within layouts/application (Duration: 14.5ms | GC: 0.2ms)
+  Rendered layouts/_flash.html.erb (Duration: 2.0ms | GC: 1.3ms)
+  Rendered layout layouts/application.html.erb (Duration: 32.4ms | GC: 9.0ms)
+Completed 200 OK in 53ms (Views: 43.4ms | ActiveRecord: 0.0ms (0 queries, 0 cached) | GC: 11.4ms)
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mUser Exists? (0.4ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."email_address" = $1 LIMIT $2[0m  [["email_address", "[FILTERED]"], ["LIMIT", 1]]
+  [1m[36mUser Create (0.2ms)[0m  [1m[32mINSERT INTO "users" ("email_address", "password_digest", "created_at", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["email_address", "[FILTERED]"], ["password_digest", "[FILTERED]"], ["created_at", "2026-03-21 17:48:12.505491"], ["updated_at", "2026-03-21 17:48:12.505491"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+Started POST "/session" for 127.0.0.1 at 2026-03-21 17:48:12 +0000
+Processing by SessionsController#create as HTML
+  Parameters: {"email_address"=>"[FILTERED]", "password"=>"[FILTERED]"}
+  [1m[36mUser Load (0.3ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."email_address" = $1 LIMIT $2[0m  [["email_address", "[FILTERED]"], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mSession Create (0.4ms)[0m  [1m[32mINSERT INTO "sessions" ("user_id", "ip_address", "user_agent", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5) RETURNING "id"[0m  [["user_id", 26], ["ip_address", "127.0.0.1"], ["user_agent", nil], ["created_at", "2026-03-21 17:48:12.517858"], ["updated_at", "2026-03-21 17:48:12.517858"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+Redirected to http://www.example.com/
+Completed 302 Found in 11ms (ActiveRecord: 0.8ms (2 queries, 0 cached) | GC: 5.2ms)
+Started DELETE "/session" for 127.0.0.1 at 2026-03-21 17:48:12 +0000
+Processing by SessionsController#destroy as HTML
+  [1m[36mSession Load (1.4ms)[0m  [1m[34mSELECT "sessions".* FROM "sessions" WHERE "sessions"."id" = $1 LIMIT $2[0m  [["id", 2], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mSession Destroy (0.4ms)[0m  [1m[31mDELETE FROM "sessions" WHERE "sessions"."id" = $1[0m  [["id", 2]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+Redirected to http://www.example.com/session/new
+Completed 302 Found in 29ms (ActiveRecord: 1.9ms (2 queries, 0 cached) | GC: 9.9ms)
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mUser Exists? (0.5ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."email_address" = $1 LIMIT $2[0m  [["email_address", "[FILTERED]"], ["LIMIT", 1]]
+  [1m[36mUser Create (0.3ms)[0m  [1m[32mINSERT INTO "users" ("email_address", "password_digest", "created_at", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["email_address", "[FILTERED]"], ["password_digest", "[FILTERED]"], ["created_at", "2026-03-21 17:48:12.569484"], ["updated_at", "2026-03-21 17:48:12.569484"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+Started GET "/" for 127.0.0.1 at 2026-03-21 17:48:12 +0000
+Processing by DashboardController#show as HTML
+Redirected to http://www.example.com/session/new
+Filter chain halted as :require_authentication rendered or redirected
+Completed 302 Found in 1ms (ActiveRecord: 0.0ms (0 queries, 0 cached) | GC: 0.0ms)
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mUser Exists? (0.3ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."email_address" = $1 LIMIT $2[0m  [["email_address", "[FILTERED]"], ["LIMIT", 1]]
+  [1m[36mUser Create (0.2ms)[0m  [1m[32mINSERT INTO "users" ("email_address", "password_digest", "created_at", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["email_address", "[FILTERED]"], ["password_digest", "[FILTERED]"], ["created_at", "2026-03-21 17:48:12.589968"], ["updated_at", "2026-03-21 17:48:12.589968"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mDocument Create (0.9ms)[0m  [1m[32mINSERT INTO "documents" ("owner_id", "concern_id", "stage", "review_required", "review_reason", "content_hash", "confidence_score", "minio_blob_key", "markdown_path", "document_type", "concern_tags", "embedding", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING "id"[0m  [["owner_id", 28], ["concern_id", nil], ["stage", 0], ["review_required", false], ["review_reason", nil], ["content_hash", nil], ["confidence_score", nil], ["minio_blob_key", "[FILTERED]"], ["markdown_path", nil], ["document_type", nil], ["concern_tags", "{}"], ["embedding", nil], ["created_at", "2026-03-21 17:48:12.591772"], ["updated_at", "2026-03-21 17:48:12.591772"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mDocumentField Create (1.3ms)[0m  [1m[32mINSERT INTO "document_fields" ("document_id", "field_name", "value", "source", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["document_id", 13], ["field_name", "field_1"], ["value", "sample value"], ["source", 0], ["created_at", "2026-03-21 17:48:12.596527"], ["updated_at", "2026-03-21 17:48:12.596527"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mDocumentField Create (0.4ms)[0m  [1m[32mINSERT INTO "document_fields" ("document_id", "field_name", "value", "source", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["document_id", 13], ["field_name", "field_2"], ["value", "sample value"], ["source", 1], ["created_at", "2026-03-21 17:48:12.600117"], ["updated_at", "2026-03-21 17:48:12.600117"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mDocumentField Create (0.5ms)[0m  [1m[32mINSERT INTO "document_fields" ("document_id", "field_name", "value", "source", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["document_id", 13], ["field_name", "field_3"], ["value", "sample value"], ["source", 2], ["created_at", "2026-03-21 17:48:12.601576"], ["updated_at", "2026-03-21 17:48:12.601576"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
