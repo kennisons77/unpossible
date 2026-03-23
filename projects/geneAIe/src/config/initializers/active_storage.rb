@@ -3,10 +3,13 @@
 Rails.application.config.after_initialize do
   next unless Rails.configuration.active_storage.service.in?(%i[minio])
 
-  bucket_name = Rails.application.config.active_storage
-    .service_configurations
-    .dig('minio', 'bucket')
+  require "aws-sdk-s3"
 
+  storage_yaml = YAML.safe_load(
+    ERB.new(Rails.root.join("config/storage.yml").read).result,
+    permitted_classes: [], aliases: true
+  )
+  bucket_name = storage_yaml.dig("minio", "bucket")
   next unless bucket_name
 
   client = Aws::S3::Client.new(
