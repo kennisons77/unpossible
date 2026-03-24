@@ -1,0 +1,31 @@
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1>Documents</h1>
+</div>
+
+<% if @documents.any? %>
+  <div class="table-responsive">
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Type</th>
+          <th>Concern</th>
+          <th>Stage</th>
+          <th>Confidence</th>
+          <th>Review Required</th>
+          <th>Created</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @documents.each do |document| %>
+          <%= render 'document', document: document %>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+<% else %>
+  <div class="alert alert-info">
+    No documents yet. Upload your first document to get started.
+  </div>
+<% end %>

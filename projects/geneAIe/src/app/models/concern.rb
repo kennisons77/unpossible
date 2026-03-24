@@ -12,4 +12,8 @@ class Concern < ApplicationRecord
   def confirm!
     update!(confirmed_at: Time.current)
   end
+
+  def confirmed?
+    confirmed_at.present?
+  end
 end

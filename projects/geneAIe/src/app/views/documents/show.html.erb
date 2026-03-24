@@ -1,0 +1,113 @@
+<div class="row">
+  <div class="col-md-8">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h1>Document #<%= @document.id %></h1>
+      <%= link_to 'Back to Documents', documents_path, class: 'btn btn-secondary' %>
+    </div>
+
+    <div class="card mb-4">
+      <div class="card-header">
+        <h5 class="mb-0">Details</h5>
+      </div>
+      <div class="card-body">
+        <dl class="row">
+          <dt class="col-sm-4">Stage</dt>
+          <dd class="col-sm-8"><span class="badge bg-<%= stage_badge_class(@document.stage) %>"><%= @document.stage %></span></dd>
+
+          <dt class="col-sm-4">Document Type</dt>
+          <dd class="col-sm-8"><%= @document.document_type || '-' %></dd>
+
+          <dt class="col-sm-4">Concern</dt>
+          <dd class="col-sm-8">
+            <% if @document.concern %>
+              <%= link_to @document.concern.name, concern_path(@document.concern) %>
+            <% else %>
+              -
+            <% end %>
+          </dd>
+
+          <dt class="col-sm-4">Confidence Score</dt>
+          <dd class="col-sm-8"><%= @document.confidence_score ? number_to_percentage(@document.confidence_score * 100, precision: 1) : '-' %></dd>
+
+          <dt class="col-sm-4">Review Required</dt>
+          <dd class="col-sm-8">
+            <% if @document.review_required? %>
+              <span class="badge bg-warning">Yes</span>
+            <% else %>
+              <span class="badge bg-success">No</span>
+            <% end %>
+          </dd>
+
+          <dt class="col-sm-4">Content Hash</dt>
+          <dd class="col-sm-8"><code><%= @document.content_hash || '-' %></code></dd>
+
+          <dt class="col-sm-4">Markdown Path</dt>
+          <dd class="col-sm-8"><code><%= @document.markdown_path || '-' %></code></dd>
+
+          <dt class="col-sm-4">Created</dt>
+          <dd class="col-sm-8"><%= @document.created_at.strftime('%Y-%m-%d %H:%M:%S') %></dd>
+
+          <dt class="col-sm-4">Updated</dt>
+          <dd class="col-sm-8"><%= @document.updated_at.strftime('%Y-%m-%d %H:%M:%S') %></dd>
+        </dl>
+      </div>
+    </div>
+
+    <% if @document.original_blob.attached? %>
+      <div class="card mb-4">
+        <div class="card-header">
+          <h5 class="mb-0">Attached File</h5>
+        </div>
+        <div class="card-body">
+          <p><strong>Filename:</strong> <%= @document.original_blob.filename %></p>
+          <p><strong>Size:</strong> <%= number_to_human_size(@document.original_blob.byte_size) %></p>
+          <p><strong>Content Type:</strong> <%= @document.original_blob.content_type %></p>
+          <%= link_to 'Download', rails_blob_path(@document.original_blob, disposition: 'attachment'), class: 'btn btn-primary' %>
+        </div>
+      </div>
+    <% end %>
+
+    <% if @document.document_fields.any? %>
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0">Extracted Fields</h5>
+        </div>
+        <div class="card-body">
+          <table class="table table-sm">
+            <thead>
+              <tr>
+                <th>Field</th>
+                <th>Value</th>
+                <th>Source</th>
+                <th>Updated</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% @document.document_fields.order(:field_name).each do |field| %>
+                <tr>
+                  <td><strong><%= field.field_name %></strong></td>
+                  <td><%= field.value %></td>
+                  <td><span class="badge bg-secondary"><%= field.source %></span></td>
+                  <td><%= time_ago_in_words(field.updated_at) %> ago</td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="col-md-4">
+    <% if @document.markdown_path && File.exist?(File.join(ENV.fetch('LIBRARY_PATH', 'library'), @document.markdown_path)) %>
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0">Markdown Preview</h5>
+        </div>
+        <div class="card-body">
+          <pre class="bg-light p-3" style="max-height: 600px; overflow-y: auto;"><%= File.read(File.join(ENV.fetch('LIBRARY_PATH', 'library'), @document.markdown_path)) %></pre>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>
