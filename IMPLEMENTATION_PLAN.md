@@ -70,13 +70,9 @@ A reusable bootstrap template for AI-assisted development. This plan covers meta
 - [x] Update `PROMPT_build.md` to append WORKLOG entries on task completion (`PROMPT_build.md` at repo root)
   **Completed:** Modified step 4 to instruct agent to log completed tasks to projects/<name>/WORKLOG.md before updating IMPLEMENTATION_PLAN.md
 
-- [ ] Add `scripts/worklog.sh` for pretty-printing/filtering WORKLOG entries (`scripts/worklog.sh` at repo root)
-  Required functionality:
-  - `worklog.sh list` — show all entries in table format
-  - `worklog.sh show <id>` — show full details for one entry
-  - `worklog.sh filter --status=<status>` — filter by status
-  - `worklog.sh filter --feature=<feature>` — filter by feature
-  Required tests: each subcommand produces valid output, exits non-zero on invalid input
+- [x] Add `scripts/worklog.sh` for pretty-printing/filtering WORKLOG entries (`scripts/worklog.sh` at repo root)
+  **Completed:** Created scripts/worklog.sh with subcommands: list (table format), show <id> (full details), filter --status=<val>, filter --feature=<val>
+  Script reads ACTIVE_PROJECT and scopes to correct WORKLOG.md path
 
 - [ ] Add BATS test for `worklog.sh` output format (`projects/unpossible/src/test/worklog.bats`)
   Required tests:
