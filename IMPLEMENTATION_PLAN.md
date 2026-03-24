@@ -82,10 +82,8 @@ A reusable bootstrap template for AI-assisted development. This plan covers meta
 
 ## Feature: Idea Parking Lot
 
-- [ ] Define `IDEAS.md` schema (`projects/unpossible/specs/features/ideas.md`)
-  Required tests: none (schema definition only)
-  Schema fields: id (auto-increment), title, status (parked/researching/ready/rejected/promoted), description, open_questions, created_at, promoted_at
-  Document the format and purpose of IDEAS.md
+- [x] Define `IDEAS.md` schema (`projects/unpossible/specs/features/ideas.md`)
+  **Completed:** Created specs/features/ideas.md with schema definition including all required fields and integration documentation
 
 - [ ] Add `./loop.sh research <idea-id>` mode (`loop.sh`, `PROMPT_research.md` at repo root)
   Required functionality:
