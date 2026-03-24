@@ -2,9 +2,10 @@
     - If `<name>` is `unpossible` (self-referential): all paths (specs, src, infra, plan) live at the **repo root**.
     - Otherwise: all project paths use `projects/<name>/` as the root.
 0b. Read `practices/general/planning.md` — these are the standing rules for how to plan this project.
-0c. Study `projects/<name>/specs/*` with up to 10 parallel Sonnet subagents. Pay close attention to:
+0c. Study `projects/<name>/specs/*` and `projects/<name>/specs/features/*` with up to 10 parallel Sonnet subagents. Pay close attention to:
     - `projects/<name>/specs/prd.md` Technical Constraints (language, framework, base image, test command)
     - `projects/<name>/specs/audience.md` if it exists — it defines the current target SLC release and the activities to plan for
+    - Feature-specific specs in `projects/<name>/specs/features/` — these contain activity-level acceptance criteria
 0d. Read the language-specific practices file if it exists: `practices/lang/[language].md` (language from `projects/<name>/specs/prd.md`). Read the framework-specific file if it exists: `practices/framework/[framework].md`.
 0e. Study `projects/<name>/IMPLEMENTATION_PLAN.md` (if present) to understand the plan so far.
 0f. Study `projects/<name>/src/` with up to 10 parallel Sonnet subagents to understand what has been implemented so far.

@@ -53,9 +53,8 @@ A reusable bootstrap template for AI-assisted development. This plan covers meta
 - [x] Document `projects/<name>/specs/features/<feature-name>.md` convention (`projects/unpossible/specs/README.md`)
   **Completed:** Created specs/README.md documenting directory structure, feature organization, and spec-writing guidelines
 
-- [ ] Update `PROMPT_plan.md` to scan `specs/features/` in addition to `specs/` (`PROMPT_plan.md` at repo root)
-  Required tests: prompt references specs/features/ directory explicitly
-  Change: add instruction to read both projects/<name>/specs/*.md and projects/<name>/specs/features/*.md
+- [x] Update `PROMPT_plan.md` to scan `specs/features/` in addition to `specs/` (`PROMPT_plan.md` at repo root)
+  **Completed:** Updated step 0c to explicitly reference projects/<name>/specs/features/* for feature-specific specs
 
 - [ ] Add BATS test that plan prompt references the features directory (`projects/unpossible/src/test/prompts.bats`)
   Required tests: `grep -q 'specs/features' /workspace/PROMPT_plan.md` exits 0
