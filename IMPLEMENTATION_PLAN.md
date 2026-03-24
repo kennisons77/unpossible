@@ -56,8 +56,9 @@ A reusable bootstrap template for AI-assisted development. This plan covers meta
 - [x] Update `PROMPT_plan.md` to scan `specs/features/` in addition to `specs/` (`PROMPT_plan.md` at repo root)
   **Completed:** Updated step 0c to explicitly reference projects/<name>/specs/features/* for feature-specific specs
 
-- [ ] Add BATS test that plan prompt references the features directory (`projects/unpossible/src/test/prompts.bats`)
-  Required tests: `grep -q 'specs/features' /workspace/PROMPT_plan.md` exits 0
+- [x] Add BATS test that plan prompt references the features directory (`projects/unpossible/src/test/prompts.bats`)
+  **Completed:** Created src/test/prompts.bats with test verifying PROMPT_plan.md references specs/features/
+  All tests pass (26/26 green)
 
 ---
 
