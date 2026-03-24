@@ -1,6 +1,8 @@
 **Model selection:** Use Haiku for reading/searching files. Use Sonnet for code generation. Use Opus only for debugging and architectural decisions. Subagents for reading complete in ≤5 turns; kill any subagent exceeding 10 turns.
 
-0a. Read `ACTIVE_PROJECT` (root-level file) to get the project name. All project paths below use `projects/<name>/` as the root.
+0a. Read `ACTIVE_PROJECT` (root-level file) to get the project name.
+    - If `<name>` is `unpossible` (self-referential): specs and plan live at the **repo root** (`specs/`, `IMPLEMENTATION_PLAN.md`); src and infra live at `projects/unpossible/src/` and `projects/unpossible/infra/`.
+    - Otherwise: all project paths use `projects/<name>/` as the root.
 0b. Read `practices/general/coding.md` — these are the standing rules for how to write code in this project.
 0c. Read the language-specific practices file if it exists: `practices/lang/[language].md` (language from `projects/<name>/specs/prd.md`). Read the framework-specific file if it exists: `practices/framework/[framework].md`.
 0d. Read `projects/<name>/specs/prd.md` and `projects/<name>/specs/plan.md` directly to understand the goal and current status. Pay close attention to Technical Constraints for language, framework, base image, and test command.

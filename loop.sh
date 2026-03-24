@@ -33,19 +33,45 @@ case "$AGENT" in
         ;;
 esac
 
+# --- Read active project ---
+if [ ! -f "ACTIVE_PROJECT" ]; then
+    echo "Error: ACTIVE_PROJECT file not found at repo root"
+    exit 1
+fi
+PROJECT_NAME=$(cat ACTIVE_PROJECT | tr -d '[:space:]')
+if [ -z "$PROJECT_NAME" ]; then
+    echo "Error: ACTIVE_PROJECT is empty"
+    exit 1
+fi
+# unpossible works on itself: specs/plan live at repo root, src/infra under projects/unpossible/
+if [ "$PROJECT_NAME" = "unpossible" ]; then
+    PROJECT_DIR="."
+else
+    PROJECT_DIR="projects/$PROJECT_NAME"
+    if [ ! -d "$PROJECT_DIR" ]; then
+        echo "Error: project directory '$PROJECT_DIR' does not exist"
+        exit 1
+    fi
+fi
+
 # --- Parse mode/iteration arguments ---
 if [ "$1" = "plan" ]; then
     MODE="plan"
-    PROMPT_FILE="PROMPT_plan.md"
     MAX_ITERATIONS=${2:-0}
 elif [[ "$1" =~ ^[0-9]+$ ]]; then
     MODE="build"
-    PROMPT_FILE="PROMPT_build.md"
     MAX_ITERATIONS=$1
 else
     MODE="build"
-    PROMPT_FILE="PROMPT_build.md"
     MAX_ITERATIONS=0
+fi
+
+# Prompt file: project-local override, else root fallback
+PROMPT_BASENAME="PROMPT_${MODE}.md"
+if [ -f "$PROJECT_DIR/$PROMPT_BASENAME" ]; then
+    PROMPT_FILE="$PROJECT_DIR/$PROMPT_BASENAME"
+else
+    PROMPT_FILE="$PROMPT_BASENAME"
 fi
 
 # --- Branch management ---

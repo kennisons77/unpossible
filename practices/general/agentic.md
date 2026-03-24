@@ -8,8 +8,13 @@ Writing code is now near-free. The scarce resource is **comprehension** — load
 
 - One file, one concept. If you need to load 5 files to understand one behavior, the code is under-decomposed.
 - Prefer explicit duplication over wrong abstractions. N copies the AI can update in one pass cost less than one abstraction that forces context-chasing.
-- Abstract only when the boundary is proven stable AND the abstraction reduces context load — not on sight of duplication.
-- Smaller files = cheaper parallel reasoning sessions, better git blame, easier isolation.
+- Abstract only when the boundary is proven stable AND the abstraction reduces context load — not on sight of duplication. When in doubt: duplicate.
+- Smaller files = cheaper parallel reasoning sessions, better git blame, easier isolation. Cap at ~200 lines; split by concept when exceeded.
+
+## Code Structure
+- If a function or module has exactly one caller, inline it — don't abstract for its own sake.
+- A logical change should touch ≤3 files. More is a signal of wrong decomposition.
+- Names should be grep-friendly: specific enough that searching returns ≤5 results. Avoid `handler`, `manager`, `util`, `helper` — they accumulate unrelated code.
 
 ## Specs and Prompts
 
@@ -27,6 +32,11 @@ Writing code is now near-free. The scarce resource is **comprehension** — load
 - No shared fixtures or DRY test helpers — hidden context is expensive. Each test must be independently understandable.
 - Flaky tests are the most expensive class of defect in an agentic loop. Each flake burns 3,000–5,000 tokens on a non-defect. Eliminate them before running the loop at scale.
 - Backpressure is the control mechanism: the agent cannot mark a task complete until tests pass.
+
+## Commits
+- One logical change per commit. Atomic commits make bisect and review tractable.
+- Commit message: imperative verb + why, not what. "Fix race condition in auth refresh" not "update auth.go".
+- Never commit a broken state — the loop commits only on green.
 
 ## Work in Progress
 
