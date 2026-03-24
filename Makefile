@@ -5,12 +5,16 @@
 # - helpers: sb-inspect (discover mounts) and sb-sync (tar-copy repo into sandbox)
 #
 # Notes:
-# - SANDBOX: name of the running sandbox (default: "claude")
+# - AGENT: AI agent to use — "claude" (default), "kiro", or a custom command string
+# - MODEL: model name passed to the agent (default depends on agent)
+# - SANDBOX: name of the running sandbox (default: "claude-unpossible")
 # - SANDBOX_WORKDIR: path inside the sandbox where the project should live.
 #   By default it's /workspace/<repo-basename> but override if your sandbox mounts elsewhere.
 #
 # Usage examples:
 #   make build
+#   make build AGENT=kiro
+#   make build AGENT=kiro MODEL=claude-sonnet-4-5
 #   make plan N=1
 #   make sb-build SANDBOX=my-sandbox SANDBOX_WORKDIR=/workspace/unpossible N=5
 #   make sb-shell SANDBOX=my-sandbox SANDBOX_WORKDIR=/workspace/unpossible
@@ -18,9 +22,14 @@
 #
 # Caution: `sb-sync` will overwrite files in the target directory inside the sandbox.
 
-SANDBOX ?= claude
+AGENT ?= claude
+MODEL ?=
+SANDBOX ?= claude-unpossible
 # Default workdir inside the sandbox: /workspace/<repo-basename>
 SANDBOX_WORKDIR ?= /workspace/$(notdir $(CURDIR))
+
+# Build the env prefix for passing AGENT/MODEL to loop.sh
+AGENT_ENV := AGENT=$(AGENT)$(if $(MODEL), MODEL=$(MODEL),)
 
 .PHONY: help build plan build1 plan1 \
         sb-build sb-plan sb-build1 sb-plan1 sb-shell sb-inspect sb-sync
@@ -35,6 +44,11 @@ help:
 	@echo "  make build1          Build mode, exactly 1 iteration (local)"
 	@echo "  make plan1           Plan mode, exactly 1 iteration (local)"
 	@echo ""
+	@echo "Agent selection (default: claude):"
+	@echo "  make build AGENT=kiro"
+	@echo "  make build AGENT=kiro MODEL=claude-sonnet-4-5"
+	@echo "  make build AGENT='my-llm-cli --headless'"
+	@echo ""
 	@echo "Sandbox-aware targets (run inside a running docker sandbox):"
 	@echo "  make sb-build        Build mode inside sandbox ($(SANDBOX))"
 	@echo "  make sb-plan         Plan mode inside sandbox ($(SANDBOX))"
@@ -44,7 +58,7 @@ help:
 	@echo "  make sb-inspect      Probe common paths inside sandbox to discover mount location"
 	@echo "  make sb-sync         Sync (tar) the current repo into the sandbox workdir (overwrites files)"
 	@echo ""
-	@echo "Defaults: SANDBOX=$(SANDBOX), SANDBOX_WORKDIR=$(SANDBOX_WORKDIR)"
+	@echo "Defaults: AGENT=$(AGENT), SANDBOX=$(SANDBOX), SANDBOX_WORKDIR=$(SANDBOX_WORKDIR)"
 	@echo "Examples:"
 	@echo "  make sb-build N=10                              # run 10 iterations inside sandbox"
 	@echo "  make sb-plan SANDBOX=my-sandbox                 # run plan mode in 'my-sandbox'"
@@ -53,16 +67,16 @@ help:
 
 # Local (host) targets - run the loop script on the host
 build:
-	@./loop.sh $(if $(N),$(N),)
+	@$(AGENT_ENV) ./loop.sh $(if $(N),$(N),)
 
 plan:
-	@./loop.sh plan $(N)
+	@$(AGENT_ENV) ./loop.sh plan $(N)
 
 build1:
-	@./loop.sh 1
+	@$(AGENT_ENV) ./loop.sh 1
 
 plan1:
-	@./loop.sh plan 1
+	@$(AGENT_ENV) ./loop.sh plan 1
 
 # -----------------------
 # Sandbox-aware targets
@@ -75,16 +89,16 @@ plan1:
 # differs, override the commands on the command-line or edit these targets.
 
 sb-build:
-	@docker sandbox exec -it $(SANDBOX) sh -lc 'cd "$(SANDBOX_WORKDIR)" && ./loop.sh $(if $(N),$(N),)'
+	@docker sandbox exec -it $(SANDBOX) sh -lc 'cd "$(SANDBOX_WORKDIR)" && $(AGENT_ENV) ./loop.sh $(if $(N),$(N),)'
 
 sb-plan:
-	@docker sandbox exec -it $(SANDBOX) sh -lc 'cd "$(SANDBOX_WORKDIR)" && ./loop.sh plan $(N)'
+	@docker sandbox exec -it $(SANDBOX) sh -lc 'cd "$(SANDBOX_WORKDIR)" && $(AGENT_ENV) ./loop.sh plan $(N)'
 
 sb-build1:
-	@docker sandbox exec -it $(SANDBOX) sh -lc 'cd "$(SANDBOX_WORKDIR)" && ./loop.sh 1'
+	@docker sandbox exec -it $(SANDBOX) sh -lc 'cd "$(SANDBOX_WORKDIR)" && $(AGENT_ENV) ./loop.sh 1'
 
 sb-plan1:
-	@docker sandbox exec -it $(SANDBOX) sh -lc 'cd "$(SANDBOX_WORKDIR)" && ./loop.sh plan 1'
+	@docker sandbox exec -it $(SANDBOX) sh -lc 'cd "$(SANDBOX_WORKDIR)" && $(AGENT_ENV) ./loop.sh plan 1'
 
 # Open an interactive shell inside the sandbox and `cd` into the project folder.
 # Tries bash first, then falls back to sh.
