@@ -67,9 +67,8 @@ A reusable bootstrap template for AI-assisted development. This plan covers meta
 - [x] Define `WORKLOG.md` schema (`projects/unpossible/specs/features/worklog.md`)
   **Completed:** Created specs/features/worklog.md defining schema with fields: id, title, status, feature, started_at, completed_at, commit_sha, summary
 
-- [ ] Update `PROMPT_build.md` to append WORKLOG entries on task completion (`PROMPT_build.md` at repo root)
-  Required tests: prompt instructs agent to append to projects/<name>/WORKLOG.md with correct schema after each task
-  Change: add instruction to log completed tasks to WORKLOG.md before marking them done in IMPLEMENTATION_PLAN.md
+- [x] Update `PROMPT_build.md` to append WORKLOG entries on task completion (`PROMPT_build.md` at repo root)
+  **Completed:** Modified step 4 to instruct agent to log completed tasks to projects/<name>/WORKLOG.md before updating IMPLEMENTATION_PLAN.md
 
 - [ ] Add `scripts/worklog.sh` for pretty-printing/filtering WORKLOG entries (`scripts/worklog.sh` at repo root)
   Required functionality:

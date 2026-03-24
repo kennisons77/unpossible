@@ -25,7 +25,10 @@
    ```
    If the Dockerfile still has placeholder values, fill them in from `projects/<name>/specs/prd.md` first.
 
-4. When tests pass, update `projects/<name>/IMPLEMENTATION_PLAN.md`, then commit:
+4. When tests pass, log the completed task to `projects/<name>/WORKLOG.md` following the schema in `specs/features/worklog.md`:
+   - Append a new entry with auto-incremented ID
+   - Include: title, status (done), feature name, started/completed timestamps, commit SHA (after commit), summary
+   - Then update `projects/<name>/IMPLEMENTATION_PLAN.md` and commit:
    ```
    git add -A && git commit -m "[description]"
    git push
