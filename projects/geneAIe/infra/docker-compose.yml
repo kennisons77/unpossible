@@ -1,0 +1,83 @@
+# docker-compose.yml — local development and test runner
+#
+# Build image:  docker compose -f infra/docker-compose.yml build
+# Run app:      docker compose -f infra/docker-compose.yml up app
+# Run tests:    docker compose -f infra/docker-compose.yml run --rm test
+
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    tmpfs:
+      - /var/lib/postgresql/data
+    shm_size: 256mb
+    environment:
+      POSTGRES_DB: sovereign_library_development
+      POSTGRES_USER: sovereign
+      POSTGRES_PASSWORD: sovereign
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sovereign"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  minio:
+    image: minio/minio
+    command: server /data --console-address ":9001"
+    volumes:
+      - ../.data/minio:/data
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  app:
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile
+      args:
+        HTTP_PROXY: ${HTTP_PROXY:-}
+        HTTPS_PROXY: ${HTTPS_PROXY:-}
+        NO_PROXY: ${NO_PROXY:-}
+        PROXY_CA_CERT_B64: ${PROXY_CA_CERT_B64:-}
+    ports:
+      - "3000:3000"
+    volumes:
+      - ../src:/app
+    depends_on:
+      db:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://sovereign:sovereign@db:5432/sovereign_library_development
+      RAILS_ENV: development
+      AWS_ACCESS_KEY_ID: minioadmin
+      AWS_SECRET_ACCESS_KEY: minioadmin
+      AWS_ENDPOINT: http://minio:9000
+
+  test:
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile
+      args:
+        HTTP_PROXY: ${HTTP_PROXY:-}
+        HTTPS_PROXY: ${HTTPS_PROXY:-}
+        NO_PROXY: ${NO_PROXY:-}
+        PROXY_CA_CERT_B64: ${PROXY_CA_CERT_B64:-}
+    command: bash -c "npm install && npm run build && bin/rails db:drop db:create db:migrate && bundle exec rspec"
+    volumes:
+      - ../src:/app
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://sovereign:sovereign@db:5432/sovereign_library_test
+      RAILS_ENV: test
+      APP_ENV: test

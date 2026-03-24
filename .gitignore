@@ -1,0 +1,30 @@
+# Data directories (postgres, minio)
+.data/
+projects/*/infra/.data/
+projects/*/infra/.env
+
+# Rails (project src directories)
+projects/*/src/log/*
+projects/*/src/tmp/*
+projects/*/src/storage/*
+projects/*/src/public/assets
+projects/*/src/temp/*
+
+# Node (CSS/JS build tooling)
+projects/*/src/node_modules/
+projects/*/src/app/assets/builds/*
+!projects/*/src/app/assets/builds/.gitkeep
+
+# Rails secrets (project-level)
+projects/*/src/config/master.key
+projects/*/src/config/credentials/*.key
+
+# Git-tracked library (separate repo)
+library/
+
+# Secrets
+.env
+*.key
+
+# OS
+.DS_Store

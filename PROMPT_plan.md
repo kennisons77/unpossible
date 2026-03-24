@@ -1,11 +1,27 @@
-0a. Study `specs/*` with up to 10 parallel Sonnet subagents to learn the application specifications. Pay close attention to the Technical Constraints section of `specs/prd.md` — it defines the language, framework, base image, and test command.
-0b. Study @IMPLEMENTATION_PLAN.md (if present) to understand the plan so far.
-0c. Study `app/**` with up to 10 parallel Sonnet subagents to understand what has been implemented so far.
+0a. Read `ACTIVE_PROJECT` (root-level file) to get the project name. All project paths below use `projects/<name>/` as the root.
+0b. Read `practices/general/planning.md` — these are the standing rules for how to plan this project.
+0c. Study `projects/<name>/specs/*` with up to 10 parallel Sonnet subagents. Pay close attention to:
+    - `projects/<name>/specs/prd.md` Technical Constraints (language, framework, base image, test command)
+    - `projects/<name>/specs/audience.md` if it exists — it defines the current target SLC release and the activities to plan for
+0d. Read the language-specific practices file if it exists: `practices/lang/[language].md` (language from `projects/<name>/specs/prd.md`). Read the framework-specific file if it exists: `practices/framework/[framework].md`.
+0e. Study `projects/<name>/IMPLEMENTATION_PLAN.md` (if present) to understand the plan so far.
+0f. Study `projects/<name>/src/` with up to 10 parallel Sonnet subagents to understand what has been implemented so far.
 
-1. Perform a gap analysis: compare what exists in `app/**` against what is required by `specs/prd.md` and `specs/plan.md`. Use an Opus subagent to analyze findings, prioritize gaps, and create/update @IMPLEMENTATION_PLAN.md as a bullet point list sorted by priority. Ultrathink. Consider: missing features, TODOs, placeholders, skipped/flaky tests, and inconsistent patterns.
+1. Perform a gap analysis comparing `projects/<name>/src/` against the specs. Use an Opus subagent to analyze findings and create/update `projects/<name>/IMPLEMENTATION_PLAN.md`. Ultrathink.
 
-Also check `infra/Dockerfile` and `infra/docker-compose.yml` — if they still contain placeholder values (e.g. `[base-image]`, `[your test command]`), add a high-priority task to fill them in from `specs/prd.md`.
+   **If `projects/<name>/specs/audience.md` exists:** scope the plan to the **Current target release** defined there.
+   Plan only the activities and capability depths for that release — not the full feature space.
+   For each task, derive required tests from the acceptance criteria in the relevant spec file and
+   include them in the task definition (see `practices/general/planning.md` for format).
 
-IMPORTANT: Plan only. Do NOT implement anything. Do NOT assume functionality is missing; confirm with code search in `app/**` first.
+   **If `projects/<name>/specs/audience.md` does not exist:** perform a full gap analysis across all specs.
+   Prioritize by dependency order. Include required tests derived from acceptance criteria where
+   specs define them.
 
-ULTIMATE GOAL: We want to achieve [project-specific goal — fill this in]. Consider missing elements and plan accordingly. If an element is missing, search first to confirm it doesn't exist, then if needed author the specification at specs/FILENAME.md and document the plan to implement it in @IMPLEMENTATION_PLAN.md.
+   In both cases: consider missing features, TODOs, placeholders, skipped/flaky tests, and
+   inconsistent patterns. Flag `projects/<name>/infra/Dockerfile` and `projects/<name>/infra/docker-compose.yml` placeholder
+   values as high-priority tasks.
+
+IMPORTANT: Plan only. Do NOT implement anything. Do NOT assume functionality is missing; confirm with code search in `projects/<name>/src/` first.
+
+ULTIMATE GOAL: We want to achieve [project-specific goal — fill this in]. Consider missing elements and plan accordingly. If something is missing, search first to confirm it doesn't exist, then if needed author the specification at `projects/<name>/specs/FILENAME.md` and document the plan to implement it in `projects/<name>/IMPLEMENTATION_PLAN.md`.
