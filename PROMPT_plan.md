@@ -1,5 +1,5 @@
 0a. Read `ACTIVE_PROJECT` (root-level file) to get the project name.
-    - If `<name>` is `unpossible` (self-referential): specs and plan live at the **repo root** (`specs/`, `IMPLEMENTATION_PLAN.md`); src and infra live at `projects/unpossible/src/` and `projects/unpossible/infra/`.
+    - If `<name>` is `unpossible` (self-referential): all paths (specs, src, infra, plan) live at the **repo root**.
     - Otherwise: all project paths use `projects/<name>/` as the root.
 0b. Read `practices/general/planning.md` — these are the standing rules for how to plan this project.
 0c. Study `projects/<name>/specs/*` with up to 10 parallel Sonnet subagents. Pay close attention to:

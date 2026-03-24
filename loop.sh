@@ -43,7 +43,7 @@ if [ -z "$PROJECT_NAME" ]; then
     echo "Error: ACTIVE_PROJECT is empty"
     exit 1
 fi
-# unpossible works on itself: specs/plan live at repo root, src/infra under projects/unpossible/
+# unpossible works on itself: specs/plan/infra/src live at repo root
 if [ "$PROJECT_NAME" = "unpossible" ]; then
     PROJECT_DIR="."
 else
