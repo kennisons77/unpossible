@@ -50,10 +50,8 @@ A reusable bootstrap template for AI-assisted development. This plan covers meta
 
 ## Feature: Spec Organisation by Feature
 
-- [ ] Document `projects/<name>/specs/features/<feature-name>.md` convention (`projects/unpossible/specs/README.md`)
-  Required tests: none (documentation only)
-  Content: explain that activity specs can be organized under specs/features/ for better grouping
-  Create the file if it doesn't exist
+- [x] Document `projects/<name>/specs/features/<feature-name>.md` convention (`projects/unpossible/specs/README.md`)
+  **Completed:** Created specs/README.md documenting directory structure, feature organization, and spec-writing guidelines
 
 - [ ] Update `PROMPT_plan.md` to scan `specs/features/` in addition to `specs/` (`PROMPT_plan.md` at repo root)
   Required tests: prompt references specs/features/ directory explicitly
