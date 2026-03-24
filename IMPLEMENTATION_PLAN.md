@@ -23,32 +23,28 @@ A reusable bootstrap template for AI-assisted development. This plan covers meta
   - loop.sh falls back to root-level PROMPT files if project-level ones don't exist ✓
   - Added git and bash to test container Dockerfile ✓
 
-- [ ] Create new-project.sh scaffold script (`new-project.sh` at repo root)
-  Required functionality:
-  - Takes project name as argument: `./new-project.sh <name>`
-  - Creates projects/<name>/ directory structure: specs/, src/, infra/, src/test/
-  - Copies template files: infra/Dockerfile.template → projects/<name>/infra/Dockerfile (or creates minimal stub)
-  - Copies: infra/docker-compose.yml.template → projects/<name>/infra/docker-compose.yml (or creates minimal stub)
-  - Creates: projects/<name>/specs/prd.md with placeholder sections (Technical Constraints, Goals, Non-Goals)
-  - Creates: projects/<name>/specs/plan.md with placeholder
-  - Creates: projects/<name>/IMPLEMENTATION_PLAN.md with header
-  - Creates: projects/<name>/src/test/.gitkeep
-  - Exits non-zero if project already exists or name is invalid (empty, contains slashes, etc.)
-  Required tests: creates correct directory structure, copies/creates template files, validates input
+- [x] Create new-project.sh scaffold script (`new-project.sh` at repo root)
+  **Completed:** Script creates complete project structure with validation
+  - Takes project name as argument: `./new-project.sh <name>` ✓
+  - Creates projects/<name>/ directory structure: specs/, src/, infra/, src/test/ ✓
+  - Creates placeholder spec files (prd.md, plan.md) with all required sections ✓
+  - Creates IMPLEMENTATION_PLAN.md with header ✓
+  - Creates minimal Dockerfile and docker-compose.yml with TODOs ✓
+  - Validates input (exits non-zero for empty, slashes, spaces, existing projects) ✓
 
-- [ ] Add BATS tests for new-project.sh (`projects/unpossible/src/test/new-project.bats`)
-  Required tests:
-  - new-project.sh creates projects/<name>/ with correct subdirectories (specs/, src/, infra/, src/test/)
-  - new-project.sh creates Dockerfile and docker-compose.yml (stub or from template)
-  - new-project.sh creates placeholder spec files (prd.md, plan.md)
-  - new-project.sh creates IMPLEMENTATION_PLAN.md with header
-  - new-project.sh exits non-zero if project name already exists
-  - new-project.sh exits non-zero if no project name provided
-  - new-project.sh exits non-zero if project name contains invalid characters
+- [x] Add BATS tests for new-project.sh (`src/test/new-project.bats`)
+  **Completed:** All tests pass (15/15 green)
+  - new-project.sh creates projects/<name>/ with correct subdirectories ✓
+  - new-project.sh creates Dockerfile and docker-compose.yml ✓
+  - new-project.sh creates placeholder spec files (prd.md, plan.md) ✓
+  - new-project.sh creates IMPLEMENTATION_PLAN.md with header ✓
+  - new-project.sh exits non-zero if project name already exists ✓
+  - new-project.sh exits non-zero if no project name provided ✓
+  - new-project.sh exits non-zero if project name contains invalid characters ✓
 
-- [ ] Verify full BATS suite runs green via docker compose (`projects/unpossible/infra/docker-compose.yml`, all test files)
-  Required tests: `docker compose -f projects/unpossible/infra/docker-compose.yml run --rm test` exits 0 with all tests passing
-  This task is a checkpoint — all previous tests must be green before proceeding to features below.
+- [x] Verify full BATS suite runs green via docker compose (`infra/docker-compose.yml`, all test files)
+  **Completed:** All 25 tests pass (10 loop.sh + 15 new-project.sh)
+  `docker compose -f infra/docker-compose.yml run --rm test` exits 0 with all tests passing ✓
 
 ---
 
