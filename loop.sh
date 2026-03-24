@@ -12,7 +12,7 @@
 #
 # Examples:
 #   AGENT=kiro ./loop.sh
-#   AGENT=kiro MODEL=claude-sonnet-4-5 ./loop.sh 10
+#   AGENT=kiro MODEL=claude-sonnet-4.5 ./loop.sh 10
 #   AGENT=claude MODEL=sonnet ./loop.sh plan 1
 
 # --- Agent configuration ---
@@ -52,8 +52,15 @@ else
     MAX_ITERATIONS=0
 fi
 
-ITERATION=0
+# --- Branch management ---
+# If on main/master, create a timestamped work branch before doing anything
 CURRENT_BRANCH=$(git branch --show-current)
+if [ "$CURRENT_BRANCH" = "main" ] || [ "$CURRENT_BRANCH" = "master" ]; then
+    WORK_BRANCH="ralph/$(date +%Y%m%d-%H%M%S)"
+    git checkout -b "$WORK_BRANCH"
+    CURRENT_BRANCH="$WORK_BRANCH"
+    echo "Created branch: $CURRENT_BRANCH"
+fi
 
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "Agent:  $AGENT"
@@ -69,6 +76,9 @@ if [ ! -f "$PROMPT_FILE" ]; then
     exit 1
 fi
 
+PR_OPENED=0
+ITERATION=0
+
 while true; do
     if [ $MAX_ITERATIONS -gt 0 ] && [ $ITERATION -ge $MAX_ITERATIONS ]; then
         echo "Reached max iterations: $MAX_ITERATIONS"
@@ -80,7 +90,16 @@ while true; do
     git push origin "$CURRENT_BRANCH" || {
         echo "Failed to push. Creating remote branch..."
         git push -u origin "$CURRENT_BRANCH"
-    }
+
+    # Open a draft PR after the first successful push (requires gh CLI)
+    if [ $PR_OPENED -eq 0 ] && command -v gh &>/dev/null; then
+        gh pr create \
+            --title "ralph: $MODE loop on $CURRENT_BRANCH" \
+            --body "Automated PR opened by loop.sh ($AGENT / $MODE mode)." \
+            --draft \
+            && PR_OPENED=1 \
+            || echo "Warning: gh pr create failed — continuing without PR"
+    fi
 
     ITERATION=$((ITERATION + 1))
     echo -e "\n\n======================== LOOP $ITERATION ========================\n"
