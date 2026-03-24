@@ -105,9 +105,9 @@ The `infra/Dockerfile` and `infra/docker-compose.yml` contain placeholder values
 
 ### 1.6 Scaffold Views
 
-- [ ] **Document scaffold views** — Index (table listing with stage, type, concern, confidence), show (detail with fields, blob download link, markdown preview), basic controller with index/show actions (files: `app/controllers/documents_controller.rb`, `app/views/documents/index.html.erb`, `app/views/documents/show.html.erb`, `app/views/documents/_document.html.erb`, `config/routes.rb`, `spec/requests/documents_spec.rb`)
+- [x] **Document scaffold views** — Index (table listing with stage, type, concern, confidence), show (detail with fields, blob download link, markdown preview), basic controller with index/show actions (files: `app/controllers/documents_controller.rb`, `app/views/documents/index.html.erb`, `app/views/documents/show.html.erb`, `app/views/documents/_document.html.erb`, `config/routes.rb`, `spec/requests/documents_spec.rb`)
   Required tests: index returns 200 with documents listed, show returns 200 with document details, unauthenticated access redirected
-- [ ] **Concern scaffold views** — Index, show (with associated documents), confirm action (files: `app/controllers/concerns_controller.rb`, `app/views/concerns/index.html.erb`, `app/views/concerns/show.html.erb`, `config/routes.rb`, `spec/requests/concerns_spec.rb`)
+- [x] **Concern scaffold views** — Index, show (with associated documents), confirm action (files: `app/controllers/concerns_controller.rb`, `app/views/concerns/index.html.erb`, `app/views/concerns/show.html.erb`, `config/routes.rb`, `spec/requests/concerns_spec.rb`)
   Required tests: index lists concerns, show displays concern with documents, confirm action sets `confirmed_at`, unauthenticated access redirected
 
 ---
