@@ -74,12 +74,9 @@ A reusable bootstrap template for AI-assisted development. This plan covers meta
   **Completed:** Created scripts/worklog.sh with subcommands: list (table format), show <id> (full details), filter --status=<val>, filter --feature=<val>
   Script reads ACTIVE_PROJECT and scopes to correct WORKLOG.md path
 
-- [ ] Add BATS test for `worklog.sh` output format (`projects/unpossible/src/test/worklog.bats`)
-  Required tests:
-  - worklog.sh list produces valid table output
-  - worklog.sh show <id> exits 0 for valid id, exits 1 for invalid id
-  - worklog.sh filter --status=done filters correctly
-  - worklog.sh filter --feature=<name> filters correctly
+- [x] Add BATS test for `worklog.sh` output format (`projects/unpossible/src/test/worklog.bats`)
+  **Completed:** Created src/test/worklog.bats with 10 tests covering all worklog.sh functionality
+  All tests pass (36/36 green): list, show, filter by status/feature, error handling
 
 ---
 

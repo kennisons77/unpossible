@@ -85,12 +85,13 @@ show_entry() {
   local target_id="$1"
   [[ ! -f "$WORKLOG" ]] && echo "Error: WORKLOG.md not found" >&2 && exit 1
   
+  local found=$(awk -v id="$target_id" '/^## \[/ { if ($2 == "["id"]") print 1 }' "$WORKLOG")
+  [[ "$found" != "1" ]] && echo "Error: Entry $target_id not found" >&2 && exit 1
+  
   awk -v id="$target_id" '
     /^## \[/ { if (found) exit; if ($2 == "["id"]") found=1 }
     found { print }
   ' "$WORKLOG"
-  
-  [[ $(awk -v id="$target_id" '/^## \[/ { if ($2 == "["id"]") print 1 }' "$WORKLOG") != "1" ]] && echo "Error: Entry $target_id not found" >&2 && exit 1
 }
 
 filter_entries() {
@@ -100,19 +101,39 @@ filter_entries() {
   
   if [[ "$filter_type" == "status" ]]; then
     awk -v val="$filter_value" '
-      /^## \[[0-9]+\]/ { entry=$0; in_entry=1; matched=0 }
-      in_entry && /^\- \*\*Status:\*\*/ { if ($3 == val) matched=1 }
-      in_entry && /^## \[[0-9]+\]/ && NR>1 { if (prev_matched) print prev_entry; prev_entry=entry; prev_matched=matched; entry=$0; matched=0 }
-      in_entry && !/^## \[[0-9]+\]/ { entry=entry"\n"$0 }
-      END { if (prev_matched) print prev_entry; if (matched) print entry }
+      BEGIN { entry=""; matched=0 }
+      /^## \[[0-9]+\]/ {
+        if (entry != "" && matched) print entry
+        entry=$0"\n"
+        matched=0
+      }
+      /^\- \*\*Status:\*\*/ {
+        if ($3 == val) matched=1
+        entry=entry$0"\n"
+        next
+      }
+      /^## \[[0-9]+\]/ { next }
+      { entry=entry$0"\n" }
+      END { if (entry != "" && matched) print entry }
     ' "$WORKLOG"
   elif [[ "$filter_type" == "feature" ]]; then
     awk -v val="$filter_value" '
-      /^## \[[0-9]+\]/ { entry=$0; in_entry=1; matched=0 }
-      in_entry && /^\- \*\*Feature:\*\*/ { feat=$0; sub(/^\- \*\*Feature:\*\* /, "", feat); if (feat == val) matched=1 }
-      in_entry && /^## \[[0-9]+\]/ && NR>1 { if (prev_matched) print prev_entry; prev_entry=entry; prev_matched=matched; entry=$0; matched=0 }
-      in_entry && !/^## \[[0-9]+\]/ { entry=entry"\n"$0 }
-      END { if (prev_matched) print prev_entry; if (matched) print entry }
+      BEGIN { entry=""; matched=0 }
+      /^## \[[0-9]+\]/ {
+        if (entry != "" && matched) print entry
+        entry=$0"\n"
+        matched=0
+      }
+      /^\- \*\*Feature:\*\*/ {
+        feat=$0
+        sub(/^\- \*\*Feature:\*\* /, "", feat)
+        if (feat == val) matched=1
+        entry=entry$0"\n"
+        next
+      }
+      /^## \[[0-9]+\]/ { next }
+      { entry=entry$0"\n" }
+      END { if (entry != "" && matched) print entry }
     ' "$WORKLOG"
   fi
 }
