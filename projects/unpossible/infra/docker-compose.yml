@@ -1,0 +1,6 @@
+services:
+  test:
+    build:
+      context: ../../..
+      dockerfile: projects/unpossible/infra/Dockerfile
+    command: "projects/unpossible/src/test"
