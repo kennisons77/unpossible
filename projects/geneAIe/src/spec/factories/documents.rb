@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 FactoryBot.define do
   factory :document do
     association :owner, factory: :user
@@ -11,13 +13,13 @@ FactoryBot.define do
     trait :categorized do
       stage { :categorized }
       association :concern
-      document_type { 'utility_bill' }
+      document_type { "utility_bill" }
       confidence_score { 0.85 }
     end
 
     trait :needing_review do
       review_required { true }
-      review_reason { 'Low confidence score' }
+      review_reason { "Low confidence score" }
     end
   end
 end

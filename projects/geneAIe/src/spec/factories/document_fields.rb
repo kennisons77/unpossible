@@ -1,8 +1,10 @@
+# frozen_string_literal: true
+
 FactoryBot.define do
   factory :document_field do
     association :document
     sequence(:field_name) { |n| "field_#{n}" }
-    value { 'sample value' }
+    value { "sample value" }
     source { :llm }
 
     trait :from_ocr do

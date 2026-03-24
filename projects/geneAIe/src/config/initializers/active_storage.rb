@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Ensure the MinIO bucket exists on boot (development/production only).
 # Test environment uses the :test disk adapter and skips this entirely.
 Rails.application.config.after_initialize do
@@ -13,10 +15,10 @@ Rails.application.config.after_initialize do
   next unless bucket_name
 
   client = Aws::S3::Client.new(
-    access_key_id: ENV.fetch('AWS_ACCESS_KEY_ID'),
-    secret_access_key: ENV.fetch('AWS_SECRET_ACCESS_KEY'),
-    region: 'us-east-1',
-    endpoint: ENV.fetch('AWS_ENDPOINT'),
+    access_key_id: ENV.fetch("AWS_ACCESS_KEY_ID"),
+    secret_access_key: ENV.fetch("AWS_SECRET_ACCESS_KEY"),
+    region: "us-east-1",
+    endpoint: ENV.fetch("AWS_ENDPOINT"),
     force_path_style: true
   )
 

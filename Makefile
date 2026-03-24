@@ -24,15 +24,15 @@
 
 AGENT ?= claude
 MODEL ?=
-SANDBOX ?= claude-unpossible
+SANDBOX ?= unpossible
 # Default workdir inside the sandbox: /workspace/<repo-basename>
-SANDBOX_WORKDIR ?= /workspace/$(notdir $(CURDIR))
+SANDBOX_WORKDIR ?= $(HOME)/workspace/$(notdir $(CURDIR))
 
 # Build the env prefix for passing AGENT/MODEL to loop.sh
 AGENT_ENV := AGENT=$(AGENT)$(if $(MODEL), MODEL=$(MODEL),)
 
 .PHONY: help build plan build1 plan1 \
-        sb-build sb-plan sb-build1 sb-plan1 sb-shell sb-inspect sb-sync
+        sb-build sb-plan sb-build1 sb-plan1 sb-shell sb-inspect sb-sync sb-rm
 
 # Default target: print usage
 help:
@@ -41,7 +41,7 @@ help:
 	@echo "  make plan            Plan mode, unlimited iterations (local)"
 	@echo "  make build N=20      Build mode, max N iterations (local)"
 	@echo "  make plan N=5        Plan mode, max N iterations (local)"
-	@echo "  make build1          Build mode, exactly 1 iteration (local)"
+	@echo "  make build1          Build mode exactly 1 iteration (local)"
 	@echo "  make plan1           Plan mode, exactly 1 iteration (local)"
 	@echo ""
 	@echo "Agent selection (default: claude):"
@@ -89,33 +89,34 @@ plan1:
 # differs, override the commands on the command-line or edit these targets.
 
 sb-build:
-	@docker sandbox exec -it $(SANDBOX) sh -lc 'cd "$(SANDBOX_WORKDIR)" && $(AGENT_ENV) ./loop.sh $(if $(N),$(N),)'
+	@docker sandbox exec -it $(SANDBOX) bash -lc 'cd "$(SANDBOX_WORKDIR)" && $(AGENT_ENV) ./loop.sh $(if $(N),$(N),)'
 
 sb-plan:
-	@docker sandbox exec -it $(SANDBOX) sh -lc 'cd "$(SANDBOX_WORKDIR)" && $(AGENT_ENV) ./loop.sh plan $(N)'
+	@docker sandbox exec -it $(SANDBOX) bash -lc 'cd "$(SANDBOX_WORKDIR)" && $(AGENT_ENV) ./loop.sh plan $(N)'
 
 sb-build1:
-	@docker sandbox exec -it $(SANDBOX) sh -lc 'cd "$(SANDBOX_WORKDIR)" && $(AGENT_ENV) ./loop.sh 1'
+	@docker sandbox exec -it $(SANDBOX) bash -lc 'cd "$(SANDBOX_WORKDIR)" && $(AGENT_ENV) ./loop.sh 1'
 
 sb-plan1:
-	@docker sandbox exec -it $(SANDBOX) sh -lc 'cd "$(SANDBOX_WORKDIR)" && $(AGENT_ENV) ./loop.sh plan 1'
+	@docker sandbox exec -it $(SANDBOX) bash -lc 'cd "$(SANDBOX_WORKDIR)" && $(AGENT_ENV) ./loop.sh plan 1'
 
-# Open an interactive shell inside the sandbox and `cd` into the project folder.
-# Tries bash first, then falls back to sh.
 sb-shell:
-	@docker sandbox exec -it $(SANDBOX) sh -lc 'cd "$(SANDBOX_WORKDIR)" && (bash || sh)'
+	@docker sandbox exec -it $(SANDBOX) bash -lc 'cd "$(SANDBOX_WORKDIR)" && bash'
 
 # Inspect likely mount points and basic runtime info inside the sandbox.
 # Useful to discover where the project is mounted when mounts are not automatic.
 sb-inspect:
 	@echo "Inspecting sandbox '$(SANDBOX)' (probing common paths)..."
-	@docker sandbox exec -it $(SANDBOX) sh -lc 'echo "SANDBOX_WORKDIR (desired): $(SANDBOX_WORKDIR)"; echo "---- /workspace ----"; ls -la /workspace || true; echo "---- /home ----"; ls -la /home || true; echo "---- /root ----"; ls -la /root || true; echo "---- pwd & user ----"; pwd; whoami; echo "---- find repo basename: $(notdir $(CURDIR)) ----"; find / -maxdepth 3 -type d -name "$(notdir $(CURDIR))" 2>/dev/null || true'
+	@docker sandbox exec -it $(SANDBOX) bash -lc 'echo "SANDBOX_WORKDIR (desired): $(SANDBOX_WORKDIR)"; echo "---- /workspace ----"; ls -la /workspace || true; echo "---- /home ----"; ls -la /home || true; echo "---- /root ----"; ls -la /root || true; echo "---- pwd & user ----"; pwd; whoami; echo "---- find repo basename: $(notdir $(CURDIR)) ----"; find / -maxdepth 3 -type d -name "$(notdir $(CURDIR))" 2>/dev/null || true'
 
 # Sync (tar) the local repo into the sandbox workdir.
 # CAUTION: this will overwrite files in the target directory inside the sandbox.
 # Excludes common large/ignored directories to reduce transfer size.
+sb-rm:
+	@docker sandbox rm $(SANDBOX)
+
 sb-sync:
 	@echo "Syncing local repo into sandbox '$(SANDBOX)' -> '$(SANDBOX_WORKDIR)' (this may overwrite files inside the sandbox)"
-	@tar -C "$(CURDIR)" --exclude='.git' --exclude='node_modules' --exclude='tmp' --exclude='log' --exclude='coverage' --exclude='.venv' -cf - . | docker sandbox exec -i $(SANDBOX) sh -lc 'mkdir -p "$(SANDBOX_WORKDIR)" && tar -C "$(SANDBOX_WORKDIR)" -xvf -'
+	@tar -C "$(CURDIR)" --exclude='.git' --exclude='node_modules' --exclude='tmp' --exclude='log' --exclude='coverage' --exclude='.venv' -cf - . | docker sandbox exec -i $(SANDBOX) bash -lc 'mkdir -p "$(SANDBOX_WORKDIR)" && tar -C "$(SANDBOX_WORKDIR)" -xvf -'
 
 # End of Makefile

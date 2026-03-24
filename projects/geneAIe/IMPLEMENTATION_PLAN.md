@@ -78,8 +78,7 @@ The `infra/Dockerfile` and `infra/docker-compose.yml` contain placeholder values
 
 - [x] **Rails 8 app init** — Hand-crafted Rails 8.1 app (no network for `rails new`): PostgreSQL adapter, skipped Mailer/Mailbox/Cable, Solid Queue + Solid Cache configured, pgvector gem, Propshaft asset pipeline. `bundle exec rspec` exits 0, `bin/rails db:create` succeeds.
 - [x] **RSpec and testing gems** — rspec-rails 7.0, factory_bot_rails 6.4, shoulda-matchers 6.0, capybara, selenium-webdriver. Configured in spec/rails_helper.rb with support files for FactoryBot and Shoulda.
-- [ ] **RuboCop setup** — Add `rubocop`, `rubocop-rails`, `rubocop-rspec` gems; create `.rubocop.yml` with project-appropriate config (files: `Gemfile`, `.rubocop.yml`)
-  Required tests: `bundle exec rubocop` runs without crash (warnings acceptable at this stage)
+- [x] **RuboCop setup** — Added `rubocop`, `rubocop-rails`, `rubocop-rspec`, `rubocop-performance` gems; created `.rubocop.yml` with metrics from practices/lang/ruby.md (line 120, method 15, block 25, cyclomatic 6, params 5); auto-corrected all violations; `bundle exec rubocop` passes with zero offenses.
 
 ### 1.2 Authentication
 

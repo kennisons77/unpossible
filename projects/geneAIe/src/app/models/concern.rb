@@ -1,5 +1,7 @@
+# frozen_string_literal: true
+
 class Concern < ApplicationRecord
-  belongs_to :owner, class_name: 'User'
+  belongs_to :owner, class_name: "User"
   has_many :documents, dependent: :nullify
 
   validates :name, presence: true, uniqueness: { scope: :owner_id }

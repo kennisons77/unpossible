@@ -18,26 +18,22 @@
 # --- Agent configuration ---
 AGENT=${AGENT:-claude}
 
-# Build the command to invoke the agent in headless/non-interactive mode
 case "$AGENT" in
     claude)
         MODEL=${MODEL:-opus}
-        # -p: headless, --dangerously-skip-permissions: auto-approve, --output-format=stream-json: structured output
         AGENT_CMD="claude -p --dangerously-skip-permissions --output-format=stream-json --model $MODEL --verbose"
         ;;
     kiro)
-        MODEL=${MODEL:-claude-sonnet-4-5}
-        # --no-interactive: headless, -a/--trust-all-tools: auto-approve all tools
+        MODEL=${MODEL:-claude-sonnet-4.5}
         AGENT_CMD="kiro-cli chat --no-interactive --trust-all-tools --model $MODEL"
         ;;
     *)
-        # Custom agent: AGENT should be a full command that reads prompt from stdin
-        # e.g. AGENT="my-llm-cli --headless --model gpt-4o"
+        # Custom agent: full command string that reads prompt from stdin
         AGENT_CMD="$AGENT"
         ;;
 esac
 
-# Parse mode/iteration arguments
+# --- Parse mode/iteration arguments ---
 if [ "$1" = "plan" ]; then
     MODE="plan"
     PROMPT_FILE="PROMPT_plan.md"
@@ -87,8 +83,8 @@ while true; do
 
     cat "$PROMPT_FILE" | $AGENT_CMD
 
-    git push origin "$CURRENT_BRANCH" || {
-        echo "Failed to push. Creating remote branch..."
+    # Push branch; set upstream tracking on first push
+    git push origin "$CURRENT_BRANCH" 2>/dev/null || \
         git push -u origin "$CURRENT_BRANCH"
 
     # Open a draft PR after the first successful push (requires gh CLI)

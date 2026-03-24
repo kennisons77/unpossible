@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "active_support/core_ext/integer/time"
 
 Rails.application.configure do
@@ -9,8 +11,8 @@ Rails.application.configure do
   config.assume_ssl = true
   config.force_ssl = true
   config.logger = ActiveSupport::Logger.new($stdout)
-    .tap  { |logger| logger.formatter = Logger::Formatter.new }
-    .then { |logger| ActiveSupport::TaggedLogging.new(logger) }
+                                       .tap { |logger| logger.formatter = Logger::Formatter.new }
+                                       .then { |logger| ActiveSupport::TaggedLogging.new(logger) }
   config.log_tags = [:request_id]
   config.log_level = ENV.fetch("RAILS_LOG_LEVEL", "info")
   config.active_support.report_deprecations = false
