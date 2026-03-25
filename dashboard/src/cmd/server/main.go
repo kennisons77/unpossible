@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"strconv"
@@ -17,6 +17,9 @@ import (
 )
 
 func main() {
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+	slog.SetDefault(logger)
+	
 	workspaceDir := os.Getenv("WORKSPACE_DIR")
 	if workspaceDir == "" {
 		workspaceDir = "/workspace"
@@ -138,9 +141,10 @@ func main() {
 			
 			if err != nil {
 				m.IncRunsFailed()
-				log.Printf("loop run failed: %v", err)
+				slog.Error("loop run failed", "error", err, "duration", duration.Seconds())
 			} else {
 				m.SetLastRunSuccess(time.Now())
+				slog.Info("loop run completed", "duration", duration.Seconds())
 			}
 		}()
 		
@@ -154,8 +158,9 @@ func main() {
 	})
 	
 	addr := ":8080"
-	log.Printf("starting server on %s", addr)
+	slog.Info("starting server", "addr", addr)
 	if err := http.ListenAndServe(addr, mux); err != nil {
-		log.Fatalf("server failed: %v", err)
+		slog.Error("server failed", "error", err)
+		os.Exit(1)
 	}
 }

@@ -10,5 +10,5 @@
 - [x] Serve static HTML frontend (embedded via `embed.FS`) showing plan + worklog
 - [x] `POST /run` endpoint — executes `loop.sh` via `exec.CommandContext`, protected by Basic Auth
 - [x] Prometheus metrics: `runs_total`, `runs_failed_total`, `run_duration_seconds`
-- [ ] Structured JSON logging (stdlib `log/slog`)
+- [x] Structured JSON logging (stdlib `log/slog`)
 - [ ] Multi-stage Dockerfile builds and `go test ./...` passes in container

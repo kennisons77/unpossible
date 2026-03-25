@@ -114,3 +114,18 @@
 **Tests:** All pass (go test ./...)
 
 **Commit:** Add Prometheus metrics with /metrics endpoint
+
+## 2026-03-25T17:09:00-05:00 — Add structured JSON logging
+
+**Task:** Structured JSON logging (stdlib log/slog)
+
+**Changes:**
+- Updated `src/cmd/server/main.go` to use slog.NewJSONHandler
+- Set slog as default logger for entire application
+- Structured logging for server startup with addr field
+- Structured logging for loop execution with error and duration fields
+- Replaced all log.Printf calls with slog.Info/Error
+
+**Tests:** All pass (go test ./...)
+
+**Commit:** Add structured JSON logging with slog
