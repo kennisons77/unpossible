@@ -1,11 +1,13 @@
 #!/bin/bash
-# Usage: ./loop.sh [plan|research] [max_iterations|id]
+# Usage: ./loop.sh [plan|research|review|promote] [max_iterations|id]
 # Examples:
 #   ./loop.sh              # Build mode, unlimited iterations
 #   ./loop.sh 20           # Build mode, max 20 iterations
 #   ./loop.sh plan         # Plan mode, unlimited iterations
 #   ./loop.sh plan 5       # Plan mode, max 5 iterations
 #   ./loop.sh research 3   # Research mode, idea ID 3
+#   ./loop.sh review       # Review mode, analyze last commit
+#   ./loop.sh promote 3    # Promote mode, promote idea ID 3
 #
 # Environment variables:
 #   AGENT   - AI agent to use: "claude" (default), "kiro", or a custom command
@@ -76,6 +78,9 @@ elif [ "$1" = "research" ]; then
         echo "Usage: ./loop.sh research <id>"
         exit 1
     fi
+    MAX_ITERATIONS=1
+elif [ "$1" = "review" ]; then
+    MODE="review"
     MAX_ITERATIONS=1
 elif [ "$1" = "promote" ]; then
     MODE="promote"

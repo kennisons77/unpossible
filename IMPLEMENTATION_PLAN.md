@@ -33,34 +33,18 @@ A reusable bootstrap template for AI-assisted development. This plan covers meta
 - [x] Add `./loop.sh promote <id>` command (`loop.sh`) — 55/55 tests green
 - [x] Add BATS tests for research and promote modes (`src/test/ideas.bats`) — 12/12 tests green
 - [x] Create PROMPT_review.md (`PROMPT_review.md`)
+- [x] Add `./loop.sh review` mode (`loop.sh`)
+- [x] Add BATS tests for review mode (`src/test/review.bats`) — 3/3 tests green
 
-**Total completed:** 23 tasks — 55/55 BATS tests passing
+**Total completed:** 26 tasks — 58/58 BATS tests passing
 
 ---
 
 ## Backlog
 
-### Feature: Idea Parking Lot (implementation)
-
-All tasks complete.
-
----
-
 ### Feature: Agent Code Review
 
-- [ ] Add `./loop.sh review` mode (`loop.sh`)
-  Required functionality:
-  - loop.sh accepts `review` as first argument
-  - Loads PROMPT_review.md (project-local override, else root fallback)
-  - Feeds prompt to agent; agent writes findings to `$PROJECT_DIR/REVIEW.md`
-  - Exits non-zero if PROMPT_review.md not found
-  Required tests: review mode sets Mode to `review` in output, review mode loads PROMPT_review.md
-
-- [ ] Add BATS tests for review mode (`src/test/review.bats`)
-  Required tests (3 minimum):
-  - loop.sh review loads PROMPT_review.md (verify prompt path in output)
-  - loop.sh review exits non-zero if PROMPT_review.md not found
-  - loop.sh accepts `review` as valid mode argument (no "unknown mode" error)
+All tasks complete.
 
 ---
 
@@ -72,7 +56,7 @@ All tasks complete.
 
 ---
 
-**Total tasks:** 3 remaining (2 features)
+**Total tasks:** 1 remaining (1 feature)
 **Phase 0 constraints:** All work uses local docker-compose only. No CI/CD, no remote deploys, no k8s.
 **Next phase:** Phase 1 (CI) — not planned yet. Advance only after Phase 0 acceptance criteria are met.
 

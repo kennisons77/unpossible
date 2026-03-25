@@ -107,3 +107,15 @@ Verified all required BATS tests for research and promote modes are implemented 
 ### Summary
 
 Created PROMPT_review.md instructing agent to read last commit diff (git diff HEAD~1), check alignment with specs, identify anti-patterns/missing tests/security issues, and write findings to REVIEW.md. Review criteria cover: alignment with specs, code quality (practices compliance), testing coverage, security/safety, and infrastructure phase-appropriateness. Output format is structured markdown with pass/fail assessments and actionable recommendations. All 55 BATS tests pass.
+
+## [10] Add ./loop.sh review mode
+
+- **Status:** done
+- **Feature:** Agent Code Review
+- **Started:** 2026-03-25T11:16:00-05:00
+- **Completed:** 2026-03-25T11:17:00-05:00
+- **Commit:** 
+
+### Summary
+
+Added `review` mode to loop.sh. Mode accepts no arguments, loads PROMPT_review.md (project-local override or root fallback), runs once (MAX_ITERATIONS=1), and exits non-zero if PROMPT_review.md not found. Updated usage documentation in loop.sh header. Created src/test/review.bats with 3 tests: loads PROMPT_review.md, exits non-zero if prompt missing, accepts review as valid mode. All 58 BATS tests pass (55 existing + 3 new review tests).
