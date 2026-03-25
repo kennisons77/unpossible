@@ -27,4 +27,6 @@
 
 IMPORTANT: Plan only. Do NOT implement anything. Do NOT assume functionality is missing; confirm with code search in `projects/<name>/src/` first.
 
+If you need clarification or a decision from the human before proceeding, output `RALPH_WAITING: <your question>` and stop. Do not guess or proceed past a genuine blocker.
+
 ULTIMATE GOAL: We want to achieve [project-specific goal — fill this in]. Consider missing elements and plan accordingly. If something is missing, search first to confirm it doesn't exist, then if needed author the specification at `projects/<name>/specs/FILENAME.md` and document the plan to implement it in `projects/<name>/IMPLEMENTATION_PLAN.md`.

@@ -35,6 +35,7 @@
    ```
 
 - Capture the *why* in documentation and commit messages.
+- If you need clarification or a decision from the human before proceeding, output `RALPH_WAITING: <your question>` and stop. Do not guess or proceed past a genuine blocker.
 - Single sources of truth — no duplicate logic, no migration shims.
 - If tests unrelated to your work fail, resolve them as part of the increment.
 - Once there are no build or test errors, create or increment a git tag (start at 0.0.1).

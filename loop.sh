@@ -254,6 +254,19 @@ while true; do
         exit 0
     fi
 
+    if echo "$AGENT_OUTPUT" | grep -q "RALPH_WAITING"; then
+        QUESTION=$(echo "$AGENT_OUTPUT" | grep "RALPH_WAITING" | sed 's/.*RALPH_WAITING[: ]*//')
+        echo ""
+        echo "⏸  RALPH_WAITING — agent needs input"
+        [ -n "$QUESTION" ] && echo "   $QUESTION"
+        echo -n "Your response: "
+        read -r USER_RESPONSE
+        TEMP_REPLY="/tmp/prompt_reply_$$.md"
+        { cat "$PROMPT_FILE"; echo ""; echo "## Human response to agent question"; echo "$USER_RESPONSE"; } > "$TEMP_REPLY"
+        PROMPT_FILE="$TEMP_REPLY"
+        continue
+    fi
+
     # Push branch; set upstream tracking on first push
     git push origin "$CURRENT_BRANCH" 2>/dev/null || \
         git push -u origin "$CURRENT_BRANCH" 2>/dev/null || \
