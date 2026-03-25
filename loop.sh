@@ -1,10 +1,11 @@
 #!/bin/bash
-# Usage: ./loop.sh [plan] [max_iterations]
+# Usage: ./loop.sh [plan|research] [max_iterations|id]
 # Examples:
 #   ./loop.sh              # Build mode, unlimited iterations
 #   ./loop.sh 20           # Build mode, max 20 iterations
 #   ./loop.sh plan         # Plan mode, unlimited iterations
 #   ./loop.sh plan 5       # Plan mode, max 5 iterations
+#   ./loop.sh research 3   # Research mode, idea ID 3
 #
 # Environment variables:
 #   AGENT   - AI agent to use: "claude" (default), "kiro", or a custom command
@@ -14,6 +15,15 @@
 #   AGENT=kiro ./loop.sh
 #   AGENT=kiro MODEL=claude-sonnet-4.5 ./loop.sh 10
 #   AGENT=claude MODEL=sonnet ./loop.sh plan 1
+
+# Cleanup temp files on exit
+TEMP_PROMPT=""
+cleanup() {
+    if [ -n "$TEMP_PROMPT" ] && [ -f "$TEMP_PROMPT" ]; then
+        rm -f "$TEMP_PROMPT"
+    fi
+}
+trap cleanup EXIT
 
 # --- Agent configuration ---
 AGENT=${AGENT:-claude}
@@ -58,6 +68,15 @@ fi
 if [ "$1" = "plan" ]; then
     MODE="plan"
     MAX_ITERATIONS=${2:-0}
+elif [ "$1" = "research" ]; then
+    MODE="research"
+    IDEA_ID="$2"
+    if [ -z "$IDEA_ID" ]; then
+        echo "Error: research mode requires an idea ID"
+        echo "Usage: ./loop.sh research <id>"
+        exit 1
+    fi
+    MAX_ITERATIONS=1
 elif [[ "$1" =~ ^[0-9]+$ ]]; then
     MODE="build"
     MAX_ITERATIONS=$1
@@ -72,6 +91,41 @@ if [ -f "$PROJECT_DIR/$PROMPT_BASENAME" ]; then
     PROMPT_FILE="$PROJECT_DIR/$PROMPT_BASENAME"
 else
     PROMPT_FILE="$PROMPT_BASENAME"
+fi
+
+# Validate prompt file exists before research mode processing
+if [ ! -f "$PROMPT_FILE" ]; then
+    echo "Error: $PROMPT_FILE not found"
+    exit 1
+fi
+
+# Research mode: validate IDEAS.md exists and extract idea content
+if [ "$MODE" = "research" ]; then
+    IDEAS_FILE="$PROJECT_DIR/IDEAS.md"
+    if [ ! -f "$IDEAS_FILE" ]; then
+        echo "Error: IDEAS.md not found at $IDEAS_FILE"
+        exit 1
+    fi
+    
+    # Extract the idea entry (from ## [ID] to next ## or EOF)
+    IDEA_CONTENT=$(awk -v id="$IDEA_ID" '
+        /^## \[/ {
+            if (found) exit
+            if ($0 ~ "\\[" id "\\]") found=1
+        }
+        found { print }
+    ' "$IDEAS_FILE")
+    
+    if [ -z "$IDEA_CONTENT" ]; then
+        echo "Error: idea ID $IDEA_ID not found in $IDEAS_FILE"
+        exit 1
+    fi
+    
+    # Replace {IDEA_CONTENT} placeholder in prompt
+    PROMPT_CONTENT=$(cat "$PROMPT_FILE" | sed "s|{IDEA_CONTENT}|$IDEA_CONTENT|")
+    TEMP_PROMPT="/tmp/prompt_research_$$.md"
+    echo "$PROMPT_CONTENT" > "$TEMP_PROMPT"
+    PROMPT_FILE="$TEMP_PROMPT"
 fi
 
 # --- Branch management ---
@@ -93,11 +147,6 @@ echo "Branch: $CURRENT_BRANCH"
 [ $MAX_ITERATIONS -gt 0 ] && echo "Max:    $MAX_ITERATIONS iterations"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
-if [ ! -f "$PROMPT_FILE" ]; then
-    echo "Error: $PROMPT_FILE not found"
-    exit 1
-fi
-
 PR_OPENED=0
 ITERATION=0
 
@@ -118,7 +167,8 @@ while true; do
 
     # Push branch; set upstream tracking on first push
     git push origin "$CURRENT_BRANCH" 2>/dev/null || \
-        git push -u origin "$CURRENT_BRANCH"
+        git push -u origin "$CURRENT_BRANCH" 2>/dev/null || \
+        echo "Warning: git push failed — continuing without push"
 
     # Open a draft PR after the first successful push (requires gh CLI)
     if [ $PR_OPENED -eq 0 ] && command -v gh &>/dev/null; then
