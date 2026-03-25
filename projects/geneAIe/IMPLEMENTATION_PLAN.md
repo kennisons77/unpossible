@@ -30,7 +30,7 @@ Activity spec files must exist before implementation of their phases. Acceptance
 
 ## Blocking: Missing Practices
 
-- [ ] **Author `practices/framework/rails.md`** — Rails 8 conventions: service objects in `app/services/` (plain Ruby classes, single public method, return value or raise), job naming (`*Job` suffix, queue names), migration style (reversible, no data changes), RSpec directory structure (models/requests/services/integration/system), factory patterns (FactoryBot traits, associations), request vs. system specs (request for API/controller logic, system for full browser flows with Capybara), controller concerns in `app/controllers/concerns/`, model concerns in `app/models/concerns/` (files: `practices/framework/rails.md`)
+- [x] **Author `practices/framework/rails.md`** — Rails 8 conventions: service objects in `app/services/` (plain Ruby classes, single public method, return value or raise), job naming (`*Job` suffix, queue names), migration style (reversible, no data changes), RSpec directory structure (models/requests/services/integration/system), factory patterns (FactoryBot traits, associations), request vs. system specs (request for API/controller logic, system for full browser flows with Capybara), controller concerns in `app/controllers/concerns/`, model concerns in `app/models/concerns/` (files: `practices/framework/rails.md`)
 
 ---
 
