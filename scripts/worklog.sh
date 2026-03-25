@@ -39,33 +39,6 @@ Examples:
 EOF
 }
 
-parse_entry() {
-  local id title status feature started completed commit summary
-  while IFS= read -r line; do
-    if [[ "$line" =~ ^\#\#\ \[([0-9]+)\]\ (.+)$ ]]; then
-      id="${BASH_REMATCH[1]}"
-      title="${BASH_REMATCH[2]}"
-    elif [[ "$line" =~ ^\-\ \*\*Status:\*\*\ (.+)$ ]]; then
-      status="${BASH_REMATCH[1]}"
-    elif [[ "$line" =~ ^\-\ \*\*Feature:\*\*\ (.+)$ ]]; then
-      feature="${BASH_REMATCH[1]}"
-    elif [[ "$line" =~ ^\-\ \*\*Started:\*\*\ (.+)$ ]]; then
-      started="${BASH_REMATCH[1]}"
-    elif [[ "$line" =~ ^\-\ \*\*Completed:\*\*\ (.*)$ ]]; then
-      completed="${BASH_REMATCH[1]}"
-    elif [[ "$line" =~ ^\-\ \*\*Commit:\*\*\ (.*)$ ]]; then
-      commit="${BASH_REMATCH[1]}"
-    elif [[ "$line" =~ ^\#\#\#\ Summary$ ]]; then
-      summary=""
-      while IFS= read -r sumline; do
-        [[ "$sumline" =~ ^\#\# ]] && break
-        summary+="$sumline"$'\n'
-      done
-    fi
-  done
-  echo "$id|$title|$status|$feature|$started|$completed|$commit|$summary"
-}
-
 list_entries() {
   [[ ! -f "$WORKLOG" ]] && echo "No WORKLOG.md found" && return
   printf "%-4s %-40s %-12s %-30s\n" "ID" "TITLE" "STATUS" "FEATURE"
