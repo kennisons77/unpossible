@@ -59,13 +59,13 @@ The test service command runs `npm install && npm run build` unnecessarily (alre
 
 ## Phase 1: Scaffold Views (Browse Library Activity)
 
-- [ ] **DocumentsController + views** — index (lists all documents with type/concern/stage/confidence in Bootstrap table), show (displays document metadata, attached blob link, all document_fields with source badges), routes (files: `src/app/controllers/documents_controller.rb`, `src/app/views/documents/index.html.erb`, `src/app/views/documents/show.html.erb`, `src/config/routes.rb`, `src/spec/requests/documents_spec.rb`)
+- [x] **DocumentsController + views** — index (lists all documents with type/concern/stage/confidence in Bootstrap table), show (displays document metadata, attached blob link, all document_fields with source badges), routes (files: `src/app/controllers/documents_controller.rb`, `src/app/views/documents/index.html.erb`, `src/app/views/documents/show.html.erb`, `src/config/routes.rb`, `src/spec/requests/documents_spec.rb`)
   Required tests: GET /documents returns 200 with documents listed, GET /documents/:id returns 200 with metadata and fields, unauthenticated redirected to login
 
-- [ ] **ConcernsController + views** — index (lists all concerns with confirmed status badge), show (lists documents in that concern), confirm action (POST /concerns/:id/confirm calls concern.confirm!), routes (files: `src/app/controllers/concerns_controller.rb`, `src/app/views/concerns/index.html.erb`, `src/app/views/concerns/show.html.erb`, `src/config/routes.rb`, `src/spec/requests/concerns_spec.rb`)
+- [x] **ConcernsController + views** — index (lists all concerns with confirmed status badge), show (lists documents in that concern), confirm action (POST /concerns/:id/confirm calls concern.confirm!), routes (files: `src/app/controllers/concerns_controller.rb`, `src/app/views/concerns/index.html.erb`, `src/app/views/concerns/show.html.erb`, `src/config/routes.rb`, `src/spec/requests/concerns_spec.rb`)
   Required tests: GET /concerns returns 200 with concerns listed, GET /concerns/:id returns 200 with documents, POST /concerns/:id/confirm sets confirmed_at and redirects, unauthenticated redirected
 
-- [ ] **Add navigation links to layout** — Add Documents and Concerns links to navbar (files: `src/app/views/layouts/application.html.erb`)
+- [x] **Add navigation links to layout** — Add Documents and Concerns links to navbar (files: `src/app/views/layouts/application.html.erb`)
   Required tests: (visual verification) navbar shows Documents and Concerns links when authenticated
 
 ---
