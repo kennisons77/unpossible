@@ -11,4 +11,4 @@
 - [x] `POST /run` endpoint — executes `loop.sh` via `exec.CommandContext`, protected by Basic Auth
 - [x] Prometheus metrics: `runs_total`, `runs_failed_total`, `run_duration_seconds`
 - [x] Structured JSON logging (stdlib `log/slog`)
-- [ ] Multi-stage Dockerfile builds and `go test ./...` passes in container
+- [x] Multi-stage Dockerfile builds and `go test ./...` passes in container
