@@ -30,7 +30,7 @@ Fixed new-project.sh to substitute $PROJECT_NAME variable in generated prd.md, p
 - **Feature:** Bug Fixes
 - **Started:** 2026-03-25T10:47:00-05:00
 - **Completed:** 2026-03-25T10:49:00-05:00
-- **Commit:** 2e84d49
+- **Commit:** 3170db6
 
 ### Summary
 
