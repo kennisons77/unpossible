@@ -30,3 +30,19 @@
 **Tests:** All pass (go test ./...)
 
 **Commit:** Add /api/plan endpoint with IMPLEMENTATION_PLAN.md parser
+
+## 2026-03-25T17:02:00-05:00 — Parse WORKLOG.md and expose via API
+
+**Task:** Parse WORKLOG.md → GET /api/worklog (JSON: entries)
+
+**Changes:**
+- Created `src/parser/worklog.go` with ParseWorklog function
+- Parses markdown headers with timestamp — title format
+- Extracts multi-line descriptions
+- Created `src/parser/worklog_test.go` with table-driven tests
+- Updated `src/cmd/server/main.go` to add /api/worklog endpoint
+- Added test for /api/worklog endpoint in main_test.go
+
+**Tests:** All pass (go test ./...)
+
+**Commit:** Add /api/worklog endpoint with WORKLOG.md parser

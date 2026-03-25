@@ -39,6 +39,18 @@ func main() {
 		json.NewEncoder(w).Encode(plan)
 	})
 	
+	mux.HandleFunc("/api/worklog", func(w http.ResponseWriter, r *http.Request) {
+		worklogPath := workspaceDir + "/WORKLOG.md"
+		worklog, err := parser.ParseWorklog(worklogPath)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(worklog)
+	})
+	
 	addr := ":8080"
 	log.Printf("starting server on %s", addr)
 	if err := http.ListenAndServe(addr, mux); err != nil {

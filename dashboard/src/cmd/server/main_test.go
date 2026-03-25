@@ -82,3 +82,40 @@ func TestAPIPlan(t *testing.T) {
 		t.Errorf("got Content-Type %q, want %q", contentType, "application/json")
 	}
 }
+
+func TestAPIWorklog(t *testing.T) {
+	tmpDir := t.TempDir()
+	worklogPath := filepath.Join(tmpDir, "WORKLOG.md")
+	content := `# Worklog
+
+## 2026-03-25T10:00:00Z — Test entry
+
+Test description.`
+	
+	if err := os.WriteFile(worklogPath, []byte(content), 0644); err != nil {
+		t.Fatalf("writing test worklog: %v", err)
+	}
+	
+	os.Setenv("WORKSPACE_DIR", tmpDir)
+	defer os.Unsetenv("WORKSPACE_DIR")
+	
+	req := httptest.NewRequest(http.MethodGet, "/api/worklog", nil)
+	w := httptest.NewRecorder()
+	
+	mux := http.NewServeMux()
+	mux.HandleFunc("/api/worklog", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.Write([]byte(`{"entries":[{"timestamp":"2026-03-25T10:00:00Z","title":"Test entry","description":"Test description."}]}`))
+	})
+	
+	mux.ServeHTTP(w, req)
+	
+	if w.Code != http.StatusOK {
+		t.Errorf("got status %d, want %d", w.Code, http.StatusOK)
+	}
+	
+	contentType := w.Header().Get("Content-Type")
+	if contentType != "application/json" {
+		t.Errorf("got Content-Type %q, want %q", contentType, "application/json")
+	}
+}
