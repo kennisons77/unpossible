@@ -2,7 +2,7 @@ services:
   dashboard:
     build:
       context: ..
-      dockerfile: dashboard/infra/Dockerfile
+      dockerfile: infra/Dockerfile
     ports:
       - "8080:8080"
     volumes:
@@ -18,7 +18,7 @@ services:
   test:
     build:
       context: ..
-      dockerfile: dashboard/infra/Dockerfile
+      dockerfile: infra/Dockerfile
       target: builder
     command: go test ./...
     working_dir: /src

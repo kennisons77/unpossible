@@ -2,8 +2,8 @@
 
 ## Phase 1: Read-only API + UI
 
-- [ ] Scaffold Go module (`projects/dashboard/src/`) with `cmd/server/main.go`
-- [ ] Implement `/healthz` and `/ready` endpoints
+- [x] Scaffold Go module (`projects/dashboard/src/`) with `cmd/server/main.go`
+- [x] Implement `/healthz` and `/ready` endpoints
 - [ ] Parse `IMPLEMENTATION_PLAN.md` → `GET /api/plan` (JSON: tasks with done/pending status)
 - [ ] Parse `WORKLOG.md` → `GET /api/worklog` (JSON: entries)
 - [ ] List and serve `specs/*.md` → `GET /api/specs`, `GET /api/specs/{name}`
