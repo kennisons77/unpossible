@@ -45,7 +45,7 @@ The test service command runs `npm install && npm run build` unnecessarily (alre
 
 ## Phase 0.2: Standards Setup
 
-- [ ] **RuboCop configuration** — Create `.rubocop.yml` with AllCops: NewCops: enable, TargetRubyVersion: 3.3, line length 120, method length 15, block length 25, cyclomatic complexity 6; enable rubocop-rails and rubocop-rspec; run passes with warnings acceptable — do NOT fail CI on violations yet (files: `src/.rubocop.yml`)
+- [x] **RuboCop configuration** — Create `.rubocop.yml` with AllCops: NewCops: enable, TargetRubyVersion: 3.3, line length 120, method length 15, block length 25, cyclomatic complexity 6; enable rubocop-rails and rubocop-rspec; run passes with warnings acceptable — do NOT fail CI on violations yet (files: `src/.rubocop.yml`)
   Required tests: `cd src && bundle exec rubocop` runs without crash (warnings OK)
 
 ---
