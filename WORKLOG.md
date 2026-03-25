@@ -119,3 +119,15 @@ Created PROMPT_review.md instructing agent to read last commit diff (git diff HE
 ### Summary
 
 Added `review` mode to loop.sh. Mode accepts no arguments, loads PROMPT_review.md (project-local override or root fallback), runs once (MAX_ITERATIONS=1), and exits non-zero if PROMPT_review.md not found. Updated usage documentation in loop.sh header. Created src/test/review.bats with 3 tests: loads PROMPT_review.md, exits non-zero if prompt missing, accepts review as valid mode. All 58 BATS tests pass (55 existing + 3 new review tests).
+
+## [11] Create practices/lang/bash.md
+
+- **Status:** done
+- **Feature:** Bash Language Practices
+- **Started:** 2026-03-25T11:18:00-05:00
+- **Completed:** 2026-03-25T11:20:00-05:00
+- **Commit:** (pending)
+
+### Summary
+
+Created practices/lang/bash.md documenting bash-specific patterns used in this project. Covers: error handling (set -e, set -euo pipefail), quoting conventions, variable naming (UPPERCASE for env/constants, lowercase for locals), array usage, function patterns, path computation, heredoc usage, BATS test structure, portability notes (macOS/Linux), output conventions (stderr for errors), and common patterns (cleanup traps, case statements). Also documents anti-patterns to avoid (eval, backticks, cd without error handling, parsing ls). No tests required (documentation file). All 58 BATS tests pass.

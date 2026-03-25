@@ -36,7 +36,7 @@ A reusable bootstrap template for AI-assisted development. This plan covers meta
 - [x] Add `./loop.sh review` mode (`loop.sh`)
 - [x] Add BATS tests for review mode (`src/test/review.bats`) — 3/3 tests green
 
-**Total completed:** 26 tasks — 58/58 BATS tests passing
+**Total completed:** 27 tasks — 58/58 BATS tests passing
 
 ---
 
@@ -50,13 +50,13 @@ All tasks complete.
 
 ### Feature: Bash Language Practices
 
-- [ ] Create practices/lang/bash.md (`practices/lang/bash.md`)
+- [x] Create practices/lang/bash.md (`practices/lang/bash.md`)
   Content: bash-specific patterns for this project — errexit/pipefail/nounset conventions, array handling, quoting rules, BATS test structure, heredoc usage, portability notes (macOS vs Linux)
   Required tests: none (documentation file)
 
 ---
 
-**Total tasks:** 1 remaining (1 feature)
+**Total tasks:** 0 remaining (0 features)
 **Phase 0 constraints:** All work uses local docker-compose only. No CI/CD, no remote deploys, no k8s.
 **Next phase:** Phase 1 (CI) — not planned yet. Advance only after Phase 0 acceptance criteria are met.
 
