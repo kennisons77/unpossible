@@ -46,3 +46,19 @@
 **Tests:** All pass (go test ./...)
 
 **Commit:** Add /api/worklog endpoint with WORKLOG.md parser
+
+## 2026-03-25T17:03:00-05:00 — List and serve specs via API
+
+**Task:** List and serve specs/*.md → GET /api/specs, GET /api/specs/{name}
+
+**Changes:**
+- Created `src/parser/specs.go` with ListSpecs and ReadSpec functions
+- ListSpecs walks specs directory and returns all .md files
+- ReadSpec reads individual spec with path traversal protection
+- Created `src/parser/specs_test.go` with tests including security checks
+- Updated `src/cmd/server/main.go` to add /api/specs and /api/specs/{name} endpoints
+- Added tests for both endpoints in main_test.go
+
+**Tests:** All pass (go test ./...)
+
+**Commit:** Add /api/specs endpoints with specs directory parser

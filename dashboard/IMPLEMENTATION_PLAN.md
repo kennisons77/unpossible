@@ -6,7 +6,7 @@
 - [x] Implement `/healthz` and `/ready` endpoints
 - [x] Parse `IMPLEMENTATION_PLAN.md` → `GET /api/plan` (JSON: tasks with done/pending status)
 - [x] Parse `WORKLOG.md` → `GET /api/worklog` (JSON: entries)
-- [ ] List and serve `specs/*.md` → `GET /api/specs`, `GET /api/specs/{name}`
+- [x] List and serve `specs/*.md` → `GET /api/specs`, `GET /api/specs/{name}`
 - [ ] Serve static HTML frontend (embedded via `embed.FS`) showing plan + worklog
 - [ ] `POST /run` endpoint — executes `loop.sh` via `exec.CommandContext`, protected by Basic Auth
 - [ ] Prometheus metrics: `runs_total`, `runs_failed_total`, `run_duration_seconds`

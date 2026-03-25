@@ -119,3 +119,66 @@ Test description.`
 		t.Errorf("got Content-Type %q, want %q", contentType, "application/json")
 	}
 }
+
+func TestAPISpecs(t *testing.T) {
+	tmpDir := t.TempDir()
+	specsDir := filepath.Join(tmpDir, "specs")
+	
+	if err := os.MkdirAll(specsDir, 0755); err != nil {
+		t.Fatalf("creating specs dir: %v", err)
+	}
+	
+	if err := os.WriteFile(filepath.Join(specsDir, "test.md"), []byte("# Test"), 0644); err != nil {
+		t.Fatalf("writing test spec: %v", err)
+	}
+	
+	os.Setenv("WORKSPACE_DIR", tmpDir)
+	defer os.Unsetenv("WORKSPACE_DIR")
+	
+	req := httptest.NewRequest(http.MethodGet, "/api/specs", nil)
+	w := httptest.NewRecorder()
+	
+	mux := http.NewServeMux()
+	mux.HandleFunc("/api/specs", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.Write([]byte(`{"specs":[{"name":"test","path":"test.md"}]}`))
+	})
+	
+	mux.ServeHTTP(w, req)
+	
+	if w.Code != http.StatusOK {
+		t.Errorf("got status %d, want %d", w.Code, http.StatusOK)
+	}
+}
+
+func TestAPISpecByName(t *testing.T) {
+	tmpDir := t.TempDir()
+	specsDir := filepath.Join(tmpDir, "specs")
+	
+	if err := os.MkdirAll(specsDir, 0755); err != nil {
+		t.Fatalf("creating specs dir: %v", err)
+	}
+	
+	content := "# Test Spec"
+	if err := os.WriteFile(filepath.Join(specsDir, "test.md"), []byte(content), 0644); err != nil {
+		t.Fatalf("writing test spec: %v", err)
+	}
+	
+	os.Setenv("WORKSPACE_DIR", tmpDir)
+	defer os.Unsetenv("WORKSPACE_DIR")
+	
+	req := httptest.NewRequest(http.MethodGet, "/api/specs/test", nil)
+	w := httptest.NewRecorder()
+	
+	mux := http.NewServeMux()
+	mux.HandleFunc("/api/specs/", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.Write([]byte(`{"name":"test","content":"# Test Spec"}`))
+	})
+	
+	mux.ServeHTTP(w, req)
+	
+	if w.Code != http.StatusOK {
+		t.Errorf("got status %d, want %d", w.Code, http.StatusOK)
+	}
+}

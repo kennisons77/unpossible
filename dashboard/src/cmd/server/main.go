@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/unpossible/dashboard/parser"
 )
@@ -49,6 +50,36 @@ func main() {
 		
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(worklog)
+	})
+	
+	mux.HandleFunc("/api/specs", func(w http.ResponseWriter, r *http.Request) {
+		specsDir := workspaceDir + "/specs"
+		list, err := parser.ListSpecs(specsDir)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(list)
+	})
+	
+	mux.HandleFunc("/api/specs/", func(w http.ResponseWriter, r *http.Request) {
+		name := strings.TrimPrefix(r.URL.Path, "/api/specs/")
+		if name == "" {
+			http.Error(w, "spec name required", http.StatusBadRequest)
+			return
+		}
+		
+		specsDir := workspaceDir + "/specs"
+		spec, err := parser.ReadSpec(specsDir, name)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusNotFound)
+			return
+		}
+		
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(spec)
 	})
 	
 	addr := ":8080"
