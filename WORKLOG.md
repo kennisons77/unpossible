@@ -95,3 +95,15 @@ Implemented `./loop.sh promote <id>` command. Validates idea exists in IDEAS.md 
 ### Summary
 
 Verified all required BATS tests for research and promote modes are implemented in src/test/ideas.bats. Tests cover: research mode error handling (IDEAS.md missing, invalid ID, PROMPT missing, ID required), research mode functionality (mode setting), promote mode success path (creates spec file, updates status), and promote mode error handling (invalid status, ID not found, already promoted, ID required). All 12 tests pass as part of the full 55-test suite. Task was already complete from previous work.
+
+## [9] Create PROMPT_review.md
+
+- **Status:** done
+- **Feature:** Agent Code Review
+- **Started:** 2026-03-25T11:14:00-05:00
+- **Completed:** 2026-03-25T11:15:00-05:00
+- **Commit:** 08344f5
+
+### Summary
+
+Created PROMPT_review.md instructing agent to read last commit diff (git diff HEAD~1), check alignment with specs, identify anti-patterns/missing tests/security issues, and write findings to REVIEW.md. Review criteria cover: alignment with specs, code quality (practices compliance), testing coverage, security/safety, and infrastructure phase-appropriateness. Output format is structured markdown with pass/fail assessments and actionable recommendations. All 55 BATS tests pass.

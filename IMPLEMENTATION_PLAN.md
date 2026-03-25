@@ -32,8 +32,9 @@ A reusable bootstrap template for AI-assisted development. This plan covers meta
 - [x] Create PROMPT_research.md (`PROMPT_research.md`) — covered by research mode implementation
 - [x] Add `./loop.sh promote <id>` command (`loop.sh`) — 55/55 tests green
 - [x] Add BATS tests for research and promote modes (`src/test/ideas.bats`) — 12/12 tests green
+- [x] Create PROMPT_review.md (`PROMPT_review.md`)
 
-**Total completed:** 22 tasks — 55/55 BATS tests passing
+**Total completed:** 23 tasks — 55/55 BATS tests passing
 
 ---
 
@@ -46,10 +47,6 @@ All tasks complete.
 ---
 
 ### Feature: Agent Code Review
-
-- [ ] Create PROMPT_review.md (`PROMPT_review.md`)
-  Content: instruct agent to read last commit diff (`git diff HEAD~1`), check alignment with specs, identify anti-patterns/missing tests/security issues, write findings to REVIEW.md in PROJECT_DIR
-  Required tests: none (prompt file only — covered by review mode test)
 
 - [ ] Add `./loop.sh review` mode (`loop.sh`)
   Required functionality:
@@ -75,7 +72,7 @@ All tasks complete.
 
 ---
 
-**Total tasks:** 4 remaining (2 features)
+**Total tasks:** 3 remaining (2 features)
 **Phase 0 constraints:** All work uses local docker-compose only. No CI/CD, no remote deploys, no k8s.
 **Next phase:** Phase 1 (CI) — not planned yet. Advance only after Phase 0 acceptance criteria are met.
 
