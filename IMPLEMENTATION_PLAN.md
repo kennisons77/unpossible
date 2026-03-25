@@ -4,145 +4,134 @@ A reusable bootstrap template for AI-assisted development. This plan covers meta
 
 **Current Phase:** Phase 0 (Local development with docker-compose)
 
-**Critical Context:** The template uses a `projects/<name>/` directory structure anchored by an `ACTIVE_PROJECT` file at the repo root. The prompt files (PROMPT_plan.md, PROMPT_build.md) already reference this structure, but `loop.sh` does NOT yet implement it. Task #1 is the blocker that unblocks everything else.
+**Critical Context:** ACTIVE_PROJECT=unpossible means all paths are at repo root. loop.sh, new-project.sh, scripts/worklog.sh, PROMPT_*.md, and src/test/*.bats all live at root level.
 
 ---
 
-## Backlog (Highest Priority — Unblocks Everything)
+## Completed
 
-- [x] **Update loop.sh to read ACTIVE_PROJECT and scope all paths to projects/<name>/** (`loop.sh`)
-  **Status:** Already implemented. loop.sh reads ACTIVE_PROJECT, validates it, and sets PROJECT_DIR accordingly.
-  The prompt files (PROMPT_build.md, PROMPT_plan.md) instruct the agent to read ACTIVE_PROJECT and handle path scoping.
+- [x] Update loop.sh to read ACTIVE_PROJECT and scope all paths (`loop.sh`)
+- [x] Add BATS tests for loop.sh ACTIVE_PROJECT scoping (`src/test/loop.bats`) — 10/10 green
+- [x] Create new-project.sh scaffold script (`new-project.sh`)
+- [x] Add BATS tests for new-project.sh (`src/test/new-project.bats`) — 15/15 green
+- [x] Verify full BATS suite runs green via docker compose (`infra/docker-compose.yml`)
+- [x] Document specs/features/ convention (`specs/README.md`)
+- [x] Update PROMPT_plan.md to scan specs/features/ (`PROMPT_plan.md`)
+- [x] Add BATS test that plan prompt references features directory (`src/test/prompts.bats`) — 1/1 green
+- [x] Define WORKLOG.md schema (`specs/features/worklog.md`)
+- [x] Update PROMPT_build.md to append WORKLOG entries on task completion (`PROMPT_build.md`)
+- [x] Add scripts/worklog.sh for pretty-printing/filtering WORKLOG entries (`scripts/worklog.sh`)
+- [x] Add BATS tests for worklog.sh (`src/test/worklog.bats`) — 10/10 green
+- [x] Define IDEAS.md schema (`specs/features/idea-parking-lot.md`)
+- [x] Create IDEAS.md with initial entries (`IDEAS.md`)
+- [x] Fix new-project.sh: substitute [PROJECT_NAME] placeholder in generated files (`new-project.sh`) — 18/18 tests green
 
-- [x] Add BATS tests for loop.sh ACTIVE_PROJECT scoping behavior (`src/test/loop.bats`)
-  **Completed:** All tests pass (10/10 green)
-  - loop.sh exits non-zero when ACTIVE_PROJECT is missing ✓
-  - loop.sh exits non-zero when ACTIVE_PROJECT is empty ✓
-  - loop.sh exits non-zero when projects/<name>/ directory does not exist ✓
-  - loop.sh reads ACTIVE_PROJECT and constructs correct paths ✓
-  - loop.sh falls back to root-level PROMPT files if project-level ones don't exist ✓
-  - Added git and bash to test container Dockerfile ✓
-
-- [x] Create new-project.sh scaffold script (`new-project.sh` at repo root)
-  **Completed:** Script creates complete project structure with validation
-  - Takes project name as argument: `./new-project.sh <name>` ✓
-  - Creates projects/<name>/ directory structure: specs/, src/, infra/, src/test/ ✓
-  - Creates placeholder spec files (prd.md, plan.md) with all required sections ✓
-  - Creates IMPLEMENTATION_PLAN.md with header ✓
-  - Creates minimal Dockerfile and docker-compose.yml with TODOs ✓
-  - Validates input (exits non-zero for empty, slashes, spaces, existing projects) ✓
-
-- [x] Add BATS tests for new-project.sh (`src/test/new-project.bats`)
-  **Completed:** All tests pass (15/15 green)
-  - new-project.sh creates projects/<name>/ with correct subdirectories ✓
-  - new-project.sh creates Dockerfile and docker-compose.yml ✓
-  - new-project.sh creates placeholder spec files (prd.md, plan.md) ✓
-  - new-project.sh creates IMPLEMENTATION_PLAN.md with header ✓
-  - new-project.sh exits non-zero if project name already exists ✓
-  - new-project.sh exits non-zero if no project name provided ✓
-  - new-project.sh exits non-zero if project name contains invalid characters ✓
-
-- [x] Verify full BATS suite runs green via docker compose (`infra/docker-compose.yml`, all test files)
-  **Completed:** All 25 tests pass (10 loop.sh + 15 new-project.sh)
-  `docker compose -f infra/docker-compose.yml run --rm test` exits 0 with all tests passing ✓
+**Total completed:** 15 tasks — 39/39 BATS tests passing
 
 ---
 
-## Feature: Spec Organisation by Feature
+## Backlog
 
-- [x] Document `projects/<name>/specs/features/<feature-name>.md` convention (`projects/unpossible/specs/README.md`)
-  **Completed:** Created specs/README.md documenting directory structure, feature organization, and spec-writing guidelines
+### Bug Fixes (unblock correctness before new features)
 
-- [x] Update `PROMPT_plan.md` to scan `specs/features/` in addition to `specs/` (`PROMPT_plan.md` at repo root)
-  **Completed:** Updated step 0c to explicitly reference projects/<name>/specs/features/* for feature-specific specs
+- [x] Fix new-project.sh: substitute [PROJECT_NAME] placeholder in generated files (`new-project.sh`)
+  Required tests: generated prd.md contains project name not literal "[PROJECT_NAME]", generated plan.md contains project name, generated IMPLEMENTATION_PLAN.md contains project name
 
-- [x] Add BATS test that plan prompt references the features directory (`projects/unpossible/src/test/prompts.bats`)
-  **Completed:** Created src/test/prompts.bats with test verifying PROMPT_plan.md references specs/features/
-  All tests pass (26/26 green)
+- [ ] Fix new-project.sh: correct Dockerfile COPY path (currently `../src/` which is wrong relative to build context) (`new-project.sh`, `infra/Dockerfile` template in new-project.sh)
+  Required tests: generated Dockerfile COPY path is `src/` not `../src/`, docker compose build succeeds for a freshly scaffolded project
 
----
-
-## Feature: Structured Work Log
-
-- [x] Define `WORKLOG.md` schema (`projects/unpossible/specs/features/worklog.md`)
-  **Completed:** Created specs/features/worklog.md defining schema with fields: id, title, status, feature, started_at, completed_at, commit_sha, summary
-
-- [x] Update `PROMPT_build.md` to append WORKLOG entries on task completion (`PROMPT_build.md` at repo root)
-  **Completed:** Modified step 4 to instruct agent to log completed tasks to projects/<name>/WORKLOG.md before updating IMPLEMENTATION_PLAN.md
-
-- [x] Add `scripts/worklog.sh` for pretty-printing/filtering WORKLOG entries (`scripts/worklog.sh` at repo root)
-  **Completed:** Created scripts/worklog.sh with subcommands: list (table format), show <id> (full details), filter --status=<val>, filter --feature=<val>
-  Script reads ACTIVE_PROJECT and scopes to correct WORKLOG.md path
-
-- [x] Add BATS test for `worklog.sh` output format (`projects/unpossible/src/test/worklog.bats`)
-  **Completed:** Created src/test/worklog.bats with 10 tests covering all worklog.sh functionality
-  All tests pass (36/36 green): list, show, filter by status/feature, error handling
+- [ ] Remove dead code: parse_entry function in worklog.sh is defined but never called (`scripts/worklog.sh`)
+  Required tests: existing worklog.bats suite still passes after removal (10/10 green)
 
 ---
 
-## Feature: Idea Parking Lot
+### Feature: RALPH_COMPLETE Detection
 
-- [x] Define `IDEAS.md` schema (`projects/unpossible/specs/features/ideas.md`)
-  **Completed:** Created specs/features/ideas.md with schema definition including all required fields and integration documentation
-
-- [ ] Add `./loop.sh research <idea-id>` mode (`loop.sh`, `PROMPT_research.md` at repo root)
+- [ ] Add RALPH_COMPLETE detection to loop.sh: exit cleanly when agent outputs the sentinel (`loop.sh`)
   Required functionality:
-  - loop.sh accepts `research <id>` as first argument
-  - Reads projects/<name>/IDEAS.md, finds entry with matching id
-  - Loads PROMPT_research.md and feeds it to agent with idea context
-  - Agent researches the idea, updates findings, sets status to "ready" or "rejected"
-  - Exits non-zero if <id> missing from IDEAS.md or IDEAS.md doesn't exist
-  Required tests: research mode loads correct prompt, exits non-zero if id invalid, updates idea status
-
-- [ ] Add `./loop.sh promote <idea-id>` command (`loop.sh`)
-  Required functionality:
-  - loop.sh accepts `promote <id>` as first argument
-  - Reads projects/<name>/IDEAS.md, finds entry with matching id
-  - Creates projects/<name>/specs/<idea-title-slugified>.md with idea content
-  - Updates IDEAS.md entry status to "promoted" and sets promoted_at timestamp
-  - Exits non-zero if <id> missing or already promoted
-  Required tests: promote creates spec file, updates IDEAS.md status
-
-- [ ] Add BATS tests for research and promote modes (`projects/unpossible/src/test/ideas.bats`)
-  Required tests:
-  - loop.sh research <id> loads PROMPT_research.md
-  - loop.sh research exits non-zero if id invalid
-  - loop.sh research updates idea status in IDEAS.md
-  - loop.sh promote <id> creates spec file in correct location
-  - loop.sh promote updates IDEAS.md status to "promoted"
-  - loop.sh promote exits non-zero if id already promoted
+  - Capture agent stdout; if it contains `RALPH_COMPLETE`, break the loop and exit 0
+  - Print a summary line: "RALPH_COMPLETE — all tasks done"
+  - Currently loop.sh pipes prompt directly to agent with no output inspection
+  Required tests: loop.sh exits 0 when agent outputs RALPH_COMPLETE, loop.sh continues when agent does not output RALPH_COMPLETE, exit code is 0 not non-zero on completion
 
 ---
 
-## Feature: Agent Code Review
+### Feature: Idea Parking Lot (implementation)
 
-- [ ] Add `PROMPT_review.md` for reviewer agent (`PROMPT_review.md` at repo root)
-  Required tests: none (prompt file only)
-  Content: instruct agent to review code for: anti-patterns, missing tests, security issues, performance problems, readability
-  Agent should read last commit diff, check alignment with specs, write findings to projects/<name>/REVIEW.md
+- [ ] Add `./loop.sh research <id>` mode (`loop.sh`, `PROMPT_research.md`)
+  Required functionality:
+  - loop.sh accepts `research <id>` as first two arguments
+  - Reads IDEAS.md (scoped to PROJECT_DIR), finds entry with matching id
+  - Loads PROMPT_research.md (project-local override, else root fallback)
+  - Feeds idea context + prompt to agent; agent updates status to `ready` or `rejected`
+  - Exits non-zero if id missing from IDEAS.md, IDEAS.md doesn't exist, or PROMPT_research.md not found
+  Required tests: research mode loads PROMPT_research.md, exits non-zero for invalid id, exits non-zero if IDEAS.md missing
+
+- [ ] Create PROMPT_research.md (`PROMPT_research.md`)
+  Content: instruct agent to read the idea entry, answer open questions, assess feasibility, update status to `ready` or `rejected`, add findings to Description section
+  Required tests: none (prompt file only — covered by research mode test above)
+
+- [ ] Add `./loop.sh promote <id>` command (`loop.sh`)
+  Required functionality:
+  - loop.sh accepts `promote <id>` as first two arguments
+  - Reads IDEAS.md, finds entry with matching id, verifies status is `ready`
+  - Creates `specs/<title-slugified>.md` with idea content (scoped to PROJECT_DIR)
+  - Updates IDEAS.md entry: status → `promoted`, sets promoted_at timestamp
+  - Exits non-zero if id missing, status is not `ready`, or already promoted
+  Required tests: promote creates spec file at correct path, updates IDEAS.md status to `promoted`, exits non-zero if id not found, exits non-zero if status is not `ready`, exits non-zero if already promoted
+
+- [ ] Add BATS tests for research and promote modes (`src/test/ideas.bats`)
+  Required tests (6 minimum):
+  - loop.sh research exits non-zero if IDEAS.md missing
+  - loop.sh research exits non-zero if id not found in IDEAS.md
+  - loop.sh research loads PROMPT_research.md (verify prompt file path in output)
+  - loop.sh promote creates spec file at correct path
+  - loop.sh promote updates IDEAS.md status to `promoted`
+  - loop.sh promote exits non-zero if idea status is not `ready`
+
+---
+
+### Feature: Agent Code Review
+
+- [ ] Create PROMPT_review.md (`PROMPT_review.md`)
+  Content: instruct agent to read last commit diff (`git diff HEAD~1`), check alignment with specs, identify anti-patterns/missing tests/security issues, write findings to REVIEW.md in PROJECT_DIR
+  Required tests: none (prompt file only — covered by review mode test)
 
 - [ ] Add `./loop.sh review` mode (`loop.sh`)
   Required functionality:
   - loop.sh accepts `review` as first argument
-  - Loads PROMPT_review.md and feeds it to agent
-  - Agent reviews projects/<name>/src/ and outputs findings to projects/<name>/REVIEW.md
-  Required tests: review mode loads correct prompt, runs review agent, creates REVIEW.md
+  - Loads PROMPT_review.md (project-local override, else root fallback)
+  - Feeds prompt to agent; agent writes findings to `$PROJECT_DIR/REVIEW.md`
+  - Exits non-zero if PROMPT_review.md not found
+  Required tests: review mode sets Mode to `review` in output, review mode loads PROMPT_review.md
 
-- [ ] Update `loop.sh` to chain build → review when `REVIEW=1` (`loop.sh`)
-  Required functionality:
-  - When REVIEW=1 environment variable is set, run one build iteration, then one review iteration
-  - Review iteration uses PROMPT_review.md
-  - Both iterations count toward MAX_ITERATIONS limit
-  Required tests: REVIEW=1 ./loop.sh runs build iteration, then review iteration
-
-- [ ] Add BATS test for `PROMPT_review.md` and review mode (`projects/unpossible/src/test/review.bats`)
-  Required tests:
-  - loop.sh review loads PROMPT_review.md
-  - loop.sh review creates REVIEW.md in projects/<name>/
-  - REVIEW=1 triggers chained build → review execution (mock test with dry-run mode)
+- [ ] Add BATS tests for review mode (`src/test/review.bats`)
+  Required tests (3 minimum):
+  - loop.sh review loads PROMPT_review.md (verify prompt path in output)
+  - loop.sh review exits non-zero if PROMPT_review.md not found
+  - loop.sh accepts `review` as valid mode argument (no "unknown mode" error)
 
 ---
 
-**Total tasks:** 18  
-**Phase 0 constraints:** All work uses local docker-compose only. No CI/CD, no remote deploys, no k8s.  
+### Feature: Bash Language Practices
+
+- [ ] Create practices/lang/bash.md (`practices/lang/bash.md`)
+  Content: bash-specific patterns for this project — errexit/pipefail/nounset conventions, array handling, quoting rules, BATS test structure, heredoc usage, portability notes (macOS vs Linux)
+  Required tests: none (documentation file)
+
+---
+
+**Total tasks:** 11 remaining (2 bug fixes + 9 features)
+**Phase 0 constraints:** All work uses local docker-compose only. No CI/CD, no remote deploys, no k8s.
 **Next phase:** Phase 1 (CI) — not planned yet. Advance only after Phase 0 acceptance criteria are met.
+
+---
+
+## Future (not planned — requires Phase 0 completion)
+
+Ideas in IDEAS.md that are out of scope for current phase:
+- Project Dashboard (IDEAS.md #1) — parked
+- Metrics System (IDEAS.md #2) — parked
+- Improvement Mode (IDEAS.md #3) — parked
+- External Benchmarking (IDEAS.md #4) — parked
+- Failure Analysis & Prompt Learning (IDEAS.md #5) — parked

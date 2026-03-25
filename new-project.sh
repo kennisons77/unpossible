@@ -43,8 +43,8 @@ mkdir -p "$PROJECT_DIR/src/test"
 mkdir -p "$PROJECT_DIR/infra"
 
 # Create placeholder spec files
-cat > "$PROJECT_DIR/specs/prd.md" << 'EOF'
-# Product Requirements Document — [PROJECT_NAME]
+cat > "$PROJECT_DIR/specs/prd.md" << EOF
+# Product Requirements Document — $PROJECT_NAME
 
 ## Overview
 
@@ -72,8 +72,8 @@ cat > "$PROJECT_DIR/specs/prd.md" << 'EOF'
 Phase 0
 EOF
 
-cat > "$PROJECT_DIR/specs/plan.md" << 'EOF'
-# Plan — [PROJECT_NAME]
+cat > "$PROJECT_DIR/specs/plan.md" << EOF
+# Plan — $PROJECT_NAME
 
 ## Goals
 
@@ -86,8 +86,8 @@ cat > "$PROJECT_DIR/specs/plan.md" << 'EOF'
 EOF
 
 # Create IMPLEMENTATION_PLAN.md
-cat > "$PROJECT_DIR/IMPLEMENTATION_PLAN.md" << 'EOF'
-# IMPLEMENTATION_PLAN — [PROJECT_NAME]
+cat > "$PROJECT_DIR/IMPLEMENTATION_PLAN.md" << EOF
+# IMPLEMENTATION_PLAN — $PROJECT_NAME
 
 [Brief description of the project]
 
@@ -97,7 +97,7 @@ cat > "$PROJECT_DIR/IMPLEMENTATION_PLAN.md" << 'EOF'
 
 ## Backlog
 
-- [ ] [First task description] (`path/to/file`)
+- [ ] [First task description] (\`path/to/file\`)
   Required tests: [what tests are needed]
 
 ---

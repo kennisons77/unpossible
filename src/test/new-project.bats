@@ -116,3 +116,24 @@ teardown() {
   [ "$status" -eq 0 ]
   [ -d "projects/my_test_project" ]
 }
+
+@test "new-project.sh substitutes project name in prd.md" {
+  run bash new-project.sh testproject
+  [ "$status" -eq 0 ]
+  grep -q "Product Requirements Document — testproject" projects/testproject/specs/prd.md
+  ! grep -q "\[PROJECT_NAME\]" projects/testproject/specs/prd.md
+}
+
+@test "new-project.sh substitutes project name in plan.md" {
+  run bash new-project.sh testproject
+  [ "$status" -eq 0 ]
+  grep -q "Plan — testproject" projects/testproject/specs/plan.md
+  ! grep -q "\[PROJECT_NAME\]" projects/testproject/specs/plan.md
+}
+
+@test "new-project.sh substitutes project name in IMPLEMENTATION_PLAN.md" {
+  run bash new-project.sh testproject
+  [ "$status" -eq 0 ]
+  grep -q "IMPLEMENTATION_PLAN — testproject" projects/testproject/IMPLEMENTATION_PLAN.md
+  ! grep -q "\[PROJECT_NAME\]" projects/testproject/IMPLEMENTATION_PLAN.md
+}
