@@ -15,7 +15,7 @@
 TEMP_PROMPT=""
 AGENT_OUTPUT_FILE=""
 cleanup() {
-    rm -f "$TEMP_PROMPT" "$AGENT_OUTPUT_FILE"
+    rm -f "$TEMP_PROMPT" "$AGENT_OUTPUT_FILE" "$RESOLVED_PROMPT"
 }
 trap cleanup EXIT
 
@@ -113,6 +113,14 @@ else
     PROMPT_FILE="$PROMPT_BASENAME"
 fi
 [ -f "$PROMPT_FILE" ] || { echo "Error: $PROMPT_FILE not found"; exit 1; }
+
+# Substitute <name> placeholder with actual project name and project dir
+RESOLVED_PROMPT="/tmp/prompt_resolved_$$.md"
+sed -e "s|projects/<name>/|${PROJECT_DIR}/|g" \
+    -e "s|projects/<name>|${PROJECT_DIR}|g" \
+    -e "s|<name>|${PROJECT_NAME}|g" \
+    "$PROMPT_FILE" > "$RESOLVED_PROMPT"
+PROMPT_FILE="$RESOLVED_PROMPT"
 
 # --- Research mode: inject idea content into prompt ---
 if [ "$MODE" = "research" ]; then
