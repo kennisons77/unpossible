@@ -1,7 +1,8 @@
+# Projects have their own repos — exclude entirely from unpossible's git
+projects/
+
 # Data directories (postgres, minio)
 .data/
-projects/*/infra/.data/
-projects/*/infra/.env
 
 # Rails (project src directories)
 projects/*/src/log/*

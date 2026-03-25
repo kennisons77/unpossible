@@ -1,6 +1,8 @@
 **Model selection:** Use Haiku for reading/searching files. Use Sonnet for code generation. Use Opus only for debugging and architectural decisions. Subagents for reading complete in ≤5 turns; kill any subagent exceeding 10 turns.
 
-0a. Read `ACTIVE_PROJECT` (root-level file) to get the project name. All project paths below use `projects/<name>/` as the root.
+0a. Read `ACTIVE_PROJECT` (root-level file) to get the project name.
+    - If `<name>` is `unpossible` (self-referential): all paths (specs, src, infra, plan) live at the **repo root**.
+    - Otherwise: all project paths use `projects/<name>/` as the root.
 0b. Read `practices/general/coding.md` — these are the standing rules for how to write code in this project.
 0c. Read the language-specific practices file if it exists: `practices/lang/[language].md` (language from `projects/<name>/specs/prd.md`). Read the framework-specific file if it exists: `practices/framework/[framework].md`.
 0d. Read `projects/<name>/specs/prd.md` and `projects/<name>/specs/plan.md` directly to understand the goal and current status. Pay close attention to Technical Constraints for language, framework, base image, and test command.
@@ -23,13 +25,17 @@
    ```
    If the Dockerfile still has placeholder values, fill them in from `projects/<name>/specs/prd.md` first.
 
-4. When tests pass, update `projects/<name>/IMPLEMENTATION_PLAN.md`, then commit:
+4. When tests pass, log the completed task to `projects/<name>/WORKLOG.md` following the schema in `specs/features/worklog.md`:
+   - Append a new entry with auto-incremented ID
+   - Include: title, status (done), feature name, started/completed timestamps, commit SHA (after commit), summary
+   - Then update `projects/<name>/IMPLEMENTATION_PLAN.md` and commit:
    ```
    git add -A && git commit -m "[description]"
    git push
    ```
 
 - Capture the *why* in documentation and commit messages.
+- If you need clarification or a decision from the human before proceeding, output `RALPH_WAITING: <your question>` and stop. Do not guess or proceed past a genuine blocker.
 - Single sources of truth — no duplicate logic, no migration shims.
 - If tests unrelated to your work fail, resolve them as part of the increment.
 - Once there are no build or test errors, create or increment a git tag (start at 0.0.1).

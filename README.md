@@ -110,7 +110,36 @@ $EDITOR specs/plan.md         # What are the tasks?
 ./loop.sh plan 1       # Plan mode, 1 iteration (dry run / gap analysis)
 ```
 
-**Plan mode** reads your specs, scans `app/`, and updates `IMPLEMENTATION_PLAN.md` without writing any code — useful for reviewing Claude's understanding before letting it loose.
+**Agent selection** — set `AGENT` and optionally `MODEL` to switch the underlying AI:
+
+```bash
+# Default: claude (opus)
+./loop.sh 10
+
+# Use kiro-cli
+AGENT=kiro ./loop.sh 10
+AGENT=kiro MODEL=claude-sonnet-4-5 ./loop.sh plan 1
+
+# Custom agent (any CLI that reads a prompt from stdin)
+AGENT="my-llm-cli --headless --model gpt-4o" ./loop.sh
+```
+
+Or via make:
+
+```bash
+make build                                   # claude (default)
+make build AGENT=kiro                        # kiro, default model
+make build AGENT=kiro MODEL=claude-sonnet-4-5
+make plan1 AGENT="my-llm-cli --headless"    # custom agent
+```
+
+| Agent | Default model | Headless invocation |
+|-------|--------------|---------------------|
+| `claude` | `opus` | `-p --dangerously-skip-permissions --output-format=stream-json` |
+| `kiro` | `claude-sonnet-4-5` | `kiro-cli chat --no-interactive --trust-all-tools` |
+| custom | — | full command string passed as `AGENT` |
+
+**Plan mode** reads your specs, scans `app/`, and updates `IMPLEMENTATION_PLAN.md` without writing any code — useful for reviewing the agent's understanding before letting it loose.
 
 **Build mode** implements tasks, tests via `docker compose run --rm test`, and commits after each green run.
 
@@ -237,5 +266,5 @@ The agent cannot mark a task complete until tests, typechecks, and lints pass. T
 - **Keep specs lean.** Every spec file loads into every loop iteration. Shorter = cheaper.
 - **One task per iteration.** The loop is designed for focused, verifiable increments.
 - **Review `specs/activity.md`** to see what the agent did in each iteration.
-- **Model choice**: `loop.sh` defaults to `--model opus`. Opus costs more per call but reasons better, leading to fewer total iterations. For well-defined build tasks you can edit `loop.sh` to use `sonnet`.
+- **Model choice**: `claude` defaults to `opus`, `kiro` defaults to `claude-sonnet-4-5`. Override with `MODEL=<name>`. Opus reasons better but costs more — use sonnet for well-defined build tasks to reduce cost.
 - **Git history is your audit trail.** The agent commits after each passing task.
