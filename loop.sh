@@ -217,12 +217,16 @@ EOF
     exit 0
 fi
 
+# --- Git context ---
+# For unpossible itself, git root is "."; for projects, it's the project dir.
+GIT_DIR="$PROJECT_DIR"
+
 # --- Branch management ---
 # If on main/master, create a timestamped work branch before doing anything
-CURRENT_BRANCH=$(git branch --show-current)
+CURRENT_BRANCH=$(git -C "$GIT_DIR" branch --show-current)
 if [ "$CURRENT_BRANCH" = "main" ] || [ "$CURRENT_BRANCH" = "master" ]; then
     WORK_BRANCH="ralph/$(date +%Y%m%d-%H%M%S)"
-    git checkout -b "$WORK_BRANCH"
+    git -C "$GIT_DIR" checkout -b "$WORK_BRANCH"
     CURRENT_BRANCH="$WORK_BRANCH"
     echo "Created branch: $CURRENT_BRANCH"
 fi
@@ -267,19 +271,21 @@ while true; do
         continue
     fi
 
-    # Push branch; set upstream tracking on first push
-    git push origin "$CURRENT_BRANCH" 2>/dev/null || \
-        git push -u origin "$CURRENT_BRANCH" 2>/dev/null || \
-        echo "Warning: git push failed — continuing without push"
+    # Push branch to project's own remote (never push unpossible itself from a project loop)
+    if [ "$GIT_DIR" != "." ]; then
+        git -C "$GIT_DIR" push origin "$CURRENT_BRANCH" 2>/dev/null || \
+            git -C "$GIT_DIR" push -u origin "$CURRENT_BRANCH" 2>/dev/null || \
+            echo "Warning: git push failed — continuing without push"
 
-    # Open a draft PR after the first successful push (requires gh CLI)
-    if [ $PR_OPENED -eq 0 ] && command -v gh &>/dev/null; then
-        gh pr create \
-            --title "ralph: $MODE loop on $CURRENT_BRANCH" \
-            --body "Automated PR opened by loop.sh ($AGENT / $MODE mode)." \
-            --draft \
-            && PR_OPENED=1 \
-            || echo "Warning: gh pr create failed — continuing without PR"
+        # Open a draft PR after the first successful push (requires gh CLI)
+        if [ $PR_OPENED -eq 0 ] && command -v gh &>/dev/null; then
+            gh -C "$GIT_DIR" pr create \
+                --title "ralph: $MODE loop on $CURRENT_BRANCH" \
+                --body "Automated PR opened by loop.sh ($AGENT / $MODE mode)." \
+                --draft \
+                && PR_OPENED=1 \
+                || echo "Warning: gh pr create failed — continuing without PR"
+        fi
     fi
 
     ITERATION=$((ITERATION + 1))

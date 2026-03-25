@@ -1,6 +1,7 @@
 #!/bin/bash
-# Usage: ./new-project.sh <project-name>
+# Usage: ./new-project.sh <project-name> [remote-url]
 # Creates a new project directory structure under projects/<name>/
+# Initialises a git repo in the project dir and sets remote if provided.
 
 set -e
 
@@ -11,6 +12,7 @@ if [ $# -eq 0 ]; then
 fi
 
 PROJECT_NAME="$1"
+REMOTE_URL="${2:-}"
 
 # Validate project name
 if [ -z "$PROJECT_NAME" ]; then
@@ -145,6 +147,18 @@ EOF
 
 # Create .gitkeep for test directory
 touch "$PROJECT_DIR/src/test/.gitkeep"
+
+# Initialise git repo for the project
+git -C "$PROJECT_DIR" init -q
+git -C "$PROJECT_DIR" add -A
+git -C "$PROJECT_DIR" commit -q -m "init from unpossible template"
+
+if [ -n "$REMOTE_URL" ]; then
+    git -C "$PROJECT_DIR" remote add origin "$REMOTE_URL"
+    echo "✓ Git remote set to $REMOTE_URL"
+else
+    echo "✓ Git repo initialised (no remote — add one with: git -C $PROJECT_DIR remote add origin <url>)"
+fi
 
 echo "✓ Created $PROJECT_DIR/"
 echo "✓ Created specs/ (prd.md, plan.md)"

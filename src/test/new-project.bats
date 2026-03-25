@@ -5,6 +5,9 @@ setup() {
   mkdir -p "$TEST_DIR"
   cp /workspace/new-project.sh "$TEST_DIR/"
   cd "$TEST_DIR"
+  git config --global user.email "test@example.com"
+  git config --global user.name "Test"
+  git config --global init.defaultBranch main
 }
 
 teardown() {
@@ -136,6 +139,20 @@ teardown() {
   [ "$status" -eq 0 ]
   grep -q "IMPLEMENTATION_PLAN — testproject" projects/testproject/IMPLEMENTATION_PLAN.md
   ! grep -q "\[PROJECT_NAME\]" projects/testproject/IMPLEMENTATION_PLAN.md
+}
+
+@test "new-project.sh initialises a git repo in the project dir" {
+  run bash new-project.sh testproject
+  [ "$status" -eq 0 ]
+  [ -d "projects/testproject/.git" ]
+}
+
+@test "new-project.sh sets remote when url provided" {
+  run bash new-project.sh testproject https://github.com/example/testproject.git
+  [ "$status" -eq 0 ]
+  run git -C projects/testproject remote get-url origin
+  [ "$status" -eq 0 ]
+  [[ "$output" =~ "testproject.git" ]]
 }
 
 @test "new-project.sh generates Dockerfile with correct COPY path" {
