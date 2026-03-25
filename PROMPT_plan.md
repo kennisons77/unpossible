@@ -1,4 +1,4 @@
-0a. Read `ACTIVE_PROJECT` (root-level file) to get the project name. All project paths below use `projects/<name>/` as the root.
+0a. Read `ACTIVE_PROJECT` (root-level file) to get the project name. All project paths below use `projects/<name>/` as the root. **Do not read or scan any other directory under `projects/` unless explicitly instructed.**
 0b. Read `practices/general/planning.md` — these are the standing rules for how to plan this project.
 0c. Study `projects/<name>/specs/*` with up to 10 parallel Sonnet subagents. Pay close attention to:
     - `projects/<name>/specs/prd.md` Technical Constraints (language, framework, base image, test command)

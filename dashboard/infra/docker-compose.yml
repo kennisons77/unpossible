@@ -1,0 +1,24 @@
+services:
+  dashboard:
+    build:
+      context: ..
+      dockerfile: dashboard/infra/Dockerfile
+    ports:
+      - "8080:8080"
+    volumes:
+      - ..:/workspace:ro
+      - /var/run/docker.sock:/var/run/docker.sock  # only needed if /run endpoint used
+    environment:
+      WORKSPACE_DIR: /workspace
+      LOOP_SCRIPT: /workspace/loop.sh
+      RUN_AUTH_USER: ${RUN_AUTH_USER:-admin}
+      RUN_AUTH_PASS: ${RUN_AUTH_PASS:-changeme}
+    restart: unless-stopped
+
+  test:
+    build:
+      context: ..
+      dockerfile: dashboard/infra/Dockerfile
+      target: builder
+    command: go test ./...
+    working_dir: /src

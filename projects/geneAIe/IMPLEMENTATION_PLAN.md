@@ -1,238 +1,250 @@
 # Implementation Plan — The Sovereign Library (POC)
 
-Scoped to the **POC release** defined in `specs/audience.md`: full 6-stage ETL pipeline working end-to-end on 10 real documents (Government IDs + Medical Records), searchable via full-text, with human review queue operational.
+Scoped to the **POC release**: full 6-stage ETL pipeline working end-to-end on 10 real documents (Government IDs + Medical Records), searchable via full-text, with human review queue operational.
 
-**Current state:** Zero application code exists. `app/` contains only `.gitkeep`. No `spec/`, `config/`, `db/`, or `library/` directories exist. Infrastructure files are placeholders. The build loop has never run.
+**Current state:** Phase 1.5 complete. 55 tests passing. Rails 8.1 app with auth, core models, Active Storage + MinIO, Bootstrap 5 + Hotwire, LibraryGitService all working.
 
----
-
-## Missing Specs
-
-Per-activity spec files do not yet exist for the four POC activities defined in `specs/audience.md`. These must be authored **before implementation begins** to provide acceptance criteria from which tests are derived.
-
-| Activity | Expected spec file | Status |
-|---|---|---|
-| Ingest a document | `specs/ingest-document.md` | **Missing** |
-| Review / correct extraction | `specs/review-extraction.md` | **Missing** |
-| Search for a document | `specs/search-document.md` | **Missing** |
-| Browse concern / type | `specs/browse-library.md` | **Missing** |
-
-- [ ] **Author `specs/ingest-document.md`** — acceptance criteria for upload, folder watch, and API webhook ingestion at POC depth (files: `specs/ingest-document.md`)
-  Required tests: derived from this spec once written
-- [ ] **Author `specs/review-extraction.md`** — acceptance criteria for manual fill, diff view, confidence gating at POC depth (files: `specs/review-extraction.md`)
-  Required tests: derived from this spec once written
-- [ ] **Author `specs/search-document.md`** — acceptance criteria for keyword FTS search at POC depth (files: `specs/search-document.md`)
-  Required tests: derived from this spec once written
-- [ ] **Author `specs/browse-library.md`** — acceptance criteria for scaffold browse by concern/type at POC depth (files: `specs/browse-library.md`)
-  Required tests: derived from this spec once written
-
-**Missing practices file:** No `practices/framework/rails.md` exists. Rails-specific conventions (directory layout, generator usage, service object patterns, ActiveRecord conventions) should be documented before implementation begins.
-
-- [ ] **Author `practices/framework/rails.md`** — Rails 8 conventions: service objects in `app/services/`, job naming, migration style, RSpec directory structure, factory patterns (files: `practices/framework/rails.md`)
-  Required tests: N/A (reference document)
+**Current Phase:** Phase 0 (Local — app runs and tests pass on dev machine)
 
 ---
 
-## Phase 0.5: Standards Baseline (from anados analysis)
+## Blocking: PRD Missing Required Sections
 
-These tasks harden the project against quality drift before the pipeline phases begin. Derived from production patterns in `anados/`.
+The PRD lacks the standard Technical Constraints and Phase declaration sections expected by the planning system.
 
-- [ ] **RuboCop full config** — Extend `.rubocop.yml` with metrics from `practices/lang/ruby.md`: line 120, method 15, block 25, cyclomatic 6, params 5; enable `rubocop-performance`; CI must exit non-zero on violations (files: `.rubocop.yml`, `Gemfile`)
-  Required tests: `bundle exec rubocop` passes on current codebase with zero offenses
-
-- [ ] **SimpleCov 90% enforcement** — Add `simplecov` gem; configure in `spec/rails_helper.rb` with `minimum_coverage 90`; CI test run fails below threshold (files: `Gemfile`, `spec/rails_helper.rb`)
-  Required tests: SimpleCov report generated on `bundle exec rspec`; threshold enforced
-
-- [ ] **Brakeman security gate** — Add `brakeman` gem; add to test container run: `bundle exec brakeman --no-pager -q`; treat high-severity findings as CI blockers (files: `Gemfile`, `infra/docker-compose.yml` test command)
-  Required tests: `bundle exec brakeman` exits 0 on current codebase
-
-- [ ] **startup.sh** — Create `utilities/startup.sh` per `practices/infra/docker.md`: cleanup volumes, build images, migrate + seed, start services, print URLs; single command from zero to running (files: `utilities/startup.sh`)
-  Required tests: script runs end-to-end without error in clean environment
-
-- [ ] **Mailpit for local email** — Add `mailpit` service to `infra/docker-compose.yml`; configure Rails SMTP to point to Mailpit in development; web UI accessible at `localhost:8025` (files: `infra/docker-compose.yml`, `config/environments/development.rb`)
-  Required tests: Rails boots without SMTP error in development environment
-
-- [ ] **Tini as PID 1** — Add `tini` to `infra/Dockerfile`; set as `ENTRYPOINT`; ensures graceful shutdown signal handling in containers (files: `infra/Dockerfile`)
-  Required tests: container starts and stops cleanly; `docker stop` does not require SIGKILL
-
-- [ ] **deploy-k8s.sh wrapper** — Create `infra/deploy-k8s.sh` per `practices/infra/kubernetes.md`: tag image with git SHA, push to registry, apply manifests, wait for rollout; parameterised for staging vs. production (files: `infra/deploy-k8s.sh`, `infra/k8s/deployment.yaml`)
-  Required tests: script validates required env vars and exits non-zero if missing
+- [x] **Add Technical Constraints section to `specs/prd.md`** — Add section with: Language (Ruby 3.3), Framework (Rails 8), Base image (ruby:3.3-slim), Test command (bundle exec rspec), Port (3000) (files: `specs/prd.md`)
+- [x] **Add Phase declaration to `specs/prd.md`** — Add `## Phase` section declaring current phase as Phase 0 (Local) (files: `specs/prd.md`)
 
 ---
 
-## Phase 0: Infrastructure (High Priority)
+## Blocking: Missing Activity Specs
 
-The `infra/Dockerfile` and `infra/docker-compose.yml` contain placeholder values that must be resolved before any containerized development or testing.
+Activity spec files must exist before implementation of their phases. Acceptance criteria drive required tests.
 
-- [x] **Fix Dockerfile placeholders** — `FROM ruby:3.3-slim`, apt-get installs build-essential/libpq-dev/libyaml-dev/tesseract/poppler/git/nodejs, bundle install, CMD rails server. Includes proxy CA cert support for sandboxed builds.
-- [x] **Fix docker-compose.yml placeholders** — Ports 3000:3000, test command `bundle exec rspec`, `depends_on` with health checks, `DATABASE_URL` env vars for app and test services.
-- [x] **Add PostgreSQL service to docker-compose** — `pgvector/pgvector:pg16` with tmpfs (bind mounts caused initdb corruption in sandbox), health check via pg_isready.
-- [x] **Add MinIO service to docker-compose** — `minio/minio` with console port 9001, API port 9000, health check, app service gets AWS env vars.
-- [x] **Confirm Solid Queue/Cache backing** — Rails 8.1 Solid Queue and Solid Cache are database-backed by default. No Redis service needed. Confirmed: no Redis service in docker-compose.
-
----
-
-## Phase 1: Rails Foundation
-
-### 1.1 App Initialization
-
-- [x] **Rails 8 app init** — Hand-crafted Rails 8.1 app (no network for `rails new`): PostgreSQL adapter, skipped Mailer/Mailbox/Cable, Solid Queue + Solid Cache configured, pgvector gem, Propshaft asset pipeline. `bundle exec rspec` exits 0, `bin/rails db:create` succeeds.
-- [x] **RSpec and testing gems** — rspec-rails 7.0, factory_bot_rails 6.4, shoulda-matchers 6.0, capybara, selenium-webdriver. Configured in spec/rails_helper.rb with support files for FactoryBot and Shoulda.
-- [ ] **RuboCop setup** — Add `rubocop`, `rubocop-rails`, `rubocop-rspec` gems; create `.rubocop.yml` with project-appropriate config (files: `Gemfile`, `.rubocop.yml`)
-  Required tests: `bundle exec rubocop` runs without crash (warnings acceptable at this stage)
-
-### 1.2 Authentication
-
-- [x] **Auth scaffold** — Hand-crafted Rails 8 authentication: User model with `has_secure_password`, Session model, Authentication concern in ApplicationController, SessionsController with login/logout, single-user seed (`admin@sovereign.local`), dashboard landing page. 12 tests passing (model validations, associations, normalization, session CRUD, auth gating).
-
-### 1.3 Core Models
-
-- [x] **Document model** — stage enum (6 stages), review_required, content_hash, confidence_score, minio_blob_key, markdown_path, owner_id FK, concern_id FK, concern_tags array, document_type, embedding vector(1536), Active Storage attachment. 11 tests passing.
-- [x] **Concern model** — name, owner_id FK, llm_proposed default true, confirmed_at nullable, confirmed/unconfirmed scopes, confirm! method. 9 tests passing.
-- [x] **DocumentField model** — document_id FK, field_name, value, source enum (llm/ocr/human), composite index. 8 tests passing.
-- [x] **Active Storage migration** — Added `create_active_storage_tables` migration for blobs/attachments/variant_records.
-- [x] **Infra fixes** — docker-compose volume mounts corrected (`src/` not `app/`), disabled schema dump after migration (pgvector vector type not supported by Ruby schema dumper), `check_all_pending!` in rails_helper, `TimeHelpers` included in RSpec config.
-
-### 1.4 Storage Configuration
-
-- [x] **Active Storage + MinIO config** — Development env uses `:minio` service (S3-compatible); test env uses `:test` disk adapter; `aws-sdk-s3` gem present; `config/initializers/active_storage.rb` auto-creates MinIO bucket on boot; docker-compose forwards proxy build args. 5 specs passing.
-- [x] **Git library service** — `LibraryGitService` class: initializes/opens git repo at configurable library path (env var `LIBRARY_PATH`, default `library/`); writes `.md` file to `{concern}/{document_type}/{doc_id}.md`; auto-commits with structured message including document ID, stage, source, timestamp; handles first-commit edge case; app repo `.gitignore` excludes `library/` (files: `app/services/library_git_service.rb`, `spec/services/library_git_service_spec.rb`, `.gitignore`)
-  Required tests: creates file at correct nested path, commits with expected message format, creates missing subdirectories, handles first commit in empty repo, updates existing file and creates new commit
-
-### 1.5 Frontend Base
-
-- [x] **Bootstrap 5 + Bootswatch Yeti + Hotwire setup** — `cssbundling-rails` + `importmap-rails` gems; `turbo-rails` and `stimulus-rails`; Bootstrap 5 via npm with Bootswatch Yeti theme; base application layout with Bootstrap navbar (login/logout, search bar placeholder, nav links), flash partials, container wrapper (files: `Gemfile`, `package.json`, `app/assets/stylesheets/application.bootstrap.scss`, `config/importmap.rb`, `app/javascript/application.js`, `app/javascript/controllers/application.js`, `app/javascript/controllers/index.js`, `app/views/layouts/application.html.erb`, `app/views/layouts/_flash.html.erb`, `infra/Dockerfile`, `infra/docker-compose.yml`)
-  Required tests: application layout renders without error, Bootstrap classes present in rendered HTML
-
-### 1.6 Scaffold Views
-
-- [ ] **Document scaffold views** — Index (table listing with stage, type, concern, confidence), show (detail with fields, blob download link, markdown preview), basic controller with index/show actions (files: `app/controllers/documents_controller.rb`, `app/views/documents/index.html.erb`, `app/views/documents/show.html.erb`, `app/views/documents/_document.html.erb`, `config/routes.rb`, `spec/requests/documents_spec.rb`)
-  Required tests: index returns 200 with documents listed, show returns 200 with document details, unauthenticated access redirected
-- [ ] **Concern scaffold views** — Index, show (with associated documents), confirm action (files: `app/controllers/concerns_controller.rb`, `app/views/concerns/index.html.erb`, `app/views/concerns/show.html.erb`, `config/routes.rb`, `spec/requests/concerns_spec.rb`)
-  Required tests: index lists concerns, show displays concern with documents, confirm action sets `confirmed_at`, unauthenticated access redirected
+- [ ] **Author `specs/ingest-document.md`** — upload (web UI), folder watch, API webhook at POC depth; acceptance criteria: file accepted (PDF/PNG/JPG/TXT), Document created at `acquired` stage, blob stored in MinIO via Active Storage, PipelineOrchestratorJob enqueued, unauthenticated requests rejected (files: `specs/ingest-document.md`)
+- [ ] **Author `specs/review-extraction.md`** — manual fill, diff view, confidence gating at POC depth; acceptance criteria: review queue lists all `review_required: true` documents with reason/confidence, diff view renders LLM-extracted fields vs. empty schema template side-by-side, approve action clears flag and advances pipeline, edit action saves fields with `source: :human`, reject action marks document rejected, duplicate decision UI shows both documents for version-vs-duplicate choice (files: `specs/review-extraction.md`)
+- [ ] **Author `specs/search-document.md`** — keyword FTS at POC depth; acceptance criteria: search bar present on all authenticated pages, query returns matching documents ranked by relevance, results show document type/concern/confidence/snippet, empty query handled gracefully, no matches returns empty state message (files: `specs/search-document.md`)
+- [ ] **Author `specs/browse-library.md`** — scaffold browse by concern/type at POC depth; acceptance criteria: documents index lists all documents with type/concern/stage/confidence, show page displays document metadata and all extracted fields with provenance (llm/ocr/human), concerns index lists all concerns with confirmed status, concern show page lists documents in that concern (files: `specs/browse-library.md`)
 
 ---
 
-## Phase 2: Acquisition Adapters
+## Blocking: Missing Practices
 
-- [ ] **Pipeline orchestrator job** — `PipelineOrchestratorJob` receives document ID; runs stages sequentially: categorization -> identification -> normalization -> storage -> enrichment; each stage is a separate service object; stops on failure and sets `review_required: true` with reason in `review_reason`; updates `document.stage` after each successful stage (files: `app/jobs/pipeline_orchestrator_job.rb`, `spec/jobs/pipeline_orchestrator_job_spec.rb`)
-  Required tests: runs all stages in order on happy path (with stubs), stops at failing stage, sets `review_required` on failure with reason, updates stage after each success
-- [ ] **File upload adapter** — Upload form on documents#new (drag-and-drop area + file picker via Stimulus controller); accepts PDF, PNG, JPG, TXT; stores blob via Active Storage to MinIO; creates Document at stage `acquired`; enqueues `PipelineOrchestratorJob` (files: `app/controllers/documents_controller.rb`, `app/views/documents/new.html.erb`, `app/javascript/controllers/upload_controller.js`, `spec/requests/documents_upload_spec.rb`)
-  Required tests: uploading PDF creates Document at stage `acquired`, blob is attached, pipeline job enqueued; rejects unsupported file types; unauthenticated upload rejected
-- [ ] **Folder watcher job** — `FolderWatcherJob` (Solid Queue recurring job) polls a configured directory path (env var `WATCH_DIR`); ingests new files not already tracked (by filename + mtime); moves processed files to `processed/` subdirectory; creates Document at stage `acquired` for each (files: `app/jobs/folder_watcher_job.rb`, `config/recurring.yml`, `spec/jobs/folder_watcher_job_spec.rb`)
-  Required tests: new file in watched dir creates Document at `acquired`, file moved to `processed/`; already-processed file skipped; empty directory is no-op; missing directory raises descriptive error
-- [ ] **API webhook endpoint** — `POST /api/v1/documents` accepting multipart file upload + optional JSON metadata (`document_type`, `concern`); bearer token auth from env var `API_TOKEN`; returns JSON with document ID and status; creates Document at stage `acquired` (files: `app/controllers/api/v1/documents_controller.rb`, `config/routes.rb`, `spec/requests/api/v1/documents_spec.rb`)
-  Required tests: valid token + file creates Document at `acquired` and returns 201 with document ID; missing token returns 401; missing file returns 422; optional metadata persisted when provided
+- [ ] **Author `practices/framework/rails.md`** — Rails 8 conventions: service objects in `app/services/` (plain Ruby classes, single public method, return value or raise), job naming (`*Job` suffix, queue names), migration style (reversible, no data changes), RSpec directory structure (models/requests/services/integration/system), factory patterns (FactoryBot traits, associations), request vs. system specs (request for API/controller logic, system for full browser flows with Capybara), controller concerns in `app/controllers/concerns/`, model concerns in `app/models/concerns/` (files: `practices/framework/rails.md`)
 
 ---
 
-## Phase 3: Pipeline Stages
+## Phase 0.1: Fix Test Infrastructure
 
-### 3.1 Text Extraction
+The test service command runs `npm install && npm run build` unnecessarily (already done in image build) and uses `db:drop` which fails on first run if DB doesn't exist.
 
-- [ ] **Create test fixture files** — Add synthetic test fixtures for the spec suite: a small valid PDF, a scan image, and a text file containing PII patterns (files: `spec/fixtures/files/sample_utility_bill.pdf`, `spec/fixtures/files/sample_scan.png`, `spec/fixtures/files/sample_with_pii.txt`)
-  Required tests: fixtures are loadable in specs, PII fixture contains expected SSN and DOB patterns
-- [ ] **PDF text extraction service** — `TextExtractionService` wraps `pdftotext` CLI; accepts blob reference; returns extracted text or empty string if pdftotext produces nothing (signals OCR fallback needed) (files: `app/services/text_extraction_service.rb`, `spec/services/text_extraction_service_spec.rb`)
-  Required tests: extracts text from digital PDF, returns empty string for image-only PDF, handles missing pdftotext binary gracefully
-- [ ] **Tesseract OCR fallback service** — `OcrService` wraps `tesseract` CLI; accepts image blob (PNG, JPG) or PDF page image; returns extracted text + confidence score; flags low-confidence results for review (files: `app/services/ocr_service.rb`, `spec/services/ocr_service_spec.rb`)
-  Required tests: extracts text from PNG scan, returns confidence score, low-confidence result flagged, handles corrupt image gracefully
-
-### 3.2 PII Redaction
-
-- [ ] **PII redaction service** — `PiiRedactionService` applies regex patterns: SSN (`\d{3}-\d{2}-\d{4}` -> `[SSN REDACTED]`), DOB patterns (various date formats), passport numbers, account numbers; returns redacted text as new string; never mutates original (files: `app/services/pii_redaction_service.rb`, `spec/services/pii_redaction_service_spec.rb`)
-  Required tests: masks SSN pattern, masks DOB patterns, masks passport numbers, masks account numbers, leaves non-PII text unchanged, handles text with multiple PII types, returns new string (does not mutate input)
-
-### 3.3 Categorization (Stage 2)
-
-- [ ] **Anthropic API client wrapper** — `AnthropicClient` thin wrapper around HTTP calls to Claude Haiku; handles request formatting, response parsing, error handling, rate limiting; reads API key from env var `ANTHROPIC_API_KEY` (files: `app/services/anthropic_client.rb`, `spec/services/anthropic_client_spec.rb`)
-  Required tests: formats request correctly, parses successful response, handles API error (4xx/5xx) gracefully, handles malformed JSON response, reads API key from environment
-- [ ] **Categorization service** — `CategorizationService` takes document, runs PII redaction on extracted text, calls Claude Haiku to extract `concern`, `document_type`, `confidence_score`; creates or finds Concern record (LLM-proposed if new); updates Document; flags for review if confidence below threshold or LLM returns malformed output (files: `app/services/categorization_service.rb`, `spec/services/categorization_service_spec.rb`)
-  Required tests: sets concern and document_type from LLM response, creates new LLM-proposed Concern if not found, reuses existing Concern if found, PII redacted before LLM call, low confidence flags `review_required`, malformed LLM output flags `review_required`, updates stage to `categorized`
-
-### 3.4 Identification (Stage 3)
-
-- [ ] **Identification service** — `IdentificationService` computes SHA-256 hash on raw blob bytes; checks for existing documents with same hash; hash match = potential duplicate (flags for review with both document IDs in `review_reason`); updates Document `content_hash` and stage to `identified` (files: `app/services/identification_service.rb`, `spec/services/identification_service_spec.rb`)
-  Required tests: computes correct SHA-256 hash, stores hash on document, detects duplicate (same hash exists) and flags `review_required`, new unique hash proceeds without review, updates stage to `identified`
-
-### 3.5 Normalization (Stage 4)
-
-- [ ] **Markdown serializer** — `MarkdownSerializer` takes structured data hash and produces Markdown string with YAML front matter; validates required fields present; body section contains extracted text (files: `app/services/markdown_serializer.rb`, `spec/services/markdown_serializer_spec.rb`)
-  Required tests: YAML front matter includes doc_id/concern/document_type/extracted fields, body section contains extracted text, handles missing optional fields gracefully, output is valid YAML parseable by `YAML.safe_load`
-- [ ] **Normalization service** — `NormalizationService` orchestrates: text extraction (pdftotext -> OCR fallback) -> PII redaction -> Claude Haiku structured extraction (YAML front matter fields) -> `MarkdownSerializer` -> `LibraryGitService` write + commit; updates `document.markdown_path` and stage to `normalized` (files: `app/services/normalization_service.rb`, `spec/services/normalization_service_spec.rb`)
-  Required tests: produces Markdown with valid YAML front matter, falls back to OCR when pdftotext returns empty, PII redacted before LLM call, malformed LLM extraction flags `review_required`, file written to correct library path, updates stage to `normalized`
-
-### 3.6 Storage (Stage 5)
-
-- [ ] **Storage confirmation service** — `StorageService` verifies: blob exists in Active Storage, Markdown file committed to git library (file exists at `markdown_path`), Postgres record fully populated; updates FTS tsvector column on document; sets stage to `stored` (files: `app/services/storage_service.rb`, `spec/services/storage_service_spec.rb`)
-  Required tests: confirms blob attachment exists, confirms markdown file exists at path, updates tsvector column, sets stage to `stored`, fails if blob missing, fails if markdown missing
-
-### 3.7 Enrichment (Stage 6)
-
-- [ ] **Enrichment service** — `EnrichmentService` creates `DocumentField` records for each extracted field with `source: :llm` (or `:ocr` if OCR-sourced); updates stage to `enriched`; commits updated Markdown via `LibraryGitService` (files: `app/services/enrichment_service.rb`, `spec/services/enrichment_service_spec.rb`)
-  Required tests: creates DocumentField for each extracted field, sets correct source enum, updates stage to `enriched`, git commit created for enrichment, handles document with no extracted fields gracefully
+- [ ] **Fix docker-compose.yml test command** — Replace test service `command` with: `bash -c "bin/rails db:prepare && bundle exec rspec"` (db:prepare creates DB if missing, loads schema, runs pending migrations) (files: `infra/docker-compose.yml`)
+  Required tests: `docker compose -f infra/docker-compose.yml run --rm test` exits 0 with 55 tests passing
 
 ---
 
-## Phase 4: Review Queue
+## Phase 0.2: Standards Setup
 
-- [ ] **Confidence gating logic** — Configurable threshold via env var `CONFIDENCE_THRESHOLD` (default 0.7); applied in `CategorizationService` and `OcrService`; documents below threshold set `review_required: true` with descriptive `review_reason`; initializer reads threshold from env (files: `config/initializers/pipeline.rb`, `spec/models/document_spec.rb`)
-  Required tests: document with confidence 0.6 and threshold 0.7 flagged, document with confidence 0.8 not flagged, threshold configurable via environment
-- [ ] **Review queue index** — `ReviewsController#index` lists all documents where `review_required: true`, ordered by creation date; shows review_reason, document_type, confidence_score (files: `app/controllers/reviews_controller.rb`, `app/views/reviews/index.html.erb`, `config/routes.rb`, `spec/requests/reviews_spec.rb`)
-  Required tests: lists only review_required documents, empty queue shows appropriate message, unauthenticated access redirected
-- [ ] **Diff view: new document** — `ReviewsController#show` renders side-by-side: LLM extraction fields (left) vs. empty schema template (right); user can approve all, edit individual fields, or reject; approve clears `review_required` and creates DocumentField records with `source: :human` for edits, then advances pipeline (files: `app/controllers/reviews_controller.rb`, `app/views/reviews/show.html.erb`, `app/views/reviews/_diff_view.html.erb`, `app/javascript/controllers/diff_controller.js`, `spec/requests/reviews_spec.rb`)
-  Required tests: renders LLM fields alongside schema template, approve action clears `review_required` and advances stage, edited fields saved with `source: :human`, reject marks document rejected
-- [ ] **Diff view: re-ingested document** — When a document re-processes (hash match to existing), show field-level diff between new extraction and previously stored version; highlight changed fields (files: `app/views/reviews/_version_diff.html.erb`, `app/services/field_diff_service.rb`, `spec/services/field_diff_service_spec.rb`)
-  Required tests: identifies changed fields between versions, identifies new fields, identifies removed fields, unchanged fields shown without highlight
-- [ ] **Stage-specific fallback UI** — OCR failure: editable raw text area pre-filled with OCR output; LLM failure: manual schema fill form with all expected fields blank; submitting either creates DocumentField records with `source: :human` (files: `app/views/reviews/_ocr_fallback.html.erb`, `app/views/reviews/_manual_fill.html.erb`, `spec/requests/reviews_spec.rb`)
-  Required tests: OCR fallback shows raw text in editable field, manual fill form shows all schema fields, submitting manual fill creates DocumentField records with `source: :human`
-- [ ] **Version-vs-duplicate decision UI** — Hash conflict review: show both documents side by side; user chooses "duplicate" (discard new, mark rejected) or "new version" (link as version, keep both) (files: `app/views/reviews/_duplicate_decision.html.erb`, `spec/requests/reviews_spec.rb`)
-  Required tests: shows both documents, duplicate action marks new document rejected, version action links documents and keeps both
+- [ ] **RuboCop configuration** — Create `.rubocop.yml` with AllCops: NewCops: enable, TargetRubyVersion: 3.3, line length 120, method length 15, block length 25, cyclomatic complexity 6; enable rubocop-rails and rubocop-rspec; run passes with warnings acceptable — do NOT fail CI on violations yet (files: `src/.rubocop.yml`)
+  Required tests: `cd src && bundle exec rubocop` runs without crash (warnings OK)
 
 ---
 
-## Phase 5: Search
+## Phase 0.3: Test Fixtures
 
-- [ ] **Full-text search index** — Add `tsv` tsvector column to documents table; ActiveRecord callback to update tsvector on save (covers Markdown content + document_type + concern name); GIN index on tsvector column (files: `db/migrate/*_add_tsv_to_documents.rb`, `app/models/document.rb`, `spec/models/document_spec.rb`)
-  Required tests: tsvector populated on document save, tsvector updated on document update, GIN index exists on column
-- [ ] **Search endpoint** — `SearchController#index` with `GET /search?q=`; uses PostgreSQL `@@` operator with `plainto_tsquery`; returns ranked results by `ts_rank`; handles empty query gracefully (files: `app/controllers/search_controller.rb`, `config/routes.rb`, `spec/requests/search_spec.rb`)
-  Required tests: query matching document content returns that document, no matches returns empty result set, empty query returns all documents or appropriate message, results ordered by relevance rank
-- [ ] **Search UI** — Search bar in main application layout (always visible); results page with document cards showing title/filename, document_type, concern, confidence_score, text snippet; card links to document show (files: `app/views/layouts/application.html.erb`, `app/views/search/index.html.erb`, `app/views/search/_result_card.html.erb`)
-  Required tests: search bar present on all pages, results render document cards with expected fields, card links to document show page
+- [ ] **Create test fixture files** — Synthetic fixtures for specs: `sample_utility_bill.pdf` (digital PDF with text), `sample_scan.png` (image requiring OCR), `sample_with_pii.txt` (plain text containing SSN pattern 123-45-6789 and DOB pattern 01/15/1980) (files: `src/spec/fixtures/files/sample_utility_bill.pdf`, `src/spec/fixtures/files/sample_scan.png`, `src/spec/fixtures/files/sample_with_pii.txt`)
+  Required tests: fixtures loadable via `Rails.root.join('spec/fixtures/files/...')`, PII fixture contains SSN and DOB patterns
 
 ---
 
-## Phase 6: Verification
+## Phase 1: Scaffold Views (Browse Library Activity)
 
-- [ ] **Rake task: full pipeline** — `rake pipeline:run[path/to/file]` triggers all 6 stages on a single file; outputs stage progression to stdout; useful for testing outside the web UI (files: `lib/tasks/pipeline.rake`, `spec/tasks/pipeline_rake_spec.rb`)
-  Required tests: rake task creates Document at `acquired` and progresses through all stages, outputs status for each stage, handles nonexistent file path with clear error
-- [ ] **Integration test: upload to stored** — Upload `sample_utility_bill.pdf` via controller; assert Document reaches stage `stored` with blob in Active Storage, markdown file at expected path, YAML fields populated, tsvector populated (files: `spec/integration/upload_to_stored_spec.rb`)
-  Required tests: document reaches `stored` stage, blob attached, markdown path set and file exists, YAML front matter has required fields, tsvector is non-null
-- [ ] **Integration test: OCR fallback** — Upload `sample_scan.png`; assert pdftotext produces empty -> Tesseract invoked -> text returned and used for categorization (files: `spec/integration/ocr_fallback_spec.rb`)
-  Required tests: Tesseract invoked when pdftotext returns empty, extracted text is non-empty, document proceeds through pipeline
-- [ ] **Integration test: PII in pipeline** — Upload `sample_with_pii.txt`; assert LLM call payload does not contain unmasked SSN (files: `spec/integration/pii_pipeline_spec.rb`)
-  Required tests: LLM request body does not contain original SSN pattern, redacted placeholder present in LLM input
-- [ ] **Integration test: hash conflict** — Upload same file twice; assert second upload triggers duplicate review queue entry (files: `spec/integration/hash_conflict_spec.rb`)
-  Required tests: second document flagged `review_required`, review_reason indicates duplicate/hash conflict
-- [ ] **Integration test: stage fallback** — Stub LLM to return malformed JSON; assert document flagged `review_required` and stage does not advance past categorization (files: `spec/integration/stage_fallback_spec.rb`)
-  Required tests: document has `review_required: true`, stage remains at `acquired` or `categorized`, review_reason indicates LLM failure
-- [ ] **System test: search returns result** — Capybara: ingest document with known content, navigate to search, enter keyword, assert result card appears (files: `spec/system/search_spec.rb`)
-  Required tests: search for known keyword shows matching document card, card contains expected document_type and concern
-- [ ] **System test: review queue diff view** — Capybara: create low-confidence document, navigate to review queue, assert diff view renders with LLM fields vs. schema template (files: `spec/system/review_queue_spec.rb`)
-  Required tests: review queue lists the low-confidence document, clicking shows diff view, LLM-extracted fields visible, approve button functional
-- [ ] **Manual POC run** — Process 10 real documents (mix of Government IDs and Medical Records) through full pipeline via upload UI and/or rake task; verify `git log` on library folder shows per-document commit history; verify MinIO blobs intact; verify FTS returns results (files: no code changes; results documented in `specs/activity.md`)
-  Required tests: (manual) 10 documents reach `stored` or `enriched` stage, FTS returns results for each, review queue surfaces at least one low-confidence doc, `git log library/` shows commits
+- [ ] **DocumentsController + views** — index (lists all documents with type/concern/stage/confidence in Bootstrap table), show (displays document metadata, attached blob link, all document_fields with source badges), routes (files: `src/app/controllers/documents_controller.rb`, `src/app/views/documents/index.html.erb`, `src/app/views/documents/show.html.erb`, `src/config/routes.rb`, `src/spec/requests/documents_spec.rb`)
+  Required tests: GET /documents returns 200 with documents listed, GET /documents/:id returns 200 with metadata and fields, unauthenticated redirected to login
+
+- [ ] **ConcernsController + views** — index (lists all concerns with confirmed status badge), show (lists documents in that concern), confirm action (POST /concerns/:id/confirm calls concern.confirm!), routes (files: `src/app/controllers/concerns_controller.rb`, `src/app/views/concerns/index.html.erb`, `src/app/views/concerns/show.html.erb`, `src/config/routes.rb`, `src/spec/requests/concerns_spec.rb`)
+  Required tests: GET /concerns returns 200 with concerns listed, GET /concerns/:id returns 200 with documents, POST /concerns/:id/confirm sets confirmed_at and redirects, unauthenticated redirected
+
+- [ ] **Add navigation links to layout** — Add Documents and Concerns links to navbar (files: `src/app/views/layouts/application.html.erb`)
+  Required tests: (visual verification) navbar shows Documents and Concerns links when authenticated
 
 ---
 
-## Ambiguities and Open Questions
+## Phase 2: Pipeline Orchestrator
 
-These items surfaced during planning. They do not block early phases but should be resolved before reaching the relevant task.
+- [ ] **PipelineOrchestratorJob** — Runs stages sequentially: categorization → identification → normalization → storage → enrichment; stops on failure, sets `review_required: true` with reason in `review_reason`; updates `document.stage` after each success; each stage is a separate service call (files: `src/app/jobs/pipeline_orchestrator_job.rb`, `src/spec/jobs/pipeline_orchestrator_job_spec.rb`)
+  Required tests: all stages run in order on happy path (stubbed services), stops at failing stage, sets `review_required` with reason, updates stage after each success, handles missing blob gracefully
 
-1. **Solid Queue / Solid Cache backing store** — Rails 8 ships these with database-backed adapters by default. Confirm no Redis service is needed for POC. This likely eliminates a dependency. *(Phase 0 task will resolve this.)*
-2. **Library git repo isolation** — The `library/` folder needs its own git repo (separate from the application repo) to track document commits independently. The app repo `.gitignore` should exclude `library/`. `LibraryGitService` must `git init` if repo does not exist.
-3. **Folder watcher path configuration** — The watched directory path needs to be configurable via env var `WATCH_DIR`. Whether it lives inside or outside the Docker container affects volume mount configuration in `docker-compose.yml`.
-4. **API auth mechanism** — Plan uses a simple bearer token from env var `API_TOKEN`. The PRD does not specify API auth. This is a reasonable POC default but should be confirmed.
-5. **pgvector dimensions** — Plan uses 1536 (common embedding size). Column present but unused in POC. Adjust if Claude embeddings use a different dimensionality.
-6. **Concern tags storage** — PRD specifies `concern_tags (array)`. Plan uses PostgreSQL array column. A join table would be more normalized but adds complexity. Array column is acceptable for POC.
-7. **Document rejection flow** — Review queue allows "reject" but PRD does not define what happens to rejected documents. Plan assumes: rejected documents remain in DB with a `rejected` stage or flag, do not proceed through pipeline. Needs confirmation.
-8. **FTS tsvector source content** — `StorageService` updates tsvector, but the source content needs clarification: is it the raw extracted text, the Markdown body, the YAML field values, or a combination? Plan assumes Markdown content + document_type + concern name.
+---
+
+## Phase 3: Acquisition Adapters (Ingest Document Activity)
+
+- [ ] **File upload form + controller action** — `DocumentsController#new` (upload form with drag-and-drop via Stimulus), `#create` (accepts PDF/PNG/JPG/TXT, attaches via Active Storage, creates Document at `acquired`, enqueues PipelineOrchestratorJob, redirects to document show); reject unsupported file types (files: `src/app/controllers/documents_controller.rb`, `src/app/views/documents/new.html.erb`, `src/app/javascript/controllers/upload_controller.js`, `src/config/routes.rb`, `src/spec/requests/documents_upload_spec.rb`)
+  Required tests: uploading PDF creates Document at `acquired` with blob attached and job enqueued, unsupported type rejected with 422, unauthenticated rejected
+
+- [ ] **Folder watcher job** — `FolderWatcherJob` (Solid Queue recurring); polls `WATCH_DIR` env var (default: `Rails.root/watch`); ingests new files not already tracked by filename; attaches via Active Storage, creates Document at `acquired`, enqueues PipelineOrchestratorJob; moves processed files to `WATCH_DIR/processed/` subdir; configure in `config/recurring.yml` to run every 30 seconds (files: `src/app/jobs/folder_watcher_job.rb`, `src/config/recurring.yml`, `src/spec/jobs/folder_watcher_job_spec.rb`)
+  Required tests: new file creates Document at `acquired` and moves to `processed/`, already-processed file skipped, empty dir is no-op, missing WATCH_DIR handled gracefully
+
+- [ ] **API webhook endpoint** — `Api::V1::DocumentsController#create` (POST /api/v1/documents); multipart file + optional JSON metadata; bearer token auth from `API_TOKEN` env var; returns JSON with document ID and stage; creates Document at `acquired`, enqueues PipelineOrchestratorJob; namespace routes under `/api/v1` (files: `src/app/controllers/api/v1/documents_controller.rb`, `src/config/routes.rb`, `src/spec/requests/api/v1/documents_spec.rb`)
+  Required tests: valid token + file → 201 with document ID, missing token → 401, invalid token → 401, missing file → 422, unsupported file type → 422
+
+---
+
+## Phase 4: Pipeline Services — PII & LLM Client
+
+- [ ] **PiiRedactionService** — Regex masks SSN (###-##-####), DOB (MM/DD/YYYY and YYYY-MM-DD), passport (e.g. US passport format), account numbers (8+ consecutive digits); returns new string, never mutates input; class method `redact(text)` (files: `src/app/services/pii_redaction_service.rb`, `src/spec/services/pii_redaction_service_spec.rb`)
+  Required tests: masks SSN (123-45-6789 → XXX-XX-XXXX), masks DOB (01/15/1980 → XX/XX/XXXX), masks passport, masks account numbers, leaves non-PII unchanged, handles multiple PII types in one string, does not mutate input, handles nil input gracefully
+
+- [ ] **AnthropicClient** — Thin HTTP wrapper for Claude Haiku; reads `ANTHROPIC_API_KEY` from env; class method `call(prompt:, system: nil, max_tokens: 1024)`; returns parsed JSON from response content; handles 4xx/5xx with clear error messages; handles malformed JSON response; uses `net/http` (no gem dependency) (files: `src/app/services/anthropic_client.rb`, `src/spec/services/anthropic_client_spec.rb`)
+  Required tests: formats request correctly (model: claude-3-haiku-20240307, messages array), parses JSON response from content[0].text, handles 401 (missing/invalid key), handles 429 (rate limit), handles 500, handles malformed JSON, raises clear error with status code
+
+- [ ] **Pipeline configuration initializer** — Define `CONFIDENCE_THRESHOLD` (default 0.7), `WATCH_DIR` (default `Rails.root/watch`), `LIBRARY_PATH` (default `Rails.root/library`), `API_TOKEN` (required in production, optional in dev/test) as Rails.application.config values (files: `src/config/initializers/pipeline.rb`)
+  Required tests: (none — config only)
+
+---
+
+## Phase 5: Pipeline Services — Text Extraction & OCR
+
+- [ ] **TextExtractionService** — Wraps `pdftotext` CLI; class method `extract(file_path)`; returns extracted text or empty string if no text found; handles non-PDF gracefully (returns empty); uses `Open3.capture3` (files: `src/app/services/text_extraction_service.rb`, `src/spec/services/text_extraction_service_spec.rb`)
+  Required tests: extracts text from digital PDF (use sample_utility_bill.pdf fixture), returns empty for image-only PDF, returns empty for non-PDF, handles missing file with clear error
+
+- [ ] **OcrService** — Wraps `tesseract` CLI; class method `extract(image_path)`; returns hash `{ text: String, confidence: Float }`; confidence is mean of per-word confidence from `tesseract --psm 3 tsv` output; handles non-image gracefully (files: `src/app/services/ocr_service.rb`, `src/spec/services/ocr_service_spec.rb`)
+  Required tests: extracts text from PNG (use sample_scan.png fixture), returns confidence score 0.0–1.0, handles non-image with clear error, handles missing file
+
+---
+
+## Phase 6: Pipeline Services — Categorization (Stage 2)
+
+- [ ] **CategorizationService** — Class method `call(document)`; extracts text from blob (TextExtractionService → OcrService fallback if empty); PII redact via PiiRedactionService; Claude Haiku prompt: "Classify this document. Return JSON: {concern: string, document_type: string, confidence: float}"; parse response; find_or_create Concern (set llm_proposed: true if new); update document with concern_id, document_type, confidence_score; flag `review_required: true` if confidence < CONFIDENCE_THRESHOLD or malformed JSON; update stage to `categorized`; return document (files: `src/app/services/categorization_service.rb`, `src/spec/services/categorization_service_spec.rb`)
+  Required tests: sets concern/document_type from LLM response, creates LLM-proposed Concern if new (llm_proposed: true), reuses existing Concern by name, PII redacted before LLM call (stub AnthropicClient, verify prompt has no SSN), low confidence flags `review_required`, malformed JSON flags `review_required`, stage → `categorized`, OCR fallback invoked when pdftotext returns empty
+
+---
+
+## Phase 7: Pipeline Services — Identification (Stage 3)
+
+- [ ] **IdentificationService** — Class method `call(document)`; compute SHA-256 hash on `document.original_blob.download`; check for existing Document with same `content_hash`; if match found, set `review_required: true` with `review_reason: "Duplicate detected: doc #{existing.id}"` and do not advance stage; if unique, update `content_hash` and stage to `identified`; return document (files: `src/app/services/identification_service.rb`, `src/spec/services/identification_service_spec.rb`)
+  Required tests: computes correct SHA-256 hash, stores hash in content_hash column, duplicate detected and flags `review_required` with reason including existing doc ID, unique hash proceeds and stage → `identified`, handles missing blob gracefully
+
+---
+
+## Phase 8: Pipeline Services — Normalization (Stage 4)
+
+- [ ] **MarkdownSerializer** — Class method `serialize(document, extracted_fields: {})`; generates Markdown with YAML front matter; front matter includes: doc_id, concern, document_type, confidence_score, content_hash, stage, extracted_fields hash; body includes "# Extracted Content" heading followed by extracted text or "[No text extracted]"; returns string (files: `src/app/services/markdown_serializer.rb`, `src/spec/services/markdown_serializer_spec.rb`)
+  Required tests: produces valid YAML front matter, includes all document metadata, handles nil concern (outputs "uncategorized"), handles empty extracted_fields, handles nil extracted text, YAML is parseable via `YAML.safe_load`
+
+- [ ] **NormalizationService** — Class method `call(document)`; extract text (TextExtractionService → OcrService fallback); PII redact; Claude Haiku structured extraction prompt: "Extract key fields from this {document_type}. Return JSON: {field_name: value, ...}"; parse response; if malformed, flag `review_required` and stop; serialize via MarkdownSerializer; write via LibraryGitService; update `markdown_path`; stage → `normalized`; return document (files: `src/app/services/normalization_service.rb`, `src/spec/services/normalization_service_spec.rb`)
+  Required tests: produces Markdown with valid YAML, OCR fallback when pdftotext empty, PII redacted before LLM, malformed LLM flags `review_required` and does not advance stage, file written to correct library path (concern/document_type/id.md), markdown_path updated, stage → `normalized`, handles missing concern gracefully (uses "uncategorized")
+
+---
+
+## Phase 9: Pipeline Services — Storage & Enrichment (Stages 5–6)
+
+- [ ] **StorageService** — Class method `call(document)`; verify blob exists via `document.original_blob.attached?`; verify markdown file exists at `document.markdown_path`; verify Postgres record saved; if any missing, raise error with details; update stage to `stored`; return document (files: `src/app/services/storage_service.rb`, `src/spec/services/storage_service_spec.rb`)
+  Required tests: confirms blob attached, confirms markdown file exists on disk, stage → `stored`, raises clear error if blob missing, raises clear error if markdown missing
+
+- [ ] **EnrichmentService** — Class method `call(document)`; read markdown file from `document.markdown_path`; parse YAML front matter; for each field in `extracted_fields`, create DocumentField with field_name, value, source: :llm; commit updated markdown via LibraryGitService with source: 'enrichment'; stage → `enriched`; return document (files: `src/app/services/enrichment_service.rb`, `src/spec/services/enrichment_service_spec.rb`)
+  Required tests: creates DocumentField per extracted field, correct source enum (:llm), stage → `enriched`, git commit created with source: 'enrichment', handles no extracted fields gracefully (no DocumentFields created, stage still advances), handles missing markdown file with clear error
+
+---
+
+## Phase 10: Review Queue (Review/Correct Extraction Activity)
+
+- [ ] **ReviewsController + index view** — `ReviewsController#index` lists `Document.needing_review` ordered by created_at; shows filename (from blob), document_type, concern, confidence_score, review_reason, stage; links to show; Bootstrap table (files: `src/app/controllers/reviews_controller.rb`, `src/app/views/reviews/index.html.erb`, `src/config/routes.rb`, `src/spec/requests/reviews_spec.rb`)
+  Required tests: GET /reviews returns 200 with review_required docs listed, empty queue shows "No documents need review" message, unauthenticated redirected
+
+- [ ] **ReviewsController#show + diff view** — Show page with document metadata at top; diff view partial renders side-by-side: left = LLM-extracted fields (from markdown YAML or empty if none), right = editable form with same fields; approve button (POST /reviews/:id/approve), edit+save button (PATCH /reviews/:id), reject button (POST /reviews/:id/reject) (files: `src/app/controllers/reviews_controller.rb`, `src/app/views/reviews/show.html.erb`, `src/app/views/reviews/_diff_view.html.erb`, `src/config/routes.rb`, `src/spec/requests/reviews_spec.rb`)
+  Required tests: GET /reviews/:id returns 200 with diff view, approve clears `review_required` and enqueues PipelineOrchestratorJob to continue from current stage, edited fields saved as DocumentField with `source: :human`, reject sets stage to `rejected` (add to Document::STAGES enum), unauthenticated redirected
+
+- [ ] **Duplicate decision UI** — When `review_reason` contains "Duplicate detected", render special partial showing both documents side-by-side; "Mark as duplicate" button (discards new, sets stage to `rejected`), "New version" button (links both via `previous_version_id` FK on Document, clears review flag, continues pipeline) (files: `src/app/views/reviews/_duplicate_decision.html.erb`, `src/db/migrate/*_add_previous_version_to_documents.rb`, `src/app/models/document.rb`, `src/spec/requests/reviews_duplicate_spec.rb`)
+  Required tests: duplicate decision view renders when reason contains "Duplicate detected", "Mark as duplicate" sets stage to `rejected`, "New version" sets previous_version_id and clears review_required, both actions redirect to review queue
+
+- [ ] **OCR fallback UI** — When stage is `acquired` or `categorized` and review_required, show editable textarea with raw OCR text; submit creates DocumentField records with `source: :human` and advances pipeline (files: `src/app/views/reviews/_ocr_fallback.html.erb`, `src/spec/requests/reviews_ocr_spec.rb`)
+  Required tests: OCR fallback renders editable textarea, submit creates DocumentField with `source: :human`, submit clears review_required and enqueues pipeline job
+
+- [ ] **Manual schema fill UI** — When stage is `categorized` and review_required due to malformed LLM, show form with common fields for the document_type (or generic fields if type unknown); submit creates DocumentField records with `source: :human` and advances pipeline (files: `src/app/views/reviews/_manual_fill.html.erb`, `src/spec/requests/reviews_manual_spec.rb`)
+  Required tests: manual fill form renders with fields, submit creates DocumentField with `source: :human`, submit clears review_required and advances pipeline
+
+---
+
+## Phase 11: Search (Search Document Activity)
+
+- [ ] **Add tsvector column + FTS index** — Migration adds `tsv` tsvector column to documents; GIN index on tsv; ActiveRecord callback `before_save :update_tsv` concatenates markdown content (if file exists) + document_type + concern.name into tsvector using `to_tsvector('english', ...)` (files: `src/db/migrate/*_add_tsv_to_documents.rb`, `src/app/models/document.rb`, `src/spec/models/document_fts_spec.rb`)
+  Required tests: tsvector populated on save, GIN index exists (check via raw SQL), updating document updates tsv, handles missing markdown file (uses document_type + concern only), handles nil concern
+
+- [ ] **SearchController + results view** — `SearchController#index` (GET /search?q=); uses `plainto_tsquery` + `ts_rank` to order results; returns documents with text snippet (via `ts_headline`); empty query returns empty set; results rendered as Bootstrap cards with document_type, concern, confidence, snippet, link to show (files: `src/app/controllers/search_controller.rb`, `src/app/views/search/index.html.erb`, `src/app/views/search/_result_card.html.erb`, `src/config/routes.rb`, `src/spec/requests/search_spec.rb`)
+  Required tests: query returns matching document ordered by rank, no matches returns empty set with message, empty query handled (returns empty or all docs — decide in implementation), results include snippet via ts_headline, unauthenticated redirected
+
+- [ ] **Wire search form in navbar** — Update layout search form to submit to `/search` with `q` param (files: `src/app/views/layouts/application.html.erb`)
+  Required tests: (visual verification) search form submits to /search
+
+---
+
+## Phase 12: Integration Tests
+
+- [ ] **Upload-to-stored integration test** — Upload a PDF via controller, stub all LLM calls, verify document reaches `stored` stage with blob attached, markdown file written, content_hash set, tsvector populated (files: `src/spec/integration/upload_to_stored_spec.rb`)
+  Required tests: document progresses through all stages, blob exists in Active Storage, markdown file exists on disk, content_hash set, stage = `stored`
+
+- [ ] **OCR fallback integration test** — Upload an image-only PDF (or PNG), stub pdftotext to return empty, verify OcrService invoked, document reaches `normalized` with OCR-extracted text in markdown (files: `src/spec/integration/ocr_fallback_spec.rb`)
+  Required tests: pdftotext returns empty, OcrService called, markdown contains OCR text, stage = `normalized`
+
+- [ ] **PII pipeline integration test** — Upload document with PII in fixture, stub AnthropicClient to capture prompt, verify prompt has no unmasked SSN or DOB (files: `src/spec/integration/pii_pipeline_spec.rb`)
+  Required tests: LLM prompt contains XXX-XX-XXXX instead of 123-45-6789, LLM prompt contains XX/XX/XXXX instead of 01/15/1980
+
+- [ ] **Hash conflict integration test** — Upload same file twice, verify second upload flags `review_required` with reason containing first document ID (files: `src/spec/integration/hash_conflict_spec.rb`)
+  Required tests: first upload reaches `identified`, second upload stops at `identified` with `review_required: true` and reason mentioning first doc ID
+
+- [ ] **Stage fallback integration test** — Stub AnthropicClient to return malformed JSON during categorization, verify document flags `review_required` and does not advance past `acquired` (files: `src/spec/integration/stage_fallback_spec.rb`)
+  Required tests: malformed LLM response flags `review_required`, stage remains `acquired`, review_reason mentions malformed JSON
+
+---
+
+## Phase 13: System Tests (E2E with Capybara)
+
+- [ ] **Search system test** — Log in, upload document with known keyword, wait for pipeline to complete (poll document.stage), search for keyword, verify result card appears with document (files: `src/spec/system/search_spec.rb`)
+  Required tests: search for known keyword shows matching card, clicking card navigates to document show page
+
+- [ ] **Review queue system test** — Log in, upload document that will trigger low confidence (stub LLM to return confidence 0.5), verify document appears in review queue, click to diff view, verify approve button present (files: `src/spec/system/review_queue_spec.rb`)
+  Required tests: low-confidence doc appears in /reviews, clicking row navigates to /reviews/:id, diff view renders with approve button
+
+---
+
+## Phase 14: Verification & POC Completion
+
+- [ ] **Rake task: pipeline runner** — `rake pipeline:run[path/to/file]` triggers full pipeline on a single file; creates Document at `acquired`, enqueues PipelineOrchestratorJob, outputs stage progression to stdout; handles nonexistent file with clear error (files: `src/lib/tasks/pipeline.rake`, `src/spec/tasks/pipeline_rake_spec.rb`)
+  Required tests: creates Document at `acquired` and progresses through stages (stubbed services), outputs stage to stdout, handles nonexistent file with error message
+
+- [ ] **Manual POC run** — Process 10 real documents (Government IDs + Medical Records) via upload UI and/or rake task; verify: git log shows commits in `library/` folder, MinIO blobs exist (check via MinIO console at localhost:9001), FTS returns results for known keywords, review queue surfaces at least one low-confidence doc; document results in `specs/activity.md` (files: no code changes; results documented in `specs/activity.md`)
+  Required tests: (manual verification) 10 docs reach `stored` or `enriched`, FTS returns results, review queue has entries, `git log library/` shows commits, MinIO console shows blobs
+
+---
+
+## Deferred (post-POC)
+
+These are explicitly out of scope for POC and should not be implemented until the pipeline is proven on real documents:
+
+- SimpleCov 90% enforcement
+- Brakeman security gate
+- RuboCop as CI blocker (setup only, non-blocking in Phase 0)
+- startup.sh utility script
+- Mailpit for local email
+- Tini as PID 1
+- deploy-k8s.sh / Kamal deployment config
+- pgvector semantic search queries (column exists, queries deferred)
+- LLM wrapper evaluation (Langchainrb)
+- Email ingestion adapter
+- Concern taxonomy seed file
+- Multi-user auth flows
+- Phase 1 (CI), Phase 2 (Staging), Phase 3 (Production) infrastructure
+
+---
+
+## Open Questions (resolve before relevant phase)
+
+1. **Document rejection flow** — PRD does not define what happens to rejected documents. Assumption: add `rejected` to Document::STAGES enum, document stays in DB, does not proceed. Confirm before Phase 10.
+2. **FTS tsvector source content** — Assumption: Markdown body + document_type + concern.name concatenated. Confirm before Phase 11.
+3. **Folder watcher volume mount** — `WATCH_DIR` inside or outside container affects docker-compose volume config. Assumption: `WATCH_DIR` defaults to `Rails.root/watch` inside container; mount `../watch:/app/watch` in docker-compose.yml. Confirm before Phase 3 folder watcher task.
+4. **API auth mechanism** — Bearer token from `API_TOKEN` env var assumed. Confirm before Phase 3 API task.
+5. **Empty search query behavior** — Should empty query return all documents or empty set? Assumption: empty set. Confirm before Phase 11.
+6. **Concern name sanitization** — LibraryGitService already sanitizes concern names for filesystem paths. Confirm this is sufficient or if additional validation needed on Concern model.
+7. **LLM prompt engineering** — Categorization and normalization prompts are minimal in this plan. Refine prompts based on real document results during POC run.
+8. **OCR confidence threshold** — What confidence score triggers review? Assumption: same as LLM confidence (0.7). Confirm before Phase 5.

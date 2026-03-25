@@ -1,0 +1,25 @@
+# Rails tmp/cache
+src/tmp/
+src/log/
+src/storage/
+src/public/assets
+src/app/assets/builds/*
+!src/app/assets/builds/.gitkeep
+
+# Node
+src/node_modules/
+
+# Secrets
+src/config/master.key
+src/config/credentials/*.key
+src/.env
+.env
+*.key
+
+# Data volumes
+.data/
+infra/.data/
+infra/.env
+
+# OS
+.DS_Store

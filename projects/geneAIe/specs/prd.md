@@ -32,6 +32,22 @@ Built for personal use first, designed to scale. The system prioritizes human co
 
 ---
 
+## Technical Constraints
+
+- **Language:** Ruby 3.3
+- **Framework:** Rails 8
+- **Base image:** ruby:3.3-slim
+- **Test command:** bundle exec rspec
+- **Port:** 3000
+
+---
+
+## Phase
+
+**Current Phase:** Phase 0 (Local — app runs and tests pass on dev machine)
+
+---
+
 ## Technical Architecture
 
 ### Stack
