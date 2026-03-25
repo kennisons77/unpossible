@@ -26,8 +26,9 @@ A reusable bootstrap template for AI-assisted development. This plan covers meta
 - [x] Create IDEAS.md with initial entries (`IDEAS.md`)
 - [x] Fix new-project.sh: substitute [PROJECT_NAME] placeholder in generated files (`new-project.sh`) — 18/18 tests green
 - [x] Fix new-project.sh: correct Dockerfile COPY path (`new-project.sh`) — 19/19 tests green
+- [x] Remove dead code: parse_entry function in worklog.sh is defined but never called (`scripts/worklog.sh`) — 40/40 tests green
 
-**Total completed:** 16 tasks — 40/40 BATS tests passing
+**Total completed:** 17 tasks — 40/40 BATS tests passing
 
 ---
 
@@ -41,7 +42,7 @@ A reusable bootstrap template for AI-assisted development. This plan covers meta
 - [x] Fix new-project.sh: correct Dockerfile COPY path (currently `../src/` which is wrong relative to build context) (`new-project.sh`, `infra/Dockerfile` template in new-project.sh)
   Required tests: generated Dockerfile COPY path is `src/` not `../src/`, docker compose build succeeds for a freshly scaffolded project
 
-- [ ] Remove dead code: parse_entry function in worklog.sh is defined but never called (`scripts/worklog.sh`)
+- [x] Remove dead code: parse_entry function in worklog.sh is defined but never called (`scripts/worklog.sh`)
   Required tests: existing worklog.bats suite still passes after removal (10/10 green)
 
 ---

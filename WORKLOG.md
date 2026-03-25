@@ -35,3 +35,15 @@ Fixed new-project.sh to substitute $PROJECT_NAME variable in generated prd.md, p
 ### Summary
 
 Fixed Dockerfile COPY path from `../src/` to `src/` in new-project.sh. The build context in docker-compose.yml is set to `..` (parent directory), so the correct relative path is `src/` not `../src/`. Added BATS test verifying the generated Dockerfile contains the correct COPY path. Manually verified a freshly scaffolded project builds successfully. All 40 tests pass.
+
+## [4] Remove dead parse_entry function from worklog.sh
+
+- **Status:** done
+- **Feature:** Bug Fixes
+- **Started:** 2026-03-25T10:50:00-05:00
+- **Completed:** 2026-03-25T10:51:00-05:00
+- **Commit:** 9a5593d
+
+### Summary
+
+Removed unused parse_entry function from scripts/worklog.sh. Function was defined but never called anywhere in the script. Verified all 10 worklog.sh BATS tests still pass after removal (40/40 total tests green). Dead code removal improves maintainability.
