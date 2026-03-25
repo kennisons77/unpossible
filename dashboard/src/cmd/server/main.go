@@ -1,13 +1,16 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/unpossible/dashboard/parser"
+	"github.com/unpossible/dashboard/runner"
 	"github.com/unpossible/dashboard/web"
 )
 
@@ -16,6 +19,16 @@ func main() {
 	if workspaceDir == "" {
 		workspaceDir = "/workspace"
 	}
+	
+	loopScript := os.Getenv("LOOP_SCRIPT")
+	if loopScript == "" {
+		loopScript = workspaceDir + "/loop.sh"
+	}
+	
+	runAuthUser := os.Getenv("RUN_AUTH_USER")
+	runAuthPass := os.Getenv("RUN_AUTH_PASS")
+	
+	loopRunner := runner.New(loopScript)
 
 	mux := http.NewServeMux()
 	
@@ -83,6 +96,40 @@ func main() {
 		
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(spec)
+	})
+	
+	mux.HandleFunc("/run", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+		
+		user, pass, ok := r.BasicAuth()
+		if !ok || user != runAuthUser || pass != runAuthPass {
+			w.Header().Set("WWW-Authenticate", `Basic realm="dashboard"`)
+			http.Error(w, "unauthorized", http.StatusUnauthorized)
+			return
+		}
+		
+		iterations := 0
+		if iterStr := r.URL.Query().Get("iterations"); iterStr != "" {
+			var err error
+			iterations, err = strconv.Atoi(iterStr)
+			if err != nil {
+				http.Error(w, "invalid iterations parameter", http.StatusBadRequest)
+				return
+			}
+		}
+		
+		go func() {
+			ctx := context.Background()
+			if err := loopRunner.Run(ctx, iterations); err != nil {
+				log.Printf("loop run failed: %v", err)
+			}
+		}()
+		
+		w.WriteHeader(http.StatusAccepted)
+		json.NewEncoder(w).Encode(map[string]string{"status": "started"})
 	})
 	
 	addr := ":8080"

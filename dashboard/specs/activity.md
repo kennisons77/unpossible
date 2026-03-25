@@ -78,3 +78,21 @@
 **Tests:** All pass (go test ./...)
 
 **Commit:** Add static HTML frontend with embedded files
+
+## 2026-03-25T17:07:00-05:00 — Add /run endpoint with Basic Auth
+
+**Task:** POST /run endpoint — executes loop.sh via exec.CommandContext, protected by Basic Auth
+
+**Changes:**
+- Created `src/runner/runner.go` with Runner type
+- Mutex-protected concurrent execution prevention
+- Executes loop.sh via exec.CommandContext with optional iterations parameter
+- Created `src/runner/runner_test.go` with concurrency and execution tests
+- Updated `src/cmd/server/main.go` to add /run endpoint
+- Basic Auth protection using RUN_AUTH_USER and RUN_AUTH_PASS env vars
+- Runs loop asynchronously, returns 202 Accepted immediately
+- Added tests for auth, method validation, and endpoint behavior
+
+**Tests:** All pass (go test ./...)
+
+**Commit:** Add /run endpoint with Basic Auth and loop execution

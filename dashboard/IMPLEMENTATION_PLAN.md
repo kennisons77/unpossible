@@ -8,7 +8,7 @@
 - [x] Parse `WORKLOG.md` → `GET /api/worklog` (JSON: entries)
 - [x] List and serve `specs/*.md` → `GET /api/specs`, `GET /api/specs/{name}`
 - [x] Serve static HTML frontend (embedded via `embed.FS`) showing plan + worklog
-- [ ] `POST /run` endpoint — executes `loop.sh` via `exec.CommandContext`, protected by Basic Auth
+- [x] `POST /run` endpoint — executes `loop.sh` via `exec.CommandContext`, protected by Basic Auth
 - [ ] Prometheus metrics: `runs_total`, `runs_failed_total`, `run_duration_seconds`
 - [ ] Structured JSON logging (stdlib `log/slog`)
 - [ ] Multi-stage Dockerfile builds and `go test ./...` passes in container

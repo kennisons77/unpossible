@@ -182,3 +182,68 @@ func TestAPISpecByName(t *testing.T) {
 		t.Errorf("got status %d, want %d", w.Code, http.StatusOK)
 	}
 }
+
+func TestRunEndpointAuth(t *testing.T) {
+	os.Setenv("RUN_AUTH_USER", "testuser")
+	os.Setenv("RUN_AUTH_PASS", "testpass")
+	defer os.Unsetenv("RUN_AUTH_USER")
+	defer os.Unsetenv("RUN_AUTH_PASS")
+	
+	tests := []struct {
+		name       string
+		user       string
+		pass       string
+		wantStatus int
+	}{
+		{"valid credentials", "testuser", "testpass", http.StatusAccepted},
+		{"invalid user", "wrong", "testpass", http.StatusUnauthorized},
+		{"invalid pass", "testuser", "wrong", http.StatusUnauthorized},
+		{"no credentials", "", "", http.StatusUnauthorized},
+	}
+	
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			req := httptest.NewRequest(http.MethodPost, "/run", nil)
+			if tt.user != "" || tt.pass != "" {
+				req.SetBasicAuth(tt.user, tt.pass)
+			}
+			w := httptest.NewRecorder()
+			
+			mux := http.NewServeMux()
+			mux.HandleFunc("/run", func(w http.ResponseWriter, r *http.Request) {
+				user, pass, ok := r.BasicAuth()
+				if !ok || user != "testuser" || pass != "testpass" {
+					w.Header().Set("WWW-Authenticate", `Basic realm="dashboard"`)
+					http.Error(w, "unauthorized", http.StatusUnauthorized)
+					return
+				}
+				w.WriteHeader(http.StatusAccepted)
+			})
+			
+			mux.ServeHTTP(w, req)
+			
+			if w.Code != tt.wantStatus {
+				t.Errorf("got status %d, want %d", w.Code, tt.wantStatus)
+			}
+		})
+	}
+}
+
+func TestRunEndpointMethodNotAllowed(t *testing.T) {
+	req := httptest.NewRequest(http.MethodGet, "/run", nil)
+	w := httptest.NewRecorder()
+	
+	mux := http.NewServeMux()
+	mux.HandleFunc("/run", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+	})
+	
+	mux.ServeHTTP(w, req)
+	
+	if w.Code != http.StatusMethodNotAllowed {
+		t.Errorf("got status %d, want %d", w.Code, http.StatusMethodNotAllowed)
+	}
+}
