@@ -4,7 +4,7 @@
 
 - [x] Scaffold Go module (`projects/dashboard/src/`) with `cmd/server/main.go`
 - [x] Implement `/healthz` and `/ready` endpoints
-- [ ] Parse `IMPLEMENTATION_PLAN.md` → `GET /api/plan` (JSON: tasks with done/pending status)
+- [x] Parse `IMPLEMENTATION_PLAN.md` → `GET /api/plan` (JSON: tasks with done/pending status)
 - [ ] Parse `WORKLOG.md` → `GET /api/worklog` (JSON: entries)
 - [ ] List and serve `specs/*.md` → `GET /api/specs`, `GET /api/specs/{name}`
 - [ ] Serve static HTML frontend (embedded via `embed.FS`) showing plan + worklog

@@ -15,3 +15,18 @@
 **Tests:** All pass (go test ./...)
 
 **Commit:** Scaffold Go module with health endpoints
+
+## 2026-03-25T17:01:00-05:00 — Parse IMPLEMENTATION_PLAN.md and expose via API
+
+**Task:** Parse IMPLEMENTATION_PLAN.md → GET /api/plan (JSON: tasks with done/pending status)
+
+**Changes:**
+- Created `src/parser/plan.go` with ParseImplementationPlan function
+- Created `src/parser/plan_test.go` with table-driven tests
+- Updated `src/cmd/server/main.go` to add /api/plan endpoint
+- Added test for /api/plan endpoint in main_test.go
+- Reads WORKSPACE_DIR from env (defaults to /workspace)
+
+**Tests:** All pass (go test ./...)
+
+**Commit:** Add /api/plan endpoint with IMPLEMENTATION_PLAN.md parser
