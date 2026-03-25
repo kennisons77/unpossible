@@ -52,7 +52,7 @@ The test service command runs `npm install && npm run build` unnecessarily (alre
 
 ## Phase 0.3: Test Fixtures
 
-- [ ] **Create test fixture files** — Synthetic fixtures for specs: `sample_utility_bill.pdf` (digital PDF with text), `sample_scan.png` (image requiring OCR), `sample_with_pii.txt` (plain text containing SSN pattern 123-45-6789 and DOB pattern 01/15/1980) (files: `src/spec/fixtures/files/sample_utility_bill.pdf`, `src/spec/fixtures/files/sample_scan.png`, `src/spec/fixtures/files/sample_with_pii.txt`)
+- [x] **Create test fixture files** — Synthetic fixtures for specs: `sample_utility_bill.pdf` (digital PDF with text), `sample_scan.png` (image requiring OCR), `sample_with_pii.txt` (plain text containing SSN pattern 123-45-6789 and DOB pattern 01/15/1980) (files: `src/spec/fixtures/files/sample_utility_bill.pdf`, `src/spec/fixtures/files/sample_scan.png`, `src/spec/fixtures/files/sample_with_pii.txt`)
   Required tests: fixtures loadable via `Rails.root.join('spec/fixtures/files/...')`, PII fixture contains SSN and DOB patterns
 
 ---

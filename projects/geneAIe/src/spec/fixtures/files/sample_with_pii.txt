@@ -1,0 +1,10 @@
+Sample Document with PII
+
+This document contains personally identifiable information for testing purposes.
+
+Name: John Doe
+Social Security Number: 123-45-6789
+Date of Birth: 01/15/1980
+Account Number: 98765432
+
+This is a test document used to verify PII redaction in the pipeline.
