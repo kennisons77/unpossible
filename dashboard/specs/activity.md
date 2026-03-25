@@ -96,3 +96,21 @@
 **Tests:** All pass (go test ./...)
 
 **Commit:** Add /run endpoint with Basic Auth and loop execution
+
+## 2026-03-25T17:09:00-05:00 — Add Prometheus metrics
+
+**Task:** Prometheus metrics: runs_total, runs_failed_total, run_duration_seconds
+
+**Changes:**
+- Created `src/metrics/metrics.go` with Metrics type
+- Tracks runs_total, runs_failed_total, current_runs, last_run_success_timestamp
+- Records run_duration_seconds for each execution
+- Exports Prometheus text format via Export() method
+- Created `src/metrics/metrics_test.go` with tests for all metrics
+- Updated `src/cmd/server/main.go` to integrate metrics with /run endpoint
+- Added /metrics endpoint exposing Prometheus format
+- Metrics updated on each loop execution (success/failure/duration)
+
+**Tests:** All pass (go test ./...)
+
+**Commit:** Add Prometheus metrics with /metrics endpoint

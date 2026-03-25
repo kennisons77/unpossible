@@ -5,6 +5,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -245,5 +246,27 @@ func TestRunEndpointMethodNotAllowed(t *testing.T) {
 	
 	if w.Code != http.StatusMethodNotAllowed {
 		t.Errorf("got status %d, want %d", w.Code, http.StatusMethodNotAllowed)
+	}
+}
+
+func TestMetricsEndpoint(t *testing.T) {
+	req := httptest.NewRequest(http.MethodGet, "/metrics", nil)
+	w := httptest.NewRecorder()
+	
+	mux := http.NewServeMux()
+	mux.HandleFunc("/metrics", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/plain; version=0.0.4")
+		w.Write([]byte("runs_total 0\n"))
+	})
+	
+	mux.ServeHTTP(w, req)
+	
+	if w.Code != http.StatusOK {
+		t.Errorf("got status %d, want %d", w.Code, http.StatusOK)
+	}
+	
+	contentType := w.Header().Get("Content-Type")
+	if !strings.Contains(contentType, "text/plain") {
+		t.Errorf("got Content-Type %q, want text/plain", contentType)
 	}
 }

@@ -8,7 +8,9 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
+	"github.com/unpossible/dashboard/metrics"
 	"github.com/unpossible/dashboard/parser"
 	"github.com/unpossible/dashboard/runner"
 	"github.com/unpossible/dashboard/web"
@@ -29,6 +31,7 @@ func main() {
 	runAuthPass := os.Getenv("RUN_AUTH_PASS")
 	
 	loopRunner := runner.New(loopScript)
+	m := metrics.New()
 
 	mux := http.NewServeMux()
 	
@@ -122,14 +125,32 @@ func main() {
 		}
 		
 		go func() {
+			m.IncRunsTotal()
+			m.IncCurrentRuns()
+			defer m.DecCurrentRuns()
+			
+			start := time.Now()
 			ctx := context.Background()
-			if err := loopRunner.Run(ctx, iterations); err != nil {
+			err := loopRunner.Run(ctx, iterations)
+			duration := time.Since(start)
+			
+			m.RecordRunDuration(duration)
+			
+			if err != nil {
+				m.IncRunsFailed()
 				log.Printf("loop run failed: %v", err)
+			} else {
+				m.SetLastRunSuccess(time.Now())
 			}
 		}()
 		
 		w.WriteHeader(http.StatusAccepted)
 		json.NewEncoder(w).Encode(map[string]string{"status": "started"})
+	})
+	
+	mux.HandleFunc("/metrics", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/plain; version=0.0.4")
+		w.Write([]byte(m.Export()))
 	})
 	
 	addr := ":8080"
