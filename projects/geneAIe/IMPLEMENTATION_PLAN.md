@@ -38,7 +38,7 @@ Activity spec files must exist before implementation of their phases. Acceptance
 
 The test service command runs `npm install && npm run build` unnecessarily (already done in image build) and uses `db:drop` which fails on first run if DB doesn't exist.
 
-- [ ] **Fix docker-compose.yml test command** — Replace test service `command` with: `bash -c "bin/rails db:prepare && bundle exec rspec"` (db:prepare creates DB if missing, loads schema, runs pending migrations) (files: `infra/docker-compose.yml`)
+- [x] **Fix docker-compose.yml test command** — Replace test service `command` with: `bash -c "bin/rails db:prepare && bundle exec rspec"` (db:prepare creates DB if missing, loads schema, runs pending migrations) (files: `infra/docker-compose.yml`)
   Required tests: `docker compose -f infra/docker-compose.yml run --rm test` exits 0 with 55 tests passing
 
 ---

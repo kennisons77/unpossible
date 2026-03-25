@@ -71,7 +71,7 @@ services:
         HTTPS_PROXY: ${HTTPS_PROXY:-}
         NO_PROXY: ${NO_PROXY:-}
         PROXY_CA_CERT_B64: ${PROXY_CA_CERT_B64:-}
-    command: bash -c "npm install && npm run build && bin/rails db:drop db:create db:migrate && bundle exec rspec"
+    command: bash -c "bin/rails db:prepare && bundle exec rspec"
     volumes:
       - ../src:/app
     depends_on:
