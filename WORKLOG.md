@@ -83,3 +83,15 @@ Implemented `./loop.sh research <id>` mode. Reads IDEAS.md, extracts the specifi
 ### Summary
 
 Implemented `./loop.sh promote <id>` command. Validates idea exists in IDEAS.md and status is 'ready', creates spec file at `specs/<title-slugified>.md` with idea content, updates IDEAS.md status to 'promoted' and sets promoted_at timestamp. Exits non-zero if: ID missing, ID not found, status not 'ready', or already promoted. Added 7 BATS tests covering all error cases and success path. All 55 tests pass (49 existing + 6 new promote tests).
+
+## [8] Add BATS tests for research and promote modes
+
+- **Status:** done
+- **Feature:** Idea Parking Lot
+- **Started:** 2026-03-25T11:11:00-05:00
+- **Completed:** 2026-03-25T11:12:00-05:00
+- **Commit:** 4cac6b6
+
+### Summary
+
+Verified all required BATS tests for research and promote modes are implemented in src/test/ideas.bats. Tests cover: research mode error handling (IDEAS.md missing, invalid ID, PROMPT missing, ID required), research mode functionality (mode setting), promote mode success path (creates spec file, updates status), and promote mode error handling (invalid status, ID not found, already promoted, ID required). All 12 tests pass as part of the full 55-test suite. Task was already complete from previous work.

@@ -31,8 +31,9 @@ A reusable bootstrap template for AI-assisted development. This plan covers meta
 - [x] Add `./loop.sh research <id>` mode (`loop.sh`, `PROMPT_research.md`) — 49/49 tests green
 - [x] Create PROMPT_research.md (`PROMPT_research.md`) — covered by research mode implementation
 - [x] Add `./loop.sh promote <id>` command (`loop.sh`) — 55/55 tests green
+- [x] Add BATS tests for research and promote modes (`src/test/ideas.bats`) — 12/12 tests green
 
-**Total completed:** 21 tasks — 55/55 BATS tests passing
+**Total completed:** 22 tasks — 55/55 BATS tests passing
 
 ---
 
@@ -41,30 +42,6 @@ A reusable bootstrap template for AI-assisted development. This plan covers meta
 ### Feature: Idea Parking Lot (implementation)
 
 All tasks complete.
-
----
-
-- [x] Create PROMPT_research.md (`PROMPT_research.md`)
-  Content: instruct agent to read the idea entry, answer open questions, assess feasibility, update status to `ready` or `rejected`, add findings to Description section
-  Required tests: none (prompt file only — covered by research mode test above)
-
-- [x] Add `./loop.sh promote <id>` command (`loop.sh`)
-  Required functionality:
-  - loop.sh accepts `promote <id>` as first two arguments
-  - Reads IDEAS.md, finds entry with matching id, verifies status is `ready`
-  - Creates `specs/<title-slugified>.md` with idea content (scoped to PROJECT_DIR)
-  - Updates IDEAS.md entry: status → `promoted`, sets promoted_at timestamp
-  - Exits non-zero if id missing, status is not `ready`, or already promoted
-  Required tests: promote creates spec file at correct path, updates IDEAS.md status to `promoted`, exits non-zero if id not found, exits non-zero if status is not `ready`, exits non-zero if already promoted
-
-- [ ] Add BATS tests for research and promote modes (`src/test/ideas.bats`)
-  Required tests (6 minimum):
-  - loop.sh research exits non-zero if IDEAS.md missing ✓
-  - loop.sh research exits non-zero if id not found in IDEAS.md ✓
-  - loop.sh research loads PROMPT_research.md (verify prompt file path in output) ✓
-  - loop.sh promote creates spec file at correct path ✓
-  - loop.sh promote updates IDEAS.md status to `promoted` ✓
-  - loop.sh promote exits non-zero if idea status is not `ready` ✓
 
 ---
 
