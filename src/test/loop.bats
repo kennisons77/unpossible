@@ -127,3 +127,71 @@ teardown() {
   [[ "$output" =~ "Mode:   plan" ]]
   [[ "$output" =~ "Prompt: PROMPT_plan.md" ]] || [[ "$output" =~ "Prompt: ./PROMPT_plan.md" ]]
 }
+
+@test "loop.sh exits 0 when agent outputs RALPH_COMPLETE" {
+  cd "$TEST_DIR"
+  cp /workspace/loop.sh .
+  echo "unpossible" > ACTIVE_PROJECT
+  echo "PROMPT_build.md content" > PROMPT_build.md
+  git init
+  git config user.email "test@test.com"
+  git config user.name "Test"
+  git add -A
+  git commit -m "init"
+  
+  # Mock agent that outputs RALPH_COMPLETE
+  cat > mock_agent.sh << 'EOF'
+#!/bin/bash
+echo "RALPH_COMPLETE"
+EOF
+  chmod +x mock_agent.sh
+  
+  run bash -c 'AGENT="./mock_agent.sh" bash loop.sh 1 2>&1'
+  [ "$status" -eq 0 ]
+  [[ "$output" =~ "RALPH_COMPLETE — all tasks done" ]]
+}
+
+@test "loop.sh continues when agent does not output RALPH_COMPLETE" {
+  cd "$TEST_DIR"
+  cp /workspace/loop.sh .
+  echo "unpossible" > ACTIVE_PROJECT
+  echo "PROMPT_build.md content" > PROMPT_build.md
+  git init
+  git config user.email "test@test.com"
+  git config user.name "Test"
+  git add -A
+  git commit -m "init"
+  
+  # Mock agent that outputs normal content
+  cat > mock_agent.sh << 'EOF'
+#!/bin/bash
+echo "Task completed"
+EOF
+  chmod +x mock_agent.sh
+  
+  run bash -c 'AGENT="./mock_agent.sh" bash loop.sh 2 2>&1'
+  [[ "$output" =~ "LOOP 1" ]]
+  [[ "$output" =~ "LOOP 2" ]]
+}
+
+@test "loop.sh exit code is 0 on RALPH_COMPLETE" {
+  cd "$TEST_DIR"
+  cp /workspace/loop.sh .
+  echo "unpossible" > ACTIVE_PROJECT
+  echo "PROMPT_build.md content" > PROMPT_build.md
+  git init
+  git config user.email "test@test.com"
+  git config user.name "Test"
+  git add -A
+  git commit -m "init"
+  
+  # Mock agent that outputs RALPH_COMPLETE
+  cat > mock_agent.sh << 'EOF'
+#!/bin/bash
+echo "RALPH_COMPLETE"
+EOF
+  chmod +x mock_agent.sh
+  
+  AGENT="./mock_agent.sh" bash loop.sh 1
+  [ $? -eq 0 ]
+}

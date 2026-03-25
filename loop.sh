@@ -107,7 +107,14 @@ while true; do
         break
     fi
 
-    cat "$PROMPT_FILE" | $AGENT_CMD
+    # Capture agent output to check for RALPH_COMPLETE
+    AGENT_OUTPUT=$(cat "$PROMPT_FILE" | $AGENT_CMD 2>&1)
+    echo "$AGENT_OUTPUT"
+
+    if echo "$AGENT_OUTPUT" | grep -q "RALPH_COMPLETE"; then
+        echo "RALPH_COMPLETE — all tasks done"
+        exit 0
+    fi
 
     # Push branch; set upstream tracking on first push
     git push origin "$CURRENT_BRANCH" 2>/dev/null || \

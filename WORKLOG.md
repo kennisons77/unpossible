@@ -47,3 +47,15 @@ Fixed Dockerfile COPY path from `../src/` to `src/` in new-project.sh. The build
 ### Summary
 
 Removed unused parse_entry function from scripts/worklog.sh. Function was defined but never called anywhere in the script. Verified all 10 worklog.sh BATS tests still pass after removal (40/40 total tests green). Dead code removal improves maintainability.
+
+## [5] Add RALPH_COMPLETE detection to loop.sh
+
+- **Status:** done
+- **Feature:** RALPH_COMPLETE Detection
+- **Started:** 2026-03-25T10:52:00-05:00
+- **Completed:** 2026-03-25T10:54:00-05:00
+- **Commit:** 70c559d
+
+### Summary
+
+Added RALPH_COMPLETE sentinel detection to loop.sh. Agent output is now captured and checked for the RALPH_COMPLETE string. When detected, loop exits cleanly with status 0 and prints "RALPH_COMPLETE — all tasks done". Added 3 BATS tests: exits 0 on RALPH_COMPLETE, continues loop when not present, and verifies exit code is 0. All 43 tests pass (40 existing + 3 new).
