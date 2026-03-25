@@ -28,8 +28,9 @@ A reusable bootstrap template for AI-assisted development. This plan covers meta
 - [x] Fix new-project.sh: correct Dockerfile COPY path (`new-project.sh`) — 19/19 tests green
 - [x] Remove dead code: parse_entry function in worklog.sh is defined but never called (`scripts/worklog.sh`) — 40/40 tests green
 - [x] Add RALPH_COMPLETE detection to loop.sh: exit cleanly when agent outputs the sentinel (`loop.sh`) — 43/43 tests green
+- [x] Add `./loop.sh research <id>` mode (`loop.sh`, `PROMPT_research.md`) — 49/49 tests green
 
-**Total completed:** 18 tasks — 43/43 BATS tests passing
+**Total completed:** 19 tasks — 49/49 BATS tests passing
 
 ---
 
@@ -42,15 +43,6 @@ All tasks complete.
 ---
 
 ### Feature: Idea Parking Lot (implementation)
-
-- [ ] Add `./loop.sh research <id>` mode (`loop.sh`, `PROMPT_research.md`)
-  Required functionality:
-  - loop.sh accepts `research <id>` as first two arguments
-  - Reads IDEAS.md (scoped to PROJECT_DIR), finds entry with matching id
-  - Loads PROMPT_research.md (project-local override, else root fallback)
-  - Feeds idea context + prompt to agent; agent updates status to `ready` or `rejected`
-  - Exits non-zero if id missing from IDEAS.md, IDEAS.md doesn't exist, or PROMPT_research.md not found
-  Required tests: research mode loads PROMPT_research.md, exits non-zero for invalid id, exits non-zero if IDEAS.md missing
 
 - [ ] Create PROMPT_research.md (`PROMPT_research.md`)
   Content: instruct agent to read the idea entry, answer open questions, assess feasibility, update status to `ready` or `rejected`, add findings to Description section
@@ -67,9 +59,9 @@ All tasks complete.
 
 - [ ] Add BATS tests for research and promote modes (`src/test/ideas.bats`)
   Required tests (6 minimum):
-  - loop.sh research exits non-zero if IDEAS.md missing
-  - loop.sh research exits non-zero if id not found in IDEAS.md
-  - loop.sh research loads PROMPT_research.md (verify prompt file path in output)
+  - loop.sh research exits non-zero if IDEAS.md missing ✓
+  - loop.sh research exits non-zero if id not found in IDEAS.md ✓
+  - loop.sh research loads PROMPT_research.md (verify prompt file path in output) ✓
   - loop.sh promote creates spec file at correct path
   - loop.sh promote updates IDEAS.md status to `promoted`
   - loop.sh promote exits non-zero if idea status is not `ready`
@@ -106,7 +98,7 @@ All tasks complete.
 
 ---
 
-**Total tasks:** 9 remaining (9 features)
+**Total tasks:** 7 remaining (7 features)
 **Phase 0 constraints:** All work uses local docker-compose only. No CI/CD, no remote deploys, no k8s.
 **Next phase:** Phase 1 (CI) — not planned yet. Advance only after Phase 0 acceptance criteria are met.
 

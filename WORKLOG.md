@@ -59,3 +59,15 @@ Removed unused parse_entry function from scripts/worklog.sh. Function was define
 ### Summary
 
 Added RALPH_COMPLETE sentinel detection to loop.sh. Agent output is now captured and checked for the RALPH_COMPLETE string. When detected, loop exits cleanly with status 0 and prints "RALPH_COMPLETE — all tasks done". Added 3 BATS tests: exits 0 on RALPH_COMPLETE, continues loop when not present, and verifies exit code is 0. All 43 tests pass (40 existing + 3 new).
+
+## [6] Add research mode to loop.sh
+
+- **Status:** done
+- **Feature:** Idea Parking Lot
+- **Started:** 2026-03-25T10:56:00-05:00
+- **Completed:** 2026-03-25T11:05:00-05:00
+- **Commit:** 7b7b091
+
+### Summary
+
+Implemented `./loop.sh research <id>` mode. Reads IDEAS.md, extracts the specified idea entry (from ## [ID] to next ## or EOF), and injects it into PROMPT_research.md by replacing {IDEA_CONTENT} placeholder. Created PROMPT_research.md template instructing agent to assess feasibility and update idea status to ready/rejected. Added cleanup trap for temp prompt files. Improved git push error handling with fallback message. Added 6 BATS tests covering: IDEAS.md missing, invalid ID, PROMPT missing, ID required, mode setting, and integration (skipped). All 49 tests pass.
