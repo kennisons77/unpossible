@@ -62,3 +62,19 @@
 **Tests:** All pass (go test ./...)
 
 **Commit:** Add /api/specs endpoints with specs directory parser
+
+## 2026-03-25T17:05:00-05:00 — Serve static HTML frontend
+
+**Task:** Serve static HTML frontend (embedded via embed.FS) showing plan + worklog
+
+**Changes:**
+- Created `src/web/index.html` with minimal UI
+- Fetches /api/plan and /api/worklog via JavaScript
+- Displays tasks with done/pending status and visual indicators
+- Displays worklog entries with timestamps
+- Created `src/web/embed.go` package to embed static files
+- Updated `src/cmd/server/main.go` to serve embedded files at root path
+
+**Tests:** All pass (go test ./...)
+
+**Commit:** Add static HTML frontend with embedded files

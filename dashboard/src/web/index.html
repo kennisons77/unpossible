@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>unpossible dashboard</title>
+    <style>
+        body { font-family: system-ui, sans-serif; max-width: 1200px; margin: 0 auto; padding: 20px; }
+        h1 { border-bottom: 2px solid #333; padding-bottom: 10px; }
+        h2 { margin-top: 30px; }
+        .task { padding: 8px; margin: 4px 0; border-left: 3px solid #ccc; }
+        .task.done { border-left-color: #4caf50; background: #f1f8f4; }
+        .task.pending { border-left-color: #ff9800; background: #fff8f0; }
+        .entry { padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 4px; }
+        .entry-title { font-weight: bold; margin-bottom: 4px; }
+        .entry-timestamp { color: #666; font-size: 0.9em; }
+        .error { color: #d32f2f; padding: 12px; background: #ffebee; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <h1>unpossible dashboard</h1>
+    
+    <h2>Implementation Plan</h2>
+    <div id="plan"></div>
+    
+    <h2>Worklog</h2>
+    <div id="worklog"></div>
+    
+    <script>
+        async function loadPlan() {
+            try {
+                const res = await fetch('/api/plan');
+                const data = await res.json();
+                const html = data.tasks.map(t => 
+                    `<div class="task ${t.done ? 'done' : 'pending'}">
+                        ${t.done ? '✓' : '○'} ${t.description}
+                    </div>`
+                ).join('');
+                document.getElementById('plan').innerHTML = html;
+            } catch (err) {
+                document.getElementById('plan').innerHTML = `<div class="error">Failed to load plan: ${err.message}</div>`;
+            }
+        }
+        
+        async function loadWorklog() {
+            try {
+                const res = await fetch('/api/worklog');
+                const data = await res.json();
+                const html = data.entries.map(e => 
+                    `<div class="entry">
+                        <div class="entry-title">${e.title}</div>
+                        <div class="entry-timestamp">${e.timestamp}</div>
+                        <pre>${e.description}</pre>
+                    </div>`
+                ).join('');
+                document.getElementById('worklog').innerHTML = html || '<p>No entries yet.</p>';
+            } catch (err) {
+                document.getElementById('worklog').innerHTML = `<div class="error">Failed to load worklog: ${err.message}</div>`;
+            }
+        }
+        
+        loadPlan();
+        loadWorklog();
+    </script>
+</body>
+</html>

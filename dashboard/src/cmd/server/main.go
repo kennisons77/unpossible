@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/unpossible/dashboard/parser"
+	"github.com/unpossible/dashboard/web"
 )
 
 func main() {
@@ -17,6 +18,8 @@ func main() {
 	}
 
 	mux := http.NewServeMux()
+	
+	mux.Handle("/", http.FileServer(http.FS(web.FS)))
 	
 	mux.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
