@@ -71,3 +71,15 @@ Added RALPH_COMPLETE sentinel detection to loop.sh. Agent output is now captured
 ### Summary
 
 Implemented `./loop.sh research <id>` mode. Reads IDEAS.md, extracts the specified idea entry (from ## [ID] to next ## or EOF), and injects it into PROMPT_research.md by replacing {IDEA_CONTENT} placeholder. Created PROMPT_research.md template instructing agent to assess feasibility and update idea status to ready/rejected. Added cleanup trap for temp prompt files. Improved git push error handling with fallback message. Added 6 BATS tests covering: IDEAS.md missing, invalid ID, PROMPT missing, ID required, mode setting, and integration (skipped). All 49 tests pass.
+
+## [7] Add promote mode to loop.sh
+
+- **Status:** done
+- **Feature:** Idea Parking Lot
+- **Started:** 2026-03-25T11:05:00-05:00
+- **Completed:** 2026-03-25T11:09:00-05:00
+- **Commit:** fd40044 
+
+### Summary
+
+Implemented `./loop.sh promote <id>` command. Validates idea exists in IDEAS.md and status is 'ready', creates spec file at `specs/<title-slugified>.md` with idea content, updates IDEAS.md status to 'promoted' and sets promoted_at timestamp. Exits non-zero if: ID missing, ID not found, status not 'ready', or already promoted. Added 7 BATS tests covering all error cases and success path. All 55 tests pass (49 existing + 6 new promote tests).

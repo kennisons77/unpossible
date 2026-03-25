@@ -109,3 +109,121 @@ EOF
   # Tests 1-5 already verify: error handling, mode parsing, and prompt loading
   skip "Content extraction verified by tests 1-5; full integration requires real agent"
 }
+
+@test "loop.sh promote creates spec file at correct path" {
+  cat > IDEAS.md << 'EOF'
+# IDEAS.md
+
+## [1] Test Feature
+
+- **Status:** ready
+- **Created:** 2026-03-25T10:00:00Z
+- **Promoted:**
+
+### Description
+
+This is a test feature description.
+EOF
+
+  mkdir -p specs
+  
+  run bash loop.sh promote 1
+  [ "$status" -eq 0 ]
+  [ -f "specs/test-feature.md" ]
+  grep -q "Test Feature" specs/test-feature.md
+}
+
+@test "loop.sh promote updates IDEAS.md status to promoted" {
+  cat > IDEAS.md << 'EOF'
+# IDEAS.md
+
+## [1] Test Feature
+
+- **Status:** ready
+- **Created:** 2026-03-25T10:00:00Z
+- **Promoted:**
+
+### Description
+
+Test description.
+EOF
+
+  mkdir -p specs
+  
+  run bash loop.sh promote 1
+  [ "$status" -eq 0 ]
+  grep -q "\*\*Status:\*\* promoted" IDEAS.md
+  grep -q "\*\*Promoted:\*\* 20" IDEAS.md
+}
+
+@test "loop.sh promote exits non-zero if idea status is not ready" {
+  cat > IDEAS.md << 'EOF'
+# IDEAS.md
+
+## [1] Test Feature
+
+- **Status:** parked
+- **Created:** 2026-03-25T10:00:00Z
+- **Promoted:**
+
+### Description
+
+Test description.
+EOF
+
+  mkdir -p specs
+  
+  run bash loop.sh promote 1
+  [ "$status" -ne 0 ]
+  [[ "$output" =~ "must be 'ready' to promote" ]]
+}
+
+@test "loop.sh promote exits non-zero if id not found" {
+  cat > IDEAS.md << 'EOF'
+# IDEAS.md
+
+## [1] Test Feature
+
+- **Status:** ready
+- **Created:** 2026-03-25T10:00:00Z
+- **Promoted:**
+
+### Description
+
+Test description.
+EOF
+
+  mkdir -p specs
+  
+  run bash loop.sh promote 999
+  [ "$status" -ne 0 ]
+  [[ "$output" =~ "idea ID 999 not found" ]]
+}
+
+@test "loop.sh promote exits non-zero if already promoted" {
+  cat > IDEAS.md << 'EOF'
+# IDEAS.md
+
+## [1] Test Feature
+
+- **Status:** ready
+- **Created:** 2026-03-25T10:00:00Z
+- **Promoted:** 2026-03-25T12:00:00Z
+
+### Description
+
+Test description.
+EOF
+
+  mkdir -p specs
+  
+  run bash loop.sh promote 1
+  [ "$status" -ne 0 ]
+  [[ "$output" =~ "already promoted" ]]
+}
+
+@test "loop.sh promote requires an idea ID" {
+  run bash loop.sh promote
+  [ "$status" -ne 0 ]
+  [[ "$output" =~ "promote mode requires an idea ID" ]]
+}

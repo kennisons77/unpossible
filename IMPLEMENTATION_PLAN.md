@@ -29,26 +29,26 @@ A reusable bootstrap template for AI-assisted development. This plan covers meta
 - [x] Remove dead code: parse_entry function in worklog.sh is defined but never called (`scripts/worklog.sh`) — 40/40 tests green
 - [x] Add RALPH_COMPLETE detection to loop.sh: exit cleanly when agent outputs the sentinel (`loop.sh`) — 43/43 tests green
 - [x] Add `./loop.sh research <id>` mode (`loop.sh`, `PROMPT_research.md`) — 49/49 tests green
+- [x] Create PROMPT_research.md (`PROMPT_research.md`) — covered by research mode implementation
+- [x] Add `./loop.sh promote <id>` command (`loop.sh`) — 55/55 tests green
 
-**Total completed:** 19 tasks — 49/49 BATS tests passing
+**Total completed:** 21 tasks — 55/55 BATS tests passing
 
 ---
 
 ## Backlog
 
-### Feature: RALPH_COMPLETE Detection
+### Feature: Idea Parking Lot (implementation)
 
 All tasks complete.
 
 ---
 
-### Feature: Idea Parking Lot (implementation)
-
-- [ ] Create PROMPT_research.md (`PROMPT_research.md`)
+- [x] Create PROMPT_research.md (`PROMPT_research.md`)
   Content: instruct agent to read the idea entry, answer open questions, assess feasibility, update status to `ready` or `rejected`, add findings to Description section
   Required tests: none (prompt file only — covered by research mode test above)
 
-- [ ] Add `./loop.sh promote <id>` command (`loop.sh`)
+- [x] Add `./loop.sh promote <id>` command (`loop.sh`)
   Required functionality:
   - loop.sh accepts `promote <id>` as first two arguments
   - Reads IDEAS.md, finds entry with matching id, verifies status is `ready`
@@ -62,9 +62,9 @@ All tasks complete.
   - loop.sh research exits non-zero if IDEAS.md missing ✓
   - loop.sh research exits non-zero if id not found in IDEAS.md ✓
   - loop.sh research loads PROMPT_research.md (verify prompt file path in output) ✓
-  - loop.sh promote creates spec file at correct path
-  - loop.sh promote updates IDEAS.md status to `promoted`
-  - loop.sh promote exits non-zero if idea status is not `ready`
+  - loop.sh promote creates spec file at correct path ✓
+  - loop.sh promote updates IDEAS.md status to `promoted` ✓
+  - loop.sh promote exits non-zero if idea status is not `ready` ✓
 
 ---
 
@@ -98,7 +98,7 @@ All tasks complete.
 
 ---
 
-**Total tasks:** 7 remaining (7 features)
+**Total tasks:** 4 remaining (2 features)
 **Phase 0 constraints:** All work uses local docker-compose only. No CI/CD, no remote deploys, no k8s.
 **Next phase:** Phase 1 (CI) — not planned yet. Advance only after Phase 0 acceptance criteria are met.
 

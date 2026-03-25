@@ -77,6 +77,14 @@ elif [ "$1" = "research" ]; then
         exit 1
     fi
     MAX_ITERATIONS=1
+elif [ "$1" = "promote" ]; then
+    MODE="promote"
+    IDEA_ID="$2"
+    if [ -z "$IDEA_ID" ]; then
+        echo "Error: promote mode requires an idea ID"
+        echo "Usage: ./loop.sh promote <id>"
+        exit 1
+    fi
 elif [[ "$1" =~ ^[0-9]+$ ]]; then
     MODE="build"
     MAX_ITERATIONS=$1
@@ -94,7 +102,7 @@ else
 fi
 
 # Validate prompt file exists before research mode processing
-if [ ! -f "$PROMPT_FILE" ]; then
+if [ "$MODE" != "promote" ] && [ ! -f "$PROMPT_FILE" ]; then
     echo "Error: $PROMPT_FILE not found"
     exit 1
 fi
@@ -126,6 +134,82 @@ if [ "$MODE" = "research" ]; then
     TEMP_PROMPT="/tmp/prompt_research_$$.md"
     echo "$PROMPT_CONTENT" > "$TEMP_PROMPT"
     PROMPT_FILE="$TEMP_PROMPT"
+fi
+
+# Promote mode: validate idea is ready, create spec file, update IDEAS.md
+if [ "$MODE" = "promote" ]; then
+    IDEAS_FILE="$PROJECT_DIR/IDEAS.md"
+    if [ ! -f "$IDEAS_FILE" ]; then
+        echo "Error: IDEAS.md not found at $IDEAS_FILE"
+        exit 1
+    fi
+    
+    # Extract the idea entry
+    IDEA_CONTENT=$(awk -v id="$IDEA_ID" '
+        /^## \[/ {
+            if (found) exit
+            if ($0 ~ "\\[" id "\\]") found=1
+        }
+        found { print }
+    ' "$IDEAS_FILE")
+    
+    if [ -z "$IDEA_CONTENT" ]; then
+        echo "Error: idea ID $IDEA_ID not found in $IDEAS_FILE"
+        exit 1
+    fi
+    
+    # Extract title and status
+    IDEA_TITLE=$(echo "$IDEA_CONTENT" | grep -m1 "^## \[" | sed 's/^## \[[0-9]*\] //')
+    IDEA_STATUS=$(echo "$IDEA_CONTENT" | grep "^- \*\*Status:\*\*" | sed 's/^- \*\*Status:\*\* //')
+    
+    # Check if already promoted (field has a value, not just empty)
+    PROMOTED_LINE=$(echo "$IDEA_CONTENT" | grep "^- \*\*Promoted:\*\*")
+    if echo "$PROMOTED_LINE" | grep -q "^- \*\*Promoted:\*\* ."; then
+        PROMOTED_AT=$(echo "$PROMOTED_LINE" | sed 's/^- \*\*Promoted:\*\* //')
+        echo "Error: idea $IDEA_ID is already promoted (promoted at: $PROMOTED_AT)"
+        exit 1
+    fi
+    
+    # Check if status is ready
+    if [ "$IDEA_STATUS" != "ready" ]; then
+        echo "Error: idea $IDEA_ID status is '$IDEA_STATUS', must be 'ready' to promote"
+        exit 1
+    fi
+    
+    # Slugify title for filename
+    SPEC_FILENAME=$(echo "$IDEA_TITLE" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed 's/--*/-/g' | sed 's/^-//' | sed 's/-$//')
+    SPEC_PATH="$PROJECT_DIR/specs/$SPEC_FILENAME.md"
+    
+    # Create spec file
+    cat > "$SPEC_PATH" << EOF
+# $IDEA_TITLE
+
+$IDEA_CONTENT
+EOF
+    
+    echo "Created spec file: $SPEC_PATH"
+    
+    # Update IDEAS.md: change status to promoted, add timestamp
+    PROMOTED_TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+    awk -v id="$IDEA_ID" -v ts="$PROMOTED_TIMESTAMP" '
+        /^## \[/ {
+            if (in_entry) in_entry=0
+            if ($0 ~ "\\[" id "\\]") in_entry=1
+        }
+        {
+            if (in_entry && /^- \*\*Status:\*\*/) {
+                print "- **Status:** promoted"
+            } else if (in_entry && /^- \*\*Promoted:\*\*/) {
+                print "- **Promoted:** " ts
+            } else {
+                print
+            }
+        }
+    ' "$IDEAS_FILE" > "$IDEAS_FILE.tmp"
+    mv "$IDEAS_FILE.tmp" "$IDEAS_FILE"
+    
+    echo "Updated IDEAS.md: idea $IDEA_ID promoted at $PROMOTED_TIMESTAMP"
+    exit 0
 fi
 
 # --- Branch management ---
