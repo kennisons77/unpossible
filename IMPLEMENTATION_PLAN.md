@@ -25,8 +25,9 @@ A reusable bootstrap template for AI-assisted development. This plan covers meta
 - [x] Define IDEAS.md schema (`specs/features/idea-parking-lot.md`)
 - [x] Create IDEAS.md with initial entries (`IDEAS.md`)
 - [x] Fix new-project.sh: substitute [PROJECT_NAME] placeholder in generated files (`new-project.sh`) — 18/18 tests green
+- [x] Fix new-project.sh: correct Dockerfile COPY path (`new-project.sh`) — 19/19 tests green
 
-**Total completed:** 15 tasks — 39/39 BATS tests passing
+**Total completed:** 16 tasks — 40/40 BATS tests passing
 
 ---
 
@@ -37,7 +38,7 @@ A reusable bootstrap template for AI-assisted development. This plan covers meta
 - [x] Fix new-project.sh: substitute [PROJECT_NAME] placeholder in generated files (`new-project.sh`)
   Required tests: generated prd.md contains project name not literal "[PROJECT_NAME]", generated plan.md contains project name, generated IMPLEMENTATION_PLAN.md contains project name
 
-- [ ] Fix new-project.sh: correct Dockerfile COPY path (currently `../src/` which is wrong relative to build context) (`new-project.sh`, `infra/Dockerfile` template in new-project.sh)
+- [x] Fix new-project.sh: correct Dockerfile COPY path (currently `../src/` which is wrong relative to build context) (`new-project.sh`, `infra/Dockerfile` template in new-project.sh)
   Required tests: generated Dockerfile COPY path is `src/` not `../src/`, docker compose build succeeds for a freshly scaffolded project
 
 - [ ] Remove dead code: parse_entry function in worklog.sh is defined but never called (`scripts/worklog.sh`)
@@ -121,7 +122,7 @@ A reusable bootstrap template for AI-assisted development. This plan covers meta
 
 ---
 
-**Total tasks:** 11 remaining (2 bug fixes + 9 features)
+**Total tasks:** 10 remaining (1 bug fix + 9 features)
 **Phase 0 constraints:** All work uses local docker-compose only. No CI/CD, no remote deploys, no k8s.
 **Next phase:** Phase 1 (CI) — not planned yet. Advance only after Phase 0 acceptance criteria are met.
 

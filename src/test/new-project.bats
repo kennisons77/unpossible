@@ -137,3 +137,10 @@ teardown() {
   grep -q "IMPLEMENTATION_PLAN — testproject" projects/testproject/IMPLEMENTATION_PLAN.md
   ! grep -q "\[PROJECT_NAME\]" projects/testproject/IMPLEMENTATION_PLAN.md
 }
+
+@test "new-project.sh generates Dockerfile with correct COPY path" {
+  run bash new-project.sh testproject
+  [ "$status" -eq 0 ]
+  grep -q "COPY src/ \." projects/testproject/infra/Dockerfile
+  ! grep -q "COPY \.\./src/" projects/testproject/infra/Dockerfile
+}

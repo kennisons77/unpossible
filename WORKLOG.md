@@ -23,3 +23,15 @@ Created specs/features/ideas.md defining the schema for the idea parking lot fea
 ### Summary
 
 Fixed new-project.sh to substitute $PROJECT_NAME variable in generated prd.md, plan.md, and IMPLEMENTATION_PLAN.md files. Changed heredoc delimiters from 'EOF' (literal) to EOF (variable expansion). Added 3 new BATS tests verifying project name appears in generated files and [PROJECT_NAME] placeholder does not. All 39 tests pass (15 existing + 3 new for new-project.sh).
+
+## [3] Fix new-project.sh: correct Dockerfile COPY path
+
+- **Status:** done
+- **Feature:** Bug Fixes
+- **Started:** 2026-03-25T10:47:00-05:00
+- **Completed:** 2026-03-25T10:49:00-05:00
+- **Commit:** 2e84d49
+
+### Summary
+
+Fixed Dockerfile COPY path from `../src/` to `src/` in new-project.sh. The build context in docker-compose.yml is set to `..` (parent directory), so the correct relative path is `src/` not `../src/`. Added BATS test verifying the generated Dockerfile contains the correct COPY path. Manually verified a freshly scaffolded project builds successfully. All 40 tests pass.

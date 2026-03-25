@@ -116,7 +116,7 @@ WORKDIR /app
 
 # TODO: Install dependencies
 
-COPY ../src/ .
+COPY src/ .
 
 # TODO: Update CMD based on your application
 CMD ["echo", "Replace this with your application command"]
