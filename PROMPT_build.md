@@ -1,4 +1,4 @@
-**Model selection:** Use Haiku for reading/searching files. Use Sonnet for code generation. Use Opus only for debugging and architectural decisions. Subagents for reading complete in ≤5 turns; kill any subagent exceeding 10 turns.
+**Model selection:** Use Haiku for reading/searching files. Use Sonnet for code generation. Use Opus only for debugging and architectural decisions. Subagents for reading complete in ≤5 turns; kill any subagent exceeding 10 turns. Read `practices/general/cost.md` for caching and subagent economics — apply `cache_control: {type: "ephemeral", ttl: "1h"}` to specs, practices files, and prd.md passed to subagents.
 
 0a. Read `ACTIVE_PROJECT` (root-level file) to get the project name. All project paths below use `projects/<name>/` as the root. **Do not read or scan any other directory under `projects/` unless explicitly instructed.**
 0b. Read `practices/general/coding.md` — these are the standing rules for how to write code in this project.
@@ -9,12 +9,7 @@
 
 1. Follow `projects/<name>/IMPLEMENTATION_PLAN.md` and choose the most important unchecked item. Before making changes, search `projects/<name>/src/` (don't assume not implemented) using up to 3 Haiku subagents. Use 1 Sonnet subagent for build/tests. Use an Opus subagent for complex reasoning (debugging, architectural decisions).
 
-2. All application code goes in `projects/<name>/src/`. All infrastructure config lives in `projects/<name>/infra/`. Check `## Phase` in `projects/<name>/specs/prd.md` before touching any infra:
-   - **Phase 0:** only `projects/<name>/infra/Dockerfile` and `projects/<name>/infra/docker-compose.yml`
-   - **Phase 1:** add `.github/workflows/<name>-ci.yml` (build + test only, no deploy)
-   - **Phase 2:** add a staging deploy workflow; update compose for remote secrets
-   - **Phase 3:** add production config, secrets management, and security hardening
-   Never add Phase N+1 infrastructure until the plan explicitly includes an "Advance to Phase N+1" task.
+2. All application code goes in `projects/<name>/src/`. All infrastructure config lives in `projects/<name>/infra/`. Check `## Phase` in `projects/<name>/specs/prd.md` and follow the phase rules in `practices/general/planning.md` before touching any infra. Never add Phase N+1 infrastructure until the plan explicitly includes an "Advance to Phase N+1" task.
 
 3. Before running tests, read `practices/general/verification.md`. Then run:
    ```
@@ -39,3 +34,5 @@
 - If you find inconsistencies in `projects/<name>/specs/*`, use an Opus subagent to update them.
 - Update phase-appropriate infra files when ports, environment variables, or resource needs change (see rule 2 above).
 - If you discover a pattern worth preserving (a gotcha, a convention, a hard-won lesson), append it to the relevant practices file: `practices/general/coding.md`, `practices/lang/[language].md`, or `practices/framework/[framework].md`. Keep entries terse.
+- After a successful commit, trim `projects/<name>/specs/activity.md` to the last 10 entries (prepend a one-line summary of removed entries).
+- Output `RALPH_COMPLETE` when the task is done and committed. Output `RALPH_WAITING: <question>` if you need human input before proceeding.

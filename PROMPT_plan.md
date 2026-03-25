@@ -1,11 +1,11 @@
 0a. Read `ACTIVE_PROJECT` (root-level file) to get the project name. All project paths below use `projects/<name>/` as the root. **Do not read or scan any other directory under `projects/` unless explicitly instructed.**
-0b. Read `practices/general/planning.md` — these are the standing rules for how to plan this project.
-0c. Study `projects/<name>/specs/*` with up to 10 parallel Sonnet subagents. Pay close attention to:
+0b. Read `practices/general/planning.md` and `practices/general/cost.md` — apply `cache_control: {type: "ephemeral", ttl: "1h"}` to specs, practices files, and prd.md passed to subagents.
+0c. Study `projects/<name>/specs/*` with up to 5 parallel Haiku subagents. Pay close attention to:
     - `projects/<name>/specs/prd.md` Technical Constraints (language, framework, base image, test command)
     - `projects/<name>/specs/audience.md` if it exists — it defines the current target SLC release and the activities to plan for
 0d. Read the language-specific practices file if it exists: `practices/lang/[language].md` (language from `projects/<name>/specs/prd.md`). Read the framework-specific file if it exists: `practices/framework/[framework].md`.
 0e. Study `projects/<name>/IMPLEMENTATION_PLAN.md` (if present) to understand the plan so far.
-0f. Study `projects/<name>/src/` with up to 10 parallel Sonnet subagents to understand what has been implemented so far.
+0f. Study `projects/<name>/src/` with up to 5 parallel Haiku subagents to understand what has been implemented so far.
 
 1. Perform a gap analysis comparing `projects/<name>/src/` against the specs. Use an Opus subagent to analyze findings and create/update `projects/<name>/IMPLEMENTATION_PLAN.md`. Ultrathink.
 
@@ -24,4 +24,6 @@
 
 IMPORTANT: Plan only. Do NOT implement anything. Do NOT assume functionality is missing; confirm with code search in `projects/<name>/src/` first.
 
-ULTIMATE GOAL: We want to achieve [project-specific goal — fill this in]. Consider missing elements and plan accordingly. If something is missing, search first to confirm it doesn't exist, then if needed author the specification at `projects/<name>/specs/FILENAME.md` and document the plan to implement it in `projects/<name>/IMPLEMENTATION_PLAN.md`.
+After updating `projects/<name>/IMPLEMENTATION_PLAN.md`, trim `projects/<name>/specs/activity.md` to the last 10 entries (prepend a one-line summary of removed entries).
+
+Output `RALPH_COMPLETE` when the plan is written and activity.md is trimmed.

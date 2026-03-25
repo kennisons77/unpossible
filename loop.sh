@@ -61,7 +61,8 @@ case "$1" in
     research) MODE="research"; IDEA_ID="$2"
               [ -z "$IDEA_ID" ] && { echo "Usage: ./loop.sh research <id>"; exit 1; }
               MAX_ITERATIONS=1 ;;
-    review)   MODE="review";   MAX_ITERATIONS=1 ;;
+    review)   MODE="review";   MAX_ITERATIONS=1
+              [ -f "PROMPT_review.md" ] || { echo "Error: PROMPT_review.md not found — review mode is not configured"; exit 1; } ;;
     promote)  MODE="promote";  IDEA_ID="$2"
               [ -z "$IDEA_ID" ] && { echo "Usage: ./loop.sh promote <id>"; exit 1; } ;;
     [0-9]*)   MODE="build";    MAX_ITERATIONS=$1 ;;
@@ -150,11 +151,17 @@ echo "━━━━━━━━━━━━━━━━━━━━━━━━�
 
 PR_OPENED=0
 ITERATION=0
+CONSECUTIVE_FAILURES=0
+MAX_CONSECUTIVE_FAILURES=3
 
 while true; do
     if [ "$MAX_ITERATIONS" -gt 0 ] && [ "$ITERATION" -ge "$MAX_ITERATIONS" ]; then
         echo "Reached max iterations: $MAX_ITERATIONS"
         break
+    fi
+    if [ "$CONSECUTIVE_FAILURES" -ge "$MAX_CONSECUTIVE_FAILURES" ]; then
+        echo "ERROR: $MAX_CONSECUTIVE_FAILURES consecutive iterations without RALPH_COMPLETE or RALPH_WAITING — stopping to avoid runaway spend"
+        exit 2
     fi
 
     # Run agent — stream live, capture for RALPH_ signal checks
@@ -166,24 +173,30 @@ while true; do
     fi
     AGENT_OUTPUT=$(cat "$AGENT_OUTPUT_FILE")
     rm -f "$AGENT_OUTPUT_FILE"
+    # Strip ANSI escape codes before signal checks
+    AGENT_OUTPUT_CLEAN=$(echo "$AGENT_OUTPUT" | sed 's/\x1b\[[0-9;]*m//g')
 
-    if echo "$AGENT_OUTPUT" | grep -q "RALPH_COMPLETE"; then
+    if echo "$AGENT_OUTPUT_CLEAN" | grep -q "RALPH_COMPLETE"; then
         echo "RALPH_COMPLETE — all tasks done"
         exit 0
     fi
 
-    if echo "$AGENT_OUTPUT" | grep -q "RALPH_WAITING"; then
-        QUESTION=$(echo "$AGENT_OUTPUT" | grep "RALPH_WAITING" | sed 's/.*RALPH_WAITING[: ]*//')
+    if echo "$AGENT_OUTPUT_CLEAN" | grep -q "RALPH_WAITING"; then
+        QUESTION=$(echo "$AGENT_OUTPUT_CLEAN" | grep "RALPH_WAITING" | sed 's/.*RALPH_WAITING[: ]*//')
         echo ""
         echo "⏸  RALPH_WAITING — agent needs input"
         [ -n "$QUESTION" ] && echo "   $QUESTION"
         echo -n "Your response: "
         read -r USER_RESPONSE
+        CONSECUTIVE_FAILURES=0
         TEMP_REPLY="/tmp/prompt_reply_$$.md"
         { cat "$PROMPT_FILE"; echo ""; echo "## Human response"; echo "$USER_RESPONSE"; } > "$TEMP_REPLY"
         PROMPT_FILE="$TEMP_REPLY"
         continue
     fi
+
+    # No RALPH signal — count as a non-signalling iteration
+    CONSECUTIVE_FAILURES=$((CONSECUTIVE_FAILURES + 1))
 
     # Push (skip for unpossible itself)
     if [ "$GIT_DIR" != "." ]; then
