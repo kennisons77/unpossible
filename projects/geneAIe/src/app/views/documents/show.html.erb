@@ -1,0 +1,102 @@
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1>Document #<%= @document.id %></h1>
+  <%= link_to '← Back to Documents', documents_path, class: 'btn btn-secondary' %>
+</div>
+
+<div class="card mb-4">
+  <div class="card-header">
+    <h5 class="mb-0">Metadata</h5>
+  </div>
+  <div class="card-body">
+    <dl class="row mb-0">
+      <dt class="col-sm-3">Type</dt>
+      <dd class="col-sm-9"><%= @document.document_type || '—' %></dd>
+
+      <dt class="col-sm-3">Concern</dt>
+      <dd class="col-sm-9">
+        <% if @document.concern %>
+          <%= link_to @document.concern.name, concern_path(@document.concern) %>
+          <% unless @document.concern.confirmed_at %>
+            <span class="badge bg-warning text-dark ms-2">Unconfirmed</span>
+          <% end %>
+        <% else %>
+          —
+        <% end %>
+      </dd>
+
+      <dt class="col-sm-3">Stage</dt>
+      <dd class="col-sm-9"><span class="badge bg-secondary"><%= @document.stage %></span></dd>
+
+      <dt class="col-sm-3">Confidence</dt>
+      <dd class="col-sm-9">
+        <% if @document.confidence_score %>
+          <%= number_to_percentage(@document.confidence_score * 100, precision: 1) %>
+        <% else %>
+          —
+        <% end %>
+      </dd>
+
+      <dt class="col-sm-3">Review Required</dt>
+      <dd class="col-sm-9">
+        <% if @document.review_required %>
+          <span class="badge bg-warning text-dark">Yes</span>
+          <% if @document.review_reason %>
+            <br><small class="text-muted"><%= @document.review_reason %></small>
+          <% end %>
+        <% else %>
+          <span class="badge bg-success">No</span>
+        <% end %>
+      </dd>
+
+      <dt class="col-sm-3">Content Hash</dt>
+      <dd class="col-sm-9"><code><%= @document.content_hash || '—' %></code></dd>
+
+      <dt class="col-sm-3">Markdown Path</dt>
+      <dd class="col-sm-9"><code><%= @document.markdown_path || '—' %></code></dd>
+
+      <dt class="col-sm-3">Original Blob</dt>
+      <dd class="col-sm-9">
+        <% if @document.original_blob.attached? %>
+          <%= link_to @document.original_blob.filename, rails_blob_path(@document.original_blob, disposition: 'attachment'), class: 'btn btn-sm btn-outline-primary' %>
+          <small class="text-muted">(<%= number_to_human_size(@document.original_blob.byte_size) %>)</small>
+        <% else %>
+          —
+        <% end %>
+      </dd>
+
+      <dt class="col-sm-3">Created</dt>
+      <dd class="col-sm-9"><%= @document.created_at.strftime('%Y-%m-%d %H:%M:%S') %></dd>
+
+      <dt class="col-sm-3">Updated</dt>
+      <dd class="col-sm-9"><%= @document.updated_at.strftime('%Y-%m-%d %H:%M:%S') %></dd>
+    </dl>
+  </div>
+</div>
+
+<% if @document.document_fields.any? %>
+  <div class="card">
+    <div class="card-header">
+      <h5 class="mb-0">Extracted Fields</h5>
+    </div>
+    <div class="card-body">
+      <dl class="row mb-0">
+        <% @document.document_fields.order(:field_name).each do |field| %>
+          <dt class="col-sm-3">
+            <%= field.field_name.titleize %>
+            <span class="badge bg-<%= field.llm? ? 'info' : field.ocr? ? 'secondary' : 'primary' %> ms-1">
+              <%= field.source %>
+            </span>
+          </dt>
+          <dd class="col-sm-9">
+            <%= field.value %>
+            <small class="text-muted d-block">Updated: <%= field.updated_at.strftime('%Y-%m-%d %H:%M') %></small>
+          </dd>
+        <% end %>
+      </dl>
+    </div>
+  </div>
+<% else %>
+  <div class="alert alert-info">
+    No extracted fields yet.
+  </div>
+<% end %>

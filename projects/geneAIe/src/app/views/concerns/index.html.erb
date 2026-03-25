@@ -1,0 +1,45 @@
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1>Concerns</h1>
+</div>
+
+<% if @concerns.any? %>
+  <div class="table-responsive">
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Status</th>
+          <th>Documents</th>
+          <th>Created</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @concerns.each do |concern| %>
+          <tr>
+            <td><%= concern.name %></td>
+            <td>
+              <% if concern.confirmed_at %>
+                <span class="badge bg-success">Confirmed</span>
+              <% else %>
+                <span class="badge bg-warning text-dark">Unconfirmed</span>
+              <% end %>
+            </td>
+            <td><%= concern.documents.count %></td>
+            <td><%= concern.created_at.strftime('%Y-%m-%d %H:%M') %></td>
+            <td>
+              <%= link_to 'View', concern_path(concern), class: 'btn btn-sm btn-primary' %>
+              <% unless concern.confirmed_at %>
+                <%= button_to 'Confirm', confirm_concern_path(concern), method: :post, class: 'btn btn-sm btn-success' %>
+              <% end %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+<% else %>
+  <div class="alert alert-info">
+    No concerns yet.
+  </div>
+<% end %>
