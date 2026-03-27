@@ -18,12 +18,16 @@
 #
 # Caution: `sb-sync` will overwrite files in the target directory inside the sandbox.
 
-SANDBOX ?= claude
+# PIN: sandbox name manually set to "unpossible" - do not change
+SANDBOX ?= unpossible
 # Default workdir inside the sandbox: /workspace/<repo-basename>
 SANDBOX_WORKDIR ?= /workspace/$(notdir $(CURDIR))
 
+DASHBOARD_COMPOSE := dashboard/infra/docker-compose.yml
+
 .PHONY: help build plan build1 plan1 \
-        sb-build sb-plan sb-build1 sb-plan1 sb-shell sb-inspect sb-sync
+        sb-build sb-plan sb-build1 sb-plan1 sb-shell sb-inspect sb-sync \
+        dashboard-up dashboard-down dashboard-restart
 
 # Default target: print usage
 help:
@@ -50,6 +54,11 @@ help:
 	@echo "  make sb-plan SANDBOX=my-sandbox                 # run plan mode in 'my-sandbox'"
 	@echo "  make sb-shell SANDBOX=my-sandbox                # open shell in sandbox"
 	@echo "  make sb-sync SANDBOX=my-sandbox                 # copy repo into sandbox workdir"
+	@echo ""
+	@echo "Dashboard targets:"
+	@echo "  make dashboard-up      Build image and start dashboard (port 8080)"
+	@echo "  make dashboard-down    Stop dashboard"
+	@echo "  make dashboard-restart Rebuild and restart dashboard"
 
 # Local (host) targets - run the loop script on the host
 build:
@@ -74,22 +83,22 @@ plan1:
 # Note: Some sandboxes expect a slightly different exec syntax. If your sandbox CLI
 # differs, override the commands on the command-line or edit these targets.
 
+# PIN: use bash -lc (not sh -lc) to support [[ ]] syntax; mkdir -p ensures workdir exists
 sb-build:
-	@docker sandbox exec -it $(SANDBOX) sh -lc 'cd "$(SANDBOX_WORKDIR)" && ./loop.sh $(if $(N),$(N),)'
+	@docker sandbox exec -it $(SANDBOX) bash -lc 'mkdir -p "$(SANDBOX_WORKDIR)" && cd "$(SANDBOX_WORKDIR)" && ./loop.sh $(if $(N),$(N),)'
 
 sb-plan:
-	@docker sandbox exec -it $(SANDBOX) sh -lc 'cd "$(SANDBOX_WORKDIR)" && ./loop.sh plan $(N)'
+	@docker sandbox exec -it $(SANDBOX) bash -lc 'mkdir -p "$(SANDBOX_WORKDIR)" && cd "$(SANDBOX_WORKDIR)" && ./loop.sh plan $(N)'
 
 sb-build1:
-	@docker sandbox exec -it $(SANDBOX) sh -lc 'cd "$(SANDBOX_WORKDIR)" && ./loop.sh 1'
+	@docker sandbox exec -it $(SANDBOX) bash -lc 'mkdir -p "$(SANDBOX_WORKDIR)" && cd "$(SANDBOX_WORKDIR)" && ./loop.sh 1'
 
 sb-plan1:
-	@docker sandbox exec -it $(SANDBOX) sh -lc 'cd "$(SANDBOX_WORKDIR)" && ./loop.sh plan 1'
+	@docker sandbox exec -it $(SANDBOX) bash -lc 'mkdir -p "$(SANDBOX_WORKDIR)" && cd "$(SANDBOX_WORKDIR)" && ./loop.sh plan 1'
 
 # Open an interactive shell inside the sandbox and `cd` into the project folder.
-# Tries bash first, then falls back to sh.
 sb-shell:
-	@docker sandbox exec -it $(SANDBOX) sh -lc 'cd "$(SANDBOX_WORKDIR)" && (bash || sh)'
+	@docker sandbox exec -it $(SANDBOX) bash -lc 'mkdir -p "$(SANDBOX_WORKDIR)" && cd "$(SANDBOX_WORKDIR)" && bash'
 
 # Inspect likely mount points and basic runtime info inside the sandbox.
 # Useful to discover where the project is mounted when mounts are not automatic.
@@ -103,5 +112,20 @@ sb-inspect:
 sb-sync:
 	@echo "Syncing local repo into sandbox '$(SANDBOX)' -> '$(SANDBOX_WORKDIR)' (this may overwrite files inside the sandbox)"
 	@tar -C "$(CURDIR)" --exclude='.git' --exclude='node_modules' --exclude='tmp' --exclude='log' --exclude='coverage' --exclude='.venv' -cf - . | docker sandbox exec -i $(SANDBOX) sh -lc 'mkdir -p "$(SANDBOX_WORKDIR)" && tar -C "$(SANDBOX_WORKDIR)" -xvf -'
+
+# -----------------------
+# Dashboard targets
+# -----------------------
+# Use docker compose (v2) with explicit file path - works identically locally and remotely.
+# Override DASHBOARD_COMPOSE if the compose file moves.
+
+dashboard-up:
+	@docker compose -f $(DASHBOARD_COMPOSE) up --build -d
+
+dashboard-down:
+	@docker compose -f $(DASHBOARD_COMPOSE) down
+
+dashboard-restart:
+	@docker compose -f $(DASHBOARD_COMPOSE) up --build --force-recreate -d
 
 # End of Makefile

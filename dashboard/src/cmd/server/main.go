@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"log/slog"
 	"net/http"
 	"os"
@@ -64,13 +65,18 @@ func main() {
 	
 	mux.HandleFunc("/api/worklog", func(w http.ResponseWriter, r *http.Request) {
 		worklogPath := workspaceDir + "/WORKLOG.md"
+		w.Header().Set("Content-Type", "application/json")
 		worklog, err := parser.ParseWorklog(worklogPath)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			// PIN: return empty worklog as JSON when file missing/unreadable - avoids "not valid JSON" client error
+			if errors.Is(err, os.ErrNotExist) {
+				json.NewEncoder(w).Encode(parser.Worklog{Entries: []parser.WorklogEntry{}})
+				return
+			}
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
 			return
 		}
-		
-		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(worklog)
 	})
 	
