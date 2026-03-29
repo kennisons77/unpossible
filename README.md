@@ -25,7 +25,7 @@ Rename the template directory to your project name.
 Start our sandbox
 ```bash
 cd [my-project]
-docker sandbox run claude
+docker sandbox run unpossible
 ```
 
 List active sandboxes:
