@@ -55,3 +55,9 @@ Loaded when specs/prd.md Language is Ruby.
 ## Structured Logging
 - Add Lograge from day one — structured request logs are worth the one-line config
 - Filter sensitive params in `config/initializers/filter_parameter_logging.rb`
+
+## Docker / Gemfile Gotchas
+- Use `ruby '~> 3.3'` not `ruby '3.3.0'` — official `ruby:3.3-slim` ships patch releases (e.g. 3.3.11)
+- `psych` gem requires `libyaml-dev` in the Dockerfile — not included in `ruby:3.3-slim`
+- Nested ERB in `database.yml` is invalid — use flat `ENV.fetch` calls, no `<%= ... <%= Rails.env %> %>`
+- SimpleCov minimum_coverage check fires even on empty suites — guard with `RSpec.world.example_count > 0`
