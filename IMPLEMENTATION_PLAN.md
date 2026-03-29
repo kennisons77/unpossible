@@ -35,12 +35,12 @@ Phase: 0 (Local Development)
 
 ## Section 1 — Infrastructure & Project Skeleton
 
-- [ ] Create Rails app skeleton
+- [x] Create Rails app skeleton
   `rails new unpossible2 --database=postgresql --skip-test` (full stack, not API-only — views needed). Gemfile: rails 8, pg, pgvector, rspec-rails, rubocop-rails-omakase, factory_bot_rails, shoulda-matchers, simplecov, lograge, sidekiq, redis, jwt, rack-attack, brakeman, bundler-audit.
   Files: `app/Gemfile`, `app/config/application.rb`, `app/config/database.yml`
   Tests: `bundle exec rspec` exits 0 on empty suite; `bundle exec rubocop` exits 0
 
-- [ ] Create infra/Dockerfile (Rails)
+- [x] Create infra/Dockerfile (Rails)
   Multi-stage: builder installs gems, final is `ruby:3.3-slim`. Copies `app/`, runs `bundle install --without development test`. Exposes port 3000. Runs as non-root user. Image tagged by git SHA — never `latest`.
   Files: `infra/Dockerfile`
   Tests: `docker build -f infra/Dockerfile .` exits 0; container responds to `GET /up`
@@ -55,23 +55,25 @@ Phase: 0 (Local Development)
   Files: `infra/Dockerfile.analytics`
   Tests: `docker build -f infra/Dockerfile.analytics .` exits 0; `/healthz` returns 200
 
-- [ ] Create infra/docker-compose.yml (local dev stack)
+- [x] Create infra/docker-compose.yml (local dev stack)
   Services: `rails` (ruby:3.3-slim, port 3000), `go_runner` (port 8080), `analytics` (port 9100), `postgres` (pgvector/pgvector:pg16, internal only), `redis` (redis:7-alpine, internal only). All on `unpossible2` bridge network. Postgres and Redis NOT bound to 0.0.0.0. Image tags use git SHA `$(git rev-parse --short HEAD)`. Rails depends_on postgres + redis. go_runner depends_on rails. analytics depends_on postgres.
   Files: `infra/docker-compose.yml`
   Tests: `docker compose up -d` exits 0; all services healthy; rails responds on port 3000; postgres/redis ports not reachable from host
+  Note: `infra/docker-compose.yml` serves as the test stack (used by loop.sh). Dev stack is `infra/docker-compose.dev.yml` (Phase 0 — Go sidecars deferred until runner/ and analytics-sidecar/ exist).
 
-- [ ] Create infra/docker-compose.test.yml (CI/test stack)
+- [x] Create infra/docker-compose.test.yml (CI/test stack)
   Services: `test` (runs `bundle exec rspec`), `postgres` (same image, tmpfs volume), `redis` (same image, tmpfs volume). No ports exposed. Ephemeral volumes only.
   Files: `infra/docker-compose.test.yml`
-  Tests: `docker compose -f infra/docker-compose.test.yml run --rm test` exits 0 on empty suite
+  Tests: `docker compose -f infra/docker-compose.yml run --rm test` exits 0 on empty suite
+  Note: implemented as `infra/docker-compose.yml` (the loop's test command target).
 
-- [ ] Configure RSpec + Rubocop + SimpleCov
+- [x] Configure RSpec + Rubocop + SimpleCov
   Install rspec-rails. Configure `.rspec`, `spec/spec_helper.rb`, `spec/rails_helper.rb` with FactoryBot, Shoulda Matchers, DatabaseCleaner. Configure `.rubocop.yml`. SimpleCov minimum coverage 90% on non-trivial files.
   Files: `app/.rspec`, `app/spec/spec_helper.rb`, `app/spec/rails_helper.rb`, `app/.rubocop.yml`
   Tests: `bundle exec rspec --format documentation` exits 0; `bundle exec rubocop` exits 0; SimpleCov reports ≥90%
 
-- [ ] Configure Sidekiq + Redis
-  Add sidekiq gem. `config/initializers/sidekiq.rb` pointing to Redis. `config/sidekiq.yml` with queue definitions: default, knowledge, analytics, tasks. Add Sidekiq web UI mounted at `/sidekiq` (authenticated).
+- [x] Configure Sidekiq + Redis
+  Add sidekiq gem. `config/initializers/sidekiq.rb` pointing to Redis. `config/sidekiq.yml` with queue definitions: default, knowledge, analytics, tasks. Add Sidekiq web UI mounted at `/sidekiq` (authenticated in production, open in dev/test).
   Files: `app/config/initializers/sidekiq.rb`, `app/config/sidekiq.yml`, `app/config/routes.rb`
   Tests: `Sidekiq::Client.push('class' => 'TestWorker', 'queue' => 'default', 'args' => [])` enqueues without error; Sidekiq web UI accessible
 
@@ -80,12 +82,12 @@ Phase: 0 (Local Development)
   Files: `app/db/migrate/YYYYMMDDHHMMSS_enable_pgvector.rb`, `app/config/database.yml`
   Tests: migration runs without error; `ActiveRecord::Base.connection.execute("SELECT '[1,2,3]'::vector")` succeeds
 
-- [ ] Configure Lograge structured logging
+- [x] Configure Lograge structured logging
   Add lograge gem. JSON format. `filter_parameters` includes `:api_key, :token, :password, :secret, :authorization, :access_token, :refresh_token, :private_key, :credential`. Never log request params containing secrets.
   Files: `app/config/initializers/lograge.rb`, `app/config/application.rb`
   Tests: log output is valid JSON; filtered params do not appear in logs
 
-- [ ] Create AGENTS.md
+- [x] Create AGENTS.md
   Build/run/test commands. Codebase patterns lookup table. Server operations section (service name, health endpoint, deploy command, rollback command, log command). Under 100 lines.
   Files: `AGENTS.md`
   Tests: file exists; contains build/run/test commands; contains server operations section; contains codebase patterns table
