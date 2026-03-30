@@ -1,9 +1,5 @@
 # Stories Module
 
-**Status:** Draft
-**Version:** 0.1
-**Last Updated:** 2026-03-30
-
 ## What It Does
 
 Owns the lifecycle of all units of work — epics, spikes, stories, tasks, and bugs — as a self-referential tree of `Story` records in Postgres. The DB owns status state and transition history. Spec files on disk are the human-readable cache of that state. The two are kept in sync; conflicts are surfaced in the UI for human resolution.
