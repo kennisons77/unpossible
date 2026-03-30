@@ -3,6 +3,11 @@
 0c. Study `projects/<name>/specs/*` with up to 5 parallel Haiku subagents. Pay close attention to:
     - `projects/<name>/specs/prd.md` Technical Constraints (language, framework, base image, test command)
     - `projects/<name>/specs/audience.md` if it exists — it defines the current target SLC release and the activities to plan for
+    **Spec layout:** specs are split into three directories:
+    - `projects/<name>/specs/system/` — unpossible internals (tasks, knowledge, agents, sandbox, runner, loop, analytics system)
+    - `projects/<name>/specs/product/` — reusable specs for products built by unpossible (auth, security, backpressure, analytics product)
+    - `projects/<name>/specs/` root — project-wide files (prd.md, audience.md, activity.md)
+    **Spec inheritance:** platform overrides mirror the same split under `specs/platform/<platform>/system/` and `specs/platform/<platform>/product/`. Read the base spec first, then layer the matching platform override on top. Derive required tests from both layers.
 0d. Read the language-specific practices file if it exists: `practices/lang/[language].md` (language from `projects/<name>/specs/prd.md`). Read the framework-specific file if it exists: `practices/framework/[framework].md`.
 0e. Study `projects/<name>/IMPLEMENTATION_PLAN.md` (if present) to understand the plan so far.
 0f. Study `projects/<name>/src/` with up to 5 parallel Haiku subagents to understand what has been implemented so far.

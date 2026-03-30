@@ -4,6 +4,11 @@
 0b. Read `practices/general/coding.md` — these are the standing rules for how to write code in this project.
 0c. Read the language-specific practices file if it exists: `practices/lang/[language].md` (language from `projects/<name>/specs/prd.md`). Read the framework-specific file if it exists: `practices/framework/[framework].md`.
 0d. Read `projects/<name>/specs/prd.md` and `projects/<name>/specs/plan.md` directly to understand the goal and current status. Pay close attention to Technical Constraints for language, framework, base image, and test command.
+    **Spec layout:** specs are split into three directories:
+    - `projects/<name>/specs/system/` — specs that describe unpossible's own internals (tasks, knowledge, agents, sandbox, runner, loop, analytics system)
+    - `projects/<name>/specs/product/` — reusable specs for products built by unpossible (auth, security, backpressure, analytics product)
+    - `projects/<name>/specs/` root — project-wide files (prd.md, audience.md, activity.md)
+    **Spec inheritance:** platform-specific overrides mirror the same `system/` and `product/` split under `projects/<name>/specs/platform/<platform>/system/` and `projects/<name>/specs/platform/<platform>/product/`. An override shares the same filename as the base spec it extends. When implementing a feature, read the base spec first, then check for a matching platform override and layer it on top. The override adds implementation detail — it does not replace the base acceptance criteria.
 0e. Study `projects/<name>/IMPLEMENTATION_PLAN.md`.
 0f. Study relevant files in `projects/<name>/src/` with up to 3 parallel Haiku subagents before making changes.
 
