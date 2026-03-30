@@ -2,17 +2,26 @@
 
 ## What It Does
 
-Owns the task schema that drives agent execution. The task record — not the LLM — determines which tools are available, which model to use, and which prompt template to apply. Parses `IMPLEMENTATION_PLAN.md` into structured task records after each plan loop.
+Owns the agent execution config that drives loop behaviour. A `Task` record is the machine-facing representation of a `Story` with `item_type: work_item` — it extends the Story with fields the LLM runtime needs: which tools are available, which model to use, which prompt template to apply. Parses `IMPLEMENTATION_PLAN.md` into structured Task records after each plan loop.
 
 ## Why It Exists
 
-Tasks living only in markdown means the LLM decides everything about how to execute them. Moving task configuration into a schema makes tool selection and model choice deterministic — controlled by the system, not the agent.
+Stories track human-facing intent and status. Tasks track agent execution config. They are the same unit of work viewed from two angles — a Task always has a corresponding Story record (`story_id` FK). Keeping execution config in the Task schema makes tool selection and model choice deterministic — controlled by the system, not the agent.
+
+## Relationship to Stories
+
+- Every Task has a `story_id` pointing to a Story with `item_type: work_item`
+- Creating a Task upserts the corresponding Story record
+- Status transitions on a Task propagate to the Story (and trigger the spec file header rewrite via the Stories sync)
+- Assigning a Task to an `AgentProfile` sets the Story's `assignee_type: agent` and `assignee_id`
 
 ## Task Schema
 
 Each task record stores:
+- `id` — UUID primary key
+- `story_id` — FK to the corresponding Story record (item_type: work_item)
 - `title` and `description` — from the plan checkbox
-- `status` — pending / in_progress / complete / failed / blocked
+- `status` — pending / in_progress / complete / failed / blocked (mirrors Story status)
 - `loop_type` — plan / build / review / reflect / research
 - `provider` and `model` — which LLM to use (overridable per task)
 - `prompt_template` — provider-tailored prompt (nullable — falls back to `PROMPT_{mode}.md`)
