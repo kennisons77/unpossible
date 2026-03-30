@@ -1,6 +1,0 @@
-:concurrency: 5
-:queues:
-  - default
-  - knowledge
-  - analytics
-  - tasks

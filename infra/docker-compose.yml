@@ -9,11 +9,8 @@ services:
       POSTGRES_USER: unpossible2
       POSTGRES_PASSWORD: unpossible2
       POSTGRES_DB: unpossible2_test
-      REDIS_URL: redis://redis:6379/0
     depends_on:
       postgres:
-        condition: service_healthy
-      redis:
         condition: service_healthy
     command: ["bundle", "exec", "rspec"]
 
@@ -27,16 +24,6 @@ services:
       - /var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U unpossible2"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
-  redis:
-    image: redis:7-alpine
-    tmpfs:
-      - /data
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
       interval: 5s
       timeout: 5s
       retries: 5

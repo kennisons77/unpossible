@@ -19,4 +19,4 @@ One file per feature area. Each spec defines what the feature does, who it's for
 | [practices.md](practices.md) | practices/ | Plan + Build |
 | [lookup-tables.md](lookup-tables.md) | specs/, AGENTS.md, practices/, app/modules/ | Plan + Build |
 | [server-operations.md](server-operations.md) | loop.sh + sandbox | Build + Deploy |
-| [infrastructure.md](infrastructure.md) | infra/ | Plan + Deploy |
+| [stories.md](system/stories.md) | stories + tasks + knowledge | Plan + Build |

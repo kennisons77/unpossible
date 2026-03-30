@@ -11,7 +11,7 @@ Unpossible 2 is both the platform and its own first project — it develops itse
 - Language: Ruby 3.3
 - Framework: Rails 8 (full stack — not API-only; views needed for UI)
 - Database: PostgreSQL 16 with pgvector extension
-- Background jobs: Sidekiq + Redis
+- Background jobs: Solid Queue
 - Base image: ruby:3.3-slim
 - Test command (in container): bundle exec rspec
 - Port: 3000
