@@ -27,7 +27,7 @@ case "$AGENT" in
         AGENT_CMD="claude -p --dangerously-skip-permissions --output-format=stream-json --model $MODEL --verbose"
         ;;
     kiro)
-        MODEL=${MODEL:-claude-sonnet-4.5}
+        MODEL=${MODEL:-auto}
         # kiro reads prompt as positional arg, not stdin; -- prevents flag interpretation
         AGENT_CMD="kiro-cli chat --no-interactive --trust-all-tools --model $MODEL --"
         ;;

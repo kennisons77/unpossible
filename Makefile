@@ -19,14 +19,14 @@
 # Caution: `sb-sync` will overwrite files in the target directory inside the sandbox.
 
 # PIN: sandbox name manually set to "unpossible" - do not change
-SANDBOX ?= unpossible
+SANDBOX ?= kiro-unpossible
 # Default workdir inside the sandbox: /workspace/<repo-basename>
-SANDBOX_WORKDIR ?= /workspace/$(notdir $(CURDIR))
+SANDBOX_WORKDIR ?= $(HOME)/workspace/$(notdir $(CURDIR))
 
 DASHBOARD_COMPOSE := dashboard/infra/docker-compose.yml
 
 .PHONY: help build plan build1 plan1 \
-        sb-build sb-plan sb-build1 sb-plan1 sb-shell sb-inspect sb-sync \
+        sb-create sb-build sb-plan sb-build1 sb-plan1 sb-shell sb-inspect sb-sync \
         dashboard-up dashboard-down dashboard-restart
 
 # Default target: print usage
@@ -40,6 +40,7 @@ help:
 	@echo "  make plan1           Plan mode, exactly 1 iteration (local)"
 	@echo ""
 	@echo "Sandbox-aware targets (run inside a running docker sandbox):"
+	@echo "  make sb-create       Create a new sandbox (requires AGENT=<name>)"
 	@echo "  make sb-build        Build mode inside sandbox ($(SANDBOX))"
 	@echo "  make sb-plan         Plan mode inside sandbox ($(SANDBOX))"
 	@echo "  make sb-build1       Single-iteration build inside sandbox"
@@ -84,6 +85,12 @@ plan1:
 # differs, override the commands on the command-line or edit these targets.
 
 # PIN: use bash -lc (not sh -lc) to support [[ ]] syntax; mkdir -p ensures workdir exists
+sb-create:
+ifndef AGENT
+	$(error AGENT is not set. Usage: make sb-create AGENT=<image-or-agent-name>)
+endif
+	@docker sandbox run $(AGENT)
+
 sb-build:
 	@docker sandbox exec -it $(SANDBOX) bash -lc 'mkdir -p "$(SANDBOX_WORKDIR)" && cd "$(SANDBOX_WORKDIR)" && ./loop.sh $(if $(N),$(N),)'
 

@@ -22,6 +22,9 @@ projects/*/src/config/credentials/*.key
 # Git-tracked library (separate repo)
 library/
 
+# reference files
+reference/
+
 # Secrets
 .env
 *.key

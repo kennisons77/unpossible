@@ -67,7 +67,7 @@ Loaded when specs/prd.md Framework is Rails.
 - Prefer composition over inheritance — concerns are better than STI in most cases
 
 ## Active Storage
-
+- TO RESEARCH: replacing this with a local file store?
 - Attach blobs via `has_one_attached :blob_name` or `has_many_attached :blob_name`
 - Store in S3-compatible backend (MinIO for local, S3 for production)
 - Blobs are immutable — never update, only create new versions
