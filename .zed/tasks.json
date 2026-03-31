@@ -1,0 +1,38 @@
+[
+  {
+    "label": "loop: build (single, streaming)",
+    "command": "make build1",
+    "use_new_terminal": true,
+    "reveal": "always"
+  },
+  {
+    "label": "loop: plan (single, streaming)",
+    "command": "make plan1",
+    "use_new_terminal": true,
+    "reveal": "always"
+  },
+  {
+    "label": "loop: build (background)",
+    "command": "make build",
+    "use_new_terminal": true,
+    "reveal": "no_focus"
+  },
+  {
+    "label": "loop: plan (background)",
+    "command": "make plan",
+    "use_new_terminal": true,
+    "reveal": "no_focus"
+  },
+  {
+    "label": "sandbox: shell",
+    "command": "make sb-shell",
+    "use_new_terminal": true,
+    "reveal": "always"
+  },
+  {
+    "label": "lint: docs",
+    "command": "make lint-docs",
+    "use_new_terminal": true,
+    "reveal": "always"
+  }
+]
