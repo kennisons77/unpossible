@@ -24,6 +24,17 @@ any step already completed in the current conversation:
    integration points and unknowns.
 6. **Write the PRD** — produce or update `[spec-name]-prd.md` using the template below.
 
+## Design Diagram
+
+Before writing the PRD, produce a text-based entity diagram showing the core data model
+and key flows. Use box-drawing characters. Include:
+- Entities with their key fields
+- Relationships and cardinality (1, 0..1, [])
+- Key API flows as indented arrows beneath the diagram
+
+Present the diagram to the user and confirm it matches their mental model before
+proceeding to write the PRD file.
+
 ## PRD Template
 
 ```markdown

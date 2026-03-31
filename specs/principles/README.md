@@ -1,25 +1,15 @@
 # Principles — Unpossible 2
 
 Always-on rules that shape agent behavior across all tasks and loop types.
-These are loaded selectively based on the `applies_to` field — not all at once.
-
-Gradually supersedes `practices/` at the monorepo root as unpossible2 matures.
-
-## Format
-
-Each file has YAML frontmatter followed by rule content:
-
-```yaml
----
-name: <slug>
-description: <one sentence>
-domain: security | testing | planning | coding | cost | prompting
-applies_to: all | build | plan | reflect | research
----
-```
+Loaded selectively based on the task — not all at once.
 
 ## Index
 
-| File | Domain | Applies To | Description |
-|---|---|---|---|
-| (none yet — migrated from practices/ as needed) | | | |
+| File | Domain | Applies To |
+|---|---|---|
+| [coding.md](coding.md) | Coding | build |
+| [planning.md](planning.md) | Planning | plan |
+| [testing.md](testing.md) | Testing | build |
+| [verification.md](verification.md) | Verification | build |
+| [cost.md](cost.md) | Cost | all |
+| [zed.md](zed.md) | Editor | all |
