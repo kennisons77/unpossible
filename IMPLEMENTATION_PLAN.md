@@ -82,7 +82,7 @@ Phase: 0 (Local Development — Docker Compose only)
   Files: `app/app/lib/security/log_redactor.rb`, `app/config/initializers/lograge.rb` (update), `app/spec/lib/security/log_redactor_spec.rb`
   Required tests: JWT redacted; OpenAI key redacted; PEM header redacted; normal lines pass through
 
-- [ ] Create `Security::PromptSanitizer`
+- [x] Create `Security::PromptSanitizer`
   `Security::PromptSanitizer.sanitize(text)` — gitleaks patterns + PII (email→`[EMAIL]`, phone→`[PHONE]`, IP→`[IP]`). Logs warning on match. Called by every provider adapter.
   Files: `app/app/lib/security/prompt_sanitizer.rb`, `app/spec/lib/security/prompt_sanitizer_spec.rb`
   Required tests: email redacted; phone redacted; OpenAI key redacted; clean text passes; match triggers audit log warning
