@@ -28,7 +28,8 @@ not inside the ralph loop.
 | Skill | Command | Loop Type | Description |
 |---|---|---|---|
 | [grill-me](grill-me.md) | `make grill-me` | none | Interview relentlessly to reach shared understanding before committing to code |
-| [write-a-prd](write-a-prd.md) | `make write-a-prd` | plan | Turn a grilled idea into a spec file with user stories |
-| [prd-to-tasks](prd-to-tasks.md) | `make prd-to-tasks` | plan | Break a PRD spec into vertical-slice tasks in the task system |
+| [write-a-prd](write-a-prd.md) | `make write-a-prd` | plan | Turn a grilled idea into a PRD file with user stories |
+| [prd-to-specs](prd-to-specs.md) | `make prd-to-specs` | plan | Turn a PRD into the spec files needed to plan and build the feature |
+| [research](research.md) | `./loop.sh research <id>` | research | Deepen a spec through structured interview and source collection before planning |
 | [tdd](tdd.md) | `make tdd` | build | Red-green-refactor loop with interface-first philosophy |
 | [improve-codebase-architecture](improve-codebase-architecture.md) | `make improve-codebase-architecture` | none | Find shallow modules, propose deepening candidates |

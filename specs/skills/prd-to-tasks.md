@@ -25,6 +25,7 @@ Read the PRD file provided and break it into tasks. Write each task to the task 
   "title": "",
   "description": "",
   "acceptance_criteria": "",
+  "status": "",
   "loop_type": "build",
   "depends_on_ids": [],
   "allowed_tools": []

@@ -43,15 +43,16 @@ API so it can discover and claim work autonomously rather than reading a flat fi
 │ model             override (nullable)       │
 │ prompt_template   override (nullable)       │
 └─────────────────────────────────────────────┘
-         │ syncs from
-         │
-┌────────┴────────┐
-│  PlanFile       │
-│─────────────────│
-│ path            │  e.g. specs/system/tasks-plan.md
-│ - [ ] item  ────┼──→ creates Task on sync
-│ - [x] item  ────┼──→ marks Task complete
-└─────────────────┘
+         │ syncs from                │ backfilled from
+         │                           │
+┌────────┴────────┐        ┌─────────┴────────┐
+│  PlanFile       │        │  ActivityLog     │
+│─────────────────│        │──────────────────│
+│ path            │        │ path             │  e.g. specs/activity.md
+│ - [ ] item  ────┼──→     │ ## Iteration N ──┼──→ creates Task (complete)
+│ - [x] item  ────┼──→     │ task: <title>    │     on first boot if no
+└─────────────────┘        │ status: complete │     matching task_ref exists
+                           └──────────────────┘
 ```
 
 **Key flows:**
@@ -61,12 +62,16 @@ prd-to-tasks skill
   └─→ POST /api/tasks          (creates Tasks directly, no PlanFile needed)
 
 loop
-  └─→ GET /api/tasks/next      (returns all unblocked pending tasks with descriptions)
+  └─→ GET /api/tasks/unblocked      (returns all unblocked pending tasks with descriptions)
   └─→ PATCH /api/tasks/:id     (updates status after completing work)
        └─→ Story.status sync   (synchronous)
 
 PlanFile edit (human or loop)
   └─→ POST /api/tasks/sync     (upserts Tasks from file, orphans renamed items)
+
+ActivityLog backfill (first boot only)
+  └─→ POST /api/tasks/backfill (reads specs/activity.md, creates complete Tasks for
+       each logged iteration entry where no matching task_ref exists in DB)
 
 promote
   └─→ POST /api/tasks/:id/promote
@@ -102,6 +107,14 @@ Task B depends on Task A. Task A is `in_progress`. The loop tries to promote Tas
 The API returns 422 with a message listing Task A as the blocker. The loop logs the
 block, picks a different unblocked task, and continues.
 
+**Scenario 4 — First boot backfill:**
+The task system is deployed for the first time on a project that has been running the
+loop for weeks. `specs/activity.md` contains 40 completed iteration entries. On boot,
+the system calls `POST /api/tasks/backfill`. It reads each iteration entry, derives a
+`task_ref` from the title, and creates a `complete` Task record for each entry that
+doesn't already exist in the DB. The loop can now query task history without the
+pre-existing work being invisible to the system.
+
 ## User Stories
 
 - As the loop, I want to query all unblocked pending tasks so I can choose what to work
@@ -114,6 +127,8 @@ block, picks a different unblocked task, and continues.
   the loop executes them in the right order.
 - As a developer, I want blocked tasks to surface their blockers clearly so I can
   diagnose stalled loops without reading the full task list.
+- As a developer adopting the task system on an existing project, I want the activity
+  log backfilled into the DB so the loop's history is visible without manual entry.
 
 ## Success Metrics
 
@@ -148,6 +163,13 @@ block, picks a different unblocked task, and continues.
 - **Dependency enforcement** — `depends_on_ids` is validated on create (all referenced
   IDs must exist). Promote is blocked if any dependency is not `complete`. Task creation
   is never blocked by dependency state.
+- **Activity log backfill** — `POST /api/tasks/backfill` reads `specs/activity.md`,
+  parses each `## Iteration N` entry for a task title, derives a `task_ref` (SHA256 of
+  title), and creates a `complete` Task record for each entry where no matching
+  `task_ref` exists in the DB. Idempotent — re-running does not create duplicates.
+  Runs automatically on first boot if the DB has zero task records.
+- **API Docs** — `swagger doc implementation` all task api endpoints are docmented in testable
+
 
 **Post-MVP:**
 
@@ -168,6 +190,40 @@ block, picks a different unblocked task, and continues.
 ## Designs
 
 - Links to Wireframes/Mockups: _none yet_
+
+## User Acceptance Tests
+
+Manual verification steps to confirm the system works end-to-end before promoting to production.
+
+**UAT-1 — Task CRUD and next-task flow**
+1. POST a task with status `pending` and no dependencies → 201, task appears in `GET /api/tasks`
+2. Call `GET /api/tasks/next` → task is returned
+3. Call `POST /api/tasks/:id/promote` → status becomes `in_progress`, task no longer in `/next`
+4. PATCH status to `complete` → task no longer in `/next`
+
+**UAT-2 — Dependency enforcement**
+1. POST task A (pending), POST task B (pending, depends_on: [A])
+2. Call `GET /api/tasks/next` → only task A is returned
+3. Promote task B → 422 with A listed as blocker
+4. Complete task A, then promote task B → 200
+
+**UAT-3 — Plan file sync**
+1. Write a plan file with two unchecked items and one checked item
+2. POST to `/api/tasks/sync` with the file path → 3 tasks created, checked item is `complete`
+3. Re-sync the same file → no duplicate tasks created
+4. Remove one item from the file, re-sync → removed item flagged as orphaned in response, not deleted
+
+**UAT-4 — Activity log backfill**
+1. Start with an empty task DB
+2. Ensure `specs/activity.md` contains at least 3 `## Iteration N` entries with task titles
+3. POST to `/api/tasks/backfill` → one `complete` task created per iteration entry
+4. POST again → no new tasks created (idempotent)
+5. Verify `GET /api/tasks?status=complete` returns the backfilled tasks
+
+**UAT-5 — First boot auto-backfill**
+1. Deploy with zero task records in DB and a populated `specs/activity.md`
+2. Start the server → backfill runs automatically on boot
+3. `GET /api/tasks` returns the backfilled complete tasks without manual intervention
 
 ## Open Questions
 

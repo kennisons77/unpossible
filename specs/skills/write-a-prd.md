@@ -96,6 +96,13 @@ Links to wireframes, mockups, or interaction specs. Placeholder until assets exi
 
 - Links to Wireframes/Mockups: _none yet_
 
+## Specs
+Spec files this PRD requires before the plan loop can run. Populated by `prd-to-specs`.
+
+| Spec file | Description |
+|---|---|
+| | |
+
 ## Open Questions
 Unresolved decisions that will affect implementation. Add entries freely — open questions
 make it safe to start a PRD before everything is known. Resolve or defer each before
