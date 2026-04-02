@@ -131,7 +131,7 @@ Phase: 0 (Local Development — Docker Compose only)
   Files: models, migrations, factories
   Required tests: allowed_tools defaults []; tools_used defaults []; Actor belongs_to ActorProfile and Node; factories valid
 
-- [ ] Implement `Ledger::NodeLifecycleService`
+- [x] Implement `Ledger::NodeLifecycleService`
   Enforces: question cannot move to in_progress while depends_on question not closed; generative answer children not opened until acceptance_threshold reached; false verdict re-opens parent; true verdict closes when threshold met; terminal answer rejects child creation; version increments on every status transition.
   Files: `web/app/modules/ledger/services/node_lifecycle_service.rb`, `web/spec/modules/ledger/services/node_lifecycle_service_spec.rb`
   Required tests: UAT-1 (question lifecycle); UAT-2 (dependency enforcement); UAT-3 (generative answer opens children); re-opens on false verdict; version increments; terminal blocks child creation
