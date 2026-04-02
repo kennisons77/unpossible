@@ -43,3 +43,15 @@ Loaded every build iteration. Language-agnostic rules that apply to all code wri
 - No magic numbers — name constants
 - Fail fast: validate inputs at the boundary, trust internals
 - Consistency beats cleverness — follow the patterns already in the codebase
+
+## Context Window Management (load-bearing decision)
+
+When passing turn history to a provider, use the **pinned + sliding** strategy:
+
+- Always include: system prompt, all `agent_question` and `human_input` turns
+- Trim from oldest first: `llm_response` and `tool_result` turns
+- If still over budget after trimming all non-pinned turns, abort with `RALPH_WAITING`
+
+Rationale: human inputs are load-bearing — they represent decisions and clarifications
+that cannot be reconstructed. Intermediate LLM responses are recoverable context; the
+human thread is not. Never trim `agent_question` or `human_input` turns to fit a budget.

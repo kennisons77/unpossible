@@ -4,7 +4,6 @@ Rails-specific implementation details for system-level specs. Each file extends 
 
 | Override | Extends |
 |---|---|
-| [tasks.md](tasks.md) | specs/system/tasks.md |
 | [agents.md](agents.md) | specs/system/agents.md |
 | [knowledge.md](knowledge.md) | specs/system/knowledge.md |
 | [sandbox.md](sandbox.md) | specs/system/sandbox.md |
