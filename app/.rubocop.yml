@@ -1,0 +1,50 @@
+inherit_gem:
+  rubocop-rails-omakase: rubocop.yml
+
+require:
+  - rubocop-performance
+  - rubocop-rails
+  - rubocop-rspec
+
+AllCops:
+  NewCops: enable
+  TargetRubyVersion: 3.3
+  Exclude:
+    - 'db/schema.rb'
+    - 'db/migrate/**/*'
+    - 'bin/**/*'
+    - 'vendor/**/*'
+    - 'node_modules/**/*'
+
+Layout/LineLength:
+  Max: 120
+
+Metrics/MethodLength:
+  Max: 15
+
+Metrics/BlockLength:
+  Max: 25
+  Exclude:
+    - 'spec/**/*'
+    - 'config/routes.rb'
+
+Metrics/CyclomaticComplexity:
+  Max: 6
+
+Metrics/PerceivedComplexity:
+  Max: 7
+
+Metrics/ParameterLists:
+  Max: 5
+
+Style/StringLiterals:
+  EnforcedStyle: single_quotes
+
+Style/HashSyntax:
+  EnforcedStyle: ruby19
+
+RSpec/MultipleExpectations:
+  Enabled: false
+
+RSpec/ExampleLength:
+  Max: 20
