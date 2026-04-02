@@ -28,7 +28,7 @@ FeatureFlag
   org_id
 ```
 
-`metadata.hypothesis` is required on creation. No flag without a stated hypothesis.
+`metadata.hypothesis` is optional in Phase 0. Required when experiment infrastructure is added (post-MVP).
 
 ## Lifecycle
 
@@ -57,7 +57,6 @@ Namespaced to prevent collisions.
 
 ## Acceptance Criteria
 
-- `FeatureFlag` creation without `metadata.hypothesis` returns 422
-- `FeatureFlag.enabled?` returns `false` for archived flags without raising
-- Archived flags excluded from UI flag list by default, accessible via filter
+- `FeatureFlag.enabled?` returns `false` for unknown or archived flags without raising
 - Flag key is unique per org — duplicate key returns 422
+- Archived flags excluded from UI flag list by default, accessible via filter
