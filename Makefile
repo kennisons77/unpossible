@@ -6,28 +6,48 @@
 PROJECT_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 LOOP := $(PROJECT_DIR)../../loop.sh
 AGENT ?= kiro
+SKILL = @cd $(PROJECT_DIR) && $(AGENT) -- "$(shell cat $(PROJECT_DIR)
 
 .PHONY: help \
         build plan build1 plan1 reflect research \
-        grill-me write-a-prd prd-to-tasks tdd improve-codebase-architecture
+        interview prd spec review server-ops \
+        start
 
 help:
+	@echo "Workflow:"
+	@echo "  make start           Orient, research if needed, gap-fill spec, plan (1 iteration)"
+	@echo ""
 	@echo "Loop commands:"
 	@echo "  make build           Build loop, unlimited iterations"
 	@echo "  make plan            Plan loop, unlimited iterations"
 	@echo "  make build1          Build loop, 1 iteration"
 	@echo "  make plan1           Plan loop, 1 iteration"
 	@echo "  make reflect         Reflect loop"
-	@echo "  make research        Research loop"
+	@echo "  make research        Research loop (./loop.sh research <id>)"
 	@echo ""
-	@echo "Skills (interactive — run with agent, no loop):"
-	@echo "  make grill-me                      Relentless design interview before committing to code"
-	@echo "  make write-a-prd                   Turn a grilled idea into a spec file"
-	@echo "  make prd-to-tasks                  Break a PRD into vertical-slice tasks"
-	@echo "  make tdd                           Red-green-refactor build loop"
-	@echo "  make improve-codebase-architecture Find shallow modules, propose deepening candidates"
+	@echo "Skills:"
+	@echo "  make interview       Reach shared understanding before committing"
+	@echo "  make prd             Produce or update a PRD"
+	@echo "  make spec            Produce or update spec files for a PRD"
+	@echo "  make review          Analyse codebase, propose beats"
+	@echo "  make server-ops      Operate on a server"
 
-# Loop targets
+# --- Workflow ---
+
+# Start a feature: orient the agent, check for prior research, gap-fill the spec,
+# then run one plan iteration so you can review the beats before committing to a full run.
+start:
+	@echo "==> Reading orientation files..."
+	@cat $(PROJECT_DIR)specs/README.md
+	@cat $(PROJECT_DIR)AGENTS.md
+	@echo ""
+	@echo "==> Checking for prior research and gap-filling spec..."
+	@cd $(PROJECT_DIR) && $(AGENT) -- "$(shell cat $(PROJECT_DIR)specs/skills/tools/research.md)\n\n$(shell cat $(PROJECT_DIR)specs/skills/workflows/spec.md)"
+	@echo ""
+	@echo "==> Running plan (1 iteration) — review beats before running make plan or make build..."
+	@cd $(PROJECT_DIR) && $(LOOP) plan 1
+
+# --- Loop targets ---
 build:
 	@cd $(PROJECT_DIR) && $(LOOP)
 
@@ -46,18 +66,19 @@ reflect:
 research:
 	@cd $(PROJECT_DIR) && $(LOOP) research
 
-# Skill targets — load the skill file and invoke the agent
-grill-me:
-	@cd $(PROJECT_DIR) && $(AGENT) --print "$(shell cat $(PROJECT_DIR)specs/skills/grill-me.md)"
+# --- Skill targets ---
+interview:
+	@cd $(PROJECT_DIR) && $(AGENT) -- "$(shell cat $(PROJECT_DIR)specs/skills/tools/interview.md)"
 
-write-a-prd:
-	@cd $(PROJECT_DIR) && $(AGENT) --print "$(shell cat $(PROJECT_DIR)specs/skills/write-a-prd.md)"
+prd:
+	@cd $(PROJECT_DIR) && $(AGENT) -- "$(shell cat $(PROJECT_DIR)specs/skills/workflows/prd.md)"
 
-prd-to-tasks:
-	@cd $(PROJECT_DIR) && $(AGENT) --print "$(shell cat $(PROJECT_DIR)specs/skills/prd-to-tasks.md)"
+spec:
+	@cd $(PROJECT_DIR) && $(AGENT) -- "$(shell cat $(PROJECT_DIR)specs/skills/workflows/spec.md)"
 
-tdd:
-	@cd $(PROJECT_DIR) && $(AGENT) --print "$(shell cat $(PROJECT_DIR)specs/skills/tdd.md)"
+review:
+	@cd $(PROJECT_DIR) && $(AGENT) -- "$(shell cat $(PROJECT_DIR)specs/skills/workflows/review.md)"
 
-improve-codebase-architecture:
-	@cd $(PROJECT_DIR) && $(AGENT) --print "$(shell cat $(PROJECT_DIR)specs/skills/improve-codebase-architecture.md)"
+server-ops:
+	@cd $(PROJECT_DIR) && $(AGENT) -- "$(shell cat $(PROJECT_DIR)specs/skills/workflows/server-ops.md)"
+

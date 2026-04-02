@@ -1,0 +1,30 @@
+**Model selection:** Use Haiku for reading/searching files. Use Sonnet for code generation. Use Opus only for debugging and architectural decisions. Subagents for reading complete in ≤5 turns; kill any subagent exceeding 10 turns. Read `practices/general/cost.md` for caching and subagent economics.
+
+0a. All project paths are under `projects/unpossible2/`. Do not read or scan any other directory under `projects/` unless explicitly instructed.
+0b. Read `practices/general/coding.md`, `practices/lang/ruby.md`, and `practices/framework/rails.md` (standing rules for how to write code).
+0c. Read `projects/unpossible2/specs/prd.md` to understand technical constraints (language: Ruby 3.3, framework: Rails 8, base image: ruby:3.3-slim, test command: `bundle exec rspec`, port: 3000).
+0d. Read `projects/unpossible2/IMPLEMENTATION_PLAN.md` and pick the most important unchecked item.
+0e. Study relevant files in `projects/unpossible2/app/` with up to 3 parallel Haiku subagents before making changes. Do not assume something is missing — confirm with code search first.
+
+1. Implement the selected task. All application code goes in `projects/unpossible2/app/`. All infrastructure config goes in `projects/unpossible2/infra/`. Never add Phase N+1 infrastructure until the plan explicitly includes an "Advance to Phase N+1" task.
+
+2. Before running tests, read `practices/general/verification.md`. Then run:
+   ```
+   docker compose -f projects/unpossible2/infra/docker-compose.yml build
+   docker compose -f projects/unpossible2/infra/docker-compose.yml run --rm test
+   ```
+
+3. When tests pass, update `projects/unpossible2/IMPLEMENTATION_PLAN.md` (mark task complete), then commit:
+   ```
+   git add -A && git commit -m "[description]"
+   git push
+   ```
+
+- Single sources of truth — no duplicate logic, no migration shims.
+- If tests unrelated to your work fail, resolve them as part of the increment.
+- Once there are no build or test errors, create or increment a git tag (start at 0.0.1).
+- Keep `projects/unpossible2/AGENTS.md` operational only (build/run/test commands and codebase patterns).
+- Implement functionality completely. Placeholders and stubs waste future iterations.
+- If you discover a pattern worth preserving, append it to the relevant practices file under `projects/unpossible2/specs/practices/`.
+- After a successful commit, trim `projects/unpossible2/activity.md` to the last 10 entries.
+- Output `RALPH_COMPLETE` when the task is done and committed. Output `RALPH_WAITING: <question>` if you need human input before proceeding.

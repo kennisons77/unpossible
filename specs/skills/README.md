@@ -1,35 +1,88 @@
 # Skills — Unpossible 2
 
-Invocable agent workflows. A user explicitly triggers a skill via `make <skill>`.
-Each skill has a defined goal, step sequence, and output.
+Skills are **instructions** — the body of a node that tells an actor what to do.
+They are model-agnostic. Which model executes them, how the prompt is assembled, and
+how it is cached are concerns of the `ActorProfile`, not the instruction.
 
-## Format
-
-Each file has YAML frontmatter followed by the skill body:
+## Frontmatter
 
 ```yaml
----
-name: <slug>
-command: make <slug>
-description: <one sentence>
-model: haiku | sonnet | opus
-loop_type: plan | build | reflect | research | none
-principles: [<slug>, ...]   # which principles files to load
----
+name:    slug
+kind:    tool | workflow | loop
+command: how a human invokes it
+runs:    once | n | until <condition>
+actor:   default | plan | build | research | review  ← ActorProfile name
 ```
 
-`loop_type: none` means the skill runs as a standalone agent conversation,
-not inside the ralph loop.
+`actor` references an `ActorProfile` record. The profile owns provider, model,
+allowed_tools, and prompt_template. Swap the profile to change how the instruction
+executes — the instruction itself doesn't change.
 
-> Skills are human-invoked workflows. For the autonomous build loop, see `AGENTS.md`.
+See `specs/system/agents.md` for how instructions are assembled, cached, and delivered
+to providers.
 
-## Skill Index
+---
 
-| Skill | Command | Loop Type | Description |
-|---|---|---|---|
-| [grill-me](grill-me.md) | `make grill-me` | none | Interview relentlessly to reach shared understanding before committing to code |
-| [write-a-prd](write-a-prd.md) | `make write-a-prd` | plan | Turn a grilled idea into a PRD file with user stories |
-| [prd-to-specs](prd-to-specs.md) | `make prd-to-specs` | plan | Turn a PRD into the spec files needed to plan and build the feature |
-| [research](research.md) | `./loop.sh research <id>` | research | Deepen a spec through structured interview and source collection before planning |
-| [tdd](tdd.md) | `make tdd` | build | Red-green-refactor loop with interface-first philosophy |
-| [improve-codebase-architecture](improve-codebase-architecture.md) | `make improve-codebase-architecture` | none | Find shallow modules, propose deepening candidates |
+Three kinds of instruction:
+
+```
+Tool      — a primitive capability. Runs once. Composable.
+Workflow  — tools composed into a named output. Runs once or n times.
+Loop      — a workflow run until a condition is met.
+```
+
+## Tools (`tools/`)
+
+Primitives. Each does one thing. Loops and workflows call them.
+
+| Tool | Description |
+|---|---|
+| [interview](tools/interview.md) | Ask questions until shared understanding is reached |
+| [research](tools/research.md) | Collect sources and findings for a topic |
+| [analyse](tools/analyse.md) | Compare a node against its outputs or codebase, report gaps |
+
+## Workflows (`workflows/`)
+
+Tools composed into a named output. Run once, or n times to refine.
+
+| Workflow | Command | Description |
+|---|---|---|
+| [prd](workflows/prd.md) | `make prd` | Produce or update a PRD for a node |
+| [spec](workflows/spec.md) | `make spec` | Produce or update spec files for a PRD |
+| [review](workflows/review.md) | `make review` | Analyse codebase for weaknesses, propose beats |
+| [server-ops](workflows/server-ops.md) | `make server-ops` | Operate on a server — deploy, rollback, check services |
+
+## Loops (`loops/`)
+
+Workflows run until a condition passes.
+
+| Loop | Command | Runs until |
+|---|---|---|
+| [plan](loops/plan.md) | `./loop.sh plan [n]` | No open unplanned questions remain |
+| [build](loops/build.md) | `./loop.sh [n]` | Tests green, beat accepted |
+| [research](loops/research.md) | `./loop.sh research <id>` | Once per invocation — re-run to deepen |
+
+## Providers (`providers/`)
+
+Best practices for specific providers as actors. Referenced by ActorProfile config.
+
+| Provider | Notes |
+|---|---|
+| [claude](providers/claude.md) | Cache control, token limits, effort levels |
+| [kiro](providers/kiro.md) | Invocation, actor config, tool allowlists |
+| [openai](providers/openai.md) | Context cap, structured output |
+
+## The Flow
+
+```
+interview (tool)          ← reach shared understanding
+  └── prd (workflow)      ← produce generative answer to pitch
+      └── spec (workflow) ← produce generative answers to PRD questions
+          └── plan (loop) ← produce beats from specs + gap analysis
+              └── build (loop) ← execute beats until accepted
+                  └── review (workflow) ← find weaknesses, propose new beats
+```
+
+A **beat** is not written directly — it is the residue of PRD + spec + gap analysis in
+agreement. The plan loop produces beats. The build loop consumes them. The review
+workflow produces new beats when the codebase drifts from the specs.
