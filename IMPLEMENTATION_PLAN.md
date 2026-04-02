@@ -137,7 +137,7 @@ Phase: 0 (Local Development — Docker Compose only)
   Files: `web/app/modules/ledger/controllers/ledger_controller.rb`
   Required tests: `GET /ledger/open` returns nodes with any non-closed status; closed nodes excluded
 
-- [ ] Fix `NodeAuditEvent` spec — add missing spec file <!-- ref: ledger-node-audit-event-spec -->
+- [x] Fix `NodeAuditEvent` spec — add missing spec file <!-- ref: ledger-node-audit-event-spec -->
   `NodeAuditEvent` model exists and migration exists but no spec file. Add spec covering: append-only (raises on update/destroy), validates changed_by, validates to_status, belongs_to node.
   Files: `web/spec/models/ledger/node_audit_event_spec.rb`
   Required tests: update raises `ActiveRecord::ReadOnlyRecord`; destroy raises `ActiveRecord::ReadOnlyRecord`; invalid changed_by → validation error; belongs_to node
