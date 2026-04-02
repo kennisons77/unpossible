@@ -67,6 +67,13 @@ analytics sidecar      port 9100  (shares network namespace with rails)
 
 Postgres and Redis run as separate deployments with persistent volumes. They are not in the application pod.
 
+### Agent sandbox pods
+
+Each agent loop run gets a dedicated K8s pod, provisioned on dispatch and torn down on
+completion. The pod authenticates to the platform API via a short-lived WireGuard tunnel
+identity — no long-lived API keys are distributed to agent pods. Tunnel provisioning is
+handled at pod startup; the identity expires when the pod terminates.
+
 ### NixOS module structure
 
 ```
@@ -131,7 +138,6 @@ Not planned yet. Reference points when the time comes:
 - Apache AGE graph extension for Postgres (if traversal queries justify it — see `prd.md`)
 - Horizontal pod autoscaling for Rails
 - Separate Postgres instance with read replica
-- Loom Weaver-style pod provisioning for agent sandboxes (K8s pod per agent run, WireGuard tunnel for I/O)
 - SPIFFE-style secret injection replacing SOPS
 
 ---
