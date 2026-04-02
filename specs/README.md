@@ -1,22 +1,87 @@
 # Specs — Unpossible 2
 
-One file per feature area. Each spec defines what the feature does, who it's for, and its acceptance criteria. The implementation plan is derived from these specs — not the other way around.
+One file per feature area. Each spec defines what the feature does, who it's for, and
+its acceptance criteria. The implementation plan is derived from these specs — not the
+other way around.
 
-| Spec | Module | Loop type |
-|---|---|---|
-| [prd.md](prd.md) | all | Plan |
-| [knowledge.md](knowledge.md) | knowledge | Build |
-| [tasks.md](tasks.md) | tasks | Build |
-| [feature-lifecycle.md](feature-lifecycle.md) | tasks + analytics + loop.sh | Plan + Build |
-| [agents.md](agents.md) | agents | Build |
-| [sandbox.md](sandbox.md) | sandbox | Build |
-| [analytics.md](analytics.md) | analytics | Build |
-| [runner.md](runner.md) | go sidecar | Build |
-| [auth.md](auth.md) | shared | Build |
-| [security.md](security.md) | shared | Build |
-| [loop.md](loop.md) | loop.sh | Build |
-| [research-loop.md](research-loop.md) | loop.sh + knowledge | Research |
-| [practices.md](practices.md) | practices/ | Plan + Build |
-| [lookup-tables.md](lookup-tables.md) | specs/, AGENTS.md, practices/, app/modules/ | Plan + Build |
-| [server-operations.md](server-operations.md) | loop.sh + sandbox | Build + Deploy |
-| [infrastructure.md](infrastructure.md) | infra/ | Plan + Deploy |
+Platform-agnostic specs live here. Rails-specific implementation details live in
+`platform/rails/`.
+
+## Conventions
+
+**Flat file** — a single `[subject].md` for subjects that have only a spec.
+
+**Directory** — a `[subject]/` directory for subjects that have both a PRD and a spec.
+A directory signals that the subject has been fully specced with intent + model:
+
+```
+system/ledger/
+  prd.md    intent, personas, scenarios, success metrics
+  spec.md   data model, schema, behaviour, acceptance criteria
+```
+
+This is the new convention. Apply it to any subject as it matures from a spec-only file
+into a fully specced module.
+
+## Core Paradigm
+
+Every artifact in the system — a pitch, a PRD, a spec, a beat, a commit, a bug, a form,
+a deployment — is a **node** in the ledger: either a question or an answer.
+
+- A **question** declares intent or poses a problem. It is open until an answer is accepted.
+- An **answer** responds to a question. It is either terminal (work done) or generative
+  (spawns child questions that must be resolved before the tree is complete).
+- A **generative answer** is a shared understanding checkpoint — a PRD, a spec, a
+  research finding. It requires co-acceptance before child questions open.
+
+Nodes form a DAG via `NodeEdge` (contains / depends_on / refs). The ledger is the
+ordered sequence of all nodes by `originated_at`. It is append-only.
+
+See [`system/ledger/`](system/ledger/) for the full model.
+
+## System Specs (`system/`)
+
+Core platform capabilities — what the system does and how its modules behave.
+
+| Spec | Module |
+|---|---|
+| [prd.md](prd.md) | All — technical constraints and phase |
+| [system/ledger/](system/ledger/) | Universal data model — nodes, edges, questions, answers |
+| [system/agent-runner/](system/agent-runner/) | AgentRun record, prompt assembly, dedup, sidecar, observability |
+| [system/knowledge/](system/knowledge/) | Vector store, MD indexing, LLM response indexing, context retrieval |
+| [system/sandbox/](system/sandbox/) | Container lifecycle, Docker dispatcher |
+| [system/analytics/](system/analytics/) | LLM metrics, product events, feature flag exposures, audit log |
+| [system/feature-flags.md](system/feature-flags.md) | Feature flag schema, hypothesis requirement, lifecycle |
+| [system/practices.md](system/practices.md) | Practices files — what they are and when they load |
+
+## Product Specs (`product/`)
+
+User-facing capabilities — what users can do and why.
+
+| Spec | Area |
+|---|---|
+| [product/auth.md](product/auth.md) | Authentication — user and internal service |
+| [product/analytics.md](product/analytics.md) | Product events, feature flags, experiment infrastructure |
+
+## Skills (`skills/`)
+
+Instructions for agents. See [`skills/README.md`](skills/README.md).
+
+| Kind | Location |
+|---|---|
+| Tools | `skills/tools/` |
+| Workflows | `skills/workflows/` — includes `server-ops` |
+| Loops | `skills/loops/` |
+| Providers | `skills/providers/` |
+
+## Practices (`practices/`)
+
+Agent discipline rules. See [`practices/README.md`](practices/README.md).
+
+## Platform Overrides (`platform/`)
+
+Implementation details for a specific runtime. Each file extends a core spec — it does
+not repeat it.
+
+- `platform/rails/` — Rails 8 implementation
+- `platform/go/` — Go sidecar implementation

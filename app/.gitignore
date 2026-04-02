@@ -1,0 +1,9 @@
+.env
+.env.*
+!.env.example
+*.log
+tmp/
+.bundle/
+vendor/bundle/
+coverage/
+.DS_Store
