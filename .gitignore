@@ -13,3 +13,7 @@ projects/*/
 
 # Data directories (postgres, minio)
 .data/
+
+# Linux libraries
+infra/debs/*
+infra/debs-debian/*
