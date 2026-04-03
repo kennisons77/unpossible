@@ -10,8 +10,8 @@
 
 2. Before running tests, read `practices/general/verification.md`. Then run:
    ```
-   docker compose -f projects/unpossible2/infra/docker-compose.yml build
-   docker compose -f projects/unpossible2/infra/docker-compose.yml run --rm test
+   docker compose -f projects/unpossible2/infra/docker-compose.test.yml build
+   docker compose -f projects/unpossible2/infra/docker-compose.test.yml run --rm test
    ```
 
 3. When tests pass, update `projects/unpossible2/IMPLEMENTATION_PLAN.md` (mark task complete), then commit:
