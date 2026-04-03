@@ -2,7 +2,7 @@
 
 Agent activity log. Auto-updated each iteration. Trimmed to last 10 entries.
 
-[Prior entries summarised: 9 iterations — initial planning pass, gap analysis (58 tasks, 5 ambiguities resolved), Rails app skeleton + test infra (tag 0.0.19), Sidekiq/Redis + Rubocop + SimpleCov fixes (tag 0.0.20), gap analysis refresh, full gap analysis + IMPLEMENTATION_PLAN.md full refresh, Gemfile.lock fix solid_queue (tag 0.0.1), gap analysis refresh + IMPLEMENTATION_PLAN.md full rewrite, docker-compose rename + full dev stack, Solid Queue configuration]
+[Prior entries summarised: 10 iterations — initial planning pass, gap analysis, Rails skeleton + test infra (tag 0.0.19), Sidekiq/Redis + Rubocop + SimpleCov fixes (tag 0.0.20), gap analysis refresh x2, Gemfile.lock fix solid_queue (tag 0.0.1), gap analysis refresh + IMPLEMENTATION_PLAN.md rewrite, docker-compose rename + full dev stack, Solid Queue configuration, Secret value object]
 
 ---
 
@@ -51,3 +51,27 @@ Agent activity log. Auto-updated each iteration. Trimmed to last 10 entries.
 - expose → raw value ✓
 - JSON serialization redacted ✓
 - String interpolation redacted ✓
+
+---
+
+## 2026-04-01 20:38 — Create Security::LogRedactor
+
+**Mode:** Build
+**Iteration:** 12
+**Status:** Complete
+
+**Task:** Section 2 — Create `Security::LogRedactor`
+
+**Actions:**
+- Created `app/app/lib/security/log_redactor.rb` — `Security::LogRedactor.scrub(line)` with 5 regex patterns
+- Patterns: OpenAI `sk-...` → `[REDACTED:openai_key]`, `Bearer ...` → `[REDACTED:bearer_token]`, PEM header → `[REDACTED:pem_header]`, AWS `AKIA...` → `[REDACTED:aws_key]`, JWT `eyJ...` → `[REDACTED:jwt]`
+- Updated `config/initializers/lograge.rb` — plugged in via `before_format` hook
+- Created `app/spec/lib/security/log_redactor_spec.rb` (8 examples)
+- All 18 tests pass; 100% line coverage
+
+**Acceptance criteria met:**
+- JWT redacted ✓
+- OpenAI key redacted ✓
+- PEM header redacted ✓
+- Normal lines pass through unchanged ✓
+- Plugged into lograge initializer ✓
