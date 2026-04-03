@@ -1,6 +1,6 @@
 # Agents Module — Rails Platform Override
 
-Extends `specs/agents.md`. Rails-specific implementation details only.
+Extends `specs/system/agent-runner/spec.md`. Rails-specific implementation details only.
 
 ## Model
 - `Agents::AgentRun` — ActiveRecord, `app/modules/agents/models/agent_run.rb`
@@ -40,5 +40,5 @@ Extends `specs/agents.md`. Rails-specific implementation details only.
 - `ProviderAdapter.for("kiro")` returns `KiroAdapter`
 - `ProviderAdapter.for("openai")` returns `OpenAiAdapter`
 - `AgentRun` unique index on `(run_id, iteration)` enforced at DB level
-- Complete endpoint triggers `Tasks::PlanParserJob` when mode is plan
+- Complete endpoint triggers `Ledger::SpecWatcherJob` when mode is plan
 - Complete endpoint calls `Analytics::AuditLogger`

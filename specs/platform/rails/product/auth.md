@@ -1,6 +1,6 @@
 # Authentication — Rails Platform Override
 
-Extends `specs/auth.md`. Rails-specific implementation details only.
+Extends `specs/practices/auth.md`. Rails-specific implementation details only.
 
 ## Token Format
 JWT. Claims: `org_id`, `user_id`, `exp`. Encoded/decoded via `app/app/lib/auth_token.rb`.
