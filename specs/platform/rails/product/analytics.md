@@ -1,6 +1,6 @@
 # Analytics Product — Rails Platform Override
 
-Extends `specs/product/analytics.md`. Rails-specific implementation only.
+Extends `specs/system/analytics/spec.md`. Rails-specific implementation only.
 
 ## Models
 - `Analytics::FeatureFlag` — `enabled?` fires `$feature_flag_called` automatically; archived flags return false without raising

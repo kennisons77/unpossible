@@ -5,4 +5,4 @@ Rails 8 implementation overrides. Each file extends a core spec and adds only Ra
 ## Directories
 
 - `system/` — overrides for `specs/system/` specs
-- `product/` — overrides for `specs/product/` specs
+- `product/` — overrides for product-level specs (auth, analytics)

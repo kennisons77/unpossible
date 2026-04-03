@@ -56,12 +56,13 @@ Core platform capabilities — what the system does and how its modules behave.
 
 ## Product Specs (`product/`)
 
-User-facing capabilities — what users can do and why.
+User-facing capabilities — what users can do and why. Rails-specific implementation details
+live in `platform/rails/product/`.
 
 | Spec | Area |
 |---|---|
-| [product/auth.md](product/auth.md) | Authentication — user and internal service |
-| [product/analytics.md](product/analytics.md) | Product events, feature flags, experiment infrastructure |
+| [platform/rails/product/auth.md](platform/rails/product/auth.md) | Authentication — user and internal service |
+| [platform/rails/product/analytics.md](platform/rails/product/analytics.md) | Product events, feature flags, experiment infrastructure |
 
 ## Skills (`skills/`)
 

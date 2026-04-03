@@ -28,7 +28,7 @@ Monorepo with namespaced Rails modules. Each module owns its models, services, j
 ```
 app/modules/
   knowledge/    # vector store, MD indexing, context retrieval
-  tasks/        # task schema, plan parsing, tool set definitions
+  ledger/       # universal data model — nodes, edges, questions, answers
   agents/       # agent run storage, prompt dedup, JWT auth
   sandbox/      # container lifecycle, Docker dispatcher
   analytics/    # LLM metrics, audit log, feature flags
