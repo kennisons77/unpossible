@@ -77,7 +77,7 @@ Phase: 0 (Local Development — Docker Compose only)
   Files: `app/app/lib/secret.rb`, `app/spec/lib/secret_spec.rb`
   Required tests: inspect → "[REDACTED]"; to_s → "[REDACTED]"; as_json → "[REDACTED]"; expose → raw value; JSON serialization redacted
 
-- [ ] Create `Security::LogRedactor`
+- [x] Create `Security::LogRedactor`
   `app/app/lib/security/log_redactor.rb`. Regex patterns for OpenAI `sk-...`, `Bearer ...`, PEM headers, AWS `AKIA...`, JWT `eyJ...` → `[REDACTED:<type>]`. Plugged into lograge initializer.
   Files: `app/app/lib/security/log_redactor.rb`, `app/config/initializers/lograge.rb` (update), `app/spec/lib/security/log_redactor_spec.rb`
   Required tests: JWT redacted; OpenAI key redacted; PEM header redacted; normal lines pass through
