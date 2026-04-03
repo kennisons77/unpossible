@@ -31,6 +31,31 @@ For criteria that can't be expressed as a traditional test (tone, visual layout,
 quality), write an LLM-as-judge check: a prompt that evaluates output against the spec and
 returns pass/fail. Treat it as a first-class test — it must pass before committing.
 
+## Tool Effectiveness Benchmarking
+
+The `agent_override` flag on `AgentRun` enables a controlled comparison between enrichment
+tools and raw agent capability. Use it to build benchmark test cases:
+
+**Pattern:**
+1. Run the same beat twice against the same context — once normally, once with `agent_override: true`
+2. Record tokens, cost, duration, and output for both runs
+3. Evaluate output quality via one of:
+   - **Human review** — a person judges which output better satisfies the acceptance criteria
+   - **Blind model comparison** — submit both outputs to a judge model with the spec as rubric,
+     without revealing which run used enrichment. Ask for a preference and a reason.
+
+**What to measure:**
+- Token delta — how much context did the enrichment tool save the agent from generating itself?
+- Cost delta — did the enrichment tool call cost less than the equivalent agent tokens?
+- Quality delta — did enrichment improve, degrade, or not affect output quality?
+
+**When to run:**
+- When adding a new enrichment tool — establish its baseline before shipping
+- When a tool's effectiveness is questioned — re-run the benchmark
+- Not every iteration — this is a deliberate, periodic check, not part of the build loop
+
+Keep benchmark runs tagged with `agent_override: true` so they're queryable from run history.
+
 ## Before Running Tests
 - Rebuild the Docker image if dependencies or the Dockerfile changed
 - Run the full test suite, not just tests for the code you touched

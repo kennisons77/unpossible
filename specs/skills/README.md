@@ -18,7 +18,7 @@ actor:   default | plan | build | research | review  ← ActorProfile name
 allowed_tools, and prompt_template. Swap the profile to change how the instruction
 executes — the instruction itself doesn't change.
 
-See `specs/system/agents.md` for how instructions are assembled, cached, and delivered
+See `specs/system/agent-runner/spec.md` for how instructions are assembled, cached, and delivered
 to providers.
 
 ---

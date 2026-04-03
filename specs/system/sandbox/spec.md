@@ -12,12 +12,18 @@ Agent loops need isolation. Separating "the app that manages loops" from "the en
 
 Local Docker execution. A dispatcher shells out to `docker run --rm` with a given image and command. No Kubernetes, no pod provisioning — those are Phase 2.
 
+## Phase 2 Scope
+
+Pod-per-agent-run on k3s. Each loop run gets a dedicated K8s pod, torn down on
+completion. Auth between the pod and the platform uses a short-lived WireGuard tunnel
+identity — no long-lived API keys distributed to agent pods.
+
 ## Container Run Record
 
 Tracks each dispatched container:
 - `image`, `command`, `status` (pending/running/complete/failed)
 - `exit_code`, `started_at`, `finished_at`
-- `agent_run_id` (nullable — not all container runs are agent-initiated)
+- `agent_run_id` — FK to the agent run that triggered this container
 
 ## Security
 

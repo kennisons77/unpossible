@@ -1,8 +1,8 @@
 # Rails Product Overrides — Unpossible 2
 
-Rails-specific implementation details for product-level specs. Each file extends the corresponding `specs/product/` spec.
+Rails-specific implementation details for product-level specs. Each file extends the corresponding base spec.
 
 | Override | Extends |
 |---|---|
-| [auth.md](auth.md) | specs/product/auth.md |
-| [analytics.md](analytics.md) | specs/product/analytics.md |
+| [auth.md](auth.md) | specs/practices/auth.md |
+| [analytics.md](analytics.md) | specs/system/analytics/spec.md |

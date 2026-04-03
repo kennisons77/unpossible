@@ -2,46 +2,30 @@
 
 Agent activity log. Auto-updated each iteration. Trimmed to last 10 entries.
 
-[Prior entries summarised: 4 iterations — initial planning pass, gap analysis (58 tasks, 5 ambiguities resolved), Rails app skeleton + test infra (tag 0.0.19), Sidekiq/Redis + Rubocop + SimpleCov fixes (tag 0.0.20)]
+[Prior entries summarised: 7 iterations — initial planning pass, gap analysis (58 tasks, 5 ambiguities resolved), Rails app skeleton + test infra (tag 0.0.19), Sidekiq/Redis + Rubocop + SimpleCov fixes (tag 0.0.20), gap analysis refresh, full gap analysis + IMPLEMENTATION_PLAN.md full refresh, Gemfile.lock fix solid_queue (tag 0.0.1)]
 
 ---
 
-## 2026-03-29 17:43 — Sidekiq/Redis + Rubocop + SimpleCov fixes
-
-**Mode:** Build
-**Iteration:** 4
-**Status:** Complete
-**Tag:** 0.0.20
-
-**Actions:**
-- Added Sidekiq web UI mount at `/sidekiq` in routes (HTTP Basic Auth in production, open in dev/test)
-- Added spec for Sidekiq: Redis enqueue, queue config, route mount
-- Fixed SimpleCov: filter boilerplate files (application_job, application_record, application_controller) so coverage check doesn't fire on config-only test runs
-- Fixed Rubocop offenses: `Layout/SpaceInsideArrayLiteralBrackets` in production.rb and rails_helper.rb; `RSpec/HookArgument` in rails_helper.rb; `RSpec/DescribeClass` in sidekiq_spec.rb (inline disable — config specs don't describe a class)
-- Marked as done in IMPLEMENTATION_PLAN.md: Dockerfile, docker-compose.yml (test stack), docker-compose.test.yml (note: implemented as docker-compose.yml), RSpec+Rubocop+SimpleCov, Sidekiq+Redis, Lograge
-
-**Gotchas:**
-- `RSpec/DescribeClass` fires on config/integration specs that describe a string — use `# rubocop:disable RSpec/DescribeClass` inline rather than disabling globally
-- SimpleCov fires on config-only test runs (0% coverage on boilerplate files) — filter ApplicationJob, ApplicationRecord, ApplicationController from tracking
-- `docker-compose.yml` serves as the test stack (loop.sh target); dev stack is `docker-compose.dev.yml` (deferred until Go sidecars exist)
-
-**Tasks completed:** Create infra/Dockerfile, Create infra/docker-compose.yml, Create infra/docker-compose.test.yml, Configure RSpec+Rubocop+SimpleCov, Configure Sidekiq+Redis, Configure Lograge
-
----
-
-## 2026-03-29 18:00 — Gap analysis + IMPLEMENTATION_PLAN.md refresh
+## 2026-04-01 17:41 — Gap analysis refresh + IMPLEMENTATION_PLAN.md full rewrite
 
 **Mode:** Plan
-**Iteration:** 5
+**Iteration:** 8
 **Status:** Complete
 
 **Actions:**
-- Read all 16 spec files; confirmed what is implemented in `app/` vs what is missing
-- Confirmed done: infra/Dockerfile, docker-compose.yml, Rails skeleton, Sidekiq, Lograge, RSpec/Rubocop/SimpleCov, AGENTS.md
-- Confirmed empty: `app/app/lib/`, `app/app/modules/`, `app/db/migrate/` — no domain code yet
-- Rewrote IMPLEMENTATION_PLAN.md: 12 sections, ~45 tasks, all with Required tests derived from acceptance criteria
-- Trimmed activity.md: rolled iteration 4 into prior-entries summary line
+- Read all specs: system/, skills/, practices/, platform/rails/ overrides
+- Read all practices: planning.md, cost.md, ruby.md, rails.md
+- Confirmed implemented: Dockerfile, Dockerfile.test, entrypoint-test.sh, docker-compose.yml (test-only), Rails skeleton, Gemfile.lock (solid_queue), RSpec/Rubocop/SimpleCov/Lograge, AGENTS.md, specs/practices/security.md
+- Confirmed all domain code absent: no migrations, no modules, no lib files, no spec files beyond helpers
+- Identified new spec: AgentRunTurn model + pause/resume + TurnGcJob (from updated agent-runner/spec.md)
+- Identified specs/practices/security.md EXISTS — removed duplicate creation task from plan
+- Identified specs/platform/rails/product/auth.md references missing base spec — flagged as open question
+- Full rewrite of IMPLEMENTATION_PLAN.md: 14 sections, ~50 tasks, 1 spike, 5 open questions
+- Trimmed activity.md to last 10 entries
 
-**Tasks completed:** Update IMPLEMENTATION_PLAN.md (plan pass)
-
----
+**Key findings:**
+- docker-compose.yml still test-only (not renamed) — HIGH PRIORITY Section 1 task
+- PROMPT_build.md still references docker-compose.yml — needs update
+- Solid Queue not configured in Rails (no queue.yml, no migrations)
+- AgentRun spec updated with pause/resume, turn model, GC job — plan reflects this
+- Ledger module namespace unresolved (not in prd.md module list)

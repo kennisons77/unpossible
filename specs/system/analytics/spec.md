@@ -9,11 +9,15 @@ infrastructure.
 
 ## Why It Exists
 
-- Feed the Reflect loop — LLM cost and error patterns drive self-improvement
+- Ops visibility — loop run counts, failure rates, rollback events, LLM cost patterns
 - Experiment infrastructure — feature flag exposures + product events enable hypothesis
   measurement
-- Own the data — no third-party service receives any signal
-- Ops visibility — loop run counts, failure rates, rollback events
+- Own the data — no third-party service receives any signal by default; outbound
+  adapters (PostHog, Datadog, custom webhook) are a post-MVP concern. The analytics
+  module will define the adapter interface; projects built with unpossible can plug in
+  concrete adapters without changing the core store.
+- Future agent diagnosis — `node_id` on LLM events is the explicit join key to ledger
+  state, enabling an agent to reconstruct what happened during a failing run
 
 ## Ingest Architecture
 
@@ -26,23 +30,37 @@ A dedicated ingest endpoint with an in-memory queue and batch writes satisfies a
 three. The application calls the ingest endpoint fire-and-forget. The ingest process
 owns only capture and flush — the application owns all reads and the query API.
 
+The event store is the source of truth — raw events are preserved, never pre-aggregated.
+A statsd/Prometheus exporter is a post-MVP read-side projection of the event store for
+ops dashboards (Grafana etc.). The exporter aggregates on read; the store does not
+change shape to accommodate it.
+
 ## Signal Categories
 
 ### LLM metrics
-Per agent run: provider, model, tokens, cost, task type, duration.
+Per agent run: provider, model, tokens, cost, mode, duration. `node_id` is the ledger
+node ID — the explicit join key between analytics events and ledger state.
 ```
 event_name: "llm.run_completed"
-properties: { provider, model, input_tokens, output_tokens, cost_usd, mode, task_id, duration_ms }
+properties: { provider, model, input_tokens, output_tokens, cost_usd, mode, node_id, duration_ms }
 distinct_id: <run_id>
 ```
 
-### Infrastructure metrics
+### Loop metrics
 Loop run counts, failure rates, rollback events.
 ```
 event_name: "loop.iteration_completed"
 properties: { mode, exit_code, duration_ms, agent, model }
 event_name: "loop.rollback_triggered"
 properties: { mode, iteration, reason }
+```
+
+### Container metrics
+Pushed by the sidecar — not scraped via Prometheus pull. Consistent with the ingest
+architecture; no separate metrics endpoint required in Phase 0.
+```
+event_name: "infra.container_metrics"
+properties: { container_name, cpu_percent, memory_mb, disk_mb }
 ```
 
 ### Product events
@@ -69,10 +87,14 @@ analytics_events
   org_id        uuid
   distinct_id   string  — opaque UUID; never an email or name
   event_name    string  — namespaced
+  node_id       uuid    — ledger node ID; indexed; nullable (non-LLM events may omit)
   properties    jsonb   — filtered through PII redaction before storage
   timestamp     timestamptz
   received_at   timestamptz
 ```
+
+`node_id` is a first-class indexed column, not buried in `properties`. Join performance
+matters for the future agent diagnosis use case.
 
 ## Audit Log
 

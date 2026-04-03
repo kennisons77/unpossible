@@ -69,8 +69,8 @@ Example codebase patterns table:
 | Agents::ProviderAdapter | app/modules/agents/services/provider_adapter.rb | Base class — subclass per provider |
 | Analytics::AuditLogger | app/modules/analytics/services/audit_logger.rb | Fire-and-forget, never raises |
 | Knowledge::ContextRetriever | app/modules/knowledge/services/context_retriever.rb | Call with query:, limit: |
+| Ledger::SpecWatcherJob | app/modules/ledger/jobs/spec_watcher_job.rb | Triggered after plan loop completes |
 | Secret | app/lib/secret.rb | Wrap all API keys — .expose for raw value |
-| Tasks::PlanParserJob | app/modules/tasks/jobs/plan_parser_job.rb | Triggered after plan loop completes |
 ```
 
 ## practices/LOOKUP.md
@@ -99,8 +99,8 @@ Maps module names to their paths and public service interfaces. Prevents agents 
 | agents | app/modules/agents/ | Agents::AgentRunsService |
 | analytics | app/modules/analytics/ | Analytics::AuditLogger, Analytics::LlmMetricsService |
 | knowledge | app/modules/knowledge/ | Knowledge::ContextRetriever, Knowledge::IndexerJob |
+| ledger | app/modules/ledger/ | Ledger::NodeLifecycleService, Ledger::SpecWatcherJob |
 | sandbox | app/modules/sandbox/ | Sandbox::DockerDispatcher |
-| tasks | app/modules/tasks/ | Tasks::PlanParserJob, Tasks::TasksService |
 ```
 
 ## Reference Style
