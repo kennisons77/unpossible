@@ -1,29 +1,75 @@
 services:
-  test:
+  rails:
     build:
       context: ..
-      dockerfile: infra/Dockerfile.test
+      dockerfile: infra/Dockerfile
+    image: unpossible2-rails:${GIT_SHA:-dev}
     environment:
-      RAILS_ENV: test
+      RAILS_ENV: development
       DB_HOST: postgres
       POSTGRES_USER: unpossible2
       POSTGRES_PASSWORD: unpossible2
-      POSTGRES_DB: unpossible2_test
+      POSTGRES_DB: unpossible2_development
+      REDIS_URL: redis://redis:6379/0
+    ports:
+      - "3000:3000"
     depends_on:
       postgres:
         condition: service_healthy
-    command: ["bundle", "exec", "rspec"]
+      redis:
+        condition: service_healthy
+    networks:
+      - unpossible2
+
+  go_runner:
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile.runner
+    image: unpossible2-runner:${GIT_SHA:-dev}
+    ports:
+      - "8080:8080"
+    networks:
+      - unpossible2
+
+  analytics:
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile.analytics
+    image: unpossible2-analytics:${GIT_SHA:-dev}
+    ports:
+      - "9100:9100"
+    networks:
+      - unpossible2
 
   postgres:
     image: pgvector/pgvector:pg16
     environment:
       POSTGRES_USER: unpossible2
       POSTGRES_PASSWORD: unpossible2
-      POSTGRES_DB: unpossible2_test
-    tmpfs:
-      - /var/lib/postgresql/data
+      POSTGRES_DB: unpossible2_development
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U unpossible2"]
       interval: 5s
       timeout: 5s
       retries: 5
+    networks:
+      - unpossible2
+
+  redis:
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - unpossible2
+
+volumes:
+  postgres_data:
+
+networks:
+  unpossible2:
+    driver: bridge

@@ -49,7 +49,7 @@ Phase: 0 (Local Development — Docker Compose only)
 - [x] Create `AGENTS.md`
 - [x] Fix Gemfile.lock — solid_queue, no sidekiq/redis
 
-- [ ] Rename docker-compose.yml → docker-compose.test.yml; create docker-compose.yml (full dev stack)
+- [x] Rename docker-compose.yml → docker-compose.test.yml; create docker-compose.yml (full dev stack)
   Per `specs/system/infrastructure/spec.md`: `docker-compose.yml` = full dev stack (rails + go_runner + analytics + postgres + redis); `docker-compose.test.yml` = ephemeral test stack. Rename current file. Create new `docker-compose.yml` with: rails (ruby:3.3-slim, port 3000), go_runner (port 8080), analytics (port 9100), postgres (pgvector/pgvector:pg16, internal only), redis (redis:7-alpine, internal only). Image tags use git SHA. Update AGENTS.md and PROMPT_build.md.
   Files: `infra/docker-compose.yml` (new), `infra/docker-compose.test.yml` (renamed), `AGENTS.md`, `PROMPT_build.md`
   Required tests: `docker compose -f infra/docker-compose.test.yml run --rm test` exits 0; postgres/redis not bound to 0.0.0.0; image tags reference git SHA not `latest`

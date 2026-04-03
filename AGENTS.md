@@ -7,13 +7,16 @@ Progress notes belong in IMPLEMENTATION_PLAN.md.
 
 ```bash
 # Build test image
-docker compose -f projects/unpossible2/infra/docker-compose.yml build
+docker compose -f projects/unpossible2/infra/docker-compose.test.yml build
 
 # Run test suite
-docker compose -f projects/unpossible2/infra/docker-compose.yml run --rm test
+docker compose -f projects/unpossible2/infra/docker-compose.test.yml run --rm test
 
 # Run a specific spec
-docker compose -f projects/unpossible2/infra/docker-compose.yml run --rm test bundle exec rspec spec/path/to/spec.rb
+docker compose -f projects/unpossible2/infra/docker-compose.test.yml run --rm test bundle exec rspec spec/path/to/spec.rb
+
+# Start full dev stack (requires Dockerfile.runner and Dockerfile.analytics)
+GIT_SHA=$(git rev-parse --short HEAD) docker compose -f projects/unpossible2/infra/docker-compose.yml up
 ```
 
 ## Adding New Gems
