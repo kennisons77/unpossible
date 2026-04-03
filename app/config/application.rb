@@ -27,5 +27,8 @@ module Unpossible2
 
     # API + full-stack (views needed for UI)
     config.api_only = false
+
+    # Background jobs via Solid Queue (Postgres-backed, no Redis)
+    config.active_job.queue_adapter = :solid_queue
   end
 end

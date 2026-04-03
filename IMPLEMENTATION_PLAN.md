@@ -54,7 +54,7 @@ Phase: 0 (Local Development — Docker Compose only)
   Files: `infra/docker-compose.yml` (new), `infra/docker-compose.test.yml` (renamed), `AGENTS.md`, `PROMPT_build.md`
   Required tests: `docker compose -f infra/docker-compose.test.yml run --rm test` exits 0; postgres/redis not bound to 0.0.0.0; image tags reference git SHA not `latest`
 
-- [ ] Configure Solid Queue
+- [x] Configure Solid Queue
   Add `config.active_job.queue_adapter = :solid_queue` to `application.rb`. Create `config/queue.yml` (queues: default, knowledge, analytics, tasks, pipeline). Run solid_queue install migrations. Create `config/recurring.yml` (empty for now).
   Files: `app/config/application.rb`, `app/config/queue.yml`, `app/config/recurring.yml`, solid_queue migrations
   Required tests: job enqueued on correct queue; no Redis connection in tests
