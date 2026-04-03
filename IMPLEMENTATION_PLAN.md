@@ -87,7 +87,7 @@ Phase: 0 (Local Development — Docker Compose only)
   Files: `app/app/lib/security/prompt_sanitizer.rb`, `app/spec/lib/security/prompt_sanitizer_spec.rb`
   Required tests: email redacted; phone redacted; OpenAI key redacted; clean text passes; match triggers audit log warning
 
-- [ ] Configure rack-attack rate limiting
+- [x] Configure rack-attack rate limiting
   Throttle by IP, return 429 on limit exceeded.
   Files: `app/config/initializers/rack_attack.rb`, `app/spec/config/initializers/rack_attack_spec.rb`
   Required tests: >N requests from same IP → 429; normal traffic passes
