@@ -17,8 +17,4 @@ See `specs/system/practices.md` for the full loading rules.
 | [cost.md](cost.md) | Cost | all |
 | [version-control.md](version-control.md) | Version control | build |
 | [zed.md](zed.md) | Editor | all |
-
-## Missing
-
-- `security.md` — secrets handling, PII, attack surface rules
-- `reflect.md` — reflect loop analysis and improvement proposals
+| [security.md](security.md) | Security | build |

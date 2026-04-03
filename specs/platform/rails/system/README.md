@@ -4,9 +4,8 @@ Rails-specific implementation details for system-level specs. Each file extends 
 
 | Override | Extends |
 |---|---|
-| [tasks.md](tasks.md) | specs/system/tasks.md |
-| [agents.md](agents.md) | specs/system/agents.md |
-| [knowledge.md](knowledge.md) | specs/system/knowledge.md |
-| [sandbox.md](sandbox.md) | specs/system/sandbox.md |
-| [analytics.md](analytics.md) | specs/system/analytics.md |
-| [api-standards.md](api-standards.md) | specs/system/api-standards.md |
+| [agents.md](agents.md) | specs/system/agent-runner/spec.md |
+| [knowledge.md](knowledge.md) | specs/system/knowledge/spec.md |
+| [sandbox.md](sandbox.md) | specs/system/sandbox/spec.md |
+| [analytics.md](analytics.md) | specs/system/analytics/spec.md |
+| [api-standards.md](api-standards.md) | specs/system/api/spec.md |

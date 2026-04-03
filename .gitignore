@@ -1,0 +1,19 @@
+# Local gem data
+vendor/
+
+# Generated projects
+projects/*/
+
+# Secrets
+.env
+*.key
+
+# OS
+.DS_Store
+
+# Data directories (postgres, minio)
+.data/
+
+# Linux libraries
+infra/debs/*
+infra/debs-debian/*

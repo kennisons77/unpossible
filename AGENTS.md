@@ -16,6 +16,18 @@ docker compose -f projects/unpossible2/infra/docker-compose.yml run --rm test
 docker compose -f projects/unpossible2/infra/docker-compose.yml run --rm test bundle exec rspec spec/path/to/spec.rb
 ```
 
+## Adding New Gems
+
+Docker containers have no outbound internet access. All gems must be pre-downloaded to `app/vendor/cache/` on the host before building:
+
+```bash
+# Download a new gem and its platform-specific variant (if any)
+curl -sf -o projects/unpossible2/app/vendor/cache/<name>-<version>.gem \
+  https://rubygems.org/gems/<name>-<version>.gem
+```
+
+Then update `app/Gemfile` and `app/Gemfile.lock`, and rebuild the image.
+
 ## Codebase Patterns
 
 | Concept | Location | Notes |
@@ -24,7 +36,7 @@ docker compose -f projects/unpossible2/infra/docker-compose.yml run --rm test bu
 | Infra config | `projects/unpossible2/infra/` | Dockerfiles, compose files |
 | Module code | `app/app/modules/{name}/` | knowledge, tasks, agents, sandbox, analytics |
 | Specs | `app/spec/` | RSpec, FactoryBot, Shoulda Matchers |
-| Initializers | `app/config/initializers/` | sidekiq.rb, lograge.rb, rack_attack.rb |
+| Initializers | `app/config/initializers/` | lograge.rb, rack_attack.rb |
 | DB migrations | `app/db/migrate/` | Rails migrations |
 | Lib | `app/app/lib/` | Secret, AuthToken, Security::* |
 
@@ -42,7 +54,6 @@ start it with `open -a Docker` and wait ~10s for the socket to appear at
 | `POSTGRES_USER` | `unpossible2` | DB user |
 | `POSTGRES_PASSWORD` | `unpossible2` | DB password |
 | `POSTGRES_DB` | `unpossible2_test` | Test DB name |
-| `REDIS_URL` | `redis://redis:6379/0` | Redis connection |
 | `RAILS_ENV` | `test` | Rails environment |
 
 ## Server Operations
@@ -51,4 +62,3 @@ start it with `open -a Docker` and wait ~10s for the socket to appear at
 |---|---|---|
 | Rails | `GET /up` | `docker compose logs rails` |
 | Postgres | `pg_isready` | `docker compose logs postgres` |
-| Redis | `redis-cli ping` | `docker compose logs redis` |
