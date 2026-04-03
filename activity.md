@@ -2,7 +2,7 @@
 
 Agent activity log. Auto-updated each iteration. Trimmed to last 10 entries.
 
-[Prior entries summarised: 8 iterations — initial planning pass, gap analysis (58 tasks, 5 ambiguities resolved), Rails app skeleton + test infra (tag 0.0.19), Sidekiq/Redis + Rubocop + SimpleCov fixes (tag 0.0.20), gap analysis refresh, full gap analysis + IMPLEMENTATION_PLAN.md full refresh, Gemfile.lock fix solid_queue (tag 0.0.1), gap analysis refresh + IMPLEMENTATION_PLAN.md full rewrite]
+[Prior entries summarised: 9 iterations — initial planning pass, gap analysis (58 tasks, 5 ambiguities resolved), Rails app skeleton + test infra (tag 0.0.19), Sidekiq/Redis + Rubocop + SimpleCov fixes (tag 0.0.20), gap analysis refresh, full gap analysis + IMPLEMENTATION_PLAN.md full refresh, Gemfile.lock fix solid_queue (tag 0.0.1), gap analysis refresh + IMPLEMENTATION_PLAN.md full rewrite, docker-compose rename + full dev stack, Solid Queue configuration]
 
 ---
 
@@ -29,18 +29,25 @@ Agent activity log. Auto-updated each iteration. Trimmed to last 10 entries.
 
 ---
 
-## 2026-04-01 20:13 — Rename docker-compose.yml → docker-compose.test.yml; create docker-compose.yml (full dev stack)
+## 2026-04-01 20:27 — Create Secret value object
+
+**Mode:** Build
+**Iteration:** 11
+**Status:** Complete
+
+**Task:** Section 2 — Create `Secret` value object
 
 **Actions:**
-- Renamed `infra/docker-compose.yml` → `infra/docker-compose.test.yml` (added explicit `unpossible2` bridge network)
-- Created new `infra/docker-compose.yml` with full dev stack: rails (port 3000), go_runner (port 8080), analytics (port 9100), postgres (pgvector/pgvector:pg16, internal only), redis (redis:7-alpine, internal only)
-- Image tags use `${GIT_SHA:-dev}` — never `latest`
-- Postgres and redis have no `ports:` entries — internal network only
-- Updated AGENTS.md build/run/test commands to reference docker-compose.test.yml
-- Updated PROMPT_build.md to reference docker-compose.test.yml
-- Tests pass: `docker compose -f infra/docker-compose.test.yml run --rm test` exits 0
+- Created `app/app/lib/secret.rb` — value object wrapping a sensitive string
+- Overrides `inspect`, `to_s`, `as_json`, `to_json` → `[REDACTED]`
+- `.expose` returns the raw value for use at consumption boundaries
+- Created `app/spec/lib/secret_spec.rb` (6 examples)
+- All 10 tests pass (4 Solid Queue + 6 Secret); 100% line coverage
 
 **Acceptance criteria met:**
-- docker-compose.test.yml run --rm test exits 0 ✓
-- postgres/redis not bound to 0.0.0.0 ✓
-- image tags reference git SHA not `latest` ✓
+- inspect → "[REDACTED]" ✓
+- to_s → "[REDACTED]" ✓
+- as_json → "[REDACTED]" ✓
+- expose → raw value ✓
+- JSON serialization redacted ✓
+- String interpolation redacted ✓

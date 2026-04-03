@@ -72,7 +72,7 @@ Phase: 0 (Local Development — Docker Compose only)
 
 ## Section 2 — Security Foundation
 
-- [ ] Create `Secret` value object
+- [x] Create `Secret` value object
   `app/app/lib/secret.rb`. Overrides `inspect`, `to_s`, `as_json` → `"[REDACTED]"`. `.expose` returns raw value.
   Files: `app/app/lib/secret.rb`, `app/spec/lib/secret_spec.rb`
   Required tests: inspect → "[REDACTED]"; to_s → "[REDACTED]"; as_json → "[REDACTED]"; expose → raw value; JSON serialization redacted
