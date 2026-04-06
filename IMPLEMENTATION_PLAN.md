@@ -92,7 +92,7 @@ Phase: 0 (Local Development — Docker Compose only)
   Files: `app/config/initializers/rack_attack.rb`, `app/spec/config/initializers/rack_attack_spec.rb`
   Required tests: >N requests from same IP → 429; normal traffic passes
 
-- [ ] Configure brakeman and bundler-audit Rake tasks
+- [x] Configure brakeman and bundler-audit Rake tasks
   Files: `app/lib/tasks/security.rake`
   Required tests: `bundle exec brakeman --exit-on-warn` exits 0; `bundle exec bundler-audit check --update` exits 0
 
