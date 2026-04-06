@@ -121,12 +121,12 @@ Phase: 0 (Local Development — Docker Compose only)
   Files: `web/app/modules/ledger/models/node.rb`, migration, `web/spec/models/ledger/node_spec.rb`, factory
   Required tests: kind/scope enums validate; answer immutable after creation; terminal answer rejects child question; generative answer allows children; accepted defaults to pending; version increments on status transition; org_id present; factory valid
 
-- [ ] Create `NodeEdge` model and migration
+- [x] Create `NodeEdge` model and migration
   Schema: id (uuid), parent_id (FK→nodes), child_id (FK→nodes), edge_type (enum: contains/depends_on/refs), ref_type (string, nullable), primary (boolean, default false). Indexes: (parent_id, edge_type), (child_id, edge_type).
   Files: `web/app/modules/ledger/models/node_edge.rb`, migration, `web/spec/models/ledger/node_edge_spec.rb`, factory
   Required tests: edge_type validates; ref_type nullable; primary flag works; fan-in works; depends_on blocks in_progress transition
 
-- [ ] Create `ActorProfile` and `Actor` models and migrations
+- [x] Create `ActorProfile` and `Actor` models and migrations
   ActorProfile: id, name, provider, model, allowed_tools (jsonb, default []), prompt_template (text, nullable), org_id. Actor: id, actor_profile_id (FK), node_id (FK→nodes), tools_used (jsonb, default []), created_at.
   Files: models, migrations, factories
   Required tests: allowed_tools defaults []; tools_used defaults []; Actor belongs_to ActorProfile and Node; factories valid
