@@ -34,4 +34,4 @@ Cross-module calls go through public service interfaces only — no direct model
 
 - Never access another module's models directly — call its public service interface
 - Never require another module's internal files — use the public interface only
-- Shared value objects (e.g. `Secret`) live in `app/lib/`, not in any module
+- Shared value objects (e.g. `Secret`) live in `web/lib/`, not in any module

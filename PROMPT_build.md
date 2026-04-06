@@ -4,9 +4,9 @@
 0b. Read `practices/general/coding.md`, `practices/lang/ruby.md`, and `practices/framework/rails.md` (standing rules for how to write code).
 0c. Read `projects/unpossible2/specs/prd.md` to understand technical constraints (language: Ruby 3.3, framework: Rails 8, base image: ruby:3.3-slim, test command: `bundle exec rspec`, port: 3000).
 0d. Read `projects/unpossible2/IMPLEMENTATION_PLAN.md` and pick the most important unchecked item.
-0e. Study relevant files in `projects/unpossible2/app/` with up to 3 parallel Haiku subagents before making changes. Do not assume something is missing — confirm with code search first.
+0e. Study relevant files in `projects/unpossible2/web/` with up to 3 parallel Haiku subagents before making changes. Do not assume something is missing — confirm with code search first.
 
-1. Implement the selected task. All application code goes in `projects/unpossible2/app/`. All infrastructure config goes in `projects/unpossible2/infra/`. Never add Phase N+1 infrastructure until the plan explicitly includes an "Advance to Phase N+1" task.
+1. Implement the selected task. All application code goes in `projects/unpossible2/web/`. All infrastructure config goes in `projects/unpossible2/infra/`. Never add Phase N+1 infrastructure until the plan explicitly includes an "Advance to Phase N+1" task.
 
 2. Before running tests, read `practices/general/verification.md`. Then run:
    ```
