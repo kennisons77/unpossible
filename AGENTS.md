@@ -42,6 +42,12 @@ Then update `web/Gemfile` and `web/Gemfile.lock`, and rebuild the image.
 | Initializers | `web/config/initializers/` | lograge.rb, rack_attack.rb |
 | DB migrations | `web/db/migrate/` | Rails migrations |
 | Lib | `web/app/lib/` | Secret, AuthToken, Security::* |
+| Ledger jobs | `web/app/modules/ledger/jobs/` | SpecWatcherJob polls specs/**/*.md every 10s |
+
+## SQL NULL Gotcha
+
+`where.not(column: value)` generates `WHERE column != value` which excludes NULLs in PostgreSQL.
+Use `where("column IS NULL OR column != ?", value)` when NULLs should be included.
 
 ## Docker Context
 

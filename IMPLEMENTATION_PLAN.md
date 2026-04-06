@@ -30,14 +30,14 @@ Phase: 0 (Local Development — Docker Compose only)
 7. `practices/LOOKUP.md` missing (monorepo root).
 8. `app/modules/LOOKUP.md` missing.
 9. `specs/practices/LOOKUP.md` missing.
-10. `specs/system/tasks/` does not exist — no base spec for Tasks module. Tasks spec only partially defined in `specs/platform/rails/system/` but that file is also absent. Spike required.
+10. ~~`specs/system/tasks/` does not exist~~ — closed, superseded by Ledger nodes.
 11. `analytics_events` needs first-class `node_id` indexed column (per analytics spec).
 12. `ContainerRun` needs `stdout` and `stderr` columns (per sandbox prd.md).
 13. `specs/README.md` has stale product spec references (`product/auth.md`, `product/analytics.md` don't exist at those paths).
 
-**Spikes required:**
-- `stable_ref` dedup strategy (blocks Ledger plan-file sync)
-- Tasks module spec (blocks Tasks section — no base spec exists)
+**Spikes resolved:**
+- `stable_ref` dedup strategy → **canonical ref comments**. Each plan file checkbox must include an explicit `<!-- ref: <stable_id> -->` comment. `PlanFileSyncService` reads that tag as `stable_ref` — no hashing, no fuzzy matching. Unblocks `PlanFileSyncService`.
+- Tasks module spec → **closed, superseded**. Tasks are modelled as Ledger nodes. No separate Tasks module or spec required.
 
 ---
 
@@ -112,9 +112,7 @@ Phase: 0 (Local Development — Docker Compose only)
 
 ## Section 4 — Ledger Module (blocks Sections 5–8)
 
-- [ ] [SPIKE] Research stable_ref dedup strategy — run `./loop.sh research stable-ref` (see specs/skills/tools/research.md)
-  Open question from `specs/system/ledger/spec.md`: agent title drift breaks SHA256(normalize(title)+parent_id). Candidates: semantic dedup, fuzzy matching, human-in-the-loop, canonical title enforcement. Spike must produce a recommendation.
-  Blocks: Ledger::PlanFileSyncService, activity-log backfill.
+- [x] [SPIKE] stable_ref dedup strategy — resolved: canonical ref comments. Each checkbox in IMPLEMENTATION_PLAN.md must include `<!-- ref: <stable_id> -->`. PlanFileSyncService reads that tag directly as stable_ref. No hashing, no fuzzy matching.
 
 - [x] Create `Node` model and migration
   Schema per `specs/system/ledger/spec.md`: id (uuid), kind (enum: question/answer), answer_type (enum: terminal/generative, nullable), scope (enum: intent/code/deployment/ui/interaction), body (text), title (string), spec_path (string, nullable), author (enum: human/agent/system), stable_ref (string, indexed), version (int, default 1), status (enum: open/in_progress/blocked/closed), resolution (enum: done/duplicate/deferred/wont_do/icebox, nullable), accepted (enum: true/false/pending, nullable), accepted_by (jsonb, default []), acceptance_threshold (int, default 1), conflict (boolean, default false), conflict_disk_state (text, nullable), conflict_db_state (text, nullable), org_id (uuid), recorded_at (timestamptz), originated_at (timestamptz, nullable). Indexes: (org_id, scope, status), stable_ref.
@@ -136,18 +134,18 @@ Phase: 0 (Local Development — Docker Compose only)
   Files: `web/app/modules/ledger/services/node_lifecycle_service.rb`, `web/spec/modules/ledger/services/node_lifecycle_service_spec.rb`
   Required tests: UAT-1 (question lifecycle); UAT-2 (dependency enforcement); UAT-3 (generative answer opens children); re-opens on false verdict; version increments; terminal blocks child creation
 
-- [ ] Create `Ledger::NodesController`
+- [x] Create `Ledger::NodesController`
   GET /api/nodes (filter by scope, status, resolution, author, parent_id), POST /api/nodes, GET /api/nodes/:id, POST /api/nodes/:id/verdict, POST /api/nodes/:id/comments. All JWT auth.
-  Files: `web/app/modules/ledger/controllers/ledger/nodes_controller.rb`, routes update, `web/spec/requests/ledger/nodes_spec.rb`
+  Files: `web/app/modules/ledger/controllers/nodes_controller.rb`, routes update, `web/spec/requests/ledger/nodes_spec.rb`
   Required tests: GET filters; POST creates question; verdict true closes when threshold met; verdict false re-opens; comment triggers IndexerJob; unauthenticated → 401; answer immutable → 422 on update
 
-- [ ] Create `Ledger::SpecWatcherJob`
+- [x] Create `Ledger::SpecWatcherJob`
   Polls `specs/**/*.md` every 10s. New file → create Node (scope: intent, status: open). Changed file → parse status header, apply. Deleted file → resolution: deferred. Git revert detected → conflict: true, never auto-resolve. After any change → enqueue Knowledge::IndexerJob.
   Files: `web/app/modules/ledger/jobs/spec_watcher_job.rb`, `web/spec/modules/ledger/jobs/spec_watcher_job_spec.rb`
   Required tests: new file creates Node; changed file updates status; deleted → deferred; git revert → conflict: true; IndexerJob enqueued; idempotent
 
-- [ ] Implement `Ledger::PlanFileSyncService` — BLOCKED by stable_ref spike
-  Reads IMPLEMENTATION_PLAN.md. For each checkbox: compute stable_ref, look up. If found, no-op. If not, create Node (scope: code). Checked → closed. Orphaned nodes flagged, not deleted. Idempotent.
+- [ ] Implement `Ledger::PlanFileSyncService`
+  Reads IMPLEMENTATION_PLAN.md. For each checkbox: read `<!-- ref: <stable_id> -->` comment as stable_ref, look up. If found, no-op. If not, create Node (scope: code). Checked → closed. Orphaned nodes flagged, not deleted. Idempotent.
   Files: `web/app/modules/ledger/services/plan_file_sync_service.rb`, `web/spec/modules/ledger/services/plan_file_sync_service_spec.rb`
   Required tests: UAT-4 (plan file sync); unchecked → open; checked → closed; re-sync = no duplicates; removed → orphaned; idempotent
 
