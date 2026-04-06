@@ -144,7 +144,7 @@ Phase: 0 (Local Development — Docker Compose only)
   Files: `web/app/modules/ledger/jobs/spec_watcher_job.rb`, `web/spec/modules/ledger/jobs/spec_watcher_job_spec.rb`
   Required tests: new file creates Node; changed file updates status; deleted → deferred; git revert → conflict: true; IndexerJob enqueued; idempotent
 
-- [ ] Implement `Ledger::PlanFileSyncService`
+- [x] Implement `Ledger::PlanFileSyncService`
   Reads IMPLEMENTATION_PLAN.md. For each checkbox: read `<!-- ref: <stable_id> -->` comment as stable_ref, look up. If found, no-op. If not, create Node (scope: code). Checked → closed. Orphaned nodes flagged, not deleted. Idempotent.
   Files: `web/app/modules/ledger/services/plan_file_sync_service.rb`, `web/spec/modules/ledger/services/plan_file_sync_service_spec.rb`
   Required tests: UAT-4 (plan file sync); unchecked → open; checked → closed; re-sync = no duplicates; removed → orphaned; idempotent
