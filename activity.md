@@ -15,13 +15,13 @@ Agent activity log. Auto-updated each iteration. Trimmed to last 10 entries.
 **Task:** Section 3 — Create JWT authentication
 
 **Actions:**
-- Created `app/app/lib/auth_token.rb` — `AuthToken.encode/decode` with HS256, `ExpiredToken`/`InvalidToken` error classes
-- Updated `app/app/controllers/application_controller.rb` — `authenticate!` reads `Authorization: Bearer` or `X-Sidecar-Token`; renders 401 on failure
-- Created `app/app/controllers/api/auth_controller.rb` — `POST /api/auth/token` issues JWT when shared secret matches `AUTH_SECRET`
-- Created `app/spec/support/test_authenticated_controller.rb` — test-only controller for request specs
-- Updated `app/spec/rails_helper.rb` — auto-requires `spec/support/**/*.rb`
-- Created `app/spec/lib/auth_token_spec.rb` (5 examples)
-- Created `app/spec/requests/api/auth_spec.rb` (9 examples)
+- Created `web/app/lib/auth_token.rb` — `AuthToken.encode/decode` with HS256, `ExpiredToken`/`InvalidToken` error classes
+- Updated `web/app/controllers/application_controller.rb` — `authenticate!` reads `Authorization: Bearer` or `X-Sidecar-Token`; renders 401 on failure
+- Created `web/app/controllers/api/auth_controller.rb` — `POST /api/auth/token` issues JWT when shared secret matches `AUTH_SECRET`
+- Created `web/spec/support/test_authenticated_controller.rb` — test-only controller for request specs
+- Updated `web/spec/rails_helper.rb` — auto-requires `spec/support/**/*.rb`
+- Created `web/spec/lib/auth_token_spec.rb` (5 examples)
+- Created `web/spec/requests/api/auth_spec.rb` (9 examples)
 - Added `AUTH_SECRET` and `SIDECAR_TOKEN` to `infra/docker-compose.test.yml`
 - Tagged v0.0.9
 
@@ -46,13 +46,13 @@ Agent activity log. Auto-updated each iteration. Trimmed to last 10 entries.
 **Task:** Section 4 — Create `Node` model and migration
 
 **Actions:**
-- Created `app/db/migrate/20260402000001_create_ledger_nodes.rb` — UUID PK, all schema fields per spec, indexes on stable_ref and (org_id, scope, status)
-- Created `app/app/modules/ledger.rb` — Ledger namespace module
-- Created `app/app/modules/ledger/models/node.rb` — `Ledger::Node` with enum validations, answer immutability, answer_type/status constraints, `before_validation` defaults
-- Created `app/app/modules/ledger/{controllers,jobs,services}/.keep` directories
-- Updated `app/config/application.rb` — added Zeitwerk collapse for module subdirs (models/, services/, jobs/, controllers/) so `Ledger::Node` resolves correctly
-- Created `app/spec/factories/ledger_nodes.rb` — factory with :answer, :terminal_answer, :generative_answer traits
-- Created `app/spec/models/ledger/node_spec.rb` (27 examples)
+- Created `web/db/migrate/20260402000001_create_ledger_nodes.rb` — UUID PK, all schema fields per spec, indexes on stable_ref and (org_id, scope, status)
+- Created `web/app/modules/ledger.rb` — Ledger namespace module
+- Created `web/app/modules/ledger/models/node.rb` — `Ledger::Node` with enum validations, answer immutability, answer_type/status constraints, `before_validation` defaults
+- Created `web/app/modules/ledger/{controllers,jobs,services}/.keep` directories
+- Updated `web/config/application.rb` — added Zeitwerk collapse for module subdirs (models/, services/, jobs/, controllers/) so `Ledger::Node` resolves correctly
+- Created `web/spec/factories/ledger_nodes.rb` — factory with :answer, :terminal_answer, :generative_answer traits
+- Created `web/spec/models/ledger/node_spec.rb` (27 examples)
 - Tagged v0.0.10
 
 **Acceptance criteria met:**

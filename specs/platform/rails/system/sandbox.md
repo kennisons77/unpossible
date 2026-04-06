@@ -11,8 +11,8 @@ Extends `specs/sandbox.md`. Rails-specific implementation details only.
 - `Sandbox::DockerDispatcher` — shells out to `docker run --rm`, command as argument array
 
 ## Files
-- `app/app/modules/sandbox/models/container_run.rb`
-- `app/app/modules/sandbox/services/docker_dispatcher.rb`
+- `web/app/modules/sandbox/models/container_run.rb`
+- `web/app/modules/sandbox/services/docker_dispatcher.rb`
 
 ## Rails-specific Acceptance Criteria
 - `ContainerRun` status enum validates
