@@ -54,7 +54,7 @@ Phase: 0 (Local Development — Docker Compose only)
   Files: `infra/docker-compose.yml` (new), `infra/docker-compose.test.yml` (renamed), `AGENTS.md`, `PROMPT_build.md`
   Required tests: `docker compose -f infra/docker-compose.test.yml run --rm test` exits 0; postgres/redis not bound to 0.0.0.0; image tags reference git SHA not `latest`
 
-- [ ] Configure Solid Queue
+- [x] Configure Solid Queue
   Add `config.active_job.queue_adapter = :solid_queue` to `application.rb`. Create `config/queue.yml` (queues: default, knowledge, analytics, tasks, pipeline). Run solid_queue install migrations. Create `config/recurring.yml` (empty for now).
   Files: `app/config/application.rb`, `app/config/queue.yml`, `app/config/recurring.yml`, solid_queue migrations
   Required tests: job enqueued on correct queue; no Redis connection in tests
@@ -72,27 +72,27 @@ Phase: 0 (Local Development — Docker Compose only)
 
 ## Section 2 — Security Foundation
 
-- [ ] Create `Secret` value object
+- [x] Create `Secret` value object
   `app/app/lib/secret.rb`. Overrides `inspect`, `to_s`, `as_json` → `"[REDACTED]"`. `.expose` returns raw value.
   Files: `app/app/lib/secret.rb`, `app/spec/lib/secret_spec.rb`
   Required tests: inspect → "[REDACTED]"; to_s → "[REDACTED]"; as_json → "[REDACTED]"; expose → raw value; JSON serialization redacted
 
-- [ ] Create `Security::LogRedactor`
+- [x] Create `Security::LogRedactor`
   `app/app/lib/security/log_redactor.rb`. Regex patterns for OpenAI `sk-...`, `Bearer ...`, PEM headers, AWS `AKIA...`, JWT `eyJ...` → `[REDACTED:<type>]`. Plugged into lograge initializer.
   Files: `app/app/lib/security/log_redactor.rb`, `app/config/initializers/lograge.rb` (update), `app/spec/lib/security/log_redactor_spec.rb`
   Required tests: JWT redacted; OpenAI key redacted; PEM header redacted; normal lines pass through
 
-- [ ] Create `Security::PromptSanitizer`
+- [x] Create `Security::PromptSanitizer`
   `Security::PromptSanitizer.sanitize(text)` — gitleaks patterns + PII (email→`[EMAIL]`, phone→`[PHONE]`, IP→`[IP]`). Logs warning on match. Called by every provider adapter.
   Files: `app/app/lib/security/prompt_sanitizer.rb`, `app/spec/lib/security/prompt_sanitizer_spec.rb`
   Required tests: email redacted; phone redacted; OpenAI key redacted; clean text passes; match triggers audit log warning
 
-- [ ] Configure rack-attack rate limiting
+- [x] Configure rack-attack rate limiting
   Throttle by IP, return 429 on limit exceeded.
   Files: `app/config/initializers/rack_attack.rb`, `app/spec/config/initializers/rack_attack_spec.rb`
   Required tests: >N requests from same IP → 429; normal traffic passes
 
-- [ ] Configure brakeman and bundler-audit Rake tasks
+- [x] Configure brakeman and bundler-audit Rake tasks
   Files: `app/lib/tasks/security.rake`
   Required tests: `bundle exec brakeman --exit-on-warn` exits 0; `bundle exec bundler-audit check --update` exits 0
 
