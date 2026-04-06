@@ -8,6 +8,8 @@ require 'factory_bot_rails'
 require 'shoulda/matchers'
 require 'database_cleaner/active_record'
 
+Dir[File.join(__dir__, 'support', '**', '*.rb')].each { |f| require f }
+
 # Prevent DB schema load errors
 begin
   ActiveRecord::Migration.maintain_test_schema!

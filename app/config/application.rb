@@ -10,8 +10,18 @@ module Unpossible2
   class Application < Rails::Application
     config.load_defaults 8.0
 
-    # Autoload app/modules/** so each module's classes are available
-    config.autoload_paths += Dir[Rails.root.join('app/modules/**/')]
+    # Autoload app/modules/ so each subdirectory maps to a namespace (e.g. Knowledge::)
+    config.autoload_paths << Rails.root.join('app/modules')
+
+    # Collapse module subdirectories (models/, services/, jobs/, controllers/) so that
+    # e.g. ledger/models/node.rb resolves to Ledger::Node, not Ledger::Models::Node.
+    config.to_prepare do
+      %w[models services jobs controllers].each do |subdir|
+        Dir[Rails.root.join("app/modules/*/#{subdir}")].each do |path|
+          Rails.autoloaders.main.collapse(path)
+        end
+      end
+    end
 
     # Structured logging via lograge
     config.log_formatter = ::Logger::Formatter.new

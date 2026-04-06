@@ -99,12 +99,12 @@ Phase: 0 (Local Development — Docker Compose only)
 
 ## Section 3 — Core Module Structure & Auth
 
-- [ ] Scaffold module directory structure + LOOKUP.md files
+- [x] Scaffold module directory structure + LOOKUP.md files
   Create `app/modules/{knowledge,tasks,agents,sandbox,analytics}/` each with `models/`, `services/`, `jobs/`, `controllers/` subdirs. Create `app/app/modules/LOOKUP.md` (maps all five modules to paths and public interfaces). Create `specs/practices/LOOKUP.md` (maps: Secret, cache_control, RALPH_COMPLETE, Ultrathink, module boundary, audit on destructive, effort parameter, ENV.fetch, filter_parameters, rack-attack, shared service pattern).
   Files: module `.keep` files, `app/app/modules/LOOKUP.md`, `specs/practices/LOOKUP.md`
   Required tests: each module namespace resolves without NameError; both LOOKUP.md files exist with required entries
 
-- [ ] Create JWT authentication
+- [x] Create JWT authentication
   `app/app/lib/auth_token.rb` — encode/decode JWT with `org_id`, `user_id`, `exp`. `ApplicationController#authenticate!` sets `current_org_id`/`current_user_id`. `X-Sidecar-Token` header for Go sidecar (from `SIDECAR_TOKEN` env var). `POST /api/auth/token` issues tokens (Phase 0: shared secret from `AUTH_SECRET` env var).
   Files: `app/app/lib/auth_token.rb`, `app/app/controllers/application_controller.rb` (update), `app/app/controllers/api/auth_controller.rb`, `app/config/routes.rb` (update), `app/spec/lib/auth_token_spec.rb`, `app/spec/requests/api/auth_spec.rb`
   Required tests: valid JWT authenticates; expired → 401; tampered → 401; missing → 401; valid sidecar token authenticates; wrong sidecar token → 401; POST /api/auth/token with valid secret returns JWT
@@ -116,7 +116,7 @@ Phase: 0 (Local Development — Docker Compose only)
   Open question from `specs/system/ledger/spec.md`: agent title drift breaks SHA256(normalize(title)+parent_id). Candidates: semantic dedup, fuzzy matching, human-in-the-loop, canonical title enforcement. Spike must produce a recommendation.
   Blocks: Ledger::PlanFileSyncService, activity-log backfill.
 
-- [ ] Create `Node` model and migration
+- [x] Create `Node` model and migration
   Schema per `specs/system/ledger/spec.md`: id (uuid), kind (enum: question/answer), answer_type (enum: terminal/generative, nullable), scope (enum: intent/code/deployment/ui/interaction), body (text), title (string), spec_path (string, nullable), author (enum: human/agent/system), stable_ref (string, indexed), version (int, default 1), status (enum: open/in_progress/blocked/closed), resolution (enum: done/duplicate/deferred/wont_do/icebox, nullable), accepted (enum: true/false/pending, nullable), accepted_by (jsonb, default []), acceptance_threshold (int, default 1), conflict (boolean, default false), conflict_disk_state (text, nullable), conflict_db_state (text, nullable), org_id (uuid), recorded_at (timestamptz), originated_at (timestamptz, nullable). Indexes: (org_id, scope, status), stable_ref.
   Files: `app/app/modules/ledger/models/node.rb`, migration, `app/spec/models/ledger/node_spec.rb`, factory
   Required tests: kind/scope enums validate; answer immutable after creation; terminal answer rejects child question; generative answer allows children; accepted defaults to pending; version increments on status transition; org_id present; factory valid

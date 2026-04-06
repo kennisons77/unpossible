@@ -9,6 +9,8 @@ services:
       POSTGRES_USER: unpossible2
       POSTGRES_PASSWORD: unpossible2
       POSTGRES_DB: unpossible2_test
+      AUTH_SECRET: test-auth-secret
+      SIDECAR_TOKEN: test-sidecar-token
     depends_on:
       postgres:
         condition: service_healthy
