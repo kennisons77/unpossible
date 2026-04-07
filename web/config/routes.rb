@@ -23,4 +23,7 @@ Rails.application.routes.draw do
     get '/tree',    to: 'ledger/ledger#tree',    as: :ledger_tree
     get '/nodes/:id', to: 'ledger/ledger#node',  as: :ledger_node
   end
+
+  # Session — stub login page (auth via JWT bearer token)
+  get '/session/new', to: proc { [200, {}, ['Login']] }, as: :new_session
 end

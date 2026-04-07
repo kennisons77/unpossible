@@ -7,7 +7,7 @@
   <% if children.any? %>
     <ul>
       <% children.each do |child| %>
-        <%= render partial: "ledger/node_tree_item", locals: { node: child, children_map: children_map } %>
+        <%= render partial: "ledger/ledger/node_tree_item", locals: { node: child, children_map: children_map } %>
       <% end %>
     </ul>
   <% end %>

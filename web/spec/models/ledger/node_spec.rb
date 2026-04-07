@@ -139,6 +139,43 @@ RSpec.describe Ledger::Node, type: :model do
     end
   end
 
+  describe "level validation" do
+    it "rejects level on a non-intent scope" do
+      node = build(:ledger_node, scope: "code", level: "ideology")
+      expect(node).not_to be_valid
+      expect(node.errors[:level]).to include("only valid on intent-scoped nodes")
+    end
+
+    it "allows level nil on a non-intent scope" do
+      node = build(:ledger_node, scope: "code", level: nil)
+      expect(node).to be_valid
+    end
+
+    it "allows level on an intent-scoped node" do
+      node = build(:ledger_node, scope: "intent", level: "ideology")
+      expect(node).to be_valid
+    end
+
+    it "rejects an invalid level value" do
+      node = build(:ledger_node, scope: "intent", level: "bogus")
+      expect(node).not_to be_valid
+      expect(node.errors[:level]).to be_present
+    end
+  end
+
+  describe "citations" do
+    it "defaults to an empty array" do
+      node = create(:ledger_node)
+      expect(node.citations).to eq([])
+    end
+  end
+
+  describe "LEVELS constant" do
+    it "is defined and non-empty" do
+      expect(described_class::LEVELS).to be_present
+    end
+  end
+
   describe "factory" do
     it "produces a valid question node" do
       expect(build(:ledger_node)).to be_valid
