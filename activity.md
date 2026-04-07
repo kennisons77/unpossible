@@ -47,3 +47,25 @@ Agent activity log. Auto-updated each iteration. Trimmed to last 10 entries.
 **Changes:**
 - `web/spec/modules/ledger/services/node_lifecycle_service_spec.rb` — 7 new test examples
 - `IMPLEMENTATION_PLAN.md` — marked 9.2, 9.3, 9.4 complete
+
+---
+
+## 2026-04-07 16:45 — Task 9.5: Add MarkdownHelper spec + fix escape_html and Rouge regex
+
+**Mode:** Build
+**Iteration:** 32
+**Status:** Complete
+**Tag:** 0.0.25
+
+**Tasks completed:**
+- Added `spec/helpers/markdown_helper_spec.rb` (6 examples: blank input, markdown rendering, syntax highlighting, tables, XSS escaping, html_safe)
+- Fixed bug: Redcarpet renderer missing `escape_html: true` — raw `<script>` tags passed through unescaped
+- Fixed bug: Rouge highlighting regex matched `class="language-(\w+)"` but Redcarpet outputs `class="(\w+)"` — syntax highlighting never applied
+- Also committed previously uncommitted 9.2-9.4 test additions
+- Full test suite passes (228 examples, 0 failures, 96.38% coverage)
+
+**Changes:**
+- `web/spec/helpers/markdown_helper_spec.rb` — new file
+- `web/app/helpers/markdown_helper.rb` — escape_html + regex fix
+- `web/spec/modules/ledger/services/node_lifecycle_service_spec.rb` — uncommitted 9.2-9.4 tests
+- `IMPLEMENTATION_PLAN.md` — marked 9.5 complete
