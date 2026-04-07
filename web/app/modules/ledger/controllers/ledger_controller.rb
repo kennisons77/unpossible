@@ -13,9 +13,13 @@ module Ledger
       @ancestors = @active_node ? ancestors_for(@active_node) : []
     end
 
-    # GET /ledger/open — all open questions, filterable
+    # GET /ledger/open — all open (non-closed) questions, filterable
     def open
-      scope = Ledger::Node.where(org_id: current_org_id, kind: "question", status: "open")
+      scope = Ledger::Node.where(
+        org_id: current_org_id,
+        kind: "question",
+        status: %w[proposed refining in_review accepted in_progress blocked]
+      )
       scope = scope.where(scope: params[:scope]) if params[:scope].present?
       scope = scope.where(level: params[:level]) if params[:level].present?
       scope = scope.where(author: params[:author]) if params[:author].present?

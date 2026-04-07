@@ -5,7 +5,7 @@ module Ledger
     class LifecycleError < StandardError; end
 
     VALID_TRANSITIONS = {
-      "proposed"    => %w[refining in_review blocked closed],
+      "proposed"    => %w[refining in_review in_progress blocked closed],
       "refining"    => %w[in_review blocked closed],
       "in_review"   => %w[accepted blocked closed proposed],
       "accepted"    => %w[in_progress closed],
@@ -46,6 +46,32 @@ module Ledger
       _open_children_if_accepted(node) if new_status == "accepted"
 
       node
+    end
+
+    # Record a verdict on an answer node.
+    # verdict=true  → closes the parent question
+    # verdict=false → reopens the parent question (transitions to "proposed")
+    def self.record_verdict(answer_node, verdict, accepted_by_id: "system")
+      raise LifecycleError, "only answer nodes can have a verdict" unless answer_node.kind == "answer"
+      raise LifecycleError, "verdict must be true or false" unless verdict == true || verdict == false
+
+      parent = NodeEdge
+        .where(child_id: answer_node.id, edge_type: "contains")
+        .joins("INNER JOIN ledger_nodes ON ledger_nodes.id = ledger_node_edges.parent_id")
+        .where("ledger_nodes.kind = ?", "question")
+        .first
+        &.then { |edge| Node.find(edge.parent_id) }
+
+      # changed_by must be one of NodeAuditEvent::CHANGED_BY_VALUES; verdicts come from humans
+      changed_by = "human"
+
+      if verdict
+        _close_question(parent, changed_by: changed_by) if parent && parent.status != "closed"
+      else
+        transition(parent, "proposed", changed_by: changed_by, reason: "verdict rejected") if parent && parent.status == "closed"
+      end
+
+      answer_node
     end
 
     # Post a terminal answer node as acceptance of a question.
@@ -113,7 +139,7 @@ module Ledger
           .joins("INNER JOIN ledger_nodes ON ledger_nodes.id = ledger_node_edges.parent_id")
           .where.not("ledger_nodes.status" => "closed")
           .count
-        raise LifecycleError, "#{open_count} open depends_on dependency(s)" if open_count > 0
+        raise LifecycleError, "#{open_count} open dependency(s) must be closed first" if open_count > 0
       end
 
       def _assert_no_open_research(node)

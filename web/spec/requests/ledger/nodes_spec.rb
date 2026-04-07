@@ -24,12 +24,12 @@ RSpec.describe 'Ledger Nodes API', type: :request do
       stable_ref: SecureRandom.hex(16),
       org_id: org_id,
       recorded_at: Time.current.iso8601,
-      status: 'open'
+      status: 'proposed'
     }
   end
 
   describe 'GET /api/nodes' do
-    before { create(:ledger_node, org_id: org_id, scope: 'code', status: 'open') }
+    before { create(:ledger_node, org_id: org_id, scope: 'code', status: 'proposed') }
 
     it 'returns 200 with nodes' do
       get '/api/nodes', headers: headers
@@ -42,7 +42,7 @@ RSpec.describe 'Ledger Nodes API', type: :request do
     end
 
     context 'when filtering by scope' do
-      before { create(:ledger_node, org_id: org_id, scope: 'intent', status: 'open') }
+      before { create(:ledger_node, org_id: org_id, scope: 'intent', status: 'proposed') }
 
       it 'returns only matching nodes' do
         get '/api/nodes', params: { scope: 'code' }, headers: headers
@@ -55,14 +55,14 @@ RSpec.describe 'Ledger Nodes API', type: :request do
       before { create(:ledger_node, org_id: org_id, scope: 'code', status: 'closed') }
 
       it 'returns only matching nodes' do
-        get '/api/nodes', params: { status: 'open' }, headers: headers
+        get '/api/nodes', params: { status: 'proposed' }, headers: headers
         statuses = JSON.parse(response.body).map { |n| n['status'] }
-        expect(statuses).to all(eq('open'))
+        expect(statuses).to all(eq('proposed'))
       end
     end
 
     context 'when filtering by author' do
-      before { create(:ledger_node, org_id: org_id, author: 'agent', scope: 'code', status: 'open') }
+      before { create(:ledger_node, org_id: org_id, author: 'agent', scope: 'code', status: 'proposed') }
 
       it 'returns only matching nodes' do
         get '/api/nodes', params: { author: 'human' }, headers: headers
@@ -148,14 +148,12 @@ RSpec.describe 'Ledger Nodes API', type: :request do
   end
 
   describe 'POST /api/nodes/:id/verdict' do
-    let(:question) { create(:ledger_node, org_id: org_id, kind: 'question', status: 'open') }
-    let(:answer) do
-      create(:ledger_node, :answer, org_id: org_id, acceptance_threshold: 1)
-    end
+    let(:question) { create(:ledger_node, org_id: org_id, kind: 'question', status: 'proposed') }
+    let(:answer) { create(:ledger_node, :answer, org_id: org_id) }
 
     before { create(:ledger_node_edge, parent: question, child: answer, edge_type: 'contains') }
 
-    context 'with verdict true and threshold met' do
+    context 'with verdict true' do
       it 'closes the parent question' do
         post "/api/nodes/#{answer.id}/verdict",
              params: { verdict: true, accepted_by_id: 'user-1' }.to_json,
@@ -166,17 +164,14 @@ RSpec.describe 'Ledger Nodes API', type: :request do
     end
 
     context 'with verdict false' do
-      before do
-        question.update!(status: 'closed')
-        answer.update!(accepted: 'true')
-      end
+      before { question.update!(status: 'closed') }
 
       it 're-opens the parent question' do
         post "/api/nodes/#{answer.id}/verdict",
              params: { verdict: false, accepted_by_id: 'user-2' }.to_json,
              headers: headers
         expect(response).to have_http_status(:ok)
-        expect(question.reload.status).to eq('open')
+        expect(question.reload.status).to eq('proposed')
       end
     end
 
@@ -199,7 +194,7 @@ RSpec.describe 'Ledger Nodes API', type: :request do
   end
 
   describe 'POST /api/nodes/:id/comments' do
-    let(:question) { create(:ledger_node, org_id: org_id, kind: 'question', status: 'open') }
+    let(:question) { create(:ledger_node, org_id: org_id, kind: 'question', status: 'proposed') }
     let(:answer) { create(:ledger_node, :answer, org_id: org_id) }
 
     it 'returns 200 for a question node' do
