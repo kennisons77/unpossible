@@ -18,3 +18,4 @@ See `specs/system/practices.md` for the full loading rules.
 | [version-control.md](version-control.md) | Version control | build |
 | [zed.md](zed.md) | Editor | all |
 | [security.md](security.md) | Security | build |
+| [threat-modeling.md](threat-modeling.md) | Threat modeling | plan, build |

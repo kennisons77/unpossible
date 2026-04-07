@@ -10,36 +10,35 @@ services:
       POSTGRES_USER: unpossible2
       POSTGRES_PASSWORD: unpossible2
       POSTGRES_DB: unpossible2_development
-      REDIS_URL: redis://redis:6379/0
+      AUTH_SECRET: 8d457c009922907ffbb3fa03283a27f101232e8f47d6c1312f3535a00de318a3
+      # REDIS_URL: redis://redis:6379/0
     ports:
       - "3000:3000"
     depends_on:
       postgres:
         condition: service_healthy
-      redis:
-        condition: service_healthy
     networks:
       - unpossible2
 
-  go_runner:
-    build:
-      context: ..
-      dockerfile: infra/Dockerfile.runner
-    image: unpossible2-runner:${GIT_SHA:-dev}
-    ports:
-      - "8080:8080"
-    networks:
-      - unpossible2
+  # go_runner:
+  #   build:
+  #     context: ..
+  #     dockerfile: infra/Dockerfile.runner
+  #   image: unpossible2-runner:${GIT_SHA:-dev}
+  #   ports:
+  #     - "8080:8080"
+  #   networks:
+  #     - unpossible2
 
-  analytics:
-    build:
-      context: ..
-      dockerfile: infra/Dockerfile.analytics
-    image: unpossible2-analytics:${GIT_SHA:-dev}
-    ports:
-      - "9100:9100"
-    networks:
-      - unpossible2
+  # analytics:
+  #   build:
+  #     context: ..
+  #     dockerfile: infra/Dockerfile.analytics
+  #   image: unpossible2-analytics:${GIT_SHA:-dev}
+  #   ports:
+  #     - "9100:9100"
+  #   networks:
+  #     - unpossible2
 
   postgres:
     image: pgvector/pgvector:pg16
@@ -57,15 +56,15 @@ services:
     networks:
       - unpossible2
 
-  redis:
-    image: redis:7-alpine
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-    networks:
-      - unpossible2
+  # redis:
+  #   image: redis:7-alpine
+  #   healthcheck:
+  #     test: ["CMD", "redis-cli", "ping"]
+  #     interval: 5s
+  #     timeout: 5s
+  #     retries: 5
+  #   networks:
+  #     - unpossible2
 
 volumes:
   postgres_data:
