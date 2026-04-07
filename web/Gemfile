@@ -12,6 +12,8 @@ gem 'solid_queue', '~> 1.1'
 gem 'jwt', '~> 2.9'
 gem 'rack-attack', '~> 6.7'
 gem 'lograge', '~> 0.14'
+gem 'redcarpet', '~> 3.6'
+gem 'rouge', '~> 4.4'
 gem 'bootsnap', '~> 1.18', require: false
 
 group :development, :test do
