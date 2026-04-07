@@ -20,7 +20,7 @@ RSpec.describe Ledger::PlanFileSyncService do
   describe "UAT-4: plan file sync" do
     it "creates an open node for an unchecked item" do
       sync("- [ ] Do something <!-- ref: task-001 -->")
-      expect(node("task-001")).to have_attributes(status: "open", kind: "question", scope: "code")
+      expect(node("task-001")).to have_attributes(status: "proposed", kind: "question", scope: "code")
     end
 
     it "creates a closed node for a checked item" do
@@ -42,7 +42,7 @@ RSpec.describe Ledger::PlanFileSyncService do
 
     it "transitions unchecked → closed when item is checked on re-sync" do
       sync("- [ ] Task <!-- ref: task-004 -->")
-      expect(node("task-004").status).to eq("open")
+      expect(node("task-004").status).to eq("proposed")
 
       sync("- [x] Task <!-- ref: task-004 -->")
       expect(node("task-004").status).to eq("closed")
@@ -53,7 +53,7 @@ RSpec.describe Ledger::PlanFileSyncService do
       expect(node("task-005").status).to eq("closed")
 
       sync("- [ ] Task <!-- ref: task-005 -->")
-      expect(node("task-005").status).to eq("open")
+      expect(node("task-005").status).to eq("proposed")
     end
 
     it "increments version when status changes" do

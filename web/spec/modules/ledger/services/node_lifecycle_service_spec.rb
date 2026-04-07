@@ -6,7 +6,7 @@ RSpec.describe Ledger::NodeLifecycleService do
   let(:org_id) { SecureRandom.uuid }
 
   def question(attrs = {})
-    create(:ledger_node, { kind: "question", status: "open", org_id: org_id }.merge(attrs))
+    create(:ledger_node, { kind: "question", status: "proposed", org_id: org_id }.merge(attrs))
   end
 
   def terminal_answer(attrs = {})
@@ -14,13 +14,13 @@ RSpec.describe Ledger::NodeLifecycleService do
   end
 
   def generative_answer(attrs = {})
-    create(:ledger_node, :generative_answer, { acceptance_threshold: 1, org_id: org_id }.merge(attrs))
+    create(:ledger_node, :generative_answer, { org_id: org_id }.merge(attrs))
   end
 
   # UAT-1: question lifecycle
   describe ".transition" do
     context "when transitioning a question through valid statuses" do
-      it "moves open → in_progress" do
+      it "moves proposed → in_progress" do
         node = question
         described_class.transition(node, "in_progress")
         expect(node.reload.status).to eq("in_progress")
@@ -60,7 +60,7 @@ RSpec.describe Ledger::NodeLifecycleService do
   describe ".transition with depends_on edges" do
     context "when a dependency is not closed" do
       it "blocks the in_progress transition" do
-        blocker = question(status: "open")
+        blocker = question(status: "proposed")
         node = question
         create(:ledger_node_edge, parent: blocker, child: node, edge_type: "depends_on")
 
@@ -81,7 +81,7 @@ RSpec.describe Ledger::NodeLifecycleService do
     end
   end
 
-  # UAT-3: generative answer opens children / verdict handling
+  # UAT-3: verdict handling — closes or reopens parent question
   describe ".record_verdict" do
     context "when called on a non-answer node" do
       it "raises LifecycleError" do
@@ -99,16 +99,10 @@ RSpec.describe Ledger::NodeLifecycleService do
       end
     end
 
-    context "with a true verdict meeting the threshold" do
-      it "sets accepted to true" do
-        answer = terminal_answer(acceptance_threshold: 1)
-        described_class.record_verdict(answer, true, accepted_by_id: "user-1")
-        expect(answer.reload.accepted).to eq("true")
-      end
-
+    context "with a true verdict" do
       it "closes the parent question" do
         parent = question
-        answer = terminal_answer(acceptance_threshold: 1)
+        answer = terminal_answer
         create(:ledger_node_edge, parent: parent, child: answer, edge_type: "contains")
 
         described_class.record_verdict(answer, true, accepted_by_id: "user-1")
@@ -117,36 +111,31 @@ RSpec.describe Ledger::NodeLifecycleService do
 
       it "increments the parent question version when closing" do
         parent = question
-        answer = terminal_answer(acceptance_threshold: 1)
+        answer = terminal_answer
         create(:ledger_node_edge, parent: parent, child: answer, edge_type: "contains")
 
         expect { described_class.record_verdict(answer, true, accepted_by_id: "user-1") }
           .to change { parent.reload.version }.by(1)
       end
-    end
 
-    context "with a true verdict below the threshold" do
-      it "keeps accepted as pending" do
-        answer = terminal_answer(acceptance_threshold: 2)
-        described_class.record_verdict(answer, true, accepted_by_id: "user-1")
-        expect(answer.reload.accepted).to eq("pending")
+      it "is a no-op when parent is already closed" do
+        parent = question(status: "closed")
+        answer = terminal_answer
+        create(:ledger_node_edge, parent: parent, child: answer, edge_type: "contains")
+
+        expect { described_class.record_verdict(answer, true, accepted_by_id: "user-1") }
+          .not_to change { parent.reload.status }
       end
     end
 
     context "with a false verdict" do
-      it "sets accepted to false" do
-        answer = terminal_answer
-        described_class.record_verdict(answer, false, accepted_by_id: "user-1")
-        expect(answer.reload.accepted).to eq("false")
-      end
-
       it "re-opens a closed parent question" do
         parent = question(status: "closed")
         answer = terminal_answer
         create(:ledger_node_edge, parent: parent, child: answer, edge_type: "contains")
 
         described_class.record_verdict(answer, false, accepted_by_id: "user-1")
-        expect(parent.reload.status).to eq("open")
+        expect(parent.reload.status).to eq("proposed")
       end
 
       it "increments the parent question version when re-opening" do

@@ -32,9 +32,9 @@ RSpec.describe Ledger::Node, type: :model do
     end
 
     it "validates accepted inclusion when present" do
-      node = build(:ledger_node, :answer, accepted: "invalid")
+      node = build(:ledger_node, :answer, answer_type: "invalid")
       expect(node).not_to be_valid
-      expect(node.errors[:accepted]).to be_present
+      expect(node.errors[:answer_type]).to be_present
     end
   end
 
@@ -42,8 +42,7 @@ RSpec.describe Ledger::Node, type: :model do
     it "accepts all valid kinds" do
       described_class::KINDS.each do |kind|
         node = build(:ledger_node, kind: kind, answer_type: kind == "answer" ? "terminal" : nil,
-                                   status: kind == "question" ? "open" : nil,
-                                   accepted: kind == "answer" ? "pending" : nil)
+                                   status: kind == "question" ? "proposed" : nil)
         expect(node).to be_valid, "expected #{kind} to be valid but got: #{node.errors.full_messages}"
       end
     end
@@ -71,13 +70,13 @@ RSpec.describe Ledger::Node, type: :model do
 
   describe "status constraint" do
     it "rejects status on an answer node" do
-      node = build(:ledger_node, :answer, status: "open")
+      node = build(:ledger_node, :answer, status: "proposed")
       expect(node).not_to be_valid
       expect(node.errors[:status]).to include("only valid on question nodes")
     end
 
     it "allows status on a question node" do
-      node = build(:ledger_node, kind: "question", status: "open")
+      node = build(:ledger_node, kind: "question", status: "proposed")
       expect(node).to be_valid
     end
   end
@@ -92,7 +91,7 @@ RSpec.describe Ledger::Node, type: :model do
 
     it "allows non-immutable field changes on a persisted answer" do
       node = create(:ledger_node, :terminal_answer)
-      node.accepted = "true"
+      node.title = "updated title"
       expect(node).to be_valid
     end
 
@@ -104,15 +103,15 @@ RSpec.describe Ledger::Node, type: :model do
   end
 
   describe "defaults" do
-    it "sets accepted to pending for new answer nodes" do
-      node = create(:ledger_node, :terminal_answer, accepted: nil)
-      expect(node.accepted).to eq("pending")
-    end
-
     it "sets recorded_at automatically before validation" do
       node = build(:ledger_node, recorded_at: nil)
       node.valid?
       expect(node.recorded_at).to be_present
+    end
+
+    it "sets status to proposed for new question nodes" do
+      node = create(:ledger_node, kind: "question", status: nil)
+      expect(node.status).to eq("proposed")
     end
   end
 

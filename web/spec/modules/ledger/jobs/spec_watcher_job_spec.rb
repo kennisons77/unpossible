@@ -34,14 +34,14 @@ RSpec.describe Ledger::SpecWatcherJob, type: :job do
   end
 
   describe "new file → creates Node" do
-    it "creates a question node with scope: intent and status: open" do
+    it "creates a question node with scope: intent and status: proposed" do
       write_spec("specs/system/my-feature.md")
       expect { run_job }.to change(Ledger::Node, :count).by(1)
 
       node = node_for("specs/system/my-feature.md")
       expect(node.kind).to eq("question")
       expect(node.scope).to eq("intent")
-      expect(node.status).to eq("open")
+      expect(node.status).to eq("proposed")
       expect(node.author).to eq("system")
       expect(node.spec_path).to eq("specs/system/my-feature.md")
     end
@@ -68,8 +68,8 @@ RSpec.describe Ledger::SpecWatcherJob, type: :job do
 
     it "transitions status when a valid <!-- status: X --> header is present" do
       node = node_for("specs/system/feature.md")
-      write_spec("specs/system/feature.md", "<!-- status: in_progress -->\n# Feature\n\nContent.")
-      expect { run_job }.to change { node.reload.status }.from("open").to("in_progress")
+      write_spec("specs/system/feature.md", "<!-- status: in_review -->\n# Feature\n\nContent.")
+      expect { run_job }.to change { node.reload.status }.from("proposed").to("in_review")
     end
 
     it "does not change status when header is absent" do
@@ -80,7 +80,7 @@ RSpec.describe Ledger::SpecWatcherJob, type: :job do
 
     it "does not change status when header value is already current" do
       node = node_for("specs/system/feature.md")
-      write_spec("specs/system/feature.md", "<!-- status: open -->\n# Feature")
+      write_spec("specs/system/feature.md", "<!-- status: proposed -->\n# Feature")
       expect { run_job }.not_to change { node.reload.status }
     end
 
@@ -137,7 +137,7 @@ RSpec.describe Ledger::SpecWatcherJob, type: :job do
       write_spec("specs/system/reverted.md", "<!-- status: closed -->\n# Reverted")
       run_job
 
-      expect(node.reload.status).to eq("open")
+      expect(node.reload.status).to eq("proposed")
       expect(node.reload.conflict).to be(true)
     end
   end
@@ -158,7 +158,7 @@ RSpec.describe Ledger::SpecWatcherJob, type: :job do
     it "enqueues IndexerJob when a status transition occurs" do
       write_spec("specs/system/feature.md")
       run_job
-      write_spec("specs/system/feature.md", "<!-- status: in_progress -->\n# Feature")
+      write_spec("specs/system/feature.md", "<!-- status: in_review -->\n# Feature")
       expect(Knowledge::IndexerJob).to receive(:perform_later).once
       run_job
     end

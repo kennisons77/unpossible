@@ -240,6 +240,8 @@ GEM
       erb
       psych (>= 4.0.0)
       tsort
+    redcarpet (3.6.1)
+    rouge (4.7.0)
     regexp_parser (2.11.3)
     reline (0.6.3)
       io-console (~> 0.5)
@@ -351,6 +353,8 @@ DEPENDENCIES
   puma (~> 6.4)
   rack-attack (~> 6.7)
   rails (~> 8.0)
+  redcarpet (~> 3.6)
+  rouge (~> 4.4)
   rspec-rails (~> 7.0)
   rubocop-performance
   rubocop-rails-omakase

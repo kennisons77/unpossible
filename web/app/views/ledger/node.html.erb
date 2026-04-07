@@ -9,7 +9,7 @@
 <p>
   <em>
     <%= @node.kind %> · <%= @node.scope %><%= @node.level ? "/#{@node.level}" : "" %>
-    · <%= @node.status || @node.accepted %>
+    · <%= @node.status %>
     · by <%= @node.author %>
     · <%= @node.originated_at&.strftime("%Y-%m-%d") %>
   </em>
@@ -32,7 +32,7 @@
   <h2>Children</h2>
   <ul>
     <% @children.each do |child| %>
-      <li><%= link_to child.title.presence || "(untitled)", ledger_node_path(child.id) %> — <%= child.status || child.accepted %></li>
+      <li><%= link_to child.title.presence || "(untitled)", ledger_node_path(child.id) %> — <%= child.status %></li>
     <% end %>
   </ul>
 <% end %>

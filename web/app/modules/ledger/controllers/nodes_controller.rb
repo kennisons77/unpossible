@@ -69,8 +69,8 @@ module Ledger
     def node_params
       params.require(:node).permit(
         :kind, :answer_type, :scope, :body, :title, :spec_path,
-        :author, :stable_ref, :status, :resolution, :accepted,
-        :acceptance_threshold, :org_id, :recorded_at, :originated_at
+        :author, :stable_ref, :status, :resolution,
+        :org_id, :recorded_at, :originated_at
       )
     end
   end

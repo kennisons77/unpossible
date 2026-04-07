@@ -58,8 +58,8 @@ RSpec.describe Ledger::NodeEdge, type: :model do
 
   describe "depends_on blocks in_progress transition" do
     it "is enforced at the service layer — model records the edge" do
-      question = create(:ledger_node, kind: "question", status: "open")
-      blocker  = create(:ledger_node, kind: "question", status: "open")
+      question = create(:ledger_node, kind: "question", status: "proposed")
+      blocker  = create(:ledger_node, kind: "question", status: "proposed")
       edge = create(:ledger_node_edge, parent: blocker, child: question, edge_type: "depends_on")
       expect(edge.edge_type).to eq("depends_on")
       expect(edge).to be_persisted

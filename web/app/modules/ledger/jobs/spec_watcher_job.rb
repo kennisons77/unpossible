@@ -71,7 +71,7 @@ module Ledger
       Ledger::Node.create!(
         kind:        "question",
         scope:       "intent",
-        status:      "open",
+        status:      "proposed",
         author:      "system",
         body:        content.lines.first(3).join.strip.presence || rel_path,
         title:       File.basename(rel_path, ".md").tr("-_", " ").capitalize,

@@ -38,12 +38,12 @@ module Ledger
             stable_ref:  stable_ref,
             org_id:      @org_id,
             recorded_at: Time.current,
-            status:      checked ? "closed" : "open"
+            status:      checked ? "closed" : "proposed"
           )
         elsif checked && node.status != "closed"
           node.update!(status: "closed", version: (node.version || 1) + 1)
         elsif !checked && node.status == "closed"
-          node.update!(status: "open", version: (node.version || 1) + 1)
+          node.update!(status: "proposed", version: (node.version || 1) + 1)
         end
       end
 
