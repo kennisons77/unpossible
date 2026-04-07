@@ -291,4 +291,90 @@ RSpec.describe Ledger::NodeLifecycleService do
       end
     end
   end
+
+  # UAT-6 part 1: attach_research
+  describe ".attach_research" do
+    it "creates a code-scoped question with research edge to parent" do
+      parent = question
+      spike = described_class.attach_research(parent, {
+        body: "spike: investigate caching", author: "agent",
+        stable_ref: SecureRandom.hex(16), org_id: org_id
+      })
+
+      expect(spike).to be_persisted
+      expect(spike.kind).to eq("question")
+      expect(spike.scope).to eq("code")
+    end
+
+    it "creates the spike with status proposed" do
+      parent = question
+      spike = described_class.attach_research(parent, {
+        body: "spike: investigate caching", author: "agent",
+        stable_ref: SecureRandom.hex(16), org_id: org_id
+      })
+
+      expect(spike.status).to eq("proposed")
+    end
+
+    it "creates a research edge from parent to spike" do
+      parent = question
+      spike = described_class.attach_research(parent, {
+        body: "spike: investigate caching", author: "agent",
+        stable_ref: SecureRandom.hex(16), org_id: org_id
+      })
+
+      edge = Ledger::NodeEdge.find_by(parent: parent, child: spike, edge_type: "research")
+      expect(edge).to be_present
+    end
+  end
+
+  # UAT-6 part 2: research spike blocking on accepted transition
+  describe ".transition with research spikes" do
+    context "when an open research spike exists" do
+      it "blocks the accepted transition" do
+        node = question(status: "in_review")
+        spike = question(status: "proposed")
+        create(:ledger_node_edge, parent: node, child: spike, edge_type: "research")
+
+        expect { described_class.transition(node, "accepted") }
+          .to raise_error(Ledger::NodeLifecycleService::LifecycleError, /open research spike/)
+      end
+    end
+
+    context "when all research spikes are closed" do
+      it "allows the accepted transition" do
+        node = question(status: "in_review")
+        spike = question(status: "closed")
+        create(:ledger_node_edge, parent: node, child: spike, edge_type: "research")
+
+        expect { described_class.transition(node, "accepted") }.not_to raise_error
+        expect(node.reload.status).to eq("accepted")
+      end
+    end
+  end
+
+  # UAT-2 extension: dependency enforcement on accepted transition
+  describe ".transition with depends_on edges (accepted)" do
+    context "when a dependency is not closed" do
+      it "blocks the accepted transition" do
+        blocker = question(status: "proposed")
+        node = question(status: "in_review")
+        create(:ledger_node_edge, parent: blocker, child: node, edge_type: "depends_on")
+
+        expect { described_class.transition(node, "accepted") }
+          .to raise_error(Ledger::NodeLifecycleService::LifecycleError, /open dependency/)
+      end
+    end
+
+    context "when all dependencies are closed" do
+      it "allows the accepted transition" do
+        blocker = question(status: "closed")
+        node = question(status: "in_review")
+        create(:ledger_node_edge, parent: blocker, child: node, edge_type: "depends_on")
+
+        expect { described_class.transition(node, "accepted") }.not_to raise_error
+        expect(node.reload.status).to eq("accepted")
+      end
+    end
+  end
 end
