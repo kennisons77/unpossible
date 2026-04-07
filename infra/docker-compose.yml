@@ -10,7 +10,9 @@ services:
       POSTGRES_USER: unpossible2
       POSTGRES_PASSWORD: unpossible2
       POSTGRES_DB: unpossible2_development
-      AUTH_SECRET: 8d457c009922907ffbb3fa03283a27f101232e8f47d6c1312f3535a00de318a3
+      AUTH_SECRET: ${AUTH_SECRET:-8d457c009922907ffbb3fa03283a27f101232e8f47d6c1312f3535a00de318a3}
+      SIDECAR_TOKEN: ${SIDECAR_TOKEN:-dev-sidecar-token}
+      DEFAULT_ORG_ID: ${DEFAULT_ORG_ID:-1}
       # REDIS_URL: redis://redis:6379/0
     ports:
       - "3000:3000"

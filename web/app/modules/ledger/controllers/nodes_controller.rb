@@ -49,13 +49,33 @@ module Ledger
 
     # POST /api/nodes/:id/comments
     def comment
-      if @node.kind == 'answer'
-        render json: { error: 'answer nodes are immutable after creation' }, status: :unprocessable_entity
+      body = params[:body]
+      if body.blank?
+        render json: { error: 'body is required' }, status: :unprocessable_entity
         return
       end
 
+      comment_node = Ledger::Node.new(
+        kind: 'answer',
+        answer_type: 'terminal',
+        scope: 'intent',
+        body: body,
+        title: "Comment on #{@node.title || @node.id}",
+        author: 'human',
+        stable_ref: SecureRandom.hex(16),
+        org_id: @node.org_id,
+        recorded_at: Time.current
+      )
+
+      unless comment_node.save
+        render json: { errors: comment_node.errors.full_messages }, status: :unprocessable_entity
+        return
+      end
+
+      Ledger::NodeEdge.create!(parent: @node, child: comment_node, edge_type: 'contains')
       Knowledge::IndexerJob.perform_later(@node.id.to_s) if defined?(Knowledge::IndexerJob)
-      render json: { status: 'queued' }
+
+      render json: comment_node, status: :created
     end
 
     private

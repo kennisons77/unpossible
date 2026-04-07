@@ -93,7 +93,7 @@ Phase: 0 (Local Development — Docker Compose only)
 
 ## Section 8 — Infrastructure Fixes (High Priority)
 
-- [ ] 8.1 — docker-compose.yml: extract AUTH_SECRET to env var with default <!-- ref: infra-auth-secret-env -->
+- [x] 8.1 — docker-compose.yml: extract AUTH_SECRET to env var with default <!-- ref: infra-auth-secret-env -->
   The hardcoded hex string works but should be `AUTH_SECRET=${AUTH_SECRET:-<default>}` for consistency.
   Add `DEFAULT_ORG_ID=1` and `SIDECAR_TOKEN` env vars to rails service.
   Files: `infra/docker-compose.yml`
@@ -115,7 +115,7 @@ Phase: 0 (Local Development — Docker Compose only)
 
 ## Section 9 — Ledger Gaps (Missing Tests + Comment Rewrite)
 
-- [ ] 9.1 — Rewrite NodesController#comment to create comment nodes <!-- ref: ledger-comment-rewrite -->
+- [x] 9.1 — Rewrite NodesController#comment to create comment nodes <!-- ref: ledger-comment-rewrite -->
   Current action is a stub that enqueues IndexerJob and returns `{status: 'queued'}`.
   Per spec: comments are answer nodes (kind: answer, answer_type: terminal, scope: intent) attached to the parent node via a `contains` edge. The comment body should be indexed as a knowledge chunk via `Knowledge::IndexerJob`.
   Also: remove the incorrect guard that rejects comments on answer nodes — the spec says comments attach to "any node", and the comment itself is a new answer node, not a mutation of the parent.
