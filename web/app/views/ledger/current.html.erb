@@ -1,0 +1,33 @@
+<h1>Current</h1>
+
+<% if @active_node %>
+  <nav>
+    <% @ancestors.each do |a| %>
+      <%= link_to a.title.presence || "(untitled)", ledger_node_path(a.id) %> /
+    <% end %>
+    <strong><%= @active_node.title.presence || "(untitled)" %></strong>
+  </nav>
+
+  <% @ancestors.each do |a| %>
+    <details>
+      <summary><%= a.title.presence || "(untitled)" %> — <em><%= a.scope %><%= a.level ? "/#{a.level}" : "" %></em> · <%= a.status %></summary>
+      <%= render_markdown(a.body) %>
+    </details>
+  <% end %>
+
+  <section>
+    <h2><%= @active_node.title.presence || "(untitled)" %></h2>
+    <p><em><%= @active_node.scope %> · <%= @active_node.status %> · by <%= @active_node.author %> · <%= @active_node.originated_at&.strftime("%Y-%m-%d") %></em></p>
+    <%= render_markdown(@active_node.body) %>
+    <% if @active_node.citations.present? %>
+      <h3>Citations</h3>
+      <ul>
+        <% @active_node.citations.each do |c| %>
+          <li><%= link_to c["label"], c["url"], target: "_blank", rel: "noopener noreferrer" %></li>
+        <% end %>
+      </ul>
+    <% end %>
+  </section>
+<% else %>
+  <p>No active node. The loop is idle.</p>
+<% end %>

@@ -1,0 +1,14 @@
+<details <%= "open" if node.status != "closed" %>>
+  <summary>
+    <%= link_to node.title.presence || "(untitled)", ledger_node_path(node.id) %>
+    — <em><%= node.scope %><%= node.level ? "/#{node.level}" : "" %></em> · <%= node.status %>
+  </summary>
+  <% children = children_map[node.id] %>
+  <% if children.any? %>
+    <ul>
+      <% children.each do |child| %>
+        <%= render partial: "ledger/node_tree_item", locals: { node: child, children_map: children_map } %>
+      <% end %>
+    </ul>
+  <% end %>
+</details>
