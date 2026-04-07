@@ -221,4 +221,74 @@ RSpec.describe Ledger::NodeLifecycleService do
       expect(node.reload.version).to eq(initial_version + 4)
     end
   end
+
+  # Audit event creation
+  describe "NodeAuditEvent writes" do
+    describe ".accept" do
+      it "creates a NodeAuditEvent with to_status closed on the question" do
+        node = question
+        expect {
+          described_class.accept(node, {
+            body: "accepted answer", scope: "code", author: "human",
+            stable_ref: SecureRandom.hex(16), org_id: org_id
+          })
+        }.to change { Ledger::NodeAuditEvent.where(node: node, to_status: "closed").count }.by(1)
+      end
+
+      it "records the from_status in the audit event" do
+        node = question(status: "in_review")
+        described_class.accept(node, {
+          body: "accepted answer", scope: "code", author: "human",
+          stable_ref: SecureRandom.hex(16), org_id: org_id
+        })
+        event = Ledger::NodeAuditEvent.where(node: node, to_status: "closed").last
+        expect(event.from_status).to eq("in_review")
+      end
+
+      it "increments version on accept" do
+        node = question
+        expect { described_class.accept(node, {
+          body: "accepted answer", scope: "code", author: "human",
+          stable_ref: SecureRandom.hex(16), org_id: org_id
+        }) }.to change { node.reload.version }.by(1)
+      end
+    end
+
+    describe ".rebut" do
+      it "creates a NodeAuditEvent with to_status proposed on the question" do
+        node = question(status: "in_review")
+        expect {
+          described_class.rebut(node, {
+            body: "rebuttal answer", scope: "code", author: "human",
+            stable_ref: SecureRandom.hex(16), org_id: org_id
+          })
+        }.to change { Ledger::NodeAuditEvent.where(node: node, to_status: "proposed").count }.by(1)
+      end
+
+      it "increments version on rebut" do
+        node = question(status: "in_review")
+        expect { described_class.rebut(node, {
+          body: "rebuttal answer", scope: "code", author: "human",
+          stable_ref: SecureRandom.hex(16), org_id: org_id
+        }) }.to change { node.reload.version }.by(1)
+      end
+    end
+
+    describe ".transition" do
+      it "creates a NodeAuditEvent on each transition" do
+        node = question
+        expect {
+          described_class.transition(node, "in_progress")
+        }.to change { Ledger::NodeAuditEvent.where(node: node).count }.by(1)
+      end
+
+      it "records from_status and to_status correctly" do
+        node = question(status: "proposed")
+        described_class.transition(node, "in_progress")
+        event = Ledger::NodeAuditEvent.where(node: node).last
+        expect(event.from_status).to eq("proposed")
+        expect(event.to_status).to eq("in_progress")
+      end
+    end
+  end
 end

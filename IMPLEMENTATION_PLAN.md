@@ -142,12 +142,12 @@ Phase: 0 (Local Development — Docker Compose only)
   Files: `web/spec/models/ledger/node_audit_event_spec.rb`
   Required tests: update raises `ActiveRecord::ReadOnlyRecord`; destroy raises `ActiveRecord::ReadOnlyRecord`; invalid changed_by → validation error; belongs_to node
 
-- [ ] Fix `NodeLifecycleService` — add `NodeAuditEvent` writes to `accept`/`rebut`/`transition` <!-- ref: ledger-audit-events -->
+- [x] Fix `NodeLifecycleService` — add `NodeAuditEvent` writes to `accept`/`rebut`/`transition` <!-- ref: ledger-audit-events -->
   Per spec: `NodeAuditEvent` must be written on every status transition. `transition` already writes it. `accept` and `rebut` call `_close_question` and `transition` respectively — verify audit events are written in both paths. Add spec coverage for audit event creation in `accept` and `rebut`.
   Files: `web/app/modules/ledger/services/node_lifecycle_service.rb`, `web/spec/modules/ledger/services/node_lifecycle_service_spec.rb`
   Required tests: `accept` creates NodeAuditEvent with from_status and to_status `"closed"`; `rebut` creates NodeAuditEvent with to_status `"proposed"`; version increments on both
 
-- [ ] Fix `Node` model — add `level` validation and `citations` default <!-- ref: ledger-node-level-fix -->
+- [x] Fix `Node` model — add `level` validation and `citations` default <!-- ref: ledger-node-level-fix -->
   Migration 5 added `level` and `citations` columns. `Node` model has `LEVELS` constant and `level_only_for_intent` validation. Verify `citations` defaults to `[]` in DB and model. Add `node_spec.rb` coverage for level validation (level on non-intent → error; level nil on non-intent → valid; level on intent → valid).
   Files: `web/app/modules/ledger/models/node.rb`, `web/spec/models/ledger/node_spec.rb`
   Required tests: level on non-intent scope → validation error; level nil on non-intent → valid; citations defaults to []; LEVELS constant present
@@ -159,7 +159,7 @@ Phase: 0 (Local Development — Docker Compose only)
 - [x] Add markdown rendering + syntax highlighting (`MarkdownHelper`)
 - [x] Views: current, open, tree, node detail
 
-- [ ] Add request specs for Ledger UI <!-- ref: ledger-ui-request-specs -->
+- [x] Add request specs for Ledger UI <!-- ref: ledger-ui-request-specs -->
   No `spec/requests/ledger/ledger_spec.rb` exists. Required per api-standards spec.
   Files: `web/spec/requests/ledger/ledger_spec.rb`
   Required tests: `GET /ledger` returns 200 with active node; `GET /ledger/open` returns 200; `GET /ledger/tree` returns 200; `GET /ledger/nodes/:id` returns 200 with audit trail; unauthenticated → redirect to login; text search on `/ledger/tree` filters results
@@ -169,7 +169,7 @@ Phase: 0 (Local Development — Docker Compose only)
   Files: `web/spec/helpers/markdown_helper_spec.rb`
   Required tests: fenced ruby block renders with syntax highlight classes; plain markdown renders headings and links; citations URL rendered as anchor tag; blank input returns empty string
 
-- [ ] Fix `node.html.erb` — remove stale `node.accepted` reference <!-- ref: ledger-ui-accepted-ref -->
+- [x] Fix `node.html.erb` — remove stale `node.accepted` reference <!-- ref: ledger-ui-accepted-ref -->
   `node.html.erb` renders `@node.status || @node.accepted` — `accepted` column was dropped in migration 7. Remove the `|| @node.accepted` fallback.
   Files: `web/app/views/ledger/node.html.erb`
   Required tests: node detail page renders without NoMethodError on `accepted`

@@ -7,6 +7,6 @@
 
 <ul>
   <% @root_nodes.each do |node| %>
-    <%= render partial: "ledger/node_tree_item", locals: { node: node, children_map: @children_by_parent } %>
+    <%= render partial: "ledger/ledger/node_tree_item", locals: { node: node, children_map: @children_by_parent } %>
   <% end %>
 </ul>
