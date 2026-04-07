@@ -195,21 +195,63 @@ RSpec.describe 'Ledger Nodes API', type: :request do
 
   describe 'POST /api/nodes/:id/comments' do
     let(:question) { create(:ledger_node, org_id: org_id, kind: 'question', status: 'proposed') }
-    let(:answer) { create(:ledger_node, :answer, org_id: org_id) }
+    let(:answer_node) { create(:ledger_node, :answer, org_id: org_id) }
+    let(:comment_body) { 'This is a comment on the node' }
 
-    it 'returns 200 for a question node' do
-      post "/api/nodes/#{question.id}/comments", headers: headers
-      expect(response).to have_http_status(:ok)
+    it 'creates an answer node and returns 201' do
+      post "/api/nodes/#{question.id}/comments",
+           params: { body: comment_body }.to_json, headers: headers
+      expect(response).to have_http_status(:created)
+      body = JSON.parse(response.body)
+      expect(body['kind']).to eq('answer')
+      expect(body['answer_type']).to eq('terminal')
+      expect(body['scope']).to eq('intent')
     end
 
-    it 'returns 422 for an answer node' do
-      post "/api/nodes/#{answer.id}/comments", headers: headers
-      expect(response).to have_http_status(:unprocessable_entity)
+    it 'stores the comment body in the created node' do
+      post "/api/nodes/#{question.id}/comments",
+           params: { body: comment_body }.to_json, headers: headers
+      body = JSON.parse(response.body)
+      expect(body['body']).to eq(comment_body)
+    end
+
+    it 'creates a contains edge to the parent node' do
+      post "/api/nodes/#{question.id}/comments",
+           params: { body: comment_body }.to_json, headers: headers
+      comment_id = JSON.parse(response.body)['id']
+      edge = Ledger::NodeEdge.find_by(parent_id: question.id, child_id: comment_id)
+      expect(edge).to be_present
+      expect(edge.edge_type).to eq('contains')
+    end
+
+    it 'enqueues Knowledge::IndexerJob with parent node ID' do
+      stub_const('Knowledge::IndexerJob', Class.new {
+        def self.perform_later(*); end
+      })
+      expect(Knowledge::IndexerJob).to receive(:perform_later).with(question.id.to_s)
+      post "/api/nodes/#{question.id}/comments",
+           params: { body: comment_body }.to_json, headers: headers
+    end
+
+    it 'allows comments on answer nodes' do
+      post "/api/nodes/#{answer_node.id}/comments",
+           params: { body: comment_body }.to_json, headers: headers
+      expect(response).to have_http_status(:created)
+    end
+
+    context 'with missing body' do
+      it 'returns 422' do
+        post "/api/nodes/#{question.id}/comments",
+             params: {}.to_json, headers: headers
+        expect(response).to have_http_status(:unprocessable_entity)
+      end
     end
 
     context 'without auth' do
       it 'returns 401' do
-        post "/api/nodes/#{question.id}/comments"
+        post "/api/nodes/#{question.id}/comments",
+             params: { body: comment_body }.to_json,
+             headers: { 'Content-Type' => 'application/json' }
         expect(response).to have_http_status(:unauthorized)
       end
     end
