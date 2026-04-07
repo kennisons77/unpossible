@@ -10,6 +10,8 @@ Quick reference for recurring patterns in this codebase.
 | `filter_parameters` | `config/application.rb` | Filters `:api_key, :token, :password, :secret` from logs |
 | `rack-attack` | `config/initializers/rack_attack.rb` | IP throttle → 429; safelist localhost in test |
 | Audit on destructive | `Analytics::AuditLogService` | Call before any delete/update of sensitive data |
+| STRIDE checklist | `specs/practices/threat-modeling.md` | Run per trust-boundary task during planning |
+| Edge case prompts | `specs/practices/threat-modeling.md` | Targeted prompts to surface domain-specific threats |
 
 ## Auth
 
