@@ -128,7 +128,7 @@ Phase: 0 (Local Development — Docker Compose only)
   - Missing body → 422
   - Unauthenticated → 401
 
-- [ ] 9.2 — Add tests for NodeLifecycleService.attach_research (UAT-6 part 1) <!-- ref: ledger-test-attach-research -->
+- [x] 9.2 — Add tests for NodeLifecycleService.attach_research (UAT-6 part 1) <!-- ref: ledger-test-attach-research -->
   The method exists but has zero test coverage.
   Files: `web/spec/modules/ledger/services/node_lifecycle_service_spec.rb`
   Required tests:
@@ -137,7 +137,7 @@ Phase: 0 (Local Development — Docker Compose only)
   - Created spike has kind `question` and scope `code`
   - NodeEdge with edge_type `research` links parent to spike
 
-- [ ] 9.3 — Add tests for research spike blocking on `accepted` transition (UAT-6 part 2) <!-- ref: ledger-test-research-blocking -->
+- [x] 9.3 — Add tests for research spike blocking on `accepted` transition (UAT-6 part 2) <!-- ref: ledger-test-research-blocking -->
   Spec says: "A question cannot transition to `accepted` or `in_progress` while any `research` spike is not `closed`."
   `in_progress` blocking is tested; `accepted` is not.
   Files: `web/spec/modules/ledger/services/node_lifecycle_service_spec.rb`
@@ -145,7 +145,7 @@ Phase: 0 (Local Development — Docker Compose only)
   - Transition to `accepted` rejected when open research spike exists
   - Transition to `accepted` succeeds after research spike is closed
 
-- [ ] 9.4 — Add tests for dependency enforcement on `accepted` transition <!-- ref: ledger-test-dep-accepted -->
+- [x] 9.4 — Add tests for dependency enforcement on `accepted` transition <!-- ref: ledger-test-dep-accepted -->
   Spec says: "A question cannot transition to `accepted` or `in_progress` while any `depends_on` question is not `closed`."
   Only `in_progress` is tested.
   Files: `web/spec/modules/ledger/services/node_lifecycle_service_spec.rb`
@@ -153,7 +153,7 @@ Phase: 0 (Local Development — Docker Compose only)
   - Transition to `accepted` rejected when `depends_on` node is not closed
   - Transition to `accepted` succeeds after dependency is closed
 
-- [ ] 9.5 — Add MarkdownHelper spec <!-- ref: ledger-markdown-helper-spec -->
+- [x] 9.5 — Add MarkdownHelper spec <!-- ref: ledger-markdown-helper-spec -->
   Files: `web/spec/helpers/markdown_helper_spec.rb`
   Required tests:
   - Renders markdown to HTML

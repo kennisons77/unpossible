@@ -28,3 +28,22 @@ Agent activity log. Auto-updated each iteration. Trimmed to last 10 entries.
 - `web/spec/requests/ledger/nodes_spec.rb` — comment spec rewrite
 - `infra/docker-compose.yml` — AUTH_SECRET/SIDECAR_TOKEN/DEFAULT_ORG_ID env vars (from 8.1)
 - `IMPLEMENTATION_PLAN.md` — marked 9.1 complete
+
+---
+
+## 2026-04-07 16:02 — Tasks 9.2, 9.3, 9.4: Ledger test gaps (attach_research, research blocking, dependency enforcement on accepted)
+
+**Mode:** Build
+**Iteration:** 31
+**Status:** Complete
+**Tag:** v0.0.16
+
+**Tasks completed:**
+- 9.2: Added 3 tests for `NodeLifecycleService.attach_research` — creates code-scoped question, status proposed, research edge to parent
+- 9.3: Added 2 tests for research spike blocking on `accepted` transition — blocks when open spike exists, allows when closed
+- 9.4: Added 2 tests for dependency enforcement on `accepted` transition — blocks when dependency not closed, allows when closed
+- Full test suite passes (222 examples, 0 failures, 95.41% coverage)
+
+**Changes:**
+- `web/spec/modules/ledger/services/node_lifecycle_service_spec.rb` — 7 new test examples
+- `IMPLEMENTATION_PLAN.md` — marked 9.2, 9.3, 9.4 complete
