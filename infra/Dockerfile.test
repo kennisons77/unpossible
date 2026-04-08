@@ -9,11 +9,12 @@ RUN groupadd --gid 1001 rails && \
 
 WORKDIR /app
 
-COPY app/Gemfile app/Gemfile.lock* ./
-COPY app/vendor/cache ./vendor/cache
+COPY web/Gemfile web/Gemfile.lock* ./
+COPY web/vendor/cache ./vendor/cache
 RUN bundle install --local --jobs 4
 
-COPY app/ .
+COPY web/ .
+COPY specs/ /specs/
 
 # Create DB and run migrations before tests
 COPY infra/entrypoint-test.sh /entrypoint-test.sh

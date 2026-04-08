@@ -19,10 +19,10 @@ A controller is not complete until:
 2. `rake rswag:specs:swaggerize` exits 0 and updates `swagger/v1/swagger.yaml`
 
 ## Files
-- `app/spec/requests/**/*_spec.rb`
-- `app/swagger/v1/swagger.yaml`
-- `app/spec/swagger_helper.rb`
-- `app/config/initializers/rswag.rb`
+- `web/spec/requests/**/*_spec.rb`
+- `web/swagger/v1/swagger.yaml`
+- `web/spec/swagger_helper.rb`
+- `web/config/initializers/rswag.rb`
 
 ## Rails-specific Acceptance Criteria
 - `GET /api/docs` returns 200 without authentication

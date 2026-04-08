@@ -44,6 +44,9 @@ Example task entry:
 
 This prevents tasks from being marked done without the required verification existing and passing.
 
+For tasks that touch trust boundaries, also derive threat-informed test scenarios per
+`threat-modeling.md` and include them as required threat tests.
+
 ## Gap Analysis
 - Read `projects/<name>/src/` before declaring anything missing — never assume unimplemented
 - Compare against each spec file in `projects/<name>/specs/` explicitly, item by item
