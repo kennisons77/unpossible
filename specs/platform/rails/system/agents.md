@@ -27,13 +27,13 @@ Extends `specs/system/agent-runner/spec.md`. Rails-specific implementation detai
 - `kiro-agents/ralph_review.json` — tools: `["read", "shell", "grep", "glob"]`
 
 ## Files
-- `app/app/modules/agents/models/agent_run.rb`
-- `app/app/modules/agents/services/prompt_deduplicator.rb`
-- `app/app/modules/agents/services/provider_adapter.rb`
-- `app/app/modules/agents/services/claude_adapter.rb`
-- `app/app/modules/agents/services/kiro_adapter.rb`
-- `app/app/modules/agents/services/open_ai_adapter.rb`
-- `app/app/modules/agents/controllers/agents/agent_runs_controller.rb`
+- `web/app/modules/agents/models/agent_run.rb`
+- `web/app/modules/agents/services/prompt_deduplicator.rb`
+- `web/app/modules/agents/services/provider_adapter.rb`
+- `web/app/modules/agents/services/claude_adapter.rb`
+- `web/app/modules/agents/services/kiro_adapter.rb`
+- `web/app/modules/agents/services/open_ai_adapter.rb`
+- `web/app/modules/agents/controllers/agents/agent_runs_controller.rb`
 
 ## Rails-specific Acceptance Criteria
 - `ProviderAdapter.for("claude")` returns `ClaudeAdapter`

@@ -3,7 +3,7 @@
 Extends `specs/practices/auth.md`. Rails-specific implementation details only.
 
 ## Token Format
-JWT. Claims: `org_id`, `user_id`, `exp`. Encoded/decoded via `app/app/lib/auth_token.rb`.
+JWT. Claims: `org_id`, `user_id`, `exp`. Encoded/decoded via `web/app/lib/auth_token.rb`.
 
 ## User Auth Wiring
 - `ApplicationController#authenticate!` — before_action on all protected controllers
@@ -15,14 +15,14 @@ JWT. Claims: `org_id`, `user_id`, `exp`. Encoded/decoded via `app/app/lib/auth_t
 - Secret loaded from `SIDECAR_TOKEN` env var via `ENV.fetch`
 
 ## Secret Value Object
-`app/app/lib/secret.rb` — Ruby class. Overrides `inspect`, `to_s`, `as_json`. `.expose` returns raw value.
+`web/app/lib/secret.rb` — Ruby class. Overrides `inspect`, `to_s`, `as_json`. `.expose` returns raw value.
 
 ## Files
-- `app/app/lib/auth_token.rb`
-- `app/app/lib/secret.rb`
-- `app/app/controllers/application_controller.rb`
-- `app/app/controllers/api/auth_controller.rb`
-- `app/config/routes.rb`
+- `web/app/lib/auth_token.rb`
+- `web/app/lib/secret.rb`
+- `web/app/controllers/application_controller.rb`
+- `web/app/controllers/api/auth_controller.rb`
+- `web/config/routes.rb`
 
 ## Rails-specific Acceptance Criteria
 - `AuthToken.encode(org_id:, user_id:)` returns a JWT string

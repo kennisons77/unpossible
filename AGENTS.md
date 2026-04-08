@@ -21,27 +21,33 @@ GIT_SHA=$(git rev-parse --short HEAD) docker compose -f projects/unpossible2/inf
 
 ## Adding New Gems
 
-Docker containers have no outbound internet access. All gems must be pre-downloaded to `app/vendor/cache/` on the host before building:
+Docker containers have no outbound internet access. All gems must be pre-downloaded to `web/vendor/cache/` on the host before building:
 
 ```bash
 # Download a new gem and its platform-specific variant (if any)
-curl -sf -o projects/unpossible2/app/vendor/cache/<name>-<version>.gem \
+curl -sf -o projects/unpossible2/web/vendor/cache/<name>-<version>.gem \
   https://rubygems.org/gems/<name>-<version>.gem
 ```
 
-Then update `app/Gemfile` and `app/Gemfile.lock`, and rebuild the image.
+Then update `web/Gemfile` and `web/Gemfile.lock`, and rebuild the image.
 
 ## Codebase Patterns
 
 | Concept | Location | Notes |
 |---|---|---|
-| Rails app root | `projects/unpossible2/app/` | All Ruby source |
+| Rails app root | `projects/unpossible2/web/` | All Ruby source |
 | Infra config | `projects/unpossible2/infra/` | Dockerfiles, compose files |
-| Module code | `app/app/modules/{name}/` | knowledge, tasks, agents, sandbox, analytics |
-| Specs | `app/spec/` | RSpec, FactoryBot, Shoulda Matchers |
-| Initializers | `app/config/initializers/` | lograge.rb, rack_attack.rb |
-| DB migrations | `app/db/migrate/` | Rails migrations |
-| Lib | `app/app/lib/` | Secret, AuthToken, Security::* |
+| Module code | `web/app/modules/{name}/` | knowledge, tasks, agents, sandbox, analytics |
+| Specs | `web/spec/` | RSpec, FactoryBot, Shoulda Matchers |
+| Initializers | `web/config/initializers/` | lograge.rb, rack_attack.rb |
+| DB migrations | `web/db/migrate/` | Rails migrations |
+| Lib | `web/app/lib/` | Secret, AuthToken, Security::* |
+| Ledger jobs | `web/app/modules/ledger/jobs/` | SpecWatcherJob polls specs/**/*.md every 10s |
+
+## SQL NULL Gotcha
+
+`where.not(column: value)` generates `WHERE column != value` which excludes NULLs in PostgreSQL.
+Use `where("column IS NULL OR column != ?", value)` when NULLs should be included.
 
 ## Docker Context
 

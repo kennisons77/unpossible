@@ -9,11 +9,28 @@ AGENT ?= kiro
 SKILL = @cd $(PROJECT_DIR) && $(AGENT) -- "$(shell cat $(PROJECT_DIR)
 
 .PHONY: help \
+        docker-build up down restart logs console shell \
+        db-create db-migrate db-setup db-reset \
         build plan build1 plan1 reflect research \
         interview prd spec review server-ops \
         start
 
+COMPOSE := docker compose -f $(PROJECT_DIR)infra/docker-compose.yml
+
 help:
+	@echo "Rails server:"
+	@echo "  make up              Start rails + postgres (detached)"
+	@echo "  make down            Stop all services"
+	@echo "  make restart         Restart rails service"
+	@echo "  make logs            Tail rails logs"
+	@echo "  make console         Open rails console"
+	@echo "  make db-create       Create database"
+	@echo "  make db-migrate      Run pending migrations"
+	@echo "  make db-setup        Create + migrate + seed"
+	@echo "  make db-reset        Drop + create + migrate + seed"
+	@echo "  make docker-build    Build the rails image"
+	@echo "  make shell           Open bash in rails container"
+	@echo ""
 	@echo "Workflow:"
 	@echo "  make start           Orient, research if needed, gap-fill spec, plan (1 iteration)"
 	@echo ""
@@ -31,6 +48,40 @@ help:
 	@echo "  make spec            Produce or update spec files for a PRD"
 	@echo "  make review          Analyse codebase, propose beats"
 	@echo "  make server-ops      Operate on a server"
+
+# --- Rails server ---
+docker-build:
+	$(COMPOSE) build rails
+
+up:
+	$(COMPOSE) up -d
+
+down:
+	$(COMPOSE) down
+
+restart:
+	$(COMPOSE) restart rails
+
+logs:
+	$(COMPOSE) logs -f rails
+
+console:
+	$(COMPOSE) exec rails bundle exec rails console
+
+shell:
+	$(COMPOSE) exec rails bash
+
+db-create:
+	$(COMPOSE) exec rails bundle exec rails db:create
+
+db-migrate:
+	$(COMPOSE) exec rails bundle exec rails db:migrate
+
+db-setup:
+	$(COMPOSE) exec rails bundle exec rails db:setup
+
+db-reset:
+	$(COMPOSE) exec rails bundle exec rails db:reset
 
 # --- Workflow ---
 

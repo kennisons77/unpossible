@@ -24,17 +24,16 @@ Node
   kind                   question | answer
   answer_type            terminal | generative  (answers only)
   scope                  intent | code | deployment | ui | interaction
-  body                   content (markdown)
+  level                  ideology | concept | practice | specification  (intent-scoped nodes only, nullable)
+  body                   content (markdown — may include fenced code blocks)
   title                  short label (derived from body first line if not set)
   spec_path              relative path to associated file on disk (nullable)
   author                 human | agent | system
   stable_ref             SHA256 of normalized(title + primary_parent_id) — see open questions
   version                integer, incremented on each status transition
-  status                 open | in_progress | blocked | closed  (questions only)
-  resolution             done | duplicate | deferred | wont_do | icebox  (questions only, set on close)
-  accepted               true | false | pending  (answers only)
-  accepted_by[]          author IDs who have accepted this answer
-  acceptance_threshold   integer — how many acceptances required to close the question
+  status                 proposed | refining | in_review | accepted | in_progress | blocked | closed  (questions only)
+  resolution             done | duplicate | deferred | wont_do  (questions only, set on close)
+  citations[]            jsonb array of {label, url, ref_type} — external sources cited in body
   conflict               boolean — true when disk and DB state diverge unresolvably
   conflict_disk_state    snapshot of file content at conflict time (nullable)
   conflict_db_state      snapshot of DB state at conflict time (nullable)
@@ -42,6 +41,53 @@ Node
   recorded_at            when this node entered the ledger (system clock)
   originated_at          when the underlying event actually happened (nullable — defaults to recorded_at)
 ```
+
+### Level
+
+`level` sub-divides `intent`-scoped nodes into four layers of shared understanding,
+each answering a different question:
+
+| Level | Question | Answers look like |
+|---|---|---|
+| `ideology` | "Why does this exist?" | Pitch, principle, mission statement |
+| `concept` | "What does it do?" | Feature description, PRD |
+| `practice` | "What patterns does this invoke?" | Practice doc, convention reference, coding standard |
+| `specification` | "How exactly is it built?" | Spec, implementation plan, beat |
+
+The chain for any piece of work reads top to bottom:
+`why → what → how (patterns) → how (specifics) → code`
+
+Practice-level nodes are the formal link between concept and implementation — they
+explain which conventions, standards, and patterns apply. This is why the loop loads
+`practices/` files as context: they are answers to `practice`-level questions that
+inform the `specification` and `code` work below them.
+
+`level` is nil for non-intent scopes (`code`, `deployment`, `ui`, `interaction`).
+
+### Audit Trail
+
+Every status transition on a Node is recorded as an append-only `NodeAuditEvent`. Events are never updated or deleted.
+
+```
+NodeAuditEvent
+  id            UUID
+  node_id       FK → Node
+  changed_by    human | agent | system
+  from_status   nullable (nil on first transition from creation)
+  to_status     the status transitioned to
+  reason        optional human or agent note explaining the transition
+  recorded_at   system clock at time of event
+```
+
+### Citations
+
+`citations` is a jsonb array on Node. Each entry:
+
+```json
+{ "label": "Simple Made Easy — Rich Hickey", "url": "https://...", "ref_type": "talk" }
+```
+
+`ref_type` is free-form for now. Common values: `talk`, `article`, `commit`, `node`, `spec`.
 
 Relationships between nodes are stored in a separate join table rather than columns on
 Node. This supports fan-in — a node can have multiple parents, multiple dependencies,
@@ -79,41 +125,26 @@ Answers are one of two types:
 
 A generative answer is a **shared understanding checkpoint** — it exists so that all
 parties (human + human, human + agent) confirm they are solving the same problem before
-work continues deeper. The `acceptance_threshold` enforces this: a PRD requires sign-off
-from multiple parties before its child questions are opened.
+work continues deeper.
 
-Answers have an acceptance state:
-
-```
-Node (answer)
-  accepted               true | false | pending
-  accepted_by[]          who has accepted so far
-  acceptance_threshold   how many must accept
-```
-
-A question is `closed` only when an answer's `accepted_by` count reaches its
-`acceptance_threshold`. An answer with `accepted: false` is a **rebuttal** — it
-re-opens the question. An answer with `accepted: pending` is a **candidate** — the
-question remains open while verdicts are awaited.
-
-This means answers can judge other answers. A test run is not an answer to the beat — it
-is a verdict on the commit's claim to answer the beat:
+Acceptance is not a flag on a node — it is a terminal answer child node. When a
+question is accepted, `NodeLifecycleService.accept` creates a terminal answer child and
+transitions the question to `closed`. When a question is rebutted,
+`NodeLifecycleService.rebut` creates a terminal answer child and transitions the
+question back to `proposed`. Every acceptance and rebuttal is a first-class record with
+author, body, timestamp, and audit trail.
 
 ```
-beat (question, threshold: 1)
-  └── commit (answer, terminal, pending)     ← candidate
-      └── test run verdict (false)           ← rebuttal — beat re-opens
-  └── commit (answer, terminal, pending)     ← new candidate
-      └── test run verdict (true)            ← accepted — beat closes
+beat (question, code) → in_progress
+  └── commit (answer, terminal)           ← candidate
+  └── rebuttal (answer, terminal)         ← beat → proposed (test failed)
+  └── commit (answer, terminal)           ← new candidate
+  └── acceptance (answer, terminal)       ← beat → closed
 
-pitch (question, threshold: 2)
-  └── PRD (answer, generative, pending)      ← candidate
-      └── human verdict (true)              ← 1 of 2
-      └── agent verdict (true)              ← 2 of 2 — pitch closes, spec questions open
+pitch (question, intent/ideology) → in_review
+  └── PRD (answer, generative)            ← candidate
+  └── acceptance (answer, terminal)       ← pitch → closed, spec questions open
 ```
-
-The same pattern covers code review: a review comment is a verdict of `false` on a
-commit, re-opening the beat. An approval is a verdict of `true`.
 
 ## Scopes
 
@@ -122,33 +153,36 @@ primitive — it is a filter and a rendering hint.
 
 | Scope | Questions look like | Answers look like |
 |---|---|---|
-| `intent` | Pitch, PRD question, spec question | PRD, spec, research finding, digest |
-| `code` | Beat, spike, bug investigation | Commit, test run, fix |
-| `deployment` | "Is this code running?", health check | Environment record, uptime reading |
-| `ui` | Button, form, navigation element | Page render, form submission response |
-| `interaction` | User action (implicit question: "what happens if I do this?") | System response, error, confirmation |
+| `intent` | Pitch, feature, spec, plan | PRD, research finding, digest |
+| `code` | Beat, spike, bug, refactor | Commit, research result, fix |
+| `deployment` | "Is this code running?" | Environment record, health check |
+| `ui` | Button, form, navigation element | Page render, form submission |
+| `interaction` | User action | System response, error, confirmation |
 
-## How Existing Artifacts Map
+## How Artifacts Map
 
-| Artifact | Kind | Answer type | Scope | Notes |
+| Artifact | Kind | Answer type | Scope | Level |
 |---|---|---|---|---|
-| Pitch | question | — | intent | Root node — no parent |
-| PRD | answer | generative | intent | Answers the pitch; spawns spec questions; threshold ≥ 2 |
-| Spec | answer | generative | intent | Answers a PRD question; spawns beat questions; threshold ≥ 1 |
-| Beat | question | — | code | A unit of work to be executed |
-| Commit | answer | terminal | code | Closes a beat; threshold: 1 (test runner) |
-| Spike | question | — | code | Time-boxed investigation question |
-| Research log entry | answer | generative | code | Closes a spike; spawns follow-on questions if needed |
-| Bug report | answer + question | — | code | Surfaces a problem; opens investigation question |
-| Fix commit | answer | terminal | code | Closes the bug investigation question |
-| Deployment | question | — | deployment | "Is this code running at this SHA?" |
-| Health check | answer | terminal | deployment | Continuously re-answered; latest is current state |
-| Page render | answer | terminal | ui | The system's answer to "what is the state of X?" |
-| Button | question | — | ui | Pending — not yet asked |
-| Form | question | — | ui | Structured question — fields are the question's shape |
-| Form submission | answer | terminal | interaction | The form filled and sent |
-| Error page | answer | terminal | interaction | A failed answer — spawns a bug question |
-| Digest / summary | answer | terminal | any | Summarises a range of prior answers; does not close a question |
+| Pitch | question | — | intent | ideology |
+| Feature | question | — | intent | concept |
+| PRD | answer | generative | intent | — |
+| Practice reference | question/answer | — | intent | practice |
+| Spec | question | — | intent | specification |
+| Plan | answer | generative | intent | — |
+| Beat | question | — | code | — |
+| Spike | question | — | code | — |
+| Bug | question | — | code | — |
+| Refactor | question | — | code | — |
+| Commit | answer | terminal | code | — |
+| Research result | answer | terminal | code | — |
+| Acceptance | answer | terminal | any | — |
+| Rebuttal | answer | terminal | any | — |
+| Deployment | question | — | deployment | — |
+| Health check | answer | terminal | deployment | — |
+| Form | question | — | ui | — |
+| Form submission | answer | terminal | interaction | — |
+| Error | answer | terminal | interaction | — (spawns bug question) |
+| Digest | answer | terminal | any | — |
 
 ## Actor and ActorProfile
 
@@ -357,14 +391,38 @@ ledger-prd.md (question, intent)
 
 ## Status and Resolution
 
-A question's status is derived from its answers and children:
+A question moves through a unified lifecycle. Status is enforced per scope.
 
-| Status | Condition |
+| Status | Meaning | Permitted scopes |
+|---|---|---|
+| `proposed` | Draft / idea — no work started | any |
+| `refining` | Active design or requirement gathering | intent, code |
+| `in_review` | Seeking alignment or peer approval | any |
+| `accepted` | Validated, ready for execution | intent, code |
+| `in_progress` | Active execution | code, deployment, ui, interaction |
+| `blocked` | External dependency or lack of clarity | any |
+| `closed` | Criteria met, node complete | any |
+
+Valid transitions:
+
+| From | To |
 |---|---|
-| `open` | No accepted answer yet, or last verdict was `false` |
-| `in_progress` | Has a candidate answer with `accepted: pending` |
-| `blocked` | Has one or more unresolved `depends_on` questions |
-| `closed` | Has an accepted answer, or closed by human decision |
+| `proposed` | `refining`, `in_review`, `blocked`, `closed` |
+| `refining` | `in_review`, `blocked`, `closed` |
+| `in_review` | `accepted`, `blocked`, `closed`, `proposed` |
+| `accepted` | `in_progress`, `closed` |
+| `in_progress` | `blocked`, `closed` |
+| `blocked` | `proposed`, `refining`, `in_review`, `accepted`, `in_progress` |
+| `closed` | `proposed` (reopen) |
+
+Typical paths by level:
+
+| Level/Scope | Path |
+|---|---|
+| intent (any level) | `proposed → refining → in_review → accepted → closed` |
+| code (beat) | `proposed → in_review → accepted → in_progress → closed` |
+| code (spike) | `proposed → refining → in_review → accepted → closed` |
+| deployment, ui, interaction | `proposed → in_progress → closed` |
 
 When a question closes, `resolution` records why:
 
@@ -372,12 +430,38 @@ When a question closes, `resolution` records why:
 |---|---|
 | `done` | Closed by an accepted answer — work completed |
 | `duplicate` | Same intent exists elsewhere in the ledger |
-| `deferred` | Valid but not now — moved to icebox |
+| `deferred` | Valid but not now |
 | `wont_do` | Explicitly out of scope, will not be answered |
-| `icebox` | Paused indefinitely — excluded from active queue, preserved in history |
 
-`done` is set automatically when an answer is accepted. All others are set by human
-decision. Icebox and deferred questions can be re-opened; duplicate and wont_do cannot.
+`done` is set automatically on close via acceptance. All others are set by human
+decision. `deferred` nodes can be re-opened; `duplicate` and `wont_do` cannot.
+
+## Acceptance
+
+Acceptance is not a flag on a node — it is a terminal answer child node. When a
+question is accepted, a terminal answer is created as a child and the question
+transitions to `closed`. When a question is rebutted, a terminal answer is created and
+the question transitions back to `proposed`.
+
+Every acceptance and rebuttal is a first-class record with author, body, timestamp, and
+audit trail. The `accepted`, `accepted_by`, and `acceptance_threshold` columns are
+removed from Node.
+
+## Research
+
+Any node at any level can have a research spike attached via a `research` edge. The
+spike is a `code`-scoped question that follows the spike lifecycle. The parent node
+cannot transition to `accepted` or `in_progress` while any attached research spike is
+not `closed`.
+
+```
+feature (question, intent/specification)
+  └── [research] spike: "evaluate approach X" (question, code)
+      └── research answer (answer, terminal)  ← spike closes
+  └── [contains] PRD answer (answer, generative)
+```
+
+`NodeEdge.edge_type` values: `contains | depends_on | refs | research`
 
 ## Success Metrics
 
@@ -403,11 +487,11 @@ decision. Icebox and deferred questions can be re-opened; duplicate and wont_do 
 3. Attempt to move B to `in_progress` → rejected, A not closed
 4. Close A, then move B to `in_progress` → succeeds
 
-**UAT-3 — Generative answer opens children**
-1. Create a pitch question (threshold: 2)
-2. Post a generative answer (PRD)
-3. Submit one true verdict → answer still pending (1 of 2)
-4. Submit second true verdict → pitch closes, child spec questions open
+**UAT-3 — Acceptance and rebuttal as nodes**
+1. Create a beat question (code, in_progress)
+2. Call `NodeLifecycleService.accept` → terminal answer child created, beat → closed
+3. Call `NodeLifecycleService.rebut` on a different beat → terminal answer child created, beat → proposed
+4. Audit trail shows both transitions with reason
 
 **UAT-4 — Plan file sync**
 1. Sync a plan file with two unchecked and one checked item → 3 nodes created, checked item closed
@@ -419,10 +503,10 @@ decision. Icebox and deferred questions can be re-opened; duplicate and wont_do 
 2. Run backfill → 3 closed nodes created with `originated_at` set to iteration dates
 3. Run backfill again → no new nodes created
 
-**UAT-6 — Icebox**
-1. Create a question, set resolution: `icebox` → question closes, excluded from active queue
-2. Query open questions → icebox question not returned
-3. Re-open icebox question → status returns to `open`, appears in queue
+**UAT-6 — Research spike blocking**
+1. Create a beat question, attach a research spike via `attach_research`
+2. Attempt to transition beat to `accepted` → rejected (open research spike)
+3. Close the spike, retry → succeeds
 
 **UAT-7 — Disk ↔ DB conflict**
 1. Edit a spec file and simultaneously update the same node via API
@@ -437,42 +521,44 @@ decision. Icebox and deferred questions can be re-opened; duplicate and wont_do 
 
 ## The Loop's Job
 
-Find the oldest open question with scope `code` and no unresolved dependencies. Answer it.
+Find the oldest `proposed` or `accepted` question with scope `code` and no unresolved
+dependencies or open research spikes. Transition it to `in_progress`, answer it, call
+`accept` or `rebut`.
 
-The UI's job: render closed questions as text. Render open questions as interactive
-elements. The frontier of open questions is the application's current state.
+The UI's job: render closed questions as text. Render non-closed questions as
+interactive elements. The frontier of non-closed questions is the application's current
+state.
 
 ## Acceptance Criteria
 
 - A node can be created as `question` or `answer` with any valid scope
 - An answer node is immutable after creation
-- An answer node is created with `accepted: pending` by default
 - A terminal answer has no child questions — the system rejects child question creation on a terminal answer
-- A generative answer may have child questions — they are opened once the answer is accepted
-- Child questions of a generative answer are not opened until `accepted_by` count reaches `acceptance_threshold`
-- An answer's `accepted_by` list grows as each party submits a verdict; `accepted` flips to `true` when threshold is reached
-- An answer is rebutted (`accepted: false`) when any party submits a false verdict — this re-opens the parent question regardless of threshold
-- A question is `closed` only when a child answer's `accepted_by` count reaches its `acceptance_threshold`
-- A question re-opens (status → `open`) when its accepted answer is rebutted
-- A failed test run submits a false verdict on the parent commit, re-opening the beat
-- A passing test run submits a true verdict on the parent commit; if threshold met, beat closes
-- A question cannot transition to `in_progress` while any `depends_on` question is not `closed`
+- A generative answer may have child questions
+- Status transitions are validated against `VALID_TRANSITIONS` and `PERMITTED_STATUSES`
+- `in_progress` is rejected on intent-scoped nodes
+- `refining` is rejected on deployment/ui/interaction-scoped nodes
+- A question cannot transition to `accepted` or `in_progress` while any `depends_on` question is not `closed`
+- A question cannot transition to `accepted` or `in_progress` while any `research` spike is not `closed`
+- `NodeLifecycleService.accept` creates a terminal answer child and transitions question to `closed`
+- `NodeLifecycleService.rebut` creates a terminal answer child and transitions question to `proposed`
+- `NodeLifecycleService.attach_research` creates a spike with a `research` edge to the parent
+- Adding a child to a closed generative answer transitions that answer's parent question back to `in_review`
+- `NodeAuditEvent` written on every status transition with `from_status`, `to_status`, `changed_by`
+- `version` increments on every status transition
 - `refs[]` on a node returns all nodes that node cross-links to
-- Querying by ref returns all nodes that ref a given node ID
 - Querying by scope returns all nodes at that layer
+- Querying by level returns all intent-scoped nodes at that level
 - A digest node summarises a range of prior nodes without closing any question
 - The ledger query returns all nodes ordered by `originated_at`
 - Backfilled nodes set `originated_at` to the historical event time and `recorded_at` to the time of backfill
 - Deleting a parent node orphans children — it does not cascade delete
-- An error response node spawns a child bug question automatically
 - `SpecWatcherJob` polls every 10 seconds and detects new, changed, and deleted spec files
 - Deleted spec file → node `resolution` set to `deferred`, record preserved
 - `SpecWatcherJob` triggers `Knowledge::IndexerJob` after any file change
 - Last-write-wins sync: newer mtime overrides the older side
-- Git revert detected (file SHA matches prior known SHA) → `conflict: true`, never auto-resolved
+- Git revert detected → `conflict: true`, never auto-resolved
 - Conflict queue surfaces diff of both states with resolve actions
-- Resolving a conflict writes chosen state to both disk and DB atomically
-- `version` increments on every status transition
 - `org_id` present on all records from day one
 - `GET /api/nodes` filters by scope, status, resolution, author, parent_id
 - `POST /api/nodes/:id/comments` creates a comment node and triggers indexing

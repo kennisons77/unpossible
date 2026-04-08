@@ -21,14 +21,14 @@ Extends `specs/knowledge.md`. Rails-specific implementation details only.
 - `archived_at` nullable — archived items excluded from default scope
 
 ## Files
-- `app/app/modules/knowledge/models/library_item.rb`
-- `app/app/modules/knowledge/models/embedding.rb`
-- `app/app/modules/knowledge/jobs/indexer_job.rb`
-- `app/app/modules/knowledge/services/embedder_service.rb`
-- `app/app/modules/knowledge/services/open_ai_embedder.rb`
-- `app/app/modules/knowledge/services/md_chunker.rb`
-- `app/app/modules/knowledge/services/context_retriever.rb`
-- `app/app/modules/knowledge/controllers/knowledge/library_items_controller.rb`
+- `web/app/modules/knowledge/models/library_item.rb`
+- `web/app/modules/knowledge/models/embedding.rb`
+- `web/app/modules/knowledge/jobs/indexer_job.rb`
+- `web/app/modules/knowledge/services/embedder_service.rb`
+- `web/app/modules/knowledge/services/open_ai_embedder.rb`
+- `web/app/modules/knowledge/services/md_chunker.rb`
+- `web/app/modules/knowledge/services/context_retriever.rb`
+- `web/app/modules/knowledge/controllers/knowledge/library_items_controller.rb`
 
 ## Rails-specific Acceptance Criteria
 - `IndexerJob` enqueued on `knowledge` queue

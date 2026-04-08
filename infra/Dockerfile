@@ -13,7 +13,7 @@ RUN apt-get update -qq && \
 
 WORKDIR /app
 
-COPY app/Gemfile app/Gemfile.lock* ./
+COPY web/Gemfile web/Gemfile.lock* ./
 RUN bundle config set --local without 'development test' && \
     bundle install --jobs 4 --retry 3
 
@@ -33,7 +33,7 @@ RUN groupadd --gid 1001 rails && \
 WORKDIR /app
 
 COPY --from=builder /usr/local/bundle /usr/local/bundle
-COPY app/ .
+COPY web/ .
 
 RUN chown -R rails:rails /app
 
