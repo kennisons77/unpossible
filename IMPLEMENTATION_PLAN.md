@@ -98,7 +98,7 @@ Phase: 0 (Local Development — Docker Compose only)
   - `node_id` scopes results to that node tree
   - Returns empty array when no matches
 
-- [ ] 12.5 — Knowledge::IndexerJob <!-- ref: knowledge-indexer-job -->
+- [x] 12.5 — Knowledge::IndexerJob <!-- ref: knowledge-indexer-job -->
   Receives a node ID or source_path. Computes SHA256, skips if unchanged. Splits via MdChunker, embeds via EmbedderService, upserts LibraryItem records.
   **Depends on:** 12.1, 12.2, 12.3
   Files: `web/app/modules/knowledge/jobs/indexer_job.rb`

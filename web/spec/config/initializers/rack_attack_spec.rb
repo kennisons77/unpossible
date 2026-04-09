@@ -12,13 +12,9 @@ RSpec.describe Rack::Attack, type: :request do
       expect(response.status).not_to eq(429)
     end
 
-    it "returns 429 when limit is exceeded" do
+    it "returns 429 with JSON error body when limit is exceeded" do
       301.times { get "/up", headers: { "REMOTE_ADDR" => "1.2.3.5" } }
       expect(response.status).to eq(429)
-    end
-
-    it "returns JSON error body on throttle" do
-      301.times { get "/up", headers: { "REMOTE_ADDR" => "1.2.3.6" } }
       expect(response.body).to include("Too Many Requests")
     end
 
