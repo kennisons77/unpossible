@@ -6,28 +6,6 @@ Agent activity log. Auto-updated each iteration. Trimmed to last 10 entries.
 
 ---
 
-## 2026-04-09 15:30 — Task 12.4: Knowledge::ContextRetriever service
-
-**Mode:** Build
-**Iteration:** 40
-**Status:** Complete
-**Tag:** 0.0.31
-
-**Tasks completed:**
-- Created `Knowledge::ContextRetriever` service with `.retrieve(query:, limit:, node_id: nil)` interface
-- Embeds query via EmbedderService, runs pgvector cosine similarity search (`<=>` operator)
-- Optional `node_id` scopes results to that node and its ancestors via `contains` edges (BFS traversal)
-- Uses `Arel.sql` + `sanitize_sql_array` for safe ORDER BY with Rails 8's dangerous query protection
-- Spec covers: top-N ordered by cosine similarity, node_id scopes to node tree, empty array when no matches
-- Full test suite passes (281 examples, 0 failures, 95.21% coverage)
-
-**Changes:**
-- `web/app/modules/knowledge/services/context_retriever.rb` — new
-- `web/spec/modules/knowledge/services/context_retriever_spec.rb` — new
-- `IMPLEMENTATION_PLAN.md` — marked 12.4 complete
-
----
-
 ## 2026-04-09 15:45 — Task 12.5: Knowledge::IndexerJob
 
 **Mode:** Build
@@ -71,3 +49,27 @@ Agent activity log. Auto-updated each iteration. Trimmed to last 10 entries.
 - `web/spec/models/sandbox/container_run_spec.rb` — new
 - `web/spec/factories/sandbox_container_runs.rb` — new
 - `IMPLEMENTATION_PLAN.md` — marked 14.1 complete
+
+---
+
+## 2026-04-09 16:11 — Task 14.2: Sandbox::DockerDispatcher service
+
+**Mode:** Build
+**Iteration:** 43
+**Status:** Complete
+**Tag:** 0.0.34
+
+**Tasks completed:**
+- Created `Sandbox::DockerDispatcher` service with `dispatch(image:, command:, env: {})` interface
+- Shells out via `Open3.capture3` with argument array (no shell interpolation)
+- Returns `{exit_code:, stdout:, stderr:, duration_ms:}`
+- Configurable timeout via `Timeout.timeout` — returns exit_code 137 on timeout
+- Env vars containing `Secret` values redacted in log output, exposed only in docker args
+- Creates `ContainerRun` record before dispatch, updates with final status/exit_code/stdout/stderr
+- Spec covers all 6 required tests: success, failure, secret filtering, timeout, record tracking, no shell interpolation
+- Full test suite passes (300 examples, 0 failures, 95.63% coverage)
+
+**Changes:**
+- `web/app/modules/sandbox/services/docker_dispatcher.rb` — new
+- `web/spec/modules/sandbox/services/docker_dispatcher_spec.rb` — new
+- `IMPLEMENTATION_PLAN.md` — marked 14.2 complete

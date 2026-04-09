@@ -118,7 +118,7 @@ Phase: 0 (Local Development — Docker Compose only)
   - agent_run_id is nullable
   - Duration computed from started_at/finished_at
 
-- [ ] 14.2 — Sandbox::DockerDispatcher service <!-- ref: sandbox-docker-dispatcher -->
+- [x] 14.2 — Sandbox::DockerDispatcher service <!-- ref: sandbox-docker-dispatcher -->
   `dispatch(image:, command:, env: {})` — shells out to `docker run --rm`, command as argument array (no shell interpolation). Returns `{exit_code:, stdout:, stderr:, duration_ms:}`. Configurable timeout. Env vars containing secret values filtered before logging. Creates ContainerRun record before dispatch, updates with final status.
   **Depends on:** 14.1
   Files: `web/app/modules/sandbox/services/docker_dispatcher.rb`
