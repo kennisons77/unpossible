@@ -149,7 +149,7 @@ Phase: 0 (Local Development — Docker Compose only)
   - Duplicate run_id → 422
   - Unauthenticated → 401
 
-- [ ] 15.6 — Kiro agent config files <!-- ref: agents-kiro-configs -->
+- [x] 15.6 — Kiro agent config files <!-- ref: agents-kiro-configs -->
   Per `specs/platform/rails/system/agents.md`: ralph_build.json, ralph_plan.json, ralph_research.json, ralph_review.json with their respective tool lists.
   Files: `kiro-agents/ralph_build.json`, `kiro-agents/ralph_plan.json`, `kiro-agents/ralph_research.json`, `kiro-agents/ralph_review.json`
   Required tests: none (static config files).
