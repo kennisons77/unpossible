@@ -41,7 +41,7 @@ Phase: 0 (Local Development — Docker Compose only)
   - Returns chunk_index for each chunk
   - Empty input returns empty array
 
-- [ ] 12.3 — Knowledge::EmbedderService + OpenAiEmbedder <!-- ref: knowledge-embedder -->
+- [x] 12.3 — Knowledge::EmbedderService + OpenAiEmbedder <!-- ref: knowledge-embedder -->
   Abstract interface: `embed(text) → Array<Float>`. OpenAiEmbedder calls `text-embedding-3-small` (1536 dims). API key wrapped in `Secret`. Swappable via `EMBEDDER_PROVIDER=openai|ollama`.
   Files: `web/app/modules/knowledge/services/embedder_service.rb`, `web/app/modules/knowledge/services/open_ai_embedder.rb`
   Required tests (`web/spec/modules/knowledge/services/embedder_service_spec.rb`):

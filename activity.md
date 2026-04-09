@@ -6,6 +6,48 @@ Agent activity log. Auto-updated each iteration. Trimmed to last 10 entries.
 
 ---
 
+## 2026-04-09 14:12 — Task 12.3: Knowledge::EmbedderService + OpenAiEmbedder
+
+**Mode:** Build
+**Iteration:** 35
+**Status:** Complete
+**Tag:** 0.0.28
+
+**Tasks completed:**
+- Implemented `Knowledge::EmbedderService` with `.for(provider)` factory method dispatching to concrete embedders via `EMBEDDER_PROVIDER` env var (default: openai)
+- Implemented `Knowledge::OpenAiEmbedder` calling `text-embedding-3-small` (1536 dims) via `net/http`, API key wrapped in `Secret`
+- Ollama and unknown providers raise `NotImplementedError` (Phase 0)
+- Full test suite passes (243 examples, 0 failures, 94.32% coverage)
+
+**Changes:**
+- `web/app/modules/knowledge/services/embedder_service.rb` — new
+- `web/app/modules/knowledge/services/open_ai_embedder.rb` — new
+- `web/spec/modules/knowledge/services/embedder_service_spec.rb` — new
+- `IMPLEMENTATION_PLAN.md` — marked 12.3 complete
+
+---
+
+## 2026-04-09 14:00 — Task 12.2: Knowledge::MdChunker service
+
+**Mode:** Build
+**Iteration:** 34
+**Status:** Complete
+**Tag:** 0.0.27
+
+**Tasks completed:**
+- Implemented `Knowledge::MdChunker` service that splits markdown at paragraph/section boundaries
+- Headings are kept together with their following content as a single chunk
+- Returns array of `{content:, chunk_index:}` hashes
+- Empty/nil input returns empty array
+- Full test suite passes (238 examples, 0 failures, 96.33% coverage)
+
+**Changes:**
+- `web/app/modules/knowledge/services/md_chunker.rb` — new
+- `web/spec/modules/knowledge/services/md_chunker_spec.rb` — new
+- `IMPLEMENTATION_PLAN.md` — marked 12.2 complete
+
+---
+
 ## 2026-04-09 13:55 — Task 12.1: Knowledge::LibraryItem model + pgvector migration
 
 **Mode:** Build
