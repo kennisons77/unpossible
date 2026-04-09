@@ -48,8 +48,6 @@ services:
       POSTGRES_USER: unpossible2
       POSTGRES_PASSWORD: unpossible2
       POSTGRES_DB: unpossible2_development
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U unpossible2"]
       interval: 5s
@@ -67,9 +65,6 @@ services:
   #     retries: 5
   #   networks:
   #     - unpossible2
-
-volumes:
-  postgres_data:
 
 networks:
   unpossible2:
