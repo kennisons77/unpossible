@@ -51,7 +51,7 @@ Phase: 0 (Local Development — Docker Compose only)
 
 ### Agents Module — Models + Services (no controller deps yet)
 
-- [ ] 15.1 — Agents::AgentRun model + migration <!-- ref: agents-agent-run -->
+- [x] 15.1 — Agents::AgentRun model + migration <!-- ref: agents-agent-run -->
   Schema per `specs/system/agent-runner/spec.md`: run_id (UUID), actor_id (FK → Actor), node_id (FK → Node), parent_run_id (nullable), mode (enum: plan/build/review/reflect/research), provider, model, prompt_sha256, status (enum: running/waiting_for_input/completed/failed), input_tokens, output_tokens, cost_estimate_usd (decimal(10,6)), duration_ms, response_truncated (boolean), source_node_ids (jsonb).
   Unique index on `(run_id)`.
   Files: `web/app/modules/agents/models/agent_run.rb`, `web/db/migrate/XXX_create_agents_agent_runs.rb`
@@ -61,7 +61,7 @@ Phase: 0 (Local Development — Docker Compose only)
   - parent_run_id is nullable
   - source_node_ids defaults to []
 
-- [ ] 15.4 — Agents::ProviderAdapter + concrete adapters <!-- ref: agents-provider-adapters -->
+- [x] 15.4 — Agents::ProviderAdapter + concrete adapters <!-- ref: agents-provider-adapters -->
   Base class with `build_prompt`, `parse_response`, `max_context_tokens`. `ProviderAdapter.for(provider_string)` returns correct adapter. ClaudeAdapter, KiroAdapter, OpenAiAdapter.
   Files: `web/app/modules/agents/services/provider_adapter.rb`, `web/app/modules/agents/services/claude_adapter.rb`, `web/app/modules/agents/services/kiro_adapter.rb`, `web/app/modules/agents/services/open_ai_adapter.rb`
   Required tests (`web/spec/modules/agents/services/provider_adapter_spec.rb`):
