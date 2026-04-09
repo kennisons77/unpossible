@@ -6,6 +6,54 @@ Agent activity log. Auto-updated each iteration. Trimmed to last 10 entries.
 
 ---
 
+## 2026-04-09 14:37 — Task 15.4: Agents::ProviderAdapter + concrete adapters
+
+**Mode:** Build
+**Iteration:** 37
+**Status:** Complete
+**Tag:** 0.0.29
+
+**Tasks completed:**
+- Implemented `Agents::ProviderAdapter` base class with `.for(provider)` factory method, `build_prompt`, `parse_response`, `max_context_tokens` abstract interface (raises NotImplementedError)
+- Implemented `Agents::ClaudeAdapter` (200K tokens, Anthropic response format)
+- Implemented `Agents::KiroAdapter` (200K tokens, Anthropic response format)
+- Implemented `Agents::OpenAiAdapter` (128K tokens, OpenAI response format)
+- Unknown provider raises ArgumentError
+- Full test suite passes (266 examples, 0 failures, 94.86% coverage)
+
+**Changes:**
+- `web/app/modules/agents/services/provider_adapter.rb` — new
+- `web/app/modules/agents/services/claude_adapter.rb` — new
+- `web/app/modules/agents/services/kiro_adapter.rb` — new
+- `web/app/modules/agents/services/open_ai_adapter.rb` — new
+- `web/spec/modules/agents/services/provider_adapter_spec.rb` — new
+- `IMPLEMENTATION_PLAN.md` — marked 15.4 complete
+
+---
+
+## 2026-04-09 14:27 — Task 15.1: Agents::AgentRun model + migration
+
+**Mode:** Build
+**Iteration:** 36
+**Status:** Complete
+**Tag:** v0.0.17
+
+**Tasks completed:**
+- Created `agents_agent_runs` table with UUID PK, run_id (unique), actor/node FKs, parent_run_id (nullable), mode/status string enums, token counts, cost_estimate_usd, duration_ms, response_truncated, source_node_ids (jsonb default [])
+- Dedup index on `(prompt_sha256, mode)` for future PromptDeduplicator use
+- Implemented `Agents::AgentRun` model with MODES/STATUSES constants, inclusion validations, belongs_to associations
+- Factory + spec covering mode/status enum validation, nullable parent_run_id, source_node_ids default
+- Full test suite passes (250 examples, 0 failures, 94.46% coverage)
+
+**Changes:**
+- `web/db/migrate/20260409000003_create_agents_agent_runs.rb` — new
+- `web/app/modules/agents/models/agent_run.rb` — new
+- `web/spec/factories/agents_agent_runs.rb` — new
+- `web/spec/models/agents/agent_run_spec.rb` — new
+- `IMPLEMENTATION_PLAN.md` — marked 15.1 complete
+
+---
+
 ## 2026-04-09 14:12 — Task 12.3: Knowledge::EmbedderService + OpenAiEmbedder
 
 **Mode:** Build
