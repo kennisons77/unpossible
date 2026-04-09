@@ -9,6 +9,11 @@ Rails.application.routes.draw do
     post 'auth/token', to: 'auth#create'
   end
 
+  # Agent runs — Agents::AgentRunsController (JSON API)
+  post '/api/agent_runs/start',        to: 'agents/agent_runs#start'
+  post '/api/agent_runs/:id/complete',  to: 'agents/agent_runs#complete', as: :complete_api_agent_run
+  post '/api/agent_runs/:id/input',     to: 'agents/agent_runs#input',    as: :input_api_agent_run
+
   # Ledger nodes — Ledger::NodesController (JSON API)
   get    '/api/nodes',          to: 'ledger/nodes#index',   as: :api_nodes
   post   '/api/nodes',          to: 'ledger/nodes#create'

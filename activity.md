@@ -73,3 +73,27 @@ Agent activity log. Auto-updated each iteration. Trimmed to last 10 entries.
 - `web/app/modules/sandbox/services/docker_dispatcher.rb` — new
 - `web/spec/modules/sandbox/services/docker_dispatcher_spec.rb` — new
 - `IMPLEMENTATION_PLAN.md` — marked 14.2 complete
+
+---
+
+## 2026-04-09 16:23 — Task 15.5: Agents::AgentRunsController
+
+**Mode:** Build
+**Iteration:** 44
+**Status:** Complete
+**Tag:** 0.0.35
+
+**Tasks completed:**
+- Created `Agents::AgentRunsController` with three endpoints:
+  - `POST /api/agent_runs/start` — JWT auth, creates AgentRun with status `running`, concurrent run for same actor → 409, dedup hit returns cached run → 200, duplicate run_id → 422
+  - `POST /api/agent_runs/:id/complete` — sidecar token auth (X-Sidecar-Token), updates record with results and status `completed`, missing sidecar token → 401
+  - `POST /api/agent_runs/:id/input` — JWT auth, appends human_input turn, sets status back to `running`
+- Added routes to `config/routes.rb`
+- Request spec covers all 8 required test cases
+- Full test suite passes (309 examples, 0 failures, 95.59% coverage)
+
+**Changes:**
+- `web/app/modules/agents/controllers/agent_runs_controller.rb` — new
+- `web/spec/requests/agents/agent_runs_spec.rb` — new
+- `web/config/routes.rb` — added agent_runs routes
+- `IMPLEMENTATION_PLAN.md` — marked 15.5 complete
