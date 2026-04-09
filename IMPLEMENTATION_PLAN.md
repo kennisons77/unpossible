@@ -89,7 +89,7 @@ Phase: 0 (Local Development — Docker Compose only)
 
 ### Knowledge Module — Depends on 12.1, 12.2, 12.3
 
-- [ ] 12.4 — Knowledge::ContextRetriever service <!-- ref: knowledge-context-retriever -->
+- [x] 12.4 — Knowledge::ContextRetriever service <!-- ref: knowledge-context-retriever -->
   `retrieve(query:, limit:, node_id: nil)` — embeds query, runs pgvector cosine similarity search. Optional `node_id` scopes to that node and its ancestors via `contains` edges.
   **Depends on:** 12.1, 12.3
   Files: `web/app/modules/knowledge/services/context_retriever.rb`
