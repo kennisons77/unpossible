@@ -97,3 +97,29 @@ Agent activity log. Auto-updated each iteration. Trimmed to last 10 entries.
 - `web/spec/requests/agents/agent_runs_spec.rb` — new
 - `web/config/routes.rb` — added agent_runs routes
 - `IMPLEMENTATION_PLAN.md` — marked 15.5 complete
+
+---
+
+## 2026-04-09 17:15 — Task 15.6: Kiro agent config files
+
+**Mode:** Build
+**Iteration:** 45
+**Status:** Complete
+**Tag:** v0.0.18
+
+**Tasks completed:**
+- Created 4 static JSON config files in `kiro-agents/` (repo root, outside gitignored project dir):
+  - `ralph_build.json` — tools: read, write, shell, grep, glob
+  - `ralph_plan.json` — tools: read, write, grep, glob
+  - `ralph_research.json` — tools: read, write, grep, glob, knowledge
+  - `ralph_review.json` — tools: read, shell, grep, glob
+- Each config declares name, mode, and tool list per `specs/platform/rails/system/agents.md`
+- No tests required (static config files)
+- Full test suite passes (309 examples, 0 failures, 95.59% coverage)
+
+**Changes:**
+- `kiro-agents/ralph_build.json` — new
+- `kiro-agents/ralph_plan.json` — new
+- `kiro-agents/ralph_research.json` — new
+- `kiro-agents/ralph_review.json` — new
+- `IMPLEMENTATION_PLAN.md` — marked 15.6 complete
