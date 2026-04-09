@@ -31,7 +31,7 @@ Phase: 0 (Local Development — Docker Compose only)
   - Upsert on `(source_path, chunk_index)` is idempotent
   - node_id and source_path are nullable
 
-- [ ] 12.2 — Knowledge::MdChunker service <!-- ref: knowledge-md-chunker -->
+- [x] 12.2 — Knowledge::MdChunker service <!-- ref: knowledge-md-chunker -->
   Splits markdown at paragraph/section boundaries. Returns array of `{content:, chunk_index:}`.
   Ref: `specs/system/knowledge/spec.md` — "Chunking unit: paragraph/section level — semantic boundaries"
   Files: `web/app/modules/knowledge/services/md_chunker.rb`
