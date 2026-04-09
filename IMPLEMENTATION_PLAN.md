@@ -162,7 +162,7 @@ Phase: 0 (Local Development — Docker Compose only)
 
 > Note: `metadata.hypothesis` is NOT required in Phase 0 per the PRD (`specs/system/feature-flags/prd.md`: "metadata optional — hypothesis, metric, owner fields available in metadata jsonb but not required in Phase 0"). The platform override (`specs/platform/rails/product/analytics.md`) says "hypothesis field required on creation → 422 if missing" but the PRD is the higher authority. Follow the PRD.
 
-- [ ] 11.1 — Analytics::FeatureFlag model + migration <!-- ref: ff-model -->
+- [x] 11.1 — Analytics::FeatureFlag model + migration <!-- ref: ff-model -->
   Schema per `specs/system/feature-flags/spec.md`: key (string, unique per org), enabled (boolean, default false), variant (string, nullable), metadata (jsonb), status (active/archived enum), org_id.
   `metadata.hypothesis` is optional — no validation on creation.
   `FeatureFlag.enabled?(org_id:, key:)` class method: returns false for unknown or archived flags without raising.
