@@ -9,6 +9,7 @@ module Agents
 
     belongs_to :actor, class_name: 'Ledger::Actor'
     belongs_to :node, class_name: 'Ledger::Node'
+    has_many :turns, class_name: 'Agents::AgentRunTurn', dependent: :destroy
 
     validates :run_id, presence: true, uniqueness: true
     validates :mode, presence: true, inclusion: { in: MODES }
