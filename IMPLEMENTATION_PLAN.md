@@ -132,7 +132,7 @@ Phase: 0 (Local Development — Docker Compose only)
 
 ### Agents Controller (wires it all together)
 
-- [ ] 15.5 — Agents::AgentRunsController <!-- ref: agents-controller -->
+- [x] 15.5 — Agents::AgentRunsController <!-- ref: agents-controller -->
   `POST /api/agent_runs/start` — JWT auth. Creates AgentRun with status `running`, enqueues job. Concurrent run for same actor → 409. Dedup hit returns cached run.
   `POST /api/agent_runs/:id/complete` — sidecar token auth (X-Sidecar-Token). Updates record with results.
   `POST /api/agent_runs/:id/input` — JWT auth. Appends human_input turn, re-enqueues job.
