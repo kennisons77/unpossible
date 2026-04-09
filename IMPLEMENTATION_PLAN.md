@@ -110,7 +110,7 @@ Phase: 0 (Local Development — Docker Compose only)
 
 ### Sandbox Module (test execution for self-hosted loop)
 
-- [ ] 14.1 — Sandbox::ContainerRun model + migration <!-- ref: sandbox-container-run -->
+- [x] 14.1 — Sandbox::ContainerRun model + migration <!-- ref: sandbox-container-run -->
   Schema per `specs/system/sandbox/spec.md`: image, command, status (enum: pending/running/complete/failed), exit_code, stdout, stderr, started_at, finished_at, agent_run_id (FK, nullable).
   Files: `web/app/modules/sandbox/models/container_run.rb`, `web/db/migrate/XXX_create_sandbox_container_runs.rb`
   Required tests (`web/spec/models/sandbox/container_run_spec.rb`):
