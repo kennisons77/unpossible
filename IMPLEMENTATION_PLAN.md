@@ -78,7 +78,7 @@ Phase: 0 (Local Development — Docker Compose only)
   - Belongs to AgentRun
   - purged_at nullable
 
-- [ ] 15.3 — Agents::PromptDeduplicator service <!-- ref: agents-prompt-dedup -->
+- [x] 15.3 — Agents::PromptDeduplicator service <!-- ref: agents-prompt-dedup -->
   Queries AgentRun for recent successful match on `prompt_sha256` + `mode` within max age (default 24h). Returns cached run or nil. Ignores failed runs.
   Files: `web/app/modules/agents/services/prompt_deduplicator.rb`
   Required tests (`web/spec/modules/agents/services/prompt_deduplicator_spec.rb`):
