@@ -123,3 +123,30 @@ Agent activity log. Auto-updated each iteration. Trimmed to last 10 entries.
 - `kiro-agents/ralph_research.json` — new
 - `kiro-agents/ralph_review.json` — new
 - `IMPLEMENTATION_PLAN.md` — marked 15.6 complete
+
+---
+
+## 2026-04-09 17:54 — Task 11.1: Analytics::FeatureFlag model + migration
+
+**Mode:** Build
+**Iteration:** 46
+**Status:** Complete
+**Tag:** 0.0.36
+
+**Tasks completed:**
+- Created `Analytics::FeatureFlag` model with `enabled?` class method
+  - Returns false for unknown keys, archived flags, and active disabled flags without raising
+  - Key unique per org via DB index — duplicate raises `ActiveRecord::RecordNotUnique`
+  - `metadata.hypothesis` not required (optional per PRD)
+  - Status enum: active/archived
+- Migration creates `analytics_feature_flags` table with UUID PK, key, enabled (default false), variant (nullable), metadata (jsonb), status, org_id
+- Unique index on `(org_id, key)`
+- Spec covers all 6 required tests
+- Full test suite passes (315 examples, 0 failures, 95.66% coverage)
+
+**Changes:**
+- `web/app/modules/analytics/models/feature_flag.rb` — new
+- `web/db/migrate/20260409000006_create_analytics_feature_flags.rb` — new
+- `web/spec/models/analytics/feature_flag_spec.rb` — new
+- `web/spec/factories/analytics_feature_flags.rb` — new
+- `IMPLEMENTATION_PLAN.md` — marked 11.1 complete
