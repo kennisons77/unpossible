@@ -70,7 +70,7 @@ Phase: 0 (Local Development — Docker Compose only)
   - `ProviderAdapter.for("openai")` returns OpenAiAdapter
   - `ProviderAdapter.for("unknown")` raises ArgumentError
 
-- [ ] 15.2 — Agents::AgentRunTurn model + migration <!-- ref: agents-agent-run-turn -->
+- [x] 15.2 — Agents::AgentRunTurn model + migration <!-- ref: agents-agent-run-turn -->
   Schema per spec: id, run_id (FK → AgentRun), position (integer), kind (enum: agent_question/human_input/llm_response/tool_result), content (text), purged_at (nullable), created_at.
   Files: `web/app/modules/agents/models/agent_run_turn.rb`, `web/db/migrate/XXX_create_agents_agent_run_turns.rb`
   Required tests (`web/spec/models/agents/agent_run_turn_spec.rb`):
