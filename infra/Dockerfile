@@ -29,8 +29,12 @@ COPY web/ .
 
 RUN chown -R rails:rails /app
 
+COPY infra/entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
 USER rails
 
 EXPOSE 3000
 
+ENTRYPOINT ["entrypoint.sh"]
 CMD ["bundle", "exec", "puma", "-C", "config/puma.rb"]

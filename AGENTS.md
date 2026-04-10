@@ -55,6 +55,15 @@ The project uses Docker Desktop (desktop-linux context). If Docker Desktop is no
 start it with `open -a Docker` and wait ~10s for the socket to appear at
 `~/.docker/run/docker.sock`.
 
+## Sandbox Limitation
+
+The agent runs in a sandboxed environment that cannot see or reach the host's Docker daemon.
+**Never attempt to check container status, run `docker compose` commands, or verify running
+services from within the agent.** The dev stack (Rails, Postgres, sidecars) runs exclusively
+on the host machine. All Docker operations — starting the stack, checking logs, running
+migrations, verifying container health — must be performed by the developer on the host.
+Do not assume you can observe or interact with running services.
+
 ## Key Environment Variables (test container)
 
 | Variable | Default | Purpose |
