@@ -16,6 +16,16 @@ namespace :ledger do
       puts "Skipped — DB already has ledger data or snapshot missing"
     end
   end
+
+  desc "Seed ledger from specs and implementation plan (runs SpecWatcherJob synchronously)"
+  task seed: :environment do
+    if Ledger::Node.exists?
+      puts "Skipped — ledger already has data"
+    else
+      Ledger::SpecWatcherJob.perform_now
+      puts "Seeded #{Ledger::Node.count} nodes from specs"
+    end
+  end
 end
 
 namespace :bulk do

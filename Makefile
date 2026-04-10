@@ -45,6 +45,7 @@ help:
 	@echo "  make shell           Open bash in rails container"
 	@echo "  make ledger-export   Export ledger state to ledger/snapshot.yml"
 	@echo "  make ledger-import   Import ledger state from snapshot (empty DB only)"
+	@echo "  make ledger-seed     Seed ledger from specs + implementation plan (empty DB only)"
 	@echo "  make bulk-export     Export agent runs + knowledge to .data/snapshots/ (not in git)"
 	@echo "  make bulk-import     Import agent runs + knowledge from .data/snapshots/"
 	@echo ""
@@ -105,7 +106,7 @@ docker-build:
 	$(COMPOSE) build rails
 
 up:
-	$(COMPOSE) up -d
+	$(COMPOSE) up -d --build
 
 down:
 	@$(COMPOSE) exec rails bundle exec rake ledger:export bulk:export 2>/dev/null || echo "Snapshot skipped (container not running)"
@@ -141,6 +142,9 @@ ledger-export:
 
 ledger-import:
 	$(COMPOSE) exec rails bundle exec rake ledger:import
+
+ledger-seed:
+	$(COMPOSE) exec rails bundle exec rake ledger:seed
 
 bulk-export:
 	$(COMPOSE) exec rails bundle exec rake bulk:export
