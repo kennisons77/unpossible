@@ -25,7 +25,7 @@ module Ledger
       return unless File.exist?(path)
       return if Ledger::Node.exists? # don't clobber existing data
 
-      data = YAML.safe_load_file(path, permitted_classes: [Time, Date, ActiveSupport::TimeWithZone])
+      data = YAML.safe_load_file(path, permitted_classes: [Time, Date, ActiveSupport::TimeWithZone, ActiveSupport::TimeZone], aliases: true)
 
       ActiveRecord::Base.transaction do
         (data["nodes"] || []).each { |attrs| Ledger::Node.insert!(attrs) }

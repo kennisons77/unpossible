@@ -14,10 +14,14 @@ services:
       AUTH_SECRET: ${AUTH_SECRET:-8d457c009922907ffbb3fa03283a27f101232e8f47d6c1312f3535a00de318a3}
       SIDECAR_TOKEN: ${SIDECAR_TOKEN:-dev-sidecar-token}
       DEFAULT_ORG_ID: ${DEFAULT_ORG_ID:-00000000-0000-0000-0000-000000000001}
+      DISABLE_AUTH: ${DISABLE_AUTH:-true}
       # REDIS_URL: redis://redis:6379/0
     ports:
       - "3000:3000"
     volumes:
+      - ../web/app:/app/app
+      - ../web/config:/app/config
+      - ../web/lib:/app/lib
       - ../ledger:/ledger
       - ../.data:/.data
       - ../specs:/specs

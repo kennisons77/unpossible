@@ -58,6 +58,72 @@ RSpec.describe Ledger::SpecWatcherJob, type: :job do
       expected_ref = "spec:#{Digest::SHA256.hexdigest('specs/system/my-feature.md')}"
       expect(Ledger::Node.find_by(stable_ref: expected_ref)).not_to be_nil
     end
+
+    it "extracts title from first markdown heading" do
+      write_spec("specs/system/my-feature.md", "# My Cool Feature\n\nDetails.")
+      run_job
+      expect(node_for("specs/system/my-feature.md").title).to eq("My Cool Feature")
+    end
+
+    it "falls back to directory name for README.md files" do
+      write_spec("specs/system/README.md", "Some content without heading.")
+      run_job
+      expect(node_for("specs/system/README.md").title).to eq("System")
+    end
+
+    it "falls back to filename when no heading present" do
+      write_spec("specs/system/my-feature.md", "No heading here.")
+      run_job
+      expect(node_for("specs/system/my-feature.md").title).to eq("My feature")
+    end
+  end
+
+  describe "parent-child edges" do
+    it "creates a contains edge from parent README node to child spec" do
+      write_spec("specs/system/README.md", "# System\n\nOverview.")
+      write_spec("specs/system/my-feature.md", "# My Feature\n\nDetails.")
+      run_job
+
+      parent = node_for("specs/system/README.md")
+      child = node_for("specs/system/my-feature.md")
+      edge = Ledger::NodeEdge.find_by(parent: parent, child: child, edge_type: "contains")
+      expect(edge).not_to be_nil
+    end
+
+    it "does not create duplicate edges on re-run" do
+      write_spec("specs/system/README.md", "# System")
+      write_spec("specs/system/my-feature.md", "# Feature")
+      run_job
+      expect { run_job }.not_to change(Ledger::NodeEdge, :count)
+    end
+
+    it "creates nested hierarchy through multiple directory levels" do
+      write_spec("specs/README.md", "# Specs")
+      write_spec("specs/system/README.md", "# System")
+      write_spec("specs/system/my-feature.md", "# Feature")
+      run_job
+
+      root = node_for("specs/README.md")
+      mid = node_for("specs/system/README.md")
+      leaf = node_for("specs/system/my-feature.md")
+
+      expect(Ledger::NodeEdge.find_by(parent: root, child: mid, edge_type: "contains")).not_to be_nil
+      expect(Ledger::NodeEdge.find_by(parent: mid, child: leaf, edge_type: "contains")).not_to be_nil
+    end
+
+    it "builds edges for nodes created in a previous run" do
+      write_spec("specs/system/my-feature.md", "# Feature")
+      run_job
+      expect(Ledger::NodeEdge.count).to eq(0)
+
+      write_spec("specs/system/README.md", "# System")
+      run_job
+      expect(Ledger::NodeEdge.find_by(
+        parent: node_for("specs/system/README.md"),
+        child: node_for("specs/system/my-feature.md"),
+        edge_type: "contains"
+      )).not_to be_nil
+    end
   end
 
   describe "changed file → parses status header and applies transition" do

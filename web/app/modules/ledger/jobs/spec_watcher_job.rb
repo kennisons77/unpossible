@@ -33,8 +33,9 @@ module Ledger
     end
 
     def process_specs(root)
+      prefix = root == "/" ? "/" : "#{root}/"
       disk_paths = Dir.glob(File.join(root, SPECS_GLOB)).map do |abs|
-        abs.delete_prefix("#{root}/")
+        abs.delete_prefix(prefix)
       end
 
       changed_nodes = []
@@ -52,6 +53,8 @@ module Ledger
           changed_nodes << node if sync_node(node, abs_path, root, rel_path)
         end
       end
+
+      build_edges
 
       # Handle deleted files — find spec-tracked nodes whose file no longer exists on disk
       tracked_paths = disk_paths.to_set
@@ -74,8 +77,8 @@ module Ledger
         scope:       "intent",
         status:      "proposed",
         author:      "system",
-        body:        content.lines.first(3).join.strip.presence || rel_path,
-        title:       File.basename(rel_path, ".md").tr("-_", " ").capitalize,
+        body:        summary_for(content, rel_path),
+        title:       title_for(content, rel_path),
         spec_path:   rel_path,
         stable_ref:  ref,
         org_id:      default_org_id,
@@ -144,6 +147,48 @@ module Ledger
 
     def stable_ref_for(rel_path)
       "spec:#{Digest::SHA256.hexdigest(rel_path)}"
+    end
+
+    def title_for(content, rel_path)
+      # Extract first markdown heading, fall back to directory-qualified filename
+      heading = content.lines.find { |l| l.match?(/\A#\s+/) }
+      return heading.sub(/\A#+\s+/, "").strip if heading.present?
+
+      parts = rel_path.split("/")
+      name = File.basename(rel_path, ".md").tr("-_", " ").capitalize
+      return name unless name.casecmp("Readme").zero? && parts.length > 1
+
+      parts[-2].tr("-_", " ").capitalize
+    end
+
+    def summary_for(content, rel_path)
+      lines = content.lines.map(&:strip).reject(&:empty?)
+      # Skip the heading (already in title), take first paragraph
+      lines.shift if lines.first&.match?(/\A#+\s/)
+      summary = lines.first(5).join("\n")
+      summary.presence || rel_path
+    end
+
+    def build_edges
+      Ledger::Node.where.not(spec_path: nil).find_each do |node|
+        parent_dir = File.dirname(node.spec_path)
+        seen = Set.new
+        loop do
+          break if parent_dir == "." || !seen.add?(parent_dir)
+
+          parent_ref = "spec:#{Digest::SHA256.hexdigest("#{parent_dir}/README.md")}"
+          parent_node = Ledger::Node.find_by(stable_ref: parent_ref)
+
+          if parent_node && parent_node.id != node.id
+            Ledger::NodeEdge.find_or_create_by!(
+              parent: parent_node, child: node, edge_type: "contains"
+            )
+            break
+          end
+
+          parent_dir = File.dirname(parent_dir)
+        end
+      end
     end
 
     def default_org_id

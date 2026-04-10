@@ -7,6 +7,8 @@ class ApplicationController < ActionController::Base
   private
 
   def authenticate!
+    return dev_bypass! if dev_auth_disabled?
+
     token = bearer_token || sidecar_token
     raise AuthToken::InvalidToken, 'Missing token' if token.nil?
 
@@ -27,6 +29,8 @@ class ApplicationController < ActionController::Base
 
   # HTML session auth — redirects to login instead of rendering JSON
   def authenticate_session!
+    return dev_bypass! if dev_auth_disabled?
+
     token = session[:auth_token] || bearer_token
     raise AuthToken::InvalidToken, 'Missing token' if token.nil?
 
@@ -56,5 +60,14 @@ class ApplicationController < ActionController::Base
 
   def sidecar_secret
     ENV.fetch('SIDECAR_TOKEN', nil)
+  end
+
+  def dev_auth_disabled?
+    Rails.env.development? && ENV['DISABLE_AUTH'] == 'true'
+  end
+
+  def dev_bypass!
+    @current_org_id = ENV.fetch('DEFAULT_ORG_ID', '00000000-0000-0000-0000-000000000001')
+    @current_user_id = nil
   end
 end

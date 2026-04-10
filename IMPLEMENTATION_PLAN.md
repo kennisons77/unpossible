@@ -266,17 +266,6 @@ Phase: 0 (Local Development — Docker Compose only)
 
 ### Spikes (Unblock Go Sidecars)
 
-- [ ] 7.1 — SPIKE: Go runner source decision <!-- ref: spike-go-runner-source -->
-  Decide: copy Go runner from unpossible1 into `runner/` or reference as git submodule.
-  Deliverable: written decision in `specs/research/go-runner-source.md` with rationale.
-  **Blocks:** all Go sidecar tasks (Section 16).
-  Files: `specs/research/go-runner-source.md`
-
-- [ ] 7.2 — SPIKE: Redis necessity in Phase 0 <!-- ref: spike-redis-phase0 -->
-  Solid Queue uses Postgres. No redis gem in Gemfile. Determine if any Phase 0 feature requires Redis.
-  Deliverable: written decision in `specs/research/redis-phase0.md`. If not needed, remove commented redis from docker-compose files. If needed, add redis gem and uncomment.
-  Files: `specs/research/redis-phase0.md`, `infra/docker-compose.yml`, `infra/docker-compose.test.yml`
-
 - [ ] 7.3 — SPIKE: Multi-tenancy scope for Phase 0 <!-- ref: spike-multi-tenancy -->
   Decide: hardcoded `org_id = 1` everywhere, or minimal org creation flow?
   Deliverable: written decision in `specs/research/multi-tenancy-phase0.md`.

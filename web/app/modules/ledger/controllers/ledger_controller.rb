@@ -43,6 +43,7 @@ module Ledger
     # GET /ledger/nodes/:id — node detail
     def node
       @node = Ledger::Node.find(params[:id])
+      @spec_content = read_spec(@node.spec_path)
       @ancestors = ancestors_for(@node)
       @children = Ledger::NodeEdge.where(parent_id: @node.id, edge_type: "contains")
                                   .includes(:child).map(&:child)
@@ -76,6 +77,13 @@ module Ledger
       edges.each_with_object(Hash.new { |h, k| h[k] = [] }) do |edge, map|
         map[edge.parent_id] << nodes_by_id[edge.child_id]
       end
+    end
+
+    def read_spec(spec_path)
+      return nil if spec_path.blank?
+
+      abs = File.join(Rails.root.parent.to_s, spec_path)
+      File.read(abs) if File.exist?(abs)
     end
   end
 end

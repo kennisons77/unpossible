@@ -15,16 +15,14 @@ module Ledger
 
     def sync
       lines = File.readlines(@plan_path, chomp: true)
+      tasks = extract_tasks(lines)
       seen_refs = []
 
-      lines.each do |line|
-        m = CHECKBOX_RE.match(line)
-        next unless m
-        next unless m[:ref]
-
-        stable_ref = m[:ref]
-        checked    = m[:checked].strip.downcase == "x"
-        body       = m[:body].gsub(/<!--.*?-->/, "").strip
+      tasks.each do |task|
+        stable_ref = task[:ref]
+        checked    = task[:checked]
+        title      = task[:title]
+        body       = task[:body]
         seen_refs << stable_ref
 
         node = Node.find_by(stable_ref: stable_ref, org_id: @org_id)
@@ -35,6 +33,7 @@ module Ledger
             scope:       "code",
             author:      "system",
             body:        body,
+            title:       title,
             stable_ref:  stable_ref,
             org_id:      @org_id,
             recorded_at: Time.current,
@@ -56,6 +55,30 @@ module Ledger
         .where("ledger_nodes.resolution IS NULL OR ledger_nodes.resolution != ?", "deferred")
       orphans = orphans.where.not(stable_ref: seen_refs) if seen_refs.any?
       orphans.update_all(resolution: "deferred")
+    end
+
+    private
+
+    def extract_tasks(lines)
+      tasks = []
+      lines.each_with_index do |line, i|
+        m = CHECKBOX_RE.match(line)
+        next unless m&.[](:ref)
+
+        summary = m[:body].gsub(/<!--.*?-->/, "").strip
+        title   = summary.split(" — ", 2).last&.strip || summary
+
+        # Collect indented description lines following the checkbox
+        desc_lines = []
+        ((i + 1)...lines.size).each do |j|
+          break if lines[j].match?(/^\s*-\s*\[/) || lines[j].match?(/^#/)
+          desc_lines << lines[j] if lines[j].strip.present?
+        end
+
+        body = ([summary] + desc_lines.map(&:strip)).join("\n")
+        tasks << { ref: m[:ref], checked: m[:checked].strip.casecmp("x").zero?, title: title, body: body }
+      end
+      tasks
     end
   end
 end
