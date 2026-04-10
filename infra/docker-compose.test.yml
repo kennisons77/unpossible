@@ -1,5 +1,6 @@
 services:
   test:
+    container_name: unpossible2-test
     build:
       context: ..
       dockerfile: infra/Dockerfile.test
@@ -19,6 +20,7 @@ services:
       - unpossible2
 
   postgres:
+    container_name: unpossible2-test-postgres
     image: pgvector/pgvector:pg16
     environment:
       POSTGRES_USER: unpossible2

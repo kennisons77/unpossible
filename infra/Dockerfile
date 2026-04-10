@@ -1,30 +1,22 @@
 # syntax=docker/dockerfile:1
 
 # ---- builder ----
-FROM ruby:3.3-slim AS builder
-
-RUN apt-get update -qq && \
-    apt-get install -y --no-install-recommends \
-      build-essential \
-      libpq-dev \
-      libyaml-dev \
-      git \
-    && rm -rf /var/lib/apt/lists/*
+FROM ruby:3.3 AS builder
 
 WORKDIR /app
 
 COPY web/Gemfile web/Gemfile.lock* ./
+COPY web/vendor/cache/ vendor/cache/
 RUN bundle config set --local without 'development test' && \
-    bundle install --jobs 4 --retry 3
+    bundle install --local --jobs 4
 
 # ---- final ----
 FROM ruby:3.3-slim
 
-RUN apt-get update -qq && \
-    apt-get install -y --no-install-recommends \
-      libpq5 \
-      curl \
-    && rm -rf /var/lib/apt/lists/*
+COPY infra/debs-debian/ /tmp/debs/
+RUN dpkg --force-overwrite --force-depends -i /tmp/debs/*.deb 2>&1 || true && \
+    dpkg --force-overwrite --force-depends -i /tmp/debs/*.deb 2>&1 || true && \
+    rm -rf /tmp/debs
 
 # Run as non-root
 RUN groupadd --gid 1001 rails && \

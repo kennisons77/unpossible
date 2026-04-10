@@ -1,6 +1,6 @@
 # Module LOOKUP
 
-Maps all five modules to their paths and public interfaces.
+Maps all four modules to their paths and public interfaces.
 Cross-module calls go through public service interfaces only — no direct model access across boundaries.
 
 ## Modules
@@ -9,11 +9,6 @@ Cross-module calls go through public service interfaces only — no direct model
 - Path: `app/modules/knowledge/`
 - Purpose: Vector store, MD indexing, context retrieval
 - Public interface: `Knowledge::IndexerJob`, `Knowledge::RetrievalService`
-
-### tasks
-- Path: `app/modules/tasks/`
-- Purpose: Task lifecycle management (plan items, acceptance criteria)
-- Public interface: `Tasks::TaskLifecycleService`
 
 ### agents
 - Path: `app/modules/agents/`
