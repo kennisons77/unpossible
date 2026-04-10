@@ -17,6 +17,9 @@ services:
       # REDIS_URL: redis://redis:6379/0
     ports:
       - "3000:3000"
+    volumes:
+      - ../ledger:/ledger
+      - ../.data:/.data
     depends_on:
       postgres:
         condition: service_healthy
