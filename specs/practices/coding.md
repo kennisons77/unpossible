@@ -44,6 +44,13 @@ Loaded every build iteration. Language-agnostic rules that apply to all code wri
 - Fail fast: validate inputs at the boundary, trust internals
 - Consistency beats cleverness — follow the patterns already in the codebase
 
+## Makefile Consistency
+
+Any change to infrastructure (Dockerfiles, entrypoints, compose files, rake tasks, or
+environment variables) must be checked against the Makefile. If the change affects how
+services start, build, or run, update the corresponding Makefile target. The Makefile is
+the developer's primary interface — if it's out of sync, the workflow is broken.
+
 ## Context Window Management (load-bearing decision)
 
 When passing turn history to a provider, use the **pinned + sliding** strategy:

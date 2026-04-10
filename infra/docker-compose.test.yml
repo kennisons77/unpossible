@@ -12,6 +12,7 @@ services:
       POSTGRES_DB: unpossible_test
       AUTH_SECRET: test-auth-secret
       SIDECAR_TOKEN: test-sidecar-token
+      DEFAULT_ORG_ID: "00000000-0000-0000-0000-000000000001"
     depends_on:
       postgres:
         condition: service_healthy
