@@ -1,6 +1,6 @@
-# Makefile — Unpossible 2
-# Skills and loop commands for the unpossible2 project.
-# Run from the monorepo root: make -f projects/unpossible2/Makefile <target>
+# Makefile — Unpossible
+# Skills and loop commands for the unpossible project.
+# Run from the monorepo root: make -f projects/unpossible/Makefile <target>
 # Or from this directory: make <target>
 
 PROJECT_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
@@ -69,8 +69,8 @@ help:
 # --- Config & runner ---
 status:
 	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-	@echo "Project:  unpossible2"
-	@printf "Active:   "; if [ -f "$(ACTIVE_PROJECT_FILE)" ] && [ "$$(cat '$(ACTIVE_PROJECT_FILE)' | tr -d '[:space:]')" = "unpossible2" ]; then echo "yes ✓"; else echo "no (active: $$(cat '$(ACTIVE_PROJECT_FILE)' 2>/dev/null || echo 'unset'))"; fi
+	@echo "Project:  unpossible"
+	@printf "Active:   "; if [ -f "$(ACTIVE_PROJECT_FILE)" ] && [ "$$(cat '$(ACTIVE_PROJECT_FILE)' | tr -d '[:space:]')" = "unpossible" ]; then echo "yes ✓"; else echo "no (active: $$(cat '$(ACTIVE_PROJECT_FILE)' 2>/dev/null || echo 'unset'))"; fi
 	@echo "Agent:    $(AGENT)"
 	@echo "Model:    $(or $(MODEL),(agent default))"
 	@echo "Loop:     $(LOOP)"
@@ -79,8 +79,8 @@ status:
 	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
 activate:
-	@echo "unpossible2" > "$(ACTIVE_PROJECT_FILE)"
-	@echo "ACTIVE_PROJECT set to unpossible2"
+	@echo "unpossible" > "$(ACTIVE_PROJECT_FILE)"
+	@echo "ACTIVE_PROJECT set to unpossible"
 
 config:
 	@echo "━━━ Runner Config ━━━"

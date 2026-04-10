@@ -1,4 +1,4 @@
-# AGENTS.md — Unpossible 2
+# AGENTS.md — Unpossible
 
 Operational reference. Build/run/test commands and codebase patterns only.
 Progress notes belong in IMPLEMENTATION_PLAN.md.
