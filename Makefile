@@ -43,6 +43,10 @@ help:
 	@echo "  make db-reset        Drop + create + migrate + seed"
 	@echo "  make docker-build    Build the rails image"
 	@echo "  make shell           Open bash in rails container"
+	@echo "  make ledger-export   Export ledger state to ledger/snapshot.yml"
+	@echo "  make ledger-import   Import ledger state from snapshot (empty DB only)"
+	@echo "  make bulk-export     Export agent runs + knowledge to .data/snapshots/ (not in git)"
+	@echo "  make bulk-import     Import agent runs + knowledge from .data/snapshots/"
 	@echo ""
 	@echo "Workflow:"
 	@echo "  make start           Orient, research if needed, gap-fill spec, plan (1 iteration)"
@@ -104,6 +108,7 @@ up:
 	$(COMPOSE) up -d
 
 down:
+	@$(COMPOSE) exec rails bundle exec rails ledger:export bulk:export 2>/dev/null || echo "Snapshot skipped (container not running)"
 	$(COMPOSE) down
 
 restart:
@@ -129,6 +134,19 @@ db-setup:
 
 db-reset:
 	$(COMPOSE) exec rails bundle exec rails db:reset
+
+# --- Ledger persistence ---
+ledger-export:
+	$(COMPOSE) exec rails bundle exec rails ledger:export
+
+ledger-import:
+	$(COMPOSE) exec rails bundle exec rails ledger:import
+
+bulk-export:
+	$(COMPOSE) exec rails bundle exec rails bulk:export
+
+bulk-import:
+	$(COMPOSE) exec rails bundle exec rails bulk:import
 
 # --- Workflow ---
 
