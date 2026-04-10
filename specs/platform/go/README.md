@@ -1,4 +1,4 @@
-# Go Platform — Unpossible 2
+# Go Platform — Unpossible
 
 Go sidecar implementation overrides. Each file extends a core spec and adds only Go-specific details.
 

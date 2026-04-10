@@ -1,4 +1,4 @@
-# Platform Overrides — Unpossible 2
+# Platform Overrides — Unpossible
 
 Runtime-specific implementation details. Each file extends a core spec in `../system/` or `../product/` — it does not repeat it.
 

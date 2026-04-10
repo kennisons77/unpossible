@@ -1,4 +1,4 @@
-# Rails System Overrides — Unpossible 2
+# Rails System Overrides — Unpossible
 
 Rails-specific implementation details for system-level specs. Each file extends the corresponding `specs/system/` spec.
 

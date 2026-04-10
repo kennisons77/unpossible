@@ -1,10 +1,10 @@
-# PRD — Unpossible 2
+# PRD — Unpossible
 
 ## What We're Building
 
 An evolving platform for AI-assisted software development. It runs ralph loops (plan, build, review, reflect) against projects, stores everything those loops produce, and uses that evidence to improve itself over time.
 
-Unpossible 2 is both the platform and its own first project — it develops itself using its own loops.
+Unpossible is both the platform and its own first project — it develops itself using its own loops.
 
 ## Technical Constraints
 

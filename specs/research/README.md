@@ -1,4 +1,4 @@
-# Research — Unpossible 2
+# Research — Unpossible
 
 Reference material, prior art analysis, and planning artifacts. Not active specs — agents do not load these files during build or plan loops unless explicitly retrieving context.
 

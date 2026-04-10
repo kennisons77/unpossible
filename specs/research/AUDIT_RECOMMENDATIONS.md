@@ -1,4 +1,4 @@
-# Unpossible 1 → Unpossible 2: Audit & Recommendations
+# Unpossible 1 → Unpossible: Audit & Recommendations
 
 > Produced 2026-03-27. Sources audited: `loop.sh`, `PROMPT_*.md`, `dashboard/src/`,
 > `practices/general/`, `practices/lang/ruby.md`, `IDEAS.md`, `specs/project-dashboard.md`.

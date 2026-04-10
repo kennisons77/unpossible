@@ -1,4 +1,4 @@
-# Practices — Unpossible 2
+# Practices — Unpossible
 
 Always-on rules that shape agent behaviour across all tasks and loop types.
 Loaded selectively based on the task — not all at once.

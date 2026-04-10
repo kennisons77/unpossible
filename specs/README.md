@@ -1,4 +1,4 @@
-# Specs — Unpossible 2
+# Specs — Unpossible
 
 One file per feature area. Each spec defines what the feature does, who it's for, and
 its acceptance criteria. The implementation plan is derived from these specs — not the
