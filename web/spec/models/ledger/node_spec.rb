@@ -5,6 +5,30 @@ require "rails_helper"
 RSpec.describe Ledger::Node, type: :model do
   subject(:node) { build(:ledger_node) }
 
+  describe "associations" do
+    it { is_expected.to have_many(:audit_events).class_name("Ledger::NodeAuditEvent").dependent(:restrict_with_error) }
+    it { is_expected.to have_many(:parent_edges).class_name("Ledger::NodeEdge").with_foreign_key(:child_id).dependent(:destroy) }
+    it { is_expected.to have_many(:child_edges).class_name("Ledger::NodeEdge").with_foreign_key(:parent_id).dependent(:destroy) }
+    it { is_expected.to have_many(:parents).through(:parent_edges).source(:parent) }
+    it { is_expected.to have_many(:children).through(:child_edges).source(:child) }
+
+    it "returns parents via edges" do
+      parent = create(:ledger_node)
+      child = create(:ledger_node)
+      create(:ledger_node_edge, parent: parent, child: child)
+
+      expect(child.parents).to eq([parent])
+    end
+
+    it "returns children via edges" do
+      parent = create(:ledger_node)
+      child = create(:ledger_node)
+      create(:ledger_node_edge, parent: parent, child: child)
+
+      expect(parent.children).to eq([child])
+    end
+  end
+
   describe "validations" do
     it { is_expected.to validate_inclusion_of(:kind).in_array(described_class::KINDS) }
     it { is_expected.to validate_inclusion_of(:scope).in_array(described_class::SCOPES) }

@@ -16,7 +16,11 @@
 </p>
 
 <section>
-  <%= render_markdown(@node.body) %>
+  <% if @spec_content %>
+    <%= render_markdown(@spec_content) %>
+  <% else %>
+    <%= render_markdown(@node.body) %>
+  <% end %>
 </section>
 
 <% if @node.citations.present? %>

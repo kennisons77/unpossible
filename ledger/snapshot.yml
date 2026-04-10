@@ -1,5 +1,3484 @@
 ---
-nodes: []
+nodes:
+- id: 78e0b66a-b12e-44c8-864c-ac5bba9f0dae
+  kind: question
+  answer_type:
+  scope: intent
+  body: |-
+    # Specs — Unpossible
+
+    One file per feature area. Each spec defines what the feature does, who it's for, and
+  title: Readme
+  spec_path: "/specs/README.md"
+  author: system
+  stable_ref: spec:87477de5d458d89683828ef5534ccf0c9e880e94bb9bd0ac04eb4f2d963d64e0
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &1 2026-04-10 15:58:22.427993000 Z
+    zone: &2 !ruby/object:ActiveSupport::TimeZone
+      name: Etc/UTC
+    time: *1
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &3 2026-04-10 15:58:22.443292000 Z
+    zone: *2
+    time: *3
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &4 2026-04-10 15:58:22.443292000 Z
+    zone: *2
+    time: *4
+  level:
+  citations: []
+  status: proposed
+- id: 5624b053-c251-4018-a4da-ec9e2af03252
+  kind: question
+  answer_type:
+  scope: intent
+  body: |-
+    # Platform Overrides — Unpossible
+
+    Runtime-specific implementation details. Each file extends a core spec in `../system/` or `../product/` — it does not repeat it.
+  title: Readme
+  spec_path: "/specs/platform/README.md"
+  author: system
+  stable_ref: spec:b5ceda9f08eba592c27924c04a6ea2ca7bdf64a1b52cd782737b25242ac74d97
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &5 2026-04-10 15:58:22.452411000 Z
+    zone: *2
+    time: *5
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &6 2026-04-10 15:58:22.453724000 Z
+    zone: *2
+    time: *6
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &7 2026-04-10 15:58:22.453724000 Z
+    zone: *2
+    time: *7
+  level:
+  citations: []
+  status: proposed
+- id: 31793752-accb-4905-9d73-96779219b015
+  kind: question
+  answer_type:
+  scope: intent
+  body: |-
+    # Go Platform — Unpossible
+
+    Go sidecar implementation overrides. Each file extends a core spec and adds only Go-specific details.
+  title: Readme
+  spec_path: "/specs/platform/go/README.md"
+  author: system
+  stable_ref: spec:07c9d560afaad3339a59e7b53911bdd1108b2fbb5652306d8dd84df99826ecab
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &8 2026-04-10 15:58:22.466835000 Z
+    zone: *2
+    time: *8
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &9 2026-04-10 15:58:22.469104000 Z
+    zone: *2
+    time: *9
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &10 2026-04-10 15:58:22.469104000 Z
+    zone: *2
+    time: *10
+  level:
+  citations: []
+  status: proposed
+- id: aa5f8e4f-6a2f-41eb-a67c-70ad9514e58b
+  kind: question
+  answer_type:
+  scope: intent
+  body: |-
+    # Go System Overrides — Unpossible
+
+    Go-specific implementation details for system-level specs. Each file extends the corresponding `specs/system/` spec.
+  title: Readme
+  spec_path: "/specs/platform/go/system/README.md"
+  author: system
+  stable_ref: spec:3ef437113a24fa13bb82c28ce4cf5cc47b9350c0c712320da93638a6e865dfc1
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &11 2026-04-10 15:58:22.474562000 Z
+    zone: *2
+    time: *11
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &12 2026-04-10 15:58:22.475805000 Z
+    zone: *2
+    time: *12
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &13 2026-04-10 15:58:22.475805000 Z
+    zone: *2
+    time: *13
+  level:
+  citations: []
+  status: proposed
+- id: c579743c-f61e-4efb-9b6a-8cccff03c3e2
+  kind: question
+  answer_type:
+  scope: intent
+  body: |-
+    # Analytics — Go Platform Override
+
+    Extends `specs/analytics.md`. Go sidecar implementation only.
+  title: Analytics
+  spec_path: "/specs/platform/go/system/analytics.md"
+  author: system
+  stable_ref: spec:0a90abd093f6dbe7c7966ff1e9088530881959b927a5caf55e10ea46e21758e5
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &14 2026-04-10 15:58:22.481537000 Z
+    zone: *2
+    time: *14
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &15 2026-04-10 15:58:22.482107000 Z
+    zone: *2
+    time: *15
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &16 2026-04-10 15:58:22.482107000 Z
+    zone: *2
+    time: *16
+  level:
+  citations: []
+  status: proposed
+- id: ce72c231-3ce0-4a5e-9036-8733bd726cfe
+  kind: question
+  answer_type:
+  scope: intent
+  body: |-
+    # Runner Sidecar — Go Platform Override
+
+    Extends `specs/runner.md`. Go implementation details only.
+  title: Runner
+  spec_path: "/specs/platform/go/system/runner.md"
+  author: system
+  stable_ref: spec:5ac78865e695b53e8e88c480f35897febbf61eea2873a591f3d76fb35dcac651
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &17 2026-04-10 15:58:22.484492000 Z
+    zone: *2
+    time: *17
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &18 2026-04-10 15:58:22.484741000 Z
+    zone: *2
+    time: *18
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &19 2026-04-10 15:58:22.484741000 Z
+    zone: *2
+    time: *19
+  level:
+  citations: []
+  status: proposed
+- id: d4203103-0794-4ff0-82f5-880590730b68
+  kind: question
+  answer_type:
+  scope: intent
+  body: |-
+    # Rails Platform — Unpossible
+
+    Rails 8 implementation overrides. Each file extends a core spec and adds only Rails-specific details: models, jobs, services, controllers, schema details, and Rails-specific acceptance criteria.
+  title: Readme
+  spec_path: "/specs/platform/rails/README.md"
+  author: system
+  stable_ref: spec:2ebe6de1e8dd97cc46251e49b4ebe14268d4ff8336fd129eba3e8e969f6e0f04
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &20 2026-04-10 15:58:22.486934000 Z
+    zone: *2
+    time: *20
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &21 2026-04-10 15:58:22.487240000 Z
+    zone: *2
+    time: *21
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &22 2026-04-10 15:58:22.487240000 Z
+    zone: *2
+    time: *22
+  level:
+  citations: []
+  status: proposed
+- id: 3b93fab9-578a-4667-b716-ccd39ccbfeac
+  kind: question
+  answer_type:
+  scope: intent
+  body: |-
+    # Rails Product Overrides — Unpossible
+
+    Rails-specific implementation details for product-level specs. Each file extends the corresponding base spec.
+  title: Readme
+  spec_path: "/specs/platform/rails/product/README.md"
+  author: system
+  stable_ref: spec:096a014a1c50bb9c2a3a56b00163ca2135d67307ec57f4c82e627378da68225a
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &23 2026-04-10 15:58:22.490656000 Z
+    zone: *2
+    time: *23
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &24 2026-04-10 15:58:22.491783000 Z
+    zone: *2
+    time: *24
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &25 2026-04-10 15:58:22.491783000 Z
+    zone: *2
+    time: *25
+  level:
+  citations: []
+  status: proposed
+- id: f721a7e2-5c2e-464a-8aa8-7eb076bd7372
+  kind: question
+  answer_type:
+  scope: intent
+  body: |-
+    # Analytics Product — Rails Platform Override
+
+    Extends `specs/system/analytics/spec.md`. Rails-specific implementation only.
+  title: Analytics
+  spec_path: "/specs/platform/rails/product/analytics.md"
+  author: system
+  stable_ref: spec:7f859c7c9c2b8c5cba020d896f6461918fc8c0d9da86bec99e65e70f630fae9f
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &26 2026-04-10 15:58:22.502252000 Z
+    zone: *2
+    time: *26
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &27 2026-04-10 15:58:22.502437000 Z
+    zone: *2
+    time: *27
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &28 2026-04-10 15:58:22.502437000 Z
+    zone: *2
+    time: *28
+  level:
+  citations: []
+  status: proposed
+- id: 509cd09b-002e-45e6-8e53-889cf2f39cd2
+  kind: question
+  answer_type:
+  scope: intent
+  body: |-
+    # Authentication — Rails Platform Override
+
+    Extends `specs/practices/auth.md`. Rails-specific implementation details only.
+  title: Auth
+  spec_path: "/specs/platform/rails/product/auth.md"
+  author: system
+  stable_ref: spec:42138751f91fa4d0fca62310f71540fb5eccbd90b044c2c9a99d6df25f3fff6c
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &29 2026-04-10 15:58:22.503903000 Z
+    zone: *2
+    time: *29
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &30 2026-04-10 15:58:22.504160000 Z
+    zone: *2
+    time: *30
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &31 2026-04-10 15:58:22.504160000 Z
+    zone: *2
+    time: *31
+  level:
+  citations: []
+  status: proposed
+- id: 4b4cc11a-43a2-4419-b300-8d5ed33c33f7
+  kind: question
+  answer_type:
+  scope: intent
+  body: |-
+    # Rails System Overrides — Unpossible
+
+    Rails-specific implementation details for system-level specs. Each file extends the corresponding `specs/system/` spec.
+  title: Readme
+  spec_path: "/specs/platform/rails/system/README.md"
+  author: system
+  stable_ref: spec:f0ba6f600711e7f9db49acce4d5f113fddc5e2e77f68fa20fc6fba689e380868
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &32 2026-04-10 15:58:22.506012000 Z
+    zone: *2
+    time: *32
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &33 2026-04-10 15:58:22.506317000 Z
+    zone: *2
+    time: *33
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &34 2026-04-10 15:58:22.506317000 Z
+    zone: *2
+    time: *34
+  level:
+  citations: []
+  status: proposed
+- id: 4f0da634-e3f4-44db-8f77-7a8cfe651399
+  kind: question
+  answer_type:
+  scope: intent
+  body: |-
+    # Agents Module — Rails Platform Override
+
+    Extends `specs/system/agent-runner/spec.md`. Rails-specific implementation details only.
+  title: Agents
+  spec_path: "/specs/platform/rails/system/agents.md"
+  author: system
+  stable_ref: spec:3c742a1556acd918e38d51fc1b6877d0874a71f416409d1f1e69e6fd2847f046
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &35 2026-04-10 15:58:22.507902000 Z
+    zone: *2
+    time: *35
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &36 2026-04-10 15:58:22.507973000 Z
+    zone: *2
+    time: *36
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &37 2026-04-10 15:58:22.507973000 Z
+    zone: *2
+    time: *37
+  level:
+  citations: []
+  status: proposed
+- id: 6c1c8a6b-5b18-4534-911d-905d8e9b3e9c
+  kind: question
+  answer_type:
+  scope: intent
+  body: |-
+    # Analytics System — Rails Platform Override
+
+    Extends `specs/system/analytics.md`. Rails-specific implementation only.
+  title: Analytics
+  spec_path: "/specs/platform/rails/system/analytics.md"
+  author: system
+  stable_ref: spec:6ae9ee5d09480e83faabe53ee9d2050f728cab380e015aed3dfc4763151a62e2
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &38 2026-04-10 15:58:22.509567000 Z
+    zone: *2
+    time: *38
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &39 2026-04-10 15:58:22.510064000 Z
+    zone: *2
+    time: *39
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &40 2026-04-10 15:58:22.510064000 Z
+    zone: *2
+    time: *40
+  level:
+  citations: []
+  status: proposed
+- id: b6aa311d-3aaf-4bf7-872d-61da732122ec
+  kind: question
+  answer_type:
+  scope: intent
+  body: |-
+    # API Documentation & Request Testing — Rails Platform Override
+
+    Extends `specs/system/api-standards.md`. Rails-specific implementation only.
+  title: Api standards
+  spec_path: "/specs/platform/rails/system/api-standards.md"
+  author: system
+  stable_ref: spec:cb249896b50092dce1d8a9c79d07e21570856a3cc65f037c611e24e9d643654a
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &41 2026-04-10 15:58:22.512363000 Z
+    zone: *2
+    time: *41
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &42 2026-04-10 15:58:22.512446000 Z
+    zone: *2
+    time: *42
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &43 2026-04-10 15:58:22.512446000 Z
+    zone: *2
+    time: *43
+  level:
+  citations: []
+  status: proposed
+- id: 9d1552e1-2b66-4345-b1bd-09a5c1ce11f1
+  kind: question
+  answer_type:
+  scope: intent
+  body: |-
+    # Knowledge Module — Rails Platform Override
+
+    Extends `specs/knowledge.md`. Rails-specific implementation details only.
+  title: Knowledge
+  spec_path: "/specs/platform/rails/system/knowledge.md"
+  author: system
+  stable_ref: spec:af6a9ed956d25ff96f2338e71697f3567f0aacae574f93b3b74f3b703bc832ad
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &44 2026-04-10 15:58:22.515274000 Z
+    zone: *2
+    time: *44
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &45 2026-04-10 15:58:22.515819000 Z
+    zone: *2
+    time: *45
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &46 2026-04-10 15:58:22.515819000 Z
+    zone: *2
+    time: *46
+  level:
+  citations: []
+  status: proposed
+- id: 55774e16-81c9-418c-86e6-35c37f438033
+  kind: question
+  answer_type:
+  scope: intent
+  body: |-
+    # Sandbox Module — Rails Platform Override
+
+    Extends `specs/sandbox.md`. Rails-specific implementation details only.
+  title: Sandbox
+  spec_path: "/specs/platform/rails/system/sandbox.md"
+  author: system
+  stable_ref: spec:4a54d567c5e013e16e17eb560212c0570a2bfc19f60fd59a705409a0f187701e
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &47 2026-04-10 15:58:22.519245000 Z
+    zone: *2
+    time: *47
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &48 2026-04-10 15:58:22.519675000 Z
+    zone: *2
+    time: *48
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &49 2026-04-10 15:58:22.519675000 Z
+    zone: *2
+    time: *49
+  level:
+  citations: []
+  status: proposed
+- id: 5eb73a99-3069-467c-ac50-04ad708475bd
+  kind: question
+  answer_type:
+  scope: intent
+  body: |-
+    # Practices LOOKUP
+
+    Quick reference for recurring patterns in this codebase.
+  title: Lookup
+  spec_path: "/specs/practices/LOOKUP.md"
+  author: system
+  stable_ref: spec:a5fe0b10bf41ec4f2ab3b8f42f0c5506b5c4918e99ffb42b20106a219b0cdd20
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &50 2026-04-10 15:58:22.524887000 Z
+    zone: *2
+    time: *50
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &51 2026-04-10 15:58:22.524996000 Z
+    zone: *2
+    time: *51
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &52 2026-04-10 15:58:22.524996000 Z
+    zone: *2
+    time: *52
+  level:
+  citations: []
+  status: proposed
+- id: 2f8b09a6-101b-41fc-a47d-8cc005217b05
+  kind: question
+  answer_type:
+  scope: intent
+  body: |-
+    # Practices — Unpossible
+
+    Always-on rules that shape agent behaviour across all tasks and loop types.
+  title: Readme
+  spec_path: "/specs/practices/README.md"
+  author: system
+  stable_ref: spec:520307549e2db2df87bc132b3cfe16f725a04db2d220410150c1f99625db758f
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &53 2026-04-10 15:58:22.526284000 Z
+    zone: *2
+    time: *53
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &54 2026-04-10 15:58:22.526351000 Z
+    zone: *2
+    time: *54
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &55 2026-04-10 15:58:22.526351000 Z
+    zone: *2
+    time: *55
+  level:
+  citations: []
+  status: proposed
+- id: adfd9c1a-517c-49d1-8c4f-7bfba4ea0d16
+  kind: question
+  answer_type:
+  scope: intent
+  body: |-
+    # Authentication
+
+    ## What It Does
+  title: Auth
+  spec_path: "/specs/practices/auth.md"
+  author: system
+  stable_ref: spec:82f0eb6537d64134b1a31bf5422077d98c7bea88281fa114b7f74f498c2465f9
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &56 2026-04-10 15:58:22.527489000 Z
+    zone: *2
+    time: *56
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &57 2026-04-10 15:58:22.527882000 Z
+    zone: *2
+    time: *57
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &58 2026-04-10 15:58:22.527882000 Z
+    zone: *2
+    time: *58
+  level:
+  citations: []
+  status: proposed
+- id: 56f255e1-883c-43d0-93f3-30c33f4a6af9
+  kind: question
+  answer_type:
+  scope: intent
+  body: |-
+    # Automation
+
+    When a task is deterministic — the same input always produces the same output — prefer
+  title: Automation
+  spec_path: "/specs/practices/automation.md"
+  author: system
+  stable_ref: spec:6ab301a930364bf8983b8b152fdff031a57a32f75b56073cc94056d5ba8af3fa
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &59 2026-04-10 15:58:22.529036000 Z
+    zone: *2
+    time: *59
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &60 2026-04-10 15:58:22.529105000 Z
+    zone: *2
+    time: *60
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &61 2026-04-10 15:58:22.529105000 Z
+    zone: *2
+    time: *61
+  level:
+  citations: []
+  status: proposed
+- id: 807eab7e-53b8-423e-8e66-48d8039bd1bc
+  kind: question
+  answer_type:
+  scope: intent
+  body: |-
+    # General Coding Practices
+
+    Loaded every build iteration. Language-agnostic rules that apply to all code written in this project.
+  title: Coding
+  spec_path: "/specs/practices/coding.md"
+  author: system
+  stable_ref: spec:ae50f2c46df1ba2ba6e709f078eeddd9c6c7ca1b8fb6296e115e8d936c37e7a6
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &62 2026-04-10 15:58:22.530532000 Z
+    zone: *2
+    time: *62
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &63 2026-04-10 15:58:22.530604000 Z
+    zone: *2
+    time: *63
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &64 2026-04-10 15:58:22.530604000 Z
+    zone: *2
+    time: *64
+  level:
+  citations: []
+  status: proposed
+- id: dd14e789-5353-4c6d-a83d-43fdc92227b6
+  kind: question
+  answer_type:
+  scope: intent
+  body: |-
+    # Claude Cost Management
+
+    Reference for controlling token spend when using Claude in autonomous loops.
+  title: Cost
+  spec_path: "/specs/practices/cost.md"
+  author: system
+  stable_ref: spec:6a55501e500d42494aa64244ef03c5ad745302d64f9942cfc5c4e321e8dec7d1
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &65 2026-04-10 15:58:22.531807000 Z
+    zone: *2
+    time: *65
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &66 2026-04-10 15:58:22.531882000 Z
+    zone: *2
+    time: *66
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &67 2026-04-10 15:58:22.531882000 Z
+    zone: *2
+    time: *67
+  level:
+  citations: []
+  status: proposed
+- id: a387b100-2503-40e5-8b24-b0996474a858
+  kind: question
+  answer_type:
+  scope: intent
+  body: |-
+    # Lookup Tables
+
+    ## What They Are
+  title: Lookup tables
+  spec_path: "/specs/practices/lookup-tables.md"
+  author: system
+  stable_ref: spec:eb91e176a63cec0776928a04522d8470504ae9df6b464ef76fcc0e16d8860fe3
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &68 2026-04-10 15:58:22.533198000 Z
+    zone: *2
+    time: *68
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &69 2026-04-10 15:58:22.533382000 Z
+    zone: *2
+    time: *69
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &70 2026-04-10 15:58:22.533382000 Z
+    zone: *2
+    time: *70
+  level:
+  citations: []
+  status: proposed
+- id: 5624d41d-89da-40d5-a9ae-0247138d3c40
+  kind: question
+  answer_type:
+  scope: intent
+  body: |-
+    # General Planning Practices
+
+    Loaded every plan iteration. Guides how to analyze specs and produce an implementation plan.
+  title: Planning
+  spec_path: "/specs/practices/planning.md"
+  author: system
+  stable_ref: spec:88d67dd2362f70f39c96238280a1712fc152caf18a37dfa4cf76ae71232f14d7
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &71 2026-04-10 15:58:22.537899000 Z
+    zone: *2
+    time: *71
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &72 2026-04-10 15:58:22.538024000 Z
+    zone: *2
+    time: *72
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &73 2026-04-10 15:58:22.538024000 Z
+    zone: *2
+    time: *73
+  level:
+  citations: []
+  status: proposed
+- id: 0e0a43ae-ce76-4373-8426-e9c1811b203f
+  kind: question
+  answer_type:
+  scope: intent
+  body: |-
+    # Security & PII
+
+    ## Principles
+  title: Security
+  spec_path: "/specs/practices/security.md"
+  author: system
+  stable_ref: spec:370b228ce3def5720efba602225ff8550eeed92d140d4ad06f79557636a01a0e
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &74 2026-04-10 15:58:22.539506000 Z
+    zone: *2
+    time: *74
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &75 2026-04-10 15:58:22.539595000 Z
+    zone: *2
+    time: *75
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &76 2026-04-10 15:58:22.539595000 Z
+    zone: *2
+    time: *76
+  level:
+  citations: []
+  status: proposed
+- id: d696ea88-9929-4818-9a4c-09ebac510035
+  kind: question
+  answer_type:
+  scope: intent
+  body: |-
+    # Testing Principals
+
+    ## Core Principles
+  title: Testing
+  spec_path: "/specs/practices/testing.md"
+  author: system
+  stable_ref: spec:bea37b8fbff3626ea8d8a8adb2df5109e39ed0f1008a33d3bd236635d6bc4b5d
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &77 2026-04-10 15:58:22.540831000 Z
+    zone: *2
+    time: *77
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &78 2026-04-10 15:58:22.540916000 Z
+    zone: *2
+    time: *78
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &79 2026-04-10 15:58:22.540916000 Z
+    zone: *2
+    time: *79
+  level:
+  citations: []
+  status: proposed
+- id: 2b0c6552-c2c8-4e48-8aa2-22f381e3cff7
+  kind: question
+  answer_type:
+  scope: intent
+  body: |-
+    # Threat Modeling Practices
+
+    Loaded every plan iteration. Guides threat-informed task definition and test scenario selection.
+  title: Threat modeling
+  spec_path: "/specs/practices/threat-modeling.md"
+  author: system
+  stable_ref: spec:d63a1837f6f6887e9968543527ebb2a6dfca372c6b3d9dd2d89cf98d697428ce
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &80 2026-04-10 15:58:22.542705000 Z
+    zone: *2
+    time: *80
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &81 2026-04-10 15:58:22.542874000 Z
+    zone: *2
+    time: *81
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &82 2026-04-10 15:58:22.542874000 Z
+    zone: *2
+    time: *82
+  level:
+  citations: []
+  status: proposed
+- id: d13a6e97-97d3-4ee0-8c3c-5a63438747b2
+  kind: question
+  answer_type:
+  scope: intent
+  body: |-
+    # General Verification Practices
+
+    Loaded when running tests. Applies regardless of language or framework.
+  title: Verification
+  spec_path: "/specs/practices/verification.md"
+  author: system
+  stable_ref: spec:0cc5e446078d5b2345ee40373e50e1e0241f9dfc6ec1c271810e48edfc7a29df
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &83 2026-04-10 15:58:22.544502000 Z
+    zone: *2
+    time: *83
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &84 2026-04-10 15:58:22.544675000 Z
+    zone: *2
+    time: *84
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &85 2026-04-10 15:58:22.544675000 Z
+    zone: *2
+    time: *85
+  level:
+  citations: []
+  status: proposed
+- id: 1ed81d81-1f8d-4433-b24a-fc041cdf0e57
+  kind: question
+  answer_type:
+  scope: intent
+  body: |-
+    # Version Control
+
+    ## One Update Rule
+  title: Version control
+  spec_path: "/specs/practices/version-control.md"
+  author: system
+  stable_ref: spec:e213468ac4bc3b0c9a16ade1fee7ffabddbd5bf14699002be189e7e3d4617b1c
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &86 2026-04-10 15:58:22.546986000 Z
+    zone: *2
+    time: *86
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &87 2026-04-10 15:58:22.547756000 Z
+    zone: *2
+    time: *87
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &88 2026-04-10 15:58:22.547756000 Z
+    zone: *2
+    time: *88
+  level:
+  citations: []
+  status: proposed
+- id: cf42be58-5187-41dd-9c1f-7c9ef12466db
+  kind: question
+  answer_type:
+  scope: intent
+  body: |-
+    # Zed Editor Practices
+
+    Principles for using Zed effectively in the unpossible workflow. The goal is to keep
+  title: Zed
+  spec_path: "/specs/practices/zed.md"
+  author: system
+  stable_ref: spec:425eda8f45ad7a0f4a55a0c089cb2ffd19e99805f75c2d79d738d02d9b2d61cb
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &89 2026-04-10 15:58:22.550626000 Z
+    zone: *2
+    time: *89
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &90 2026-04-10 15:58:22.556223000 Z
+    zone: *2
+    time: *90
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &91 2026-04-10 15:58:22.556223000 Z
+    zone: *2
+    time: *91
+  level:
+  citations: []
+  status: proposed
+- id: 12fee1dc-8367-470e-a0d8-346bfbdc7854
+  kind: question
+  answer_type:
+  scope: intent
+  body: |-
+    # PRD — Unpossible
+
+    ## What We're Building
+  title: Project prd
+  spec_path: "/specs/project-prd.md"
+  author: system
+  stable_ref: spec:d3e859896bb237b1bc274a4ce0eaf7c8c14eb35ae22cafc98731468ff78a2cda
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &92 2026-04-10 15:58:22.561915000 Z
+    zone: *2
+    time: *92
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &93 2026-04-10 15:58:22.561979000 Z
+    zone: *2
+    time: *93
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &94 2026-04-10 15:58:22.561979000 Z
+    zone: *2
+    time: *94
+  level:
+  citations: []
+  status: proposed
+- id: 82d89005-3449-4bab-8bb6-4f4eb84324af
+  kind: question
+  answer_type:
+  scope: intent
+  body: |-
+    # Unpossible 1 → Unpossible: Audit & Recommendations
+
+    > Produced 2026-03-27. Sources audited: `loop.sh`, `PROMPT_*.md`, `dashboard/src/`,
+  title: Audit recommendations
+  spec_path: "/specs/research/AUDIT_RECOMMENDATIONS.md"
+  author: system
+  stable_ref: spec:0fb2467b5d58e6ef835fc5df4e3faaeda4b22632dadbd184c0b48f648d3574e0
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &95 2026-04-10 15:58:22.564779000 Z
+    zone: *2
+    time: *95
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &96 2026-04-10 15:58:22.564863000 Z
+    zone: *2
+    time: *96
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &97 2026-04-10 15:58:22.564863000 Z
+    zone: *2
+    time: *97
+  level:
+  citations: []
+  status: proposed
+- id: 07ed742d-419f-41d5-91f1-324af1ee31c9
+  kind: question
+  answer_type:
+  scope: intent
+  body: |-
+    ### Unpossible Design Breakdown
+
+    ## Goals
+  title: Pitch
+  spec_path: "/specs/research/PITCH.md"
+  author: system
+  stable_ref: spec:7ffcc7c9d9bab0d88779dfae80ffd6820e197be2a790e8038fc976f49aa2ba40
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &98 2026-04-10 15:58:22.566073000 Z
+    zone: *2
+    time: *98
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &99 2026-04-10 15:58:22.566134000 Z
+    zone: *2
+    time: *99
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &100 2026-04-10 15:58:22.566134000 Z
+    zone: *2
+    time: *100
+  level:
+  citations: []
+  status: proposed
+- id: 0ec5941c-9197-4ab4-9915-7ff002e1f1a5
+  kind: question
+  answer_type:
+  scope: intent
+  body: |-
+    # Research — Unpossible
+
+    Reference material, prior art analysis, and planning artifacts. Not active specs — agents do not load these files during build or plan loops unless explicitly retrieving context.
+  title: Readme
+  spec_path: "/specs/research/README.md"
+  author: system
+  stable_ref: spec:d46babb9a18bbc3c26d185148a408a989eece7b702fdcee70d89d45ccf1b4e01
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &101 2026-04-10 15:58:22.567267000 Z
+    zone: *2
+    time: *101
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &102 2026-04-10 15:58:22.567564000 Z
+    zone: *2
+    time: *102
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &103 2026-04-10 15:58:22.567564000 Z
+    zone: *2
+    time: *103
+  level:
+  citations: []
+  status: proposed
+- id: 6b5ae761-99a1-4bf3-87b0-441ae864b2b3
+  kind: question
+  answer_type:
+  scope: intent
+  body: |-
+    # Unpossible2 — Research & Planning Notes
+
+    > Collected via interview 2026-03-27. Drives the first ralph planning loops.
+  title: Research
+  spec_path: "/specs/research/RESEARCH.md"
+  author: system
+  stable_ref: spec:833b52c0390b48aa2a57009a38039d0171e69cc90be305abe6bed09d9e7c068b
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &104 2026-04-10 15:58:22.568731000 Z
+    zone: *2
+    time: *104
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &105 2026-04-10 15:58:22.568796000 Z
+    zone: *2
+    time: *105
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &106 2026-04-10 15:58:22.568796000 Z
+    zone: *2
+    time: *106
+  level:
+  citations: []
+  status: proposed
+- id: d4c5cdd8-b57f-4e74-a730-bb53ce18b1ea
+  kind: question
+  answer_type:
+  scope: intent
+  body: |-
+    # Loom System Analysis
+
+    > Analysis of the Loom codebase — an AI-powered coding agent built in Rust by Geoffrey Huntley
+  title: Loom analysis
+  spec_path: "/specs/research/loom/LOOM_ANALYSIS.md"
+  author: system
+  stable_ref: spec:1441eaa2a8d1871c31b4cd527d01e3f2e77f69483e952e3f987fe8d418f56735
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &107 2026-04-10 15:58:22.570230000 Z
+    zone: *2
+    time: *107
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &108 2026-04-10 15:58:22.570284000 Z
+    zone: *2
+    time: *108
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &109 2026-04-10 15:58:22.570284000 Z
+    zone: *2
+    time: *109
+  level:
+  citations: []
+  status: proposed
+- id: 0a16d06b-f2a1-43d3-8884-8ca92867a9b4
+  kind: question
+  answer_type:
+  scope: intent
+  body: |-
+    <!--
+     Copyright (c) 2025 Geoffrey Huntley <ghuntley@ghuntley.com>. All rights reserved.
+     SPDX-License-Identifier: Proprietary
+  title: Loom readme
+  spec_path: "/specs/research/loom/loom readme.md"
+  author: system
+  stable_ref: spec:67b46cb2f0c931a5d1c1724e995217cd40f150294bc80016abd1c9126251ea98
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &110 2026-04-10 15:58:22.571515000 Z
+    zone: *2
+    time: *110
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &111 2026-04-10 15:58:22.571572000 Z
+    zone: *2
+    time: *111
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &112 2026-04-10 15:58:22.571572000 Z
+    zone: *2
+    time: *112
+  level:
+  citations: []
+  status: proposed
+- id: e738e971-1368-48f5-873a-645984206e11
+  kind: question
+  answer_type:
+  scope: intent
+  body: |-
+    # Loom Agent Guidelines
+
+    ## Specifications
+  title: Loom claude
+  spec_path: "/specs/research/loom/loom_claude.md"
+  author: system
+  stable_ref: spec:95fe24fdb7fcb8cdba5627b70d5d1c80222647e59f880f2bbf19cb5f16c13060
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &113 2026-04-10 15:58:22.572824000 Z
+    zone: *2
+    time: *113
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &114 2026-04-10 15:58:22.572904000 Z
+    zone: *2
+    time: *114
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &115 2026-04-10 15:58:22.572904000 Z
+    zone: *2
+    time: *115
+  level:
+  citations: []
+  status: proposed
+- id: 97e690bd-cb9a-4700-ad3e-9ca78414fa62
+  kind: question
+  answer_type:
+  scope: intent
+  body: |-
+    <!--
+     Copyright (c) 2025 Geoffrey Huntley <ghuntley@ghuntley.com>. All rights reserved.
+     SPDX-License-Identifier: Proprietary
+  title: Loom specs readme
+  spec_path: "/specs/research/loom/loom_specs_readme.md"
+  author: system
+  stable_ref: spec:fa04a7f8c045513a5f42012fb53c8e2b61572c0d86e05445c7fc534769156843
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &116 2026-04-10 15:58:22.574949000 Z
+    zone: *2
+    time: *116
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &117 2026-04-10 15:58:22.575013000 Z
+    zone: *2
+    time: *117
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &118 2026-04-10 15:58:22.575013000 Z
+    zone: *2
+    time: *118
+  level:
+  citations: []
+  status: proposed
+- id: 3ba210d2-cc69-4597-b435-db39ce3b66cf
+  kind: question
+  answer_type:
+  scope: intent
+  body: |-
+    # Research: Recursive LLM Calls
+
+    **Status:** Pinned — not yet analyzed
+  title: Recursive llm calls
+  spec_path: "/specs/research/recursive-llm-calls.md"
+  author: system
+  stable_ref: spec:a9f932cb5164f7655ad4fc76bb82db796c50f98cdad095ac4b997bd0978eabc8
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &119 2026-04-10 15:58:22.576214000 Z
+    zone: *2
+    time: *119
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &120 2026-04-10 15:58:22.576273000 Z
+    zone: *2
+    time: *120
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &121 2026-04-10 15:58:22.576273000 Z
+    zone: *2
+    time: *121
+  level:
+  citations: []
+  status: proposed
+- id: 86eb0a62-a433-4584-a2f9-42f8c9a9a1d2
+  kind: question
+  answer_type:
+  scope: intent
+  body: |-
+    # Skills — Unpossible
+
+    Skills are **instructions** — the body of a node that tells an actor what to do.
+  title: Readme
+  spec_path: "/specs/skills/README.md"
+  author: system
+  stable_ref: spec:bcfabf2c692e043c389c90304768becfefabb28cc8c2e8e16be8213eaab6f85e
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &122 2026-04-10 15:58:22.577451000 Z
+    zone: *2
+    time: *122
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &123 2026-04-10 15:58:22.577733000 Z
+    zone: *2
+    time: *123
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &124 2026-04-10 15:58:22.577733000 Z
+    zone: *2
+    time: *124
+  level:
+  citations: []
+  status: proposed
+- id: e4dbc52b-fcc7-472a-8246-0aaef38d9771
+  kind: question
+  answer_type:
+  scope: intent
+  body: |-
+    ---
+    name: build
+    kind: loop
+  title: Build
+  spec_path: "/specs/skills/loops/build.md"
+  author: system
+  stable_ref: spec:794bbb3fe9d8159f3341188f96da02d72eb4acbe6d5b70e54071a3a142fa9814
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &125 2026-04-10 15:58:22.578892000 Z
+    zone: *2
+    time: *125
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &126 2026-04-10 15:58:22.578952000 Z
+    zone: *2
+    time: *126
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &127 2026-04-10 15:58:22.578952000 Z
+    zone: *2
+    time: *127
+  level:
+  citations: []
+  status: proposed
+- id: db9bbcbb-e93a-4ffc-bd99-0d1d75af9e40
+  kind: question
+  answer_type:
+  scope: intent
+  body: |-
+    ---
+    name: plan
+    kind: loop
+  title: Plan
+  spec_path: "/specs/skills/loops/plan.md"
+  author: system
+  stable_ref: spec:dcb748f447fb9fbaa75b09fe64883da790103474efeb8b3fb44ea0208a79926e
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &128 2026-04-10 15:58:22.580373000 Z
+    zone: *2
+    time: *128
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &129 2026-04-10 15:58:22.580434000 Z
+    zone: *2
+    time: *129
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &130 2026-04-10 15:58:22.580434000 Z
+    zone: *2
+    time: *130
+  level:
+  citations: []
+  status: proposed
+- id: 2ad6e723-2967-4b37-9ade-a3ca7c4f4d32
+  kind: question
+  answer_type:
+  scope: intent
+  body: |-
+    ---
+    name: research
+    kind: loop
+  title: Research
+  spec_path: "/specs/skills/loops/research.md"
+  author: system
+  stable_ref: spec:cf7c88e4c04bfabae0b57e4769507d856b82ba69c98c251357a862d96bd99121
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &131 2026-04-10 15:58:22.581572000 Z
+    zone: *2
+    time: *131
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &132 2026-04-10 15:58:22.581627000 Z
+    zone: *2
+    time: *132
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &133 2026-04-10 15:58:22.581627000 Z
+    zone: *2
+    time: *133
+  level:
+  citations: []
+  status: proposed
+- id: 56fbf69e-b8ce-499b-b739-89688d2a6af3
+  kind: question
+  answer_type:
+  scope: intent
+  body: |-
+    ---
+    name: claude
+    kind: provider
+  title: Claude
+  spec_path: "/specs/skills/providers/claude.md"
+  author: system
+  stable_ref: spec:3179780468761c071f7bb4d634008a72f8f400d8e265d1a7f7c41ca610ee8846
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &134 2026-04-10 15:58:22.582778000 Z
+    zone: *2
+    time: *134
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &135 2026-04-10 15:58:22.582867000 Z
+    zone: *2
+    time: *135
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &136 2026-04-10 15:58:22.582867000 Z
+    zone: *2
+    time: *136
+  level:
+  citations: []
+  status: proposed
+- id: c4416e0e-4cb7-44e5-ba9a-ad2acb88357b
+  kind: question
+  answer_type:
+  scope: intent
+  body: |-
+    ---
+    name: kiro
+    kind: provider
+  title: Kiro
+  spec_path: "/specs/skills/providers/kiro.md"
+  author: system
+  stable_ref: spec:7d34f80e8f83bfcd4f10ac0aada9309843bbfaaff7a98d8ee03f28043d4cdaa0
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &137 2026-04-10 15:58:22.584134000 Z
+    zone: *2
+    time: *137
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &138 2026-04-10 15:58:22.584192000 Z
+    zone: *2
+    time: *138
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &139 2026-04-10 15:58:22.584192000 Z
+    zone: *2
+    time: *139
+  level:
+  citations: []
+  status: proposed
+- id: 1ca3bbee-33c9-458d-a315-2a1bd2c13a35
+  kind: question
+  answer_type:
+  scope: intent
+  body: |-
+    ---
+    name: openai
+    kind: provider
+  title: Openai
+  spec_path: "/specs/skills/providers/openai.md"
+  author: system
+  stable_ref: spec:3f18893e402e3e826ad43914620c6234ce44e6e95a28da27835755f0e99b3f77
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &140 2026-04-10 15:58:22.586362000 Z
+    zone: *2
+    time: *140
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &141 2026-04-10 15:58:22.586447000 Z
+    zone: *2
+    time: *141
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &142 2026-04-10 15:58:22.586447000 Z
+    zone: *2
+    time: *142
+  level:
+  citations: []
+  status: proposed
+- id: e83f85bf-29d6-4a22-84c0-5ed429fca811
+  kind: question
+  answer_type:
+  scope: intent
+  body: |-
+    ---
+    name: analyse
+    kind: tool
+  title: Analyse
+  spec_path: "/specs/skills/tools/analyse.md"
+  author: system
+  stable_ref: spec:fa6512abedfb65885bfe83868b76898ffd64bf7460cd328416fdf9140bc6411e
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &143 2026-04-10 15:58:22.587652000 Z
+    zone: *2
+    time: *143
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &144 2026-04-10 15:58:22.587707000 Z
+    zone: *2
+    time: *144
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &145 2026-04-10 15:58:22.587707000 Z
+    zone: *2
+    time: *145
+  level:
+  citations: []
+  status: proposed
+- id: b091e72b-c22c-4ec7-a738-0c4bf21e856a
+  kind: question
+  answer_type:
+  scope: intent
+  body: |-
+    ---
+    name: interview
+    kind: tool
+  title: Interview
+  spec_path: "/specs/skills/tools/interview.md"
+  author: system
+  stable_ref: spec:ba886edb6fe36833e6ca232e347ccd9926e8058567d64c19207ec66864d7bbbf
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &146 2026-04-10 15:58:22.589186000 Z
+    zone: *2
+    time: *146
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &147 2026-04-10 15:58:22.589252000 Z
+    zone: *2
+    time: *147
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &148 2026-04-10 15:58:22.589252000 Z
+    zone: *2
+    time: *148
+  level:
+  citations: []
+  status: proposed
+- id: fb640ec4-7715-4e30-80ba-b6b78ef49435
+  kind: question
+  answer_type:
+  scope: intent
+  body: |-
+    ---
+    name: research
+    kind: tool
+  title: Research
+  spec_path: "/specs/skills/tools/research.md"
+  author: system
+  stable_ref: spec:cb069fbafadbff4250a2eb47cc89a0ee13570f059929224bf5dcefe8c37354cc
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &149 2026-04-10 15:58:22.590409000 Z
+    zone: *2
+    time: *149
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &150 2026-04-10 15:58:22.590476000 Z
+    zone: *2
+    time: *150
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &151 2026-04-10 15:58:22.590476000 Z
+    zone: *2
+    time: *151
+  level:
+  citations: []
+  status: proposed
+- id: a48dd1c6-5918-4bb6-bd84-8158bd862234
+  kind: question
+  answer_type:
+  scope: intent
+  body: |-
+    ---
+    name: prd
+    kind: workflow
+  title: Prd
+  spec_path: "/specs/skills/workflows/prd.md"
+  author: system
+  stable_ref: spec:b466c202c4219bf69c7a678d167f665371c5303a31838d420d35bbda3dd31f89
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &152 2026-04-10 15:58:22.591849000 Z
+    zone: *2
+    time: *152
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &153 2026-04-10 15:58:22.591908000 Z
+    zone: *2
+    time: *153
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &154 2026-04-10 15:58:22.591908000 Z
+    zone: *2
+    time: *154
+  level:
+  citations: []
+  status: proposed
+- id: 9e148c77-7cb2-498e-aa02-4d77be8536a6
+  kind: question
+  answer_type:
+  scope: intent
+  body: |-
+    ---
+    name: review
+    kind: workflow
+  title: Review
+  spec_path: "/specs/skills/workflows/review.md"
+  author: system
+  stable_ref: spec:da2d5740659f2a178e7a880b7da91763978b02556a6fdbe0d039a1a388b0c362
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &155 2026-04-10 15:58:22.593064000 Z
+    zone: *2
+    time: *155
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &156 2026-04-10 15:58:22.593121000 Z
+    zone: *2
+    time: *156
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &157 2026-04-10 15:58:22.593121000 Z
+    zone: *2
+    time: *157
+  level:
+  citations: []
+  status: proposed
+- id: ee17513f-562b-40ea-a79f-02f26917d4d2
+  kind: question
+  answer_type:
+  scope: intent
+  body: |-
+    ---
+    name: server-ops
+    kind: workflow
+  title: Server ops
+  spec_path: "/specs/skills/workflows/server-ops.md"
+  author: system
+  stable_ref: spec:ee4afa15ce47f1f73bbd070587e973efbaafdc243207c0f0fe82a1c43ad4a0d9
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &158 2026-04-10 15:58:22.594314000 Z
+    zone: *2
+    time: *158
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &159 2026-04-10 15:58:22.594374000 Z
+    zone: *2
+    time: *159
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &160 2026-04-10 15:58:22.594374000 Z
+    zone: *2
+    time: *160
+  level:
+  citations: []
+  status: proposed
+- id: 53db9c8a-fddb-4221-a9e6-0b16a951a01e
+  kind: question
+  answer_type:
+  scope: intent
+  body: |-
+    ---
+    name: spec
+    kind: workflow
+  title: Spec
+  spec_path: "/specs/skills/workflows/spec.md"
+  author: system
+  stable_ref: spec:ee449ea9aa8f250d2e3da554360802b02c38aef88f6cf7acf0b22518182d96d9
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &161 2026-04-10 15:58:22.596304000 Z
+    zone: *2
+    time: *161
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &162 2026-04-10 15:58:22.596378000 Z
+    zone: *2
+    time: *162
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &163 2026-04-10 15:58:22.596378000 Z
+    zone: *2
+    time: *163
+  level:
+  citations: []
+  status: proposed
+- id: 37024bda-3d64-45c0-8c36-2d7c0571a513
+  kind: question
+  answer_type:
+  scope: intent
+  body: |-
+    # System Specs — Unpossible
+
+    Platform-agnostic specs for core system capabilities. Each file defines what a module does, why it exists, and its acceptance criteria.
+  title: Readme
+  spec_path: "/specs/system/README.md"
+  author: system
+  stable_ref: spec:d29ceb59abdc8812a88885fd5172a6fe403dc96632baecb29518c253b25abe06
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &164 2026-04-10 15:58:22.597536000 Z
+    zone: *2
+    time: *164
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &165 2026-04-10 15:58:22.597584000 Z
+    zone: *2
+    time: *165
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &166 2026-04-10 15:58:22.597584000 Z
+    zone: *2
+    time: *166
+  level:
+  citations: []
+  status: proposed
+- id: 8ee8d5bd-850b-4918-8d90-f2df21e53d3f
+  kind: question
+  answer_type:
+  scope: intent
+  body: |-
+    # PRD: Agent Runner
+
+    - **Status:** Draft
+  title: Prd
+  spec_path: "/specs/system/agent-runner/prd.md"
+  author: system
+  stable_ref: spec:5073da42aa29d12c5d2a2b7e5ab26ff256bbd504a065c21e86937c3d788695e0
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &167 2026-04-10 15:58:22.599020000 Z
+    zone: *2
+    time: *167
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &168 2026-04-10 15:58:22.599076000 Z
+    zone: *2
+    time: *168
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &169 2026-04-10 15:58:22.599076000 Z
+    zone: *2
+    time: *169
+  level:
+  citations: []
+  status: proposed
+- id: abd555e4-5bd9-40c4-87b2-2c196f07d427
+  kind: question
+  answer_type:
+  scope: intent
+  body: |-
+    # Agent Runner
+
+    ## What It Does
+  title: Spec
+  spec_path: "/specs/system/agent-runner/spec.md"
+  author: system
+  stable_ref: spec:54aff32fc4ae492f745b994b46522714135d0e550b62aea6e4f26d66fbbf5903
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &170 2026-04-10 15:58:22.600258000 Z
+    zone: *2
+    time: *170
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &171 2026-04-10 15:58:22.600316000 Z
+    zone: *2
+    time: *171
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &172 2026-04-10 15:58:22.600316000 Z
+    zone: *2
+    time: *172
+  level:
+  citations: []
+  status: proposed
+- id: caa7bc45-f3c4-49bd-855c-9be9ba77f277
+  kind: question
+  answer_type:
+  scope: intent
+  body: |-
+    # PRD: Analytics
+
+    - **Status:** Draft
+  title: Prd
+  spec_path: "/specs/system/analytics/prd.md"
+  author: system
+  stable_ref: spec:6a02b262d1223c7fcf5c6ec709dec7e9a7361346e93b1dd5ba4be2946707961c
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &173 2026-04-10 15:58:22.601711000 Z
+    zone: *2
+    time: *173
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &174 2026-04-10 15:58:22.601791000 Z
+    zone: *2
+    time: *174
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &175 2026-04-10 15:58:22.601791000 Z
+    zone: *2
+    time: *175
+  level:
+  citations: []
+  status: proposed
+- id: 2f1259b3-09fb-4d16-9a83-2a86cb3dd68e
+  kind: question
+  answer_type:
+  scope: intent
+  body: |-
+    # Analytics
+
+    ## What It Does
+  title: Spec
+  spec_path: "/specs/system/analytics/spec.md"
+  author: system
+  stable_ref: spec:4826d0888ad68ecdf1ad445fafb6943e74cc2dd1dae2eec160a1f8f0259b339e
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &176 2026-04-10 15:58:22.603014000 Z
+    zone: *2
+    time: *176
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &177 2026-04-10 15:58:22.603069000 Z
+    zone: *2
+    time: *177
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &178 2026-04-10 15:58:22.603069000 Z
+    zone: *2
+    time: *178
+  level:
+  citations: []
+  status: proposed
+- id: 61879557-5f37-4857-87ce-c0981ce97a22
+  kind: question
+  answer_type:
+  scope: intent
+  body: |-
+    # PRD: API Documentation & Request Testing
+
+    - **Status:** Draft
+  title: Prd
+  spec_path: "/specs/system/api/prd.md"
+  author: system
+  stable_ref: spec:52b59020097d4a2ba3760a2b9fce8bba01347a1b62bf551e29551a2b3e419b4e
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &179 2026-04-10 15:58:22.604252000 Z
+    zone: *2
+    time: *179
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &180 2026-04-10 15:58:22.604315000 Z
+    zone: *2
+    time: *180
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &181 2026-04-10 15:58:22.604315000 Z
+    zone: *2
+    time: *181
+  level:
+  citations: []
+  status: proposed
+- id: cd864308-fc13-4ffd-8ae6-86c76f093c51
+  kind: question
+  answer_type:
+  scope: intent
+  body: |-
+    # API Documentation & Request Testing
+
+    ## What It Does
+  title: Spec
+  spec_path: "/specs/system/api/spec.md"
+  author: system
+  stable_ref: spec:983a684a6dffdf1310f69df5202ec594689a951e34f0e4b202b9cf8d20867e3a
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &182 2026-04-10 15:58:22.606429000 Z
+    zone: *2
+    time: *182
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &183 2026-04-10 15:58:22.606524000 Z
+    zone: *2
+    time: *183
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &184 2026-04-10 15:58:22.606524000 Z
+    zone: *2
+    time: *184
+  level:
+  citations: []
+  status: proposed
+- id: bd6e1727-9743-411c-9391-1857da729c5a
+  kind: question
+  answer_type:
+  scope: intent
+  body: |-
+    # PRD: Feature Flags
+
+    - **Status:** Draft
+  title: Prd
+  spec_path: "/specs/system/feature-flags/prd.md"
+  author: system
+  stable_ref: spec:53223d7c3fe278bbd1f02a317f14e7122ffeef3ec053a29a74c4088ecd0ca3f5
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &185 2026-04-10 15:58:22.607724000 Z
+    zone: *2
+    time: *185
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &186 2026-04-10 15:58:22.607786000 Z
+    zone: *2
+    time: *186
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &187 2026-04-10 15:58:22.607786000 Z
+    zone: *2
+    time: *187
+  level:
+  citations: []
+  status: proposed
+- id: 9c6eb207-2c95-402e-966e-3a9a7a3c9379
+  kind: question
+  answer_type:
+  scope: intent
+  body: |-
+    # Feature Flags
+
+    ## What It Does
+  title: Spec
+  spec_path: "/specs/system/feature-flags/spec.md"
+  author: system
+  stable_ref: spec:01b43ac6f33f462b6be9b42f1e4331008de34a9719d399fbf714c43f7d0eff81
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &188 2026-04-10 15:58:22.608941000 Z
+    zone: *2
+    time: *188
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &189 2026-04-10 15:58:22.609210000 Z
+    zone: *2
+    time: *189
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &190 2026-04-10 15:58:22.609210000 Z
+    zone: *2
+    time: *190
+  level:
+  citations: []
+  status: proposed
+- id: 6d843769-d87b-4ff6-87af-3649a5d0b33c
+  kind: question
+  answer_type:
+  scope: intent
+  body: |-
+    # PRD: Infrastructure
+
+    - **Status:** Draft
+  title: Prd
+  spec_path: "/specs/system/infrastructure/prd.md"
+  author: system
+  stable_ref: spec:933ed8c0adebd963aa7ed3d2eb1ba1fc37baac5229a002915d0f55bf3f518e4d
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &191 2026-04-10 15:58:22.610462000 Z
+    zone: *2
+    time: *191
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &192 2026-04-10 15:58:22.610533000 Z
+    zone: *2
+    time: *192
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &193 2026-04-10 15:58:22.610533000 Z
+    zone: *2
+    time: *193
+  level:
+  citations: []
+  status: proposed
+- id: e6de4052-3c58-4be9-8834-848cf4db1354
+  kind: question
+  answer_type:
+  scope: intent
+  body: |-
+    # Infrastructure
+
+    ## Phase Model
+  title: Spec
+  spec_path: "/specs/system/infrastructure/spec.md"
+  author: system
+  stable_ref: spec:5903fc9cefdadd1bed5b1c19f1bd9c263df04df23d33c35ada014afb0af5dc6b
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &194 2026-04-10 15:58:22.611752000 Z
+    zone: *2
+    time: *194
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &195 2026-04-10 15:58:22.612061000 Z
+    zone: *2
+    time: *195
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &196 2026-04-10 15:58:22.612061000 Z
+    zone: *2
+    time: *196
+  level:
+  citations: []
+  status: proposed
+- id: 915e4d4f-8c67-4cd8-aa2b-b9f860df0e39
+  kind: question
+  answer_type:
+  scope: intent
+  body: |-
+    # PRD: Knowledge
+
+    - **Status:** Draft
+  title: Prd
+  spec_path: "/specs/system/knowledge/prd.md"
+  author: system
+  stable_ref: spec:737a6ef80f341b193bc9b4bc5279ae44d7e0f431f4b47d1a537f36789411c15a
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &197 2026-04-10 15:58:22.613285000 Z
+    zone: *2
+    time: *197
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &198 2026-04-10 15:58:22.613346000 Z
+    zone: *2
+    time: *198
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &199 2026-04-10 15:58:22.613346000 Z
+    zone: *2
+    time: *199
+  level:
+  citations: []
+  status: proposed
+- id: c1841ae2-41b2-4ac6-af7d-f65439b9daca
+  kind: question
+  answer_type:
+  scope: intent
+  body: |-
+    # Knowledge
+
+    ## What It Does
+  title: Spec
+  spec_path: "/specs/system/knowledge/spec.md"
+  author: system
+  stable_ref: spec:491fe0baf08894ac1e1ab612600cdf1c08b4317c3e9c46d9d4fb3b858087dac4
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &200 2026-04-10 15:58:22.614535000 Z
+    zone: *2
+    time: *200
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &201 2026-04-10 15:58:22.614602000 Z
+    zone: *2
+    time: *201
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &202 2026-04-10 15:58:22.614602000 Z
+    zone: *2
+    time: *202
+  level:
+  citations: []
+  status: proposed
+- id: 2358324e-0fff-4c4a-a0c4-e81246c73a38
+  kind: question
+  answer_type:
+  scope: intent
+  body: |-
+    # PRD: Ledger
+
+    - **Status:** Draft
+  title: Prd
+  spec_path: "/specs/system/ledger/prd.md"
+  author: system
+  stable_ref: spec:91ffed89397be5ec23a03100dfe8d634ef0ca0c132ecaac650f875d6ea6b6893
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &203 2026-04-10 15:58:22.615812000 Z
+    zone: *2
+    time: *203
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &204 2026-04-10 15:58:22.615868000 Z
+    zone: *2
+    time: *204
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &205 2026-04-10 15:58:22.615868000 Z
+    zone: *2
+    time: *205
+  level:
+  citations: []
+  status: proposed
+- id: 5c670bc3-89a1-4178-bed1-101349a3b246
+  kind: question
+  answer_type:
+  scope: intent
+  body: |-
+    # Ledger
+
+    ## What It Does
+  title: Spec
+  spec_path: "/specs/system/ledger/spec.md"
+  author: system
+  stable_ref: spec:a79d1955cd2dd57501dcb5d2dcd059c7d9b1084674f3dfdd776615aae7e643f3
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &206 2026-04-10 15:58:22.617887000 Z
+    zone: *2
+    time: *206
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &207 2026-04-10 15:58:22.617948000 Z
+    zone: *2
+    time: *207
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &208 2026-04-10 15:58:22.617948000 Z
+    zone: *2
+    time: *208
+  level:
+  citations: []
+  status: proposed
+- id: d661a60f-c76c-4a98-bd72-70137d496da8
+  kind: question
+  answer_type:
+  scope: intent
+  body: |-
+    # Ledger UI
+
+    - **Status:** Draft
+  title: Ui
+  spec_path: "/specs/system/ledger/ui.md"
+  author: system
+  stable_ref: spec:c12a29ef718b4e86902b0af8690b45670369d274662a9ea088ff3ef1380cb273
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &209 2026-04-10 15:58:22.619089000 Z
+    zone: *2
+    time: *209
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &210 2026-04-10 15:58:22.619153000 Z
+    zone: *2
+    time: *210
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &211 2026-04-10 15:58:22.619153000 Z
+    zone: *2
+    time: *211
+  level:
+  citations: []
+  status: proposed
+- id: e9431df9-f865-4c24-8113-c6abe270807f
+  kind: question
+  answer_type:
+  scope: intent
+  body: |-
+    # Log Tail Relay
+
+    <!-- status: proposed -->
+  title: Log tail relay
+  spec_path: "/specs/system/log-tail-relay.md"
+  author: system
+  stable_ref: spec:f2ce9ab07b2930f55d20467145cb0283bd267618f3b0276df67a9c559df4999e
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &212 2026-04-10 15:58:22.620486000 Z
+    zone: *2
+    time: *212
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &213 2026-04-10 15:58:22.620538000 Z
+    zone: *2
+    time: *213
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &214 2026-04-10 15:58:22.620538000 Z
+    zone: *2
+    time: *214
+  level:
+  citations: []
+  status: proposed
+- id: daa0a517-9358-4e6d-88f6-1227f8040795
+  kind: question
+  answer_type:
+  scope: intent
+  body: |-
+    # Practices
+
+    Practices files live in `specs/practices/` and are indexed into the knowledge base.
+  title: Practices
+  spec_path: "/specs/system/practices.md"
+  author: system
+  stable_ref: spec:4ac5014b1323c92f499f7ef3679cd8bf8ad601810e144db1412745d05f940551
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &215 2026-04-10 15:58:22.621669000 Z
+    zone: *2
+    time: *215
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &216 2026-04-10 15:58:22.621897000 Z
+    zone: *2
+    time: *216
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &217 2026-04-10 15:58:22.621897000 Z
+    zone: *2
+    time: *217
+  level:
+  citations: []
+  status: proposed
+- id: ea168c4a-cd78-485e-a33b-f9a34db30d02
+  kind: question
+  answer_type:
+  scope: intent
+  body: |-
+    # PRD: Sandbox
+
+    - **Status:** Draft
+  title: Prd
+  spec_path: "/specs/system/sandbox/prd.md"
+  author: system
+  stable_ref: spec:c02de3c402b7b9db8402507a1873b29fe431ef15afb8373ecf879243b0a17faf
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &218 2026-04-10 15:58:22.623021000 Z
+    zone: *2
+    time: *218
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &219 2026-04-10 15:58:22.623072000 Z
+    zone: *2
+    time: *219
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &220 2026-04-10 15:58:22.623072000 Z
+    zone: *2
+    time: *220
+  level:
+  citations: []
+  status: proposed
+- id: 81ea17aa-f42f-46f4-a696-0de6e3877f5c
+  kind: question
+  answer_type:
+  scope: intent
+  body: |-
+    # Sandbox Module
+
+    ## What It Does
+  title: Spec
+  spec_path: "/specs/system/sandbox/spec.md"
+  author: system
+  stable_ref: spec:133913d245026a071dd1deda5585b9fa14152fd8c323d7e4a4eb0d5e26ece01c
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &221 2026-04-10 15:58:22.624130000 Z
+    zone: *2
+    time: *221
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &222 2026-04-10 15:58:22.624178000 Z
+    zone: *2
+    time: *222
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &223 2026-04-10 15:58:22.624178000 Z
+    zone: *2
+    time: *223
+  level:
+  citations: []
+  status: proposed
+- id: 13734f00-a628-4652-9215-f22235a75b95
+  kind: question
+  answer_type:
+  scope: code
+  body: 12.1 — Knowledge::LibraryItem model + migration
+  title:
+  spec_path:
+  author: system
+  stable_ref: knowledge-library-item
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &224 2026-04-10 15:58:22.896529000 Z
+    zone: *2
+    time: *224
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &225 2026-04-10 15:58:22.896620000 Z
+    zone: *2
+    time: *225
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &226 2026-04-10 15:58:22.896620000 Z
+    zone: *2
+    time: *226
+  level:
+  citations: []
+  status: closed
+- id: c0f19e28-7746-423f-ac18-af965624133d
+  kind: question
+  answer_type:
+  scope: code
+  body: 12.2 — Knowledge::MdChunker service
+  title:
+  spec_path:
+  author: system
+  stable_ref: knowledge-md-chunker
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &227 2026-04-10 15:58:22.898109000 Z
+    zone: *2
+    time: *227
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &228 2026-04-10 15:58:22.898199000 Z
+    zone: *2
+    time: *228
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &229 2026-04-10 15:58:22.898199000 Z
+    zone: *2
+    time: *229
+  level:
+  citations: []
+  status: closed
+- id: 49d3d391-a35e-41d6-ae2f-1902f5f7d40d
+  kind: question
+  answer_type:
+  scope: code
+  body: 12.3 — Knowledge::EmbedderService + OpenAiEmbedder
+  title:
+  spec_path:
+  author: system
+  stable_ref: knowledge-embedder
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &230 2026-04-10 15:58:22.899533000 Z
+    zone: *2
+    time: *230
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &231 2026-04-10 15:58:22.899600000 Z
+    zone: *2
+    time: *231
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &232 2026-04-10 15:58:22.899600000 Z
+    zone: *2
+    time: *232
+  level:
+  citations: []
+  status: closed
+- id: 96bcf57e-0eed-431e-a526-0186f3e4634c
+  kind: question
+  answer_type:
+  scope: code
+  body: 15.1 — Agents::AgentRun model + migration
+  title:
+  spec_path:
+  author: system
+  stable_ref: agents-agent-run
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &233 2026-04-10 15:58:22.900712000 Z
+    zone: *2
+    time: *233
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &234 2026-04-10 15:58:22.900764000 Z
+    zone: *2
+    time: *234
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &235 2026-04-10 15:58:22.900764000 Z
+    zone: *2
+    time: *235
+  level:
+  citations: []
+  status: closed
+- id: 22270257-6208-4e5a-8bbf-c042876fe1dd
+  kind: question
+  answer_type:
+  scope: code
+  body: 15.4 — Agents::ProviderAdapter + concrete adapters
+  title:
+  spec_path:
+  author: system
+  stable_ref: agents-provider-adapters
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &236 2026-04-10 15:58:22.901793000 Z
+    zone: *2
+    time: *236
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &237 2026-04-10 15:58:22.901846000 Z
+    zone: *2
+    time: *237
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &238 2026-04-10 15:58:22.901846000 Z
+    zone: *2
+    time: *238
+  level:
+  citations: []
+  status: closed
+- id: e441295f-39f2-4447-a9a8-b08e4431246f
+  kind: question
+  answer_type:
+  scope: code
+  body: 15.2 — Agents::AgentRunTurn model + migration
+  title:
+  spec_path:
+  author: system
+  stable_ref: agents-agent-run-turn
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &239 2026-04-10 15:58:22.903429000 Z
+    zone: *2
+    time: *239
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &240 2026-04-10 15:58:22.903489000 Z
+    zone: *2
+    time: *240
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &241 2026-04-10 15:58:22.903489000 Z
+    zone: *2
+    time: *241
+  level:
+  citations: []
+  status: closed
+- id: f6f110c0-2ec4-4a47-8f66-bf28d275a699
+  kind: question
+  answer_type:
+  scope: code
+  body: 15.3 — Agents::PromptDeduplicator service
+  title:
+  spec_path:
+  author: system
+  stable_ref: agents-prompt-dedup
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &242 2026-04-10 15:58:22.904428000 Z
+    zone: *2
+    time: *242
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &243 2026-04-10 15:58:22.904484000 Z
+    zone: *2
+    time: *243
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &244 2026-04-10 15:58:22.904484000 Z
+    zone: *2
+    time: *244
+  level:
+  citations: []
+  status: closed
+- id: ca38afaf-5be4-40ec-b846-aec9b269bb95
+  kind: question
+  answer_type:
+  scope: code
+  body: 12.4 — Knowledge::ContextRetriever service
+  title:
+  spec_path:
+  author: system
+  stable_ref: knowledge-context-retriever
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &245 2026-04-10 15:58:22.905465000 Z
+    zone: *2
+    time: *245
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &246 2026-04-10 15:58:22.905525000 Z
+    zone: *2
+    time: *246
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &247 2026-04-10 15:58:22.905525000 Z
+    zone: *2
+    time: *247
+  level:
+  citations: []
+  status: closed
+- id: ee314b17-5553-4d7a-a415-4d1b39f8bd2d
+  kind: question
+  answer_type:
+  scope: code
+  body: 12.5 — Knowledge::IndexerJob
+  title:
+  spec_path:
+  author: system
+  stable_ref: knowledge-indexer-job
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &248 2026-04-10 15:58:22.906663000 Z
+    zone: *2
+    time: *248
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &249 2026-04-10 15:58:22.906718000 Z
+    zone: *2
+    time: *249
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &250 2026-04-10 15:58:22.906718000 Z
+    zone: *2
+    time: *250
+  level:
+  citations: []
+  status: closed
+- id: 9e65943a-3f61-4d2c-b292-602af411d940
+  kind: question
+  answer_type:
+  scope: code
+  body: 14.1 — Sandbox::ContainerRun model + migration
+  title:
+  spec_path:
+  author: system
+  stable_ref: sandbox-container-run
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &251 2026-04-10 15:58:22.907836000 Z
+    zone: *2
+    time: *251
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &252 2026-04-10 15:58:22.907883000 Z
+    zone: *2
+    time: *252
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &253 2026-04-10 15:58:22.907883000 Z
+    zone: *2
+    time: *253
+  level:
+  citations: []
+  status: closed
+- id: b7e260b1-cb68-42e1-93bc-9d7445e88ab2
+  kind: question
+  answer_type:
+  scope: code
+  body: 14.2 — Sandbox::DockerDispatcher service
+  title:
+  spec_path:
+  author: system
+  stable_ref: sandbox-docker-dispatcher
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &254 2026-04-10 15:58:22.908820000 Z
+    zone: *2
+    time: *254
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &255 2026-04-10 15:58:22.908870000 Z
+    zone: *2
+    time: *255
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &256 2026-04-10 15:58:22.908870000 Z
+    zone: *2
+    time: *256
+  level:
+  citations: []
+  status: closed
+- id: 2e46b772-c152-4c8c-afda-2c22b1267ab8
+  kind: question
+  answer_type:
+  scope: code
+  body: 15.5 — Agents::AgentRunsController
+  title:
+  spec_path:
+  author: system
+  stable_ref: agents-controller
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &257 2026-04-10 15:58:22.909796000 Z
+    zone: *2
+    time: *257
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &258 2026-04-10 15:58:22.909843000 Z
+    zone: *2
+    time: *258
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &259 2026-04-10 15:58:22.909843000 Z
+    zone: *2
+    time: *259
+  level:
+  citations: []
+  status: closed
+- id: 78196d26-f233-4802-9b02-4a9bedda2311
+  kind: question
+  answer_type:
+  scope: code
+  body: 15.6 — Kiro agent config files
+  title:
+  spec_path:
+  author: system
+  stable_ref: agents-kiro-configs
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &260 2026-04-10 15:58:22.911365000 Z
+    zone: *2
+    time: *260
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &261 2026-04-10 15:58:22.911420000 Z
+    zone: *2
+    time: *261
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &262 2026-04-10 15:58:22.911420000 Z
+    zone: *2
+    time: *262
+  level:
+  citations: []
+  status: closed
+- id: 912254a6-035d-4a3b-9eeb-f0ee275cf74e
+  kind: question
+  answer_type:
+  scope: code
+  body: 11.1 — Analytics::FeatureFlag model + migration
+  title:
+  spec_path:
+  author: system
+  stable_ref: ff-model
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &263 2026-04-10 15:58:22.912353000 Z
+    zone: *2
+    time: *263
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &264 2026-04-10 15:58:22.912399000 Z
+    zone: *2
+    time: *264
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &265 2026-04-10 15:58:22.912399000 Z
+    zone: *2
+    time: *265
+  level:
+  citations: []
+  status: closed
+- id: cfee6bf5-a39b-4162-b329-aafe59d14188
+  kind: question
+  answer_type:
+  scope: code
+  body: 11.2 — Feature flags API controller
+  title:
+  spec_path:
+  author: system
+  stable_ref: ff-controller
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &266 2026-04-10 15:58:22.913350000 Z
+    zone: *2
+    time: *266
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &267 2026-04-10 15:58:22.913438000 Z
+    zone: *2
+    time: *267
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &268 2026-04-10 15:58:22.913438000 Z
+    zone: *2
+    time: *268
+  level:
+  citations: []
+  status: proposed
+- id: a6488839-9ed7-401e-81a9-837b92098e44
+  kind: question
+  answer_type:
+  scope: code
+  body: 13.1 — Analytics::AnalyticsEvent model + migration
+  title:
+  spec_path:
+  author: system
+  stable_ref: analytics-event-model
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &269 2026-04-10 15:58:22.914569000 Z
+    zone: *2
+    time: *269
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &270 2026-04-10 15:58:22.914621000 Z
+    zone: *2
+    time: *270
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &271 2026-04-10 15:58:22.914621000 Z
+    zone: *2
+    time: *271
+  level:
+  citations: []
+  status: proposed
+- id: 956c9f7d-3812-47b6-b027-b624a45ec2d1
+  kind: question
+  answer_type:
+  scope: code
+  body: 13.2 — Analytics::AuditEvent model + migration
+  title:
+  spec_path:
+  author: system
+  stable_ref: analytics-audit-event-model
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &272 2026-04-10 15:58:22.915757000 Z
+    zone: *2
+    time: *272
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &273 2026-04-10 15:58:22.915808000 Z
+    zone: *2
+    time: *273
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &274 2026-04-10 15:58:22.915808000 Z
+    zone: *2
+    time: *274
+  level:
+  citations: []
+  status: proposed
+- id: 72a255d0-44f0-4715-aef8-c942333b2c4c
+  kind: question
+  answer_type:
+  scope: code
+  body: 13.3 — Analytics::LlmMetric model + migration
+  title:
+  spec_path:
+  author: system
+  stable_ref: analytics-llm-metric-model
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &275 2026-04-10 15:58:22.916763000 Z
+    zone: *2
+    time: *275
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &276 2026-04-10 15:58:22.916810000 Z
+    zone: *2
+    time: *276
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &277 2026-04-10 15:58:22.916810000 Z
+    zone: *2
+    time: *277
+  level:
+  citations: []
+  status: proposed
+- id: a65c292b-26e7-4721-bc0c-33847a20768d
+  kind: question
+  answer_type:
+  scope: code
+  body: 13.4 — Analytics::AuditLogger service + AuditLogJob
+  title:
+  spec_path:
+  author: system
+  stable_ref: analytics-audit-logger
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &278 2026-04-10 15:58:22.917743000 Z
+    zone: *2
+    time: *278
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &279 2026-04-10 15:58:22.917791000 Z
+    zone: *2
+    time: *279
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &280 2026-04-10 15:58:22.917791000 Z
+    zone: *2
+    time: *280
+  level:
+  citations: []
+  status: proposed
+- id: b0310190-d65a-4bda-9010-4f9a78fb7da3
+  kind: question
+  answer_type:
+  scope: code
+  body: 13.5 — Analytics::MetricsController (query API)
+  title:
+  spec_path:
+  author: system
+  stable_ref: analytics-metrics-controller
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &281 2026-04-10 15:58:22.919222000 Z
+    zone: *2
+    time: *281
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &282 2026-04-10 15:58:22.919282000 Z
+    zone: *2
+    time: *282
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &283 2026-04-10 15:58:22.919282000 Z
+    zone: *2
+    time: *283
+  level:
+  citations: []
+  status: proposed
+- id: 171b68bd-95ec-48c0-97c8-8a281d9a3963
+  kind: question
+  answer_type:
+  scope: code
+  body: 10.1 — Configure rswag and Swagger UI
+  title:
+  spec_path:
+  author: system
+  stable_ref: api-rswag-setup
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &284 2026-04-10 15:58:22.920369000 Z
+    zone: *2
+    time: *284
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &285 2026-04-10 15:58:22.920419000 Z
+    zone: *2
+    time: *285
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &286 2026-04-10 15:58:22.920419000 Z
+    zone: *2
+    time: *286
+  level:
+  citations: []
+  status: proposed
+- id: a4092037-74ed-4de5-868a-6dccfce3f4d8
+  kind: question
+  answer_type:
+  scope: code
+  body: 10.2 — Convert existing request specs to rswag format
+  title:
+  spec_path:
+  author: system
+  stable_ref: api-rswag-convert
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &287 2026-04-10 15:58:22.921419000 Z
+    zone: *2
+    time: *287
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &288 2026-04-10 15:58:22.921476000 Z
+    zone: *2
+    time: *288
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &289 2026-04-10 15:58:22.921476000 Z
+    zone: *2
+    time: *289
+  level:
+  citations: []
+  status: proposed
+- id: 4bc376b6-933a-48a1-867e-a9a496e09100
+  kind: question
+  answer_type:
+  scope: code
+  body: '7.1 — SPIKE: Go runner source decision'
+  title:
+  spec_path:
+  author: system
+  stable_ref: spike-go-runner-source
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &290 2026-04-10 15:58:22.922555000 Z
+    zone: *2
+    time: *290
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &291 2026-04-10 15:58:22.922605000 Z
+    zone: *2
+    time: *291
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &292 2026-04-10 15:58:22.922605000 Z
+    zone: *2
+    time: *292
+  level:
+  citations: []
+  status: proposed
+- id: c5849bf7-6fda-418f-95a5-63ee4a05da89
+  kind: question
+  answer_type:
+  scope: code
+  body: '7.2 — SPIKE: Redis necessity in Phase 0'
+  title:
+  spec_path:
+  author: system
+  stable_ref: spike-redis-phase0
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &293 2026-04-10 15:58:22.923760000 Z
+    zone: *2
+    time: *293
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &294 2026-04-10 15:58:22.923808000 Z
+    zone: *2
+    time: *294
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &295 2026-04-10 15:58:22.923808000 Z
+    zone: *2
+    time: *295
+  level:
+  citations: []
+  status: proposed
+- id: 7810dd3f-c0d9-4ee5-b1c8-273c4f94a196
+  kind: question
+  answer_type:
+  scope: code
+  body: '7.3 — SPIKE: Multi-tenancy scope for Phase 0'
+  title:
+  spec_path:
+  author: system
+  stable_ref: spike-multi-tenancy
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &296 2026-04-10 15:58:22.924753000 Z
+    zone: *2
+    time: *296
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &297 2026-04-10 15:58:22.924800000 Z
+    zone: *2
+    time: *297
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &298 2026-04-10 15:58:22.924800000 Z
+    zone: *2
+    time: *298
+  level:
+  citations: []
+  status: proposed
+- id: f0be2866-f5e9-40f7-bf52-0d9ad0d318dc
+  kind: question
+  answer_type:
+  scope: code
+  body: 8.2 — Fix LOOKUP.md naming inconsistencies
+  title:
+  spec_path:
+  author: system
+  stable_ref: fix-lookup-naming
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &299 2026-04-10 15:58:22.925727000 Z
+    zone: *2
+    time: *299
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &300 2026-04-10 15:58:22.925772000 Z
+    zone: *2
+    time: *300
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &301 2026-04-10 15:58:22.925772000 Z
+    zone: *2
+    time: *301
+  level:
+  citations: []
+  status: proposed
+- id: 364ced3e-b092-4940-9864-93874c74c86e
+  kind: question
+  answer_type:
+  scope: code
+  body: 17.1 — Add has_blockers filter to LedgerController#open
+  title:
+  spec_path:
+  author: system
+  stable_ref: ledger-ui-has-blockers
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &302 2026-04-10 15:58:22.926717000 Z
+    zone: *2
+    time: *302
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &303 2026-04-10 15:58:22.926764000 Z
+    zone: *2
+    time: *303
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &304 2026-04-10 15:58:22.926764000 Z
+    zone: *2
+    time: *304
+  level:
+  citations: []
+  status: proposed
+- id: d2499291-c83e-458a-87a6-8647206bc8e3
+  kind: question
+  answer_type:
+  scope: code
+  body: 17.2 — Show resolution field on node detail page
+  title:
+  spec_path:
+  author: system
+  stable_ref: ledger-ui-resolution
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &305 2026-04-10 15:58:22.928222000 Z
+    zone: *2
+    time: *305
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &306 2026-04-10 15:58:22.928271000 Z
+    zone: *2
+    time: *306
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &307 2026-04-10 15:58:22.928271000 Z
+    zone: *2
+    time: *307
+  level:
+  citations: []
+  status: proposed
+- id: b1d3709c-0bcb-4aad-8def-3ba7194e3369
+  kind: question
+  answer_type:
+  scope: code
+  body: 16.1 — Go runner sidecar (Dockerfile.runner + source)
+  title:
+  spec_path:
+  author: system
+  stable_ref: go-runner-sidecar
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &308 2026-04-10 15:58:22.929195000 Z
+    zone: *2
+    time: *308
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &309 2026-04-10 15:58:22.929239000 Z
+    zone: *2
+    time: *309
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &310 2026-04-10 15:58:22.929239000 Z
+    zone: *2
+    time: *310
+  level:
+  citations: []
+  status: proposed
+- id: 4b3f35ca-3930-46c3-bbed-ba2d58182d28
+  kind: question
+  answer_type:
+  scope: code
+  body: 16.2 — Go analytics ingest sidecar (Dockerfile.analytics + source)
+  title:
+  spec_path:
+  author: system
+  stable_ref: go-analytics-sidecar
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &311 2026-04-10 15:58:22.930156000 Z
+    zone: *2
+    time: *311
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &312 2026-04-10 15:58:22.930314000 Z
+    zone: *2
+    time: *312
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &313 2026-04-10 15:58:22.930314000 Z
+    zone: *2
+    time: *313
+  level:
+  citations: []
+  status: proposed
+- id: c0f73af9-a2eb-4798-b222-bbfca997c095
+  kind: question
+  answer_type:
+  scope: code
+  body: 16.3 — Wire FeatureFlag.enabled? to fire $feature_flag_called via analytics
+    sidecar
+  title:
+  spec_path:
+  author: system
+  stable_ref: ff-exposure-event
+  version: 1
+  resolution:
+  conflict: false
+  conflict_disk_state:
+  conflict_db_state:
+  org_id: 00000000-0000-0000-0000-000000000001
+  recorded_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &314 2026-04-10 15:58:22.931482000 Z
+    zone: *2
+    time: *314
+  originated_at:
+  created_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &315 2026-04-10 15:58:22.931537000 Z
+    zone: *2
+    time: *315
+  updated_at: !ruby/object:ActiveSupport::TimeWithZone
+    utc: &316 2026-04-10 15:58:22.931537000 Z
+    zone: *2
+    time: *316
+  level:
+  citations: []
+  status: proposed
 node_edges: []
 audit_events: []
-exported_at: '2026-04-10T15:56:46Z'
+exported_at: '2026-04-10T18:24:42Z'

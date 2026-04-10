@@ -31,6 +31,12 @@ module Ledger
     has_many :audit_events, class_name: "Ledger::NodeAuditEvent", foreign_key: :node_id,
                             dependent: :restrict_with_error
 
+    has_many :parent_edges, class_name: "Ledger::NodeEdge", foreign_key: :child_id, dependent: :destroy
+    has_many :child_edges,  class_name: "Ledger::NodeEdge", foreign_key: :parent_id, dependent: :destroy
+
+    has_many :parents,  through: :parent_edges, source: :parent
+    has_many :children, through: :child_edges,  source: :child
+
     validates :kind,        inclusion: { in: KINDS }
     validates :scope,       inclusion: { in: SCOPES }
     validates :level,       inclusion: { in: LEVELS }, allow_nil: true
