@@ -64,6 +64,7 @@ module Ledger
         author: 'human',
         stable_ref: SecureRandom.hex(16),
         org_id: @node.org_id,
+        project_id: @node.project_id,
         recorded_at: Time.current
       )
 
@@ -90,7 +91,7 @@ module Ledger
       params.require(:node).permit(
         :kind, :answer_type, :scope, :body, :title, :spec_path,
         :author, :stable_ref, :status, :resolution,
-        :org_id, :recorded_at, :originated_at
+        :org_id, :recorded_at, :originated_at, :project_id
       )
     end
   end

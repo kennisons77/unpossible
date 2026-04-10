@@ -4,12 +4,13 @@ require "rails_helper"
 
 RSpec.describe Ledger::PlanFileSyncService do
   let(:org_id) { SecureRandom.uuid }
+  let(:project) { create(:ledger_project, org_id: org_id) }
 
   def sync(content)
     Tempfile.create(["plan", ".md"]) do |f|
       f.write(content)
       f.flush
-      described_class.sync(plan_path: f.path, org_id: org_id)
+      described_class.sync(plan_path: f.path, org_id: org_id, project_id: project.id)
     end
   end
 
@@ -88,7 +89,8 @@ RSpec.describe Ledger::PlanFileSyncService do
 
     it "does not affect nodes from other orgs" do
       other_org = SecureRandom.uuid
-      create(:ledger_node, stable_ref: "task-011", org_id: other_org, scope: "code", author: "system")
+      other_project = create(:ledger_project, org_id: other_org)
+      create(:ledger_node, stable_ref: "task-011", org_id: other_org, scope: "code", author: "system", project: other_project)
 
       sync("- [ ] Something else <!-- ref: task-012 -->")
       expect(Ledger::Node.find_by(stable_ref: "task-011", org_id: other_org).resolution).to be_nil

@@ -4,13 +4,14 @@ module Ledger
   class PlanFileSyncService
     CHECKBOX_RE = /^\s*-\s*\[(?<checked>[xX ])\]\s+(?<body>.+?)(?:\s*<!--\s*ref:\s*(?<ref>[^\s>]+)\s*-->)?$/
 
-    def self.sync(plan_path:, org_id:)
-      new(plan_path: plan_path, org_id: org_id).sync
+    def self.sync(plan_path:, org_id:, project_id:)
+      new(plan_path: plan_path, org_id: org_id, project_id: project_id).sync
     end
 
-    def initialize(plan_path:, org_id:)
-      @plan_path = plan_path
-      @org_id    = org_id
+    def initialize(plan_path:, org_id:, project_id:)
+      @plan_path  = plan_path
+      @org_id     = org_id
+      @project_id = project_id
     end
 
     def sync
@@ -36,6 +37,7 @@ module Ledger
             title:       title,
             stable_ref:  stable_ref,
             org_id:      @org_id,
+            project_id:  @project_id,
             recorded_at: Time.current,
             status:      checked ? "closed" : "proposed"
           )
