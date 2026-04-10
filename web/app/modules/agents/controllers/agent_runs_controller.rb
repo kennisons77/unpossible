@@ -5,57 +5,30 @@ module Agents
     before_action :authenticate!
     before_action :set_agent_run, only: %i[complete input]
 
-    # POST /api/agent_runs/start
     def start
-      # Dedup check
-      if params[:prompt_sha256].present? && params[:mode].present?
-        cached = PromptDeduplicator.call(
-          prompt_sha256: params[:prompt_sha256],
-          mode: params[:mode]
-        )
-        if cached
-          render json: cached, status: :ok
-          return
-        end
-      end
-
-      # Concurrent run check — one active run per actor
-      if AgentRun.where(actor_id: params[:actor_id], status: %w[running waiting_for_input]).exists?
-        render json: { error: 'Concurrent run already active for this actor' }, status: :conflict
-        return
-      end
-
-      run = AgentRun.new(agent_run_params.merge(status: 'running'))
-      if run.save
-        render json: run, status: :created
-      else
-        if run.errors[:run_id]&.include?('has already been taken')
-          render json: { error: 'Duplicate run_id' }, status: :unprocessable_entity
-        else
-          render json: { errors: run.errors.full_messages }, status: :unprocessable_entity
-        end
-      end
+      result = RunStorageService.start(agent_run_params)
+      status = result[:cached] ? :ok : :created
+      render json: result[:run], status: status
+    rescue RunStorageService::ConcurrentRunError
+      render json: { error: "Concurrent run already active for this actor" }, status: :conflict
+    rescue RunStorageService::DuplicateRunError
+      render json: { error: "Duplicate run_id" }, status: :unprocessable_entity
+    rescue ActiveRecord::RecordInvalid => e
+      render json: { errors: e.record.errors.full_messages }, status: :unprocessable_entity
     end
 
-    # POST /api/agent_runs/:id/complete
     def complete
       unless sidecar_authenticated?
-        render json: { error: 'Unauthorized' }, status: :unauthorized
+        render json: { error: "Unauthorized" }, status: :unauthorized
         return
       end
 
-      @agent_run.update!(complete_params.merge(status: 'completed'))
+      RunStorageService.complete(@agent_run, complete_params)
       render json: @agent_run
     end
 
-    # POST /api/agent_runs/:id/input
     def input
-      turn = @agent_run.turns.create!(
-        position: (@agent_run.turns.maximum(:position) || 0) + 1,
-        kind: 'human_input',
-        content: params[:content]
-      )
-      @agent_run.update!(status: 'running')
+      turn = RunStorageService.record_input(@agent_run, content: params[:content])
       render json: turn
     end
 
@@ -64,7 +37,7 @@ module Agents
     def set_agent_run
       @agent_run = AgentRun.find(params[:id])
     rescue ActiveRecord::RecordNotFound
-      render json: { error: 'Not found' }, status: :not_found
+      render json: { error: "Not found" }, status: :not_found
     end
 
     def sidecar_authenticated?

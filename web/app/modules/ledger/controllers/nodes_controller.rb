@@ -7,7 +7,7 @@ module Ledger
 
     # GET /api/nodes
     def index
-      nodes = Ledger::Node.all
+      nodes = Ledger::Node.where(org_id: current_org_id)
       nodes = nodes.where(scope: params[:scope]) if params[:scope].present?
       nodes = nodes.where(status: params[:status]) if params[:status].present?
       nodes = nodes.where(resolution: params[:resolution]) if params[:resolution].present?
@@ -23,7 +23,7 @@ module Ledger
 
     # POST /api/nodes
     def create
-      node = Ledger::Node.new(node_params)
+      node = Ledger::Node.new(node_params.merge(org_id: current_org_id))
       if node.save
         render json: node, status: :created
       else
@@ -81,7 +81,7 @@ module Ledger
     private
 
     def set_node
-      @node = Ledger::Node.find(params[:id])
+      @node = Ledger::Node.find_by!(id: params[:id], org_id: current_org_id)
     rescue ActiveRecord::RecordNotFound
       render json: { error: 'Not found' }, status: :not_found
     end

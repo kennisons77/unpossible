@@ -3,7 +3,7 @@
 require 'rails_helper'
 
 RSpec.describe 'Module scaffold' do
-  MODULES = %w[Knowledge Tasks Agents Sandbox Analytics].freeze
+  MODULES = %w[Knowledge Agents Sandbox Analytics].freeze
 
   describe 'namespace resolution' do
     MODULES.each do |mod|
