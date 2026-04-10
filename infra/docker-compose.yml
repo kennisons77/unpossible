@@ -4,13 +4,13 @@ services:
     build:
       context: ..
       dockerfile: infra/Dockerfile
-    image: unpossible2-rails:${GIT_SHA:-dev}
+    image: unpossible-rails:${GIT_SHA:-dev}
     environment:
       RAILS_ENV: development
       DB_HOST: postgres
-      POSTGRES_USER: unpossible2
-      POSTGRES_PASSWORD: unpossible2
-      POSTGRES_DB: unpossible2_development
+      POSTGRES_USER: unpossible
+      POSTGRES_PASSWORD: unpossible
+      POSTGRES_DB: unpossible_development
       AUTH_SECRET: ${AUTH_SECRET:-8d457c009922907ffbb3fa03283a27f101232e8f47d6c1312f3535a00de318a3}
       SIDECAR_TOKEN: ${SIDECAR_TOKEN:-dev-sidecar-token}
       DEFAULT_ORG_ID: ${DEFAULT_ORG_ID:-1}
@@ -26,42 +26,42 @@ services:
       postgres:
         condition: service_healthy
     networks:
-      - unpossible2
+      - unpossible
 
   # go_runner:
   #   build:
   #     context: ..
   #     dockerfile: infra/Dockerfile.runner
-  #   image: unpossible2-runner:${GIT_SHA:-dev}
+  #   image: unpossible-runner:${GIT_SHA:-dev}
   #   ports:
   #     - "8080:8080"
   #   networks:
-  #     - unpossible2
+  #     - unpossible
 
   # analytics:
   #   build:
   #     context: ..
   #     dockerfile: infra/Dockerfile.analytics
-  #   image: unpossible2-analytics:${GIT_SHA:-dev}
+  #   image: unpossible-analytics:${GIT_SHA:-dev}
   #   ports:
   #     - "9100:9100"
   #   networks:
-  #     - unpossible2
+  #     - unpossible
 
   postgres:
     container_name: postgres
     image: pgvector/pgvector:pg16
     environment:
-      POSTGRES_USER: unpossible2
-      POSTGRES_PASSWORD: unpossible2
-      POSTGRES_DB: unpossible2_development
+      POSTGRES_USER: unpossible
+      POSTGRES_PASSWORD: unpossible
+      POSTGRES_DB: unpossible_development
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U unpossible2"]
+      test: ["CMD-SHELL", "pg_isready -U unpossible"]
       interval: 5s
       timeout: 5s
       retries: 5
     networks:
-      - unpossible2
+      - unpossible
 
   # redis:
   #   image: redis:7-alpine
@@ -71,8 +71,8 @@ services:
   #     timeout: 5s
   #     retries: 5
   #   networks:
-  #     - unpossible2
+  #     - unpossible
 
 networks:
-  unpossible2:
+  unpossible:
     driver: bridge

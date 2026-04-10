@@ -5,7 +5,7 @@
 
 ## Purpose
 
-Investigate patterns for recursive / nested LLM calls — where an LLM invocation spawns further LLM calls as part of its execution. Relevant to unpossible2's subagent dispatch model and the producer/reviewer pattern.
+Investigate patterns for recursive / nested LLM calls — where an LLM invocation spawns further LLM calls as part of its execution. Relevant to unpossible's subagent dispatch model and the producer/reviewer pattern.
 
 ## Pinned References
 
@@ -22,4 +22,4 @@ Investigate patterns for recursive / nested LLM calls — where an LLM invocatio
 
 ## Next Step
 
-Run a spike loop against the pinned paper and any related work it cites. Output: a summary of applicable patterns and a recommendation for how unpossible2's subagent dispatch should handle recursive depth limits.
+Run a spike loop against the pinned paper and any related work it cites. Output: a summary of applicable patterns and a recommendation for how unpossible's subagent dispatch should handle recursive depth limits.

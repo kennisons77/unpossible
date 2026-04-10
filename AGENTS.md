@@ -60,9 +60,9 @@ start it with `open -a Docker` and wait ~10s for the socket to appear at
 | Variable | Default | Purpose |
 |---|---|---|
 | `DB_HOST` | `postgres` | Postgres hostname |
-| `POSTGRES_USER` | `unpossible2` | DB user |
-| `POSTGRES_PASSWORD` | `unpossible2` | DB password |
-| `POSTGRES_DB` | `unpossible2_test` | Test DB name |
+| `POSTGRES_USER` | `unpossible` | DB user |
+| `POSTGRES_PASSWORD` | `unpossible` | DB password |
+| `POSTGRES_DB` | `unpossible_test` | Test DB name |
 | `RAILS_ENV` | `test` | Rails environment |
 
 ## Server Operations
