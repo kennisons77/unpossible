@@ -4,7 +4,7 @@
 # Or from this directory: make <target>
 
 PROJECT_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
-ROOT_DIR := $(PROJECT_DIR)../../
+ROOT_DIR := $(PROJECT_DIR)
 LOOP := $(ROOT_DIR)loop.sh
 ACTIVE_PROJECT_FILE := $(ROOT_DIR)ACTIVE_PROJECT
 ENV_FILE := $(ROOT_DIR).env
@@ -108,7 +108,7 @@ up:
 	$(COMPOSE) up -d
 
 down:
-	@$(COMPOSE) exec rails bundle exec rails ledger:export bulk:export 2>/dev/null || echo "Snapshot skipped (container not running)"
+	@$(COMPOSE) exec rails bundle exec rake ledger:export bulk:export 2>/dev/null || echo "Snapshot skipped (container not running)"
 	$(COMPOSE) down
 
 restart:
@@ -137,16 +137,16 @@ db-reset:
 
 # --- Ledger persistence ---
 ledger-export:
-	$(COMPOSE) exec rails bundle exec rails ledger:export
+	$(COMPOSE) exec rails bundle exec rake ledger:export
 
 ledger-import:
-	$(COMPOSE) exec rails bundle exec rails ledger:import
+	$(COMPOSE) exec rails bundle exec rake ledger:import
 
 bulk-export:
-	$(COMPOSE) exec rails bundle exec rails bulk:export
+	$(COMPOSE) exec rails bundle exec rake bulk:export
 
 bulk-import:
-	$(COMPOSE) exec rails bundle exec rails bulk:import
+	$(COMPOSE) exec rails bundle exec rake bulk:import
 
 # --- Workflow ---
 

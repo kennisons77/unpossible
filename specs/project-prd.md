@@ -52,5 +52,5 @@ app/modules/
 
 - Multi-tenancy scope for Phase 0: single-org (hardcoded org_id = 1) or org creation flow?
 - MinIO: is it needed in Phase 0, and what is stored there?
-- loop.sh location: `projects/unpossible2/loop.sh` or monorepo root?
+- loop.sh location: project root `./loop.sh`
 - Go runner: copy from unpossible1 into `runner/` or reference as submodule?

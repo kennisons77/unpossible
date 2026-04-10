@@ -13,4 +13,9 @@ Rails.application.config.after_initialize do
   if Agents::AgentRun.table_exists? && !Agents::AgentRun.exists?
     Agents::BulkSnapshotService.import if File.exist?(File.join(Agents::BulkSnapshotService::SNAPSHOT_DIR, "meta.json"))
   end
+
+  # Start the spec watcher polling loop
+  if defined?(Ledger::SpecWatcherJob) && Ledger::Node.table_exists?
+    Ledger::SpecWatcherJob.perform_later
+  end
 end
