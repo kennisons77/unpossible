@@ -35,7 +35,7 @@ postgres       same image, tmpfs volume
 redis          same image, tmpfs volume
 ```
 
-All services on a single `unpossible2` bridge network. Postgres and Redis are never bound to `0.0.0.0` — internal network only.
+All services on a single `unpossible` bridge network. Postgres and Redis are never bound to `0.0.0.0` — internal network only.
 
 Image tags: always git SHA (`$(git rev-parse --short HEAD)`), never `latest`.
 
@@ -93,13 +93,13 @@ git push origin main
     ↓
 NixOS auto-update service (polls every 30s)
     ↓
-Detects new commit at /var/lib/unpossible2
+Detects new commit at /var/lib/unpossible
     ↓
 nixos-rebuild switch
     ↓
 kubectl apply -f infra/k8s/
     ↓
-kubectl rollout status deployment/unpossible2
+kubectl rollout status deployment/unpossible
     ↓
 Health check: curl http://localhost:3000/up
 ```

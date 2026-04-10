@@ -4,17 +4,17 @@ default: &default
   pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
   host: <%= ENV.fetch("DB_HOST", "postgres") %>
   port: <%= ENV.fetch("DB_PORT", 5432) %>
-  username: <%= ENV.fetch("POSTGRES_USER", "unpossible2") %>
-  password: <%= ENV.fetch("POSTGRES_PASSWORD", "unpossible2") %>
+  username: <%= ENV.fetch("POSTGRES_USER", "unpossible") %>
+  password: <%= ENV.fetch("POSTGRES_PASSWORD", "unpossible") %>
 
 development:
   <<: *default
-  database: unpossible2_development
+  database: unpossible_development
 
 test:
   <<: *default
-  database: <%= ENV.fetch("POSTGRES_DB", "unpossible2_test") %>
+  database: <%= ENV.fetch("POSTGRES_DB", "unpossible_test") %>
 
 production:
   <<: *default
-  database: unpossible2_production
+  database: unpossible_production

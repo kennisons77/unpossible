@@ -71,7 +71,7 @@ are the right tool for this job and would be worse in Ruby.
 ### Phase-gated infrastructure (planning.md)
 
 The Phase 0→3 ladder (local → CI → staging → production) is a concrete implementation of
-**Simplicity**. Keep it as the planning discipline for all unpossible2 projects.
+**Simplicity**. Keep it as the planning discipline for all unpossible projects.
 
 ### Git-per-iteration commit discipline
 
@@ -188,7 +188,7 @@ The Go runner passes `AGENT` and `MODEL` env vars; the Rails app sets them per t
 **Flexibility** and **Determinism** together — the system, not the LLM, decides which model runs.
 
 Loom's server-side LLM proxy pattern (LOOM_ANALYSIS.md §7) is the long-term target: API keys
-never leave the server, the CLI talks to a proxy endpoint. For unpossible2 Phase 0 this is
+never leave the server, the CLI talks to a proxy endpoint. For unpossible Phase 0 this is
 overkill — env vars are fine. Add it as a Phase 3 task.
 
 ### IDEAS.md promote flow is manual CLI only
@@ -225,7 +225,7 @@ RESEARCH.md schema already includes `org_id`/`tenant_id` for this reason.
 
 Loading every file in `specs/` every iteration is the current approach. Once the knowledge base
 exists, this is replaced by targeted retrieval. Don't carry the unconditional load pattern into
-unpossible2's prompt templates.
+unpossible's prompt templates.
 
 ---
 
@@ -238,7 +238,7 @@ In Rails: a `Secret` value object that overrides `inspect` and `to_s` to return 
 Never pass raw API keys to LLMs or log them. This is **Security** made structural.
 
 **Specs README as lookup table.** Loom's `specs/README.md` maps each spec to its implementing
-code. Adopt this for unpossible2: a `specs/README.md` table mapping each spec file to the Rails
+code. Adopt this for unpossible: a `specs/README.md` table mapping each spec file to the Rails
 module and the loop type that implements it. Keeps the agent oriented without loading every spec.
 
 **Core/implementation split.** Loom separates `loom-analytics-core` (types) from
@@ -248,13 +248,13 @@ calls go through the service interface only — no direct model access across mo
 This is the **Flexibility** principle made structural.
 
 **Audit log as a separate concern from application logging.** Loom separates `tracing` (ops
-logging) from the audit system (compliance/security). In unpossible2: Rails structured logging
+logging) from the audit system (compliance/security). In unpossible: Rails structured logging
 (Lograge) for ops; a dedicated `audit_events` table for security-relevant actions (who ran what
 loop, what was promoted, what was deleted). Never mix them.
 
 **Feature flags for hypothesis testing.** The pitch calls for testing hypotheses through feature
 flags and analytics. Loom's flag system (per-environment, kill switches, exposure tracking) is
-the reference. For unpossible2 Phase 0: a simple `feature_flags` table with key/enabled/variant
+the reference. For unpossible Phase 0: a simple `feature_flags` table with key/enabled/variant
 columns is sufficient. Design the schema so the Loom-style evaluation engine can be added later
 without a migration (**Simplicity** now, **Adaptability** later).
 
