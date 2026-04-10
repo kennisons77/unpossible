@@ -29,6 +29,7 @@ help:
 	@echo "  make config          Show runner config (agent, model, env vars)"
 	@echo "  make config AGENT=claude MODEL=opus   Set agent and model for this session"
 	@echo "  make test            Run test suite via docker compose"
+	@echo "  make sandbox         Launch Kiro CLI in a Docker sandbox"
 	@echo ""
 	@echo "Rails server:"
 	@echo "  make up              Start rails + postgres (detached)"
@@ -91,6 +92,9 @@ config:
 test:
 	$(COMPOSE_TEST) build
 	$(COMPOSE_TEST) run --rm test
+
+sandbox:
+	docker sandbox run kiro
 
 # --- Rails server ---
 docker-build:
@@ -155,7 +159,7 @@ plan1:
 	@cd $(ROOT_DIR) && AGENT=$(AGENT) MODEL=$(MODEL) $(LOOP) plan 1
 
 reflect:
-	@cd $(ROOT_DIR) && AGENT=$(AGENT) MODEL=$(MODEL) $(LOOP) reflect
+	@cd $(ROOT_DIR) && AGENT=$(AGENT) MODEL=$(MODEL) $(LOOP) reflects
 
 research:
 	@cd $(ROOT_DIR) && AGENT=$(AGENT) MODEL=$(MODEL) $(LOOP) research
@@ -175,4 +179,3 @@ review:
 
 server-ops:
 	@cd $(PROJECT_DIR) && $(AGENT) -- "$(shell cat $(PROJECT_DIR)specs/skills/workflows/server-ops.md)"
-

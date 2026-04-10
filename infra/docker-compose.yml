@@ -1,5 +1,6 @@
 services:
   rails:
+    container_name: rails
     build:
       context: ..
       dockerfile: infra/Dockerfile
@@ -43,6 +44,7 @@ services:
   #     - unpossible2
 
   postgres:
+    container_name: postgres
     image: pgvector/pgvector:pg16
     environment:
       POSTGRES_USER: unpossible2
