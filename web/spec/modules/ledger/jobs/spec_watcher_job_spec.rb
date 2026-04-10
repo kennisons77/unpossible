@@ -44,6 +44,8 @@ RSpec.describe Ledger::SpecWatcherJob, type: :job do
       expect(node.status).to eq("proposed")
       expect(node.author).to eq("system")
       expect(node.spec_path).to eq("specs/system/my-feature.md")
+      expect(node.project).to be_a(Ledger::Project)
+      expect(node.project.name).to eq(File.basename(@specs_root))
     end
 
     it "is idempotent — running twice does not create a duplicate" do

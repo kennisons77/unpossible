@@ -1,12 +1,28 @@
 <h1>Project Tree</h1>
 
-<form method="get">
-  <input name="q" value="<%= params[:q] %>" placeholder="Search title or body…">
-  <button type="submit">Search</button>
-</form>
-
-<ul>
-  <% @root_nodes.each do |node| %>
-    <%= render partial: "ledger/ledger/node_tree_item", locals: { node: node, children_map: @children_by_parent } %>
+<nav>
+  <%= link_to "All Projects", ledger_tree_path %>
+  <% if @current_project %>
+    / <strong><%= @current_project.name %></strong>
   <% end %>
-</ul>
+</nav>
+
+<% if @current_project %>
+  <form method="get">
+    <input type="hidden" name="project" value="<%= @current_project.name %>">
+    <input name="q" value="<%= params[:q] %>" placeholder="Search title or body…">
+    <button type="submit">Search</button>
+  </form>
+
+  <ul>
+    <% @root_nodes.each do |node| %>
+      <%= render partial: "ledger/ledger/node_tree_item", locals: { node: node, children_map: @children_by_parent } %>
+    <% end %>
+  </ul>
+<% else %>
+  <ul>
+    <% @projects.each do |project| %>
+      <li><%= link_to project.name, ledger_tree_path(project: project.name) %></li>
+    <% end %>
+  </ul>
+<% end %>

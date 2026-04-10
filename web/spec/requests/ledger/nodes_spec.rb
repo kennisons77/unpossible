@@ -6,6 +6,7 @@ RSpec.describe 'Ledger Nodes API', type: :request do
   let(:org_id) { SecureRandom.uuid }
   let(:token) { AuthToken.encode(org_id: org_id, user_id: 'user-1') }
   let(:headers) { { 'Authorization' => "Bearer #{token}", 'Content-Type' => 'application/json' } }
+  let(:project) { create(:ledger_project, org_id: org_id) }
 
   around do |example|
     original = ENV.fetch('AUTH_SECRET', nil)
@@ -24,7 +25,8 @@ RSpec.describe 'Ledger Nodes API', type: :request do
       stable_ref: SecureRandom.hex(16),
       org_id: org_id,
       recorded_at: Time.current.iso8601,
-      status: 'proposed'
+      status: 'proposed',
+      project_id: project.id
     }
   end
 

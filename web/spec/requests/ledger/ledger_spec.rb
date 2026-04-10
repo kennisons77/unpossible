@@ -6,6 +6,7 @@ RSpec.describe 'Ledger UI', type: :request do
   let(:org_id) { SecureRandom.uuid }
   let(:token) { AuthToken.encode(org_id: org_id, user_id: 'user-1') }
   let(:headers) { { 'Authorization' => "Bearer #{token}" } }
+  let(:project) { create(:ledger_project, org_id: org_id, name: 'test-project') }
 
   around do |example|
     original = ENV.fetch('AUTH_SECRET', nil)
@@ -77,10 +78,16 @@ RSpec.describe 'Ledger UI', type: :request do
         expect(response).to have_http_status(:ok)
       end
 
+      it 'lists projects' do
+        create_question(project: project)
+        get '/ledger/tree', headers: headers
+        expect(response.body).to include('test-project')
+      end
+
       it 'filters results when q param provided' do
-        create_question(title: 'unique-search-term', status: 'proposed')
-        create_question(title: 'other node', status: 'proposed')
-        get '/ledger/tree', params: { q: 'unique-search-term' }, headers: headers
+        create_question(title: 'unique-search-term', status: 'proposed', project: project)
+        create_question(title: 'other node', status: 'proposed', project: project)
+        get '/ledger/tree', params: { project: 'test-project', q: 'unique-search-term' }, headers: headers
         expect(response).to have_http_status(:ok)
         expect(response.body).to include('unique-search-term')
       end

@@ -6,6 +6,7 @@ RSpec.describe Ledger::Node, type: :model do
   subject(:node) { build(:ledger_node) }
 
   describe "associations" do
+    it { is_expected.to belong_to(:project).class_name("Ledger::Project") }
     it { is_expected.to have_many(:audit_events).class_name("Ledger::NodeAuditEvent").dependent(:restrict_with_error) }
     it { is_expected.to have_many(:parent_edges).class_name("Ledger::NodeEdge").with_foreign_key(:child_id).dependent(:destroy) }
     it { is_expected.to have_many(:child_edges).class_name("Ledger::NodeEdge").with_foreign_key(:parent_id).dependent(:destroy) }

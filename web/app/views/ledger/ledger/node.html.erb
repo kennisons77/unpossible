@@ -1,11 +1,11 @@
 <nav>
+<%= link_to a.title.presence || "(untitled)", ledger_node_path(a.id) %> /
   <% @ancestors.each do |a| %>
     <%= link_to a.title.presence || "(untitled)", ledger_node_path(a.id) %> /
   <% end %>
-  <strong><%= @node.title.presence || "(untitled)" %></strong>
 </nav>
 
-<h1><%= @node.title.presence || "(untitled)" %></h1>
+<!--<h1><%= @node.title.presence || "(untitled)" %></h1>-->
 <p>
   <em>
     <%= @node.kind %> · <%= @node.scope %><%= @node.level ? "/#{@node.level}" : "" %>

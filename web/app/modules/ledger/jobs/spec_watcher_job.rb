@@ -20,6 +20,7 @@ module Ledger
 
     def perform(specs_root: nil)
       root = specs_root || Rails.root.parent.to_s
+      @project = find_or_create_project(root)
       changed = process_specs(root)
       changed.each { |node| Knowledge::IndexerJob.perform_later(node.id.to_s) if defined?(Knowledge::IndexerJob) }
       sync_plan(root)
@@ -82,6 +83,7 @@ module Ledger
         spec_path:   rel_path,
         stable_ref:  ref,
         org_id:      default_org_id,
+        project_id:  @project.id,
         recorded_at: Time.current
       )
     rescue ActiveRecord::RecordInvalid => e
@@ -192,14 +194,28 @@ module Ledger
     end
 
     def default_org_id
-      ENV.fetch("DEFAULT_ORG_ID", "00000000-0000-0000-0000-000000000000")
+      ENV.fetch("DEFAULT_ORG_ID", "00000000-0000-0000-0000-000000000001")
+    end
+
+    def find_or_create_project(root)
+      name = detect_project_name(root)
+      Ledger::Project.find_or_create_by!(name: name, org_id: default_org_id)
+    rescue ActiveRecord::RecordInvalid
+      Ledger::Project.find_by(name: name, org_id: default_org_id)
+    end
+
+    def detect_project_name(root)
+      active = File.join(root, "ACTIVE_PROJECT")
+      return File.read(active).strip if File.exist?(active)
+
+      File.basename(root)
     end
 
     def sync_plan(root)
       plan_path = File.join(root, "IMPLEMENTATION_PLAN.md")
       return unless File.exist?(plan_path)
 
-      Ledger::PlanFileSyncService.sync(plan_path: plan_path, org_id: default_org_id)
+      Ledger::PlanFileSyncService.sync(plan_path: plan_path, org_id: default_org_id, project_id: @project.id)
     rescue StandardError => e
       Rails.logger.warn("[SpecWatcherJob] plan sync error: #{e.message}")
     end
