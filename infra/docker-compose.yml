@@ -20,6 +20,8 @@ services:
     volumes:
       - ../ledger:/ledger
       - ../.data:/.data
+      - ../specs:/specs
+      - ../IMPLEMENTATION_PLAN.md:/IMPLEMENTATION_PLAN.md
     depends_on:
       postgres:
         condition: service_healthy

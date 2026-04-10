@@ -1,4 +1,4 @@
-# Implementation Plan
+y# Implementation Plan
 
 Generated: 2026-04-02 (gap analysis refresh)
 Reordered: 2026-04-09 (self-hosting critical path first)
