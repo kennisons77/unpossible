@@ -7,16 +7,16 @@ Progress notes belong in IMPLEMENTATION_PLAN.md.
 
 ```bash
 # Build test image
-docker compose -f projects/unpossible2/infra/docker-compose.test.yml build
+docker compose -f infra/docker-compose.test.yml build
 
 # Run test suite
-docker compose -f projects/unpossible2/infra/docker-compose.test.yml run --rm test
+docker compose -f infra/docker-compose.test.yml run --rm test
 
 # Run a specific spec
-docker compose -f projects/unpossible2/infra/docker-compose.test.yml run --rm test bundle exec rspec spec/path/to/spec.rb
+docker compose -f infra/docker-compose.test.yml run --rm test bundle exec rspec spec/path/to/spec.rb
 
 # Start full dev stack (requires Dockerfile.runner and Dockerfile.analytics)
-GIT_SHA=$(git rev-parse --short HEAD) docker compose -f projects/unpossible2/infra/docker-compose.yml up
+GIT_SHA=$(git rev-parse --short HEAD) docker compose -f infra/docker-compose.yml up
 ```
 
 ## Adding New Gems
@@ -25,7 +25,7 @@ Docker containers have no outbound internet access. All gems must be pre-downloa
 
 ```bash
 # Download a new gem and its platform-specific variant (if any)
-curl -sf -o projects/unpossible2/web/vendor/cache/<name>-<version>.gem \
+curl -sf -o web/vendor/cache/<name>-<version>.gem \
   https://rubygems.org/gems/<name>-<version>.gem
 ```
 
@@ -35,8 +35,8 @@ Then update `web/Gemfile` and `web/Gemfile.lock`, and rebuild the image.
 
 | Concept | Location | Notes |
 |---|---|---|
-| Rails app root | `projects/unpossible2/web/` | All Ruby source |
-| Infra config | `projects/unpossible2/infra/` | Dockerfiles, compose files |
+| Rails app root | `web/` | All Ruby source |
+| Infra config | `infra/` | Dockerfiles, compose files |
 | Module code | `web/app/modules/{name}/` | knowledge, tasks, agents, sandbox, analytics |
 | Specs | `web/spec/` | RSpec, FactoryBot, Shoulda Matchers |
 | Initializers | `web/config/initializers/` | lograge.rb, rack_attack.rb |

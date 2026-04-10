@@ -22,6 +22,7 @@ module Ledger
       root = specs_root || Rails.root.parent.to_s
       changed = process_specs(root)
       changed.each { |node| Knowledge::IndexerJob.perform_later(node.id.to_s) if defined?(Knowledge::IndexerJob) }
+      sync_plan(root)
       reenqueue(specs_root)
     end
 
@@ -147,6 +148,15 @@ module Ledger
 
     def default_org_id
       ENV.fetch("DEFAULT_ORG_ID", "00000000-0000-0000-0000-000000000000")
+    end
+
+    def sync_plan(root)
+      plan_path = File.join(root, "IMPLEMENTATION_PLAN.md")
+      return unless File.exist?(plan_path)
+
+      Ledger::PlanFileSyncService.sync(plan_path: plan_path, org_id: default_org_id)
+    rescue StandardError => e
+      Rails.logger.warn("[SpecWatcherJob] plan sync error: #{e.message}")
     end
   end
 end

@@ -1,0 +1,2 @@
+# Ledger snapshot — auto-imported on fresh DB boot.
+# Run `make ledger-export` to update after meaningful state changes.

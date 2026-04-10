@@ -4,8 +4,12 @@
 # Or from this directory: make <target>
 
 PROJECT_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
-LOOP := $(PROJECT_DIR)../../loop.sh
+ROOT_DIR := $(PROJECT_DIR)
+LOOP := $(ROOT_DIR)loop.sh
+ACTIVE_PROJECT_FILE := $(ROOT_DIR)ACTIVE_PROJECT
+ENV_FILE := $(ROOT_DIR).env
 AGENT ?= kiro
+MODEL ?=
 SKILL = @cd $(PROJECT_DIR) && $(AGENT) -- "$(shell cat $(PROJECT_DIR)
 
 .PHONY: help \
@@ -13,11 +17,20 @@ SKILL = @cd $(PROJECT_DIR) && $(AGENT) -- "$(shell cat $(PROJECT_DIR)
         db-create db-migrate db-setup db-reset \
         build plan build1 plan1 reflect research \
         interview prd spec review server-ops \
-        start
+        start config status activate test
 
 COMPOSE := docker compose -f $(PROJECT_DIR)infra/docker-compose.yml
+COMPOSE_TEST := docker compose -f $(PROJECT_DIR)infra/docker-compose.test.yml
 
 help:
+	@echo "Config & runner:"
+	@echo "  make status          Show active project, agent, model, env"
+	@echo "  make activate        Set this project as ACTIVE_PROJECT"
+	@echo "  make config          Show runner config (agent, model, env vars)"
+	@echo "  make config AGENT=claude MODEL=opus   Set agent and model for this session"
+	@echo "  make test            Run test suite via docker compose"
+	@echo "  make sandbox         Launch Kiro CLI in a Docker sandbox"
+	@echo ""
 	@echo "Rails server:"
 	@echo "  make up              Start rails + postgres (detached)"
 	@echo "  make down            Stop all services"
@@ -30,6 +43,10 @@ help:
 	@echo "  make db-reset        Drop + create + migrate + seed"
 	@echo "  make docker-build    Build the rails image"
 	@echo "  make shell           Open bash in rails container"
+	@echo "  make ledger-export   Export ledger state to ledger/snapshot.yml"
+	@echo "  make ledger-import   Import ledger state from snapshot (empty DB only)"
+	@echo "  make bulk-export     Export agent runs + knowledge to .data/snapshots/ (not in git)"
+	@echo "  make bulk-import     Import agent runs + knowledge from .data/snapshots/"
 	@echo ""
 	@echo "Workflow:"
 	@echo "  make start           Orient, research if needed, gap-fill spec, plan (1 iteration)"
@@ -49,6 +66,40 @@ help:
 	@echo "  make review          Analyse codebase, propose beats"
 	@echo "  make server-ops      Operate on a server"
 
+# --- Config & runner ---
+status:
+	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+	@echo "Project:  unpossible2"
+	@printf "Active:   "; if [ -f "$(ACTIVE_PROJECT_FILE)" ] && [ "$$(cat '$(ACTIVE_PROJECT_FILE)' | tr -d '[:space:]')" = "unpossible2" ]; then echo "yes ✓"; else echo "no (active: $$(cat '$(ACTIVE_PROJECT_FILE)' 2>/dev/null || echo 'unset'))"; fi
+	@echo "Agent:    $(AGENT)"
+	@echo "Model:    $(or $(MODEL),(agent default))"
+	@echo "Loop:     $(LOOP)"
+	@echo "Compose:  $(COMPOSE)"
+	@printf "Docker:   "; docker info --format '{{.ServerVersion}}' 2>/dev/null || echo "not running"
+	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+activate:
+	@echo "unpossible2" > "$(ACTIVE_PROJECT_FILE)"
+	@echo "ACTIVE_PROJECT set to unpossible2"
+
+config:
+	@echo "━━━ Runner Config ━━━"
+	@echo "AGENT=$(AGENT)"
+	@echo "MODEL=$(or $(MODEL),(agent default))"
+	@echo ""
+	@echo "━━━ Environment (.env) ━━━"
+	@if [ -f "$(ENV_FILE)" ]; then grep -v '^#' "$(ENV_FILE)" | grep -v '^$$' | sed 's/=.*/=***/' ; else echo ".env not found — copy .env.example"; fi
+	@echo ""
+	@echo "Override per-command:  make build AGENT=claude MODEL=opus"
+	@echo "Override for session:  export AGENT=claude MODEL=opus"
+
+test:
+	$(COMPOSE_TEST) build
+	$(COMPOSE_TEST) run --rm test
+
+sandbox:
+	docker sandbox run kiro
+
 # --- Rails server ---
 docker-build:
 	$(COMPOSE) build rails
@@ -57,6 +108,7 @@ up:
 	$(COMPOSE) up -d
 
 down:
+	@$(COMPOSE) exec rails bundle exec rake ledger:export bulk:export 2>/dev/null || echo "Snapshot skipped (container not running)"
 	$(COMPOSE) down
 
 restart:
@@ -83,6 +135,19 @@ db-setup:
 db-reset:
 	$(COMPOSE) exec rails bundle exec rails db:reset
 
+# --- Ledger persistence ---
+ledger-export:
+	$(COMPOSE) exec rails bundle exec rake ledger:export
+
+ledger-import:
+	$(COMPOSE) exec rails bundle exec rake ledger:import
+
+bulk-export:
+	$(COMPOSE) exec rails bundle exec rake bulk:export
+
+bulk-import:
+	$(COMPOSE) exec rails bundle exec rake bulk:import
+
 # --- Workflow ---
 
 # Start a feature: orient the agent, check for prior research, gap-fill the spec,
@@ -100,22 +165,22 @@ start:
 
 # --- Loop targets ---
 build:
-	@cd $(PROJECT_DIR) && $(LOOP)
+	@cd $(ROOT_DIR) && AGENT=$(AGENT) MODEL=$(MODEL) $(LOOP)
 
 plan:
-	@cd $(PROJECT_DIR) && $(LOOP) plan
+	@cd $(ROOT_DIR) && AGENT=$(AGENT) MODEL=$(MODEL) $(LOOP) plan
 
 build1:
-	@cd $(PROJECT_DIR) && $(LOOP) 1
+	@cd $(ROOT_DIR) && AGENT=$(AGENT) MODEL=$(MODEL) $(LOOP) 1
 
 plan1:
-	@cd $(PROJECT_DIR) && $(LOOP) plan 1
+	@cd $(ROOT_DIR) && AGENT=$(AGENT) MODEL=$(MODEL) $(LOOP) plan 1
 
 reflect:
-	@cd $(PROJECT_DIR) && $(LOOP) reflect
+	@cd $(ROOT_DIR) && AGENT=$(AGENT) MODEL=$(MODEL) $(LOOP) reflects
 
 research:
-	@cd $(PROJECT_DIR) && $(LOOP) research
+	@cd $(ROOT_DIR) && AGENT=$(AGENT) MODEL=$(MODEL) $(LOOP) research
 
 # --- Skill targets ---
 interview:
@@ -132,4 +197,3 @@ review:
 
 server-ops:
 	@cd $(PROJECT_DIR) && $(AGENT) -- "$(shell cat $(PROJECT_DIR)specs/skills/workflows/server-ops.md)"
-
