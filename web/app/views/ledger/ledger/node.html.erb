@@ -1,5 +1,4 @@
 <nav>
-<%= link_to a.title.presence || "(untitled)", ledger_node_path(a.id) %> /
   <% @ancestors.each do |a| %>
     <%= link_to a.title.presence || "(untitled)", ledger_node_path(a.id) %> /
   <% end %>

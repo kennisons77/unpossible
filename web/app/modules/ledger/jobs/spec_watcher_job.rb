@@ -208,7 +208,8 @@ module Ledger
       active = File.join(root, "ACTIVE_PROJECT")
       return File.read(active).strip if File.exist?(active)
 
-      File.basename(root)
+      name = File.basename(root)
+      name == "/" ? "unpossible" : name
     end
 
     def sync_plan(root)

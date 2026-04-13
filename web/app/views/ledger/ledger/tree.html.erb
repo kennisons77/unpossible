@@ -3,7 +3,7 @@
 <nav>
   <%= link_to "All Projects", ledger_tree_path %>
   <% if @current_project %>
-    / <strong><%= @current_project.name %></strong>
+    <strong><%= @current_project.name %></strong>
   <% end %>
 </nav>
 
