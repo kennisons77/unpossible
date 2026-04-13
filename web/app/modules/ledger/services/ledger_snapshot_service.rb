@@ -29,10 +29,10 @@ module Ledger
       data = YAML.safe_load_file(path, permitted_classes: [Time, Date, ActiveSupport::TimeWithZone, ActiveSupport::TimeZone], aliases: true)
 
       ActiveRecord::Base.transaction do
-        (data["projects"] || []).each { |attrs| Ledger::Project.insert!(attrs) }
-        (data["nodes"] || []).each { |attrs| Ledger::Node.insert!(attrs) }
-        (data["node_edges"] || []).each { |attrs| Ledger::NodeEdge.insert!(attrs) }
-        (data["audit_events"] || []).each { |attrs| Ledger::NodeAuditEvent.insert!(attrs) }
+        (data["projects"] || []).each { |attrs| Ledger::Project.insert!(attrs.slice(*Ledger::Project.column_names)) }
+        (data["nodes"] || []).each { |attrs| Ledger::Node.insert!(attrs.slice(*Ledger::Node.column_names)) }
+        (data["node_edges"] || []).each { |attrs| Ledger::NodeEdge.insert!(attrs.slice(*Ledger::NodeEdge.column_names)) }
+        (data["audit_events"] || []).each { |attrs| Ledger::NodeAuditEvent.insert!(attrs.slice(*Ledger::NodeAuditEvent.column_names)) }
       end
 
       count = data["nodes"]&.size || 0

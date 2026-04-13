@@ -98,6 +98,7 @@ module Ledger
     def set_defaults
       self.recorded_at ||= Time.current
       self.status      ||= "proposed" if kind == "question"
+      self.project     ||= Ledger::Project.find_by(name: "unpossible", org_id: org_id) if org_id.present?
     end
   end
 end
