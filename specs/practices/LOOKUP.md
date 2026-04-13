@@ -6,7 +6,7 @@ Quick reference for recurring patterns in this codebase.
 
 | Pattern | Location | Notes |
 |---|---|---|
-| `Secret` value object | `web/lib/secret.rb` | Wraps sensitive strings; `.expose` returns raw value; inspect/to_s/as_json → `[REDACTED]` |
+| `Secret` value object | `web/app/lib/secret.rb` | Wraps sensitive strings; `.expose` returns raw value; inspect/to_s/as_json → `[REDACTED]` |
 | `filter_parameters` | `config/application.rb` | Filters `:api_key, :token, :password, :secret` from logs |
 | `rack-attack` | `config/initializers/rack_attack.rb` | IP throttle → 429; safelist localhost in test |
 | Audit on destructive | `Analytics::AuditLogService` | Call before any delete/update of sensitive data |
@@ -17,7 +17,7 @@ Quick reference for recurring patterns in this codebase.
 
 | Pattern | Location | Notes |
 |---|---|---|
-| JWT encode/decode | `web/lib/auth_token.rb` | `org_id`, `user_id`, `exp`; `AUTH_SECRET` env var |
+| JWT encode/decode | `web/app/lib/auth_token.rb` | `org_id`, `user_id`, `exp`; `AUTH_SECRET` env var |
 | `authenticate!` | `ApplicationController` | Sets `current_org_id` / `current_user_id` |
 | Sidecar token | `X-Sidecar-Token` header | From `SIDECAR_TOKEN` env var |
 

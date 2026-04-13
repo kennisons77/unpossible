@@ -31,9 +31,15 @@ case "$AGENT" in
         AGENT_CMD="claude -p --dangerously-skip-permissions --output-format=stream-json --model $MODEL --verbose"
         ;;
     kiro)
-        MODEL=${MODEL:-auto}
         # kiro reads prompt as positional arg, not stdin; -- prevents flag interpretation
-        AGENT_CMD="kiro-cli chat --no-interactive --trust-all-tools --model $MODEL --"
+        # --agent is set per-mode after MODE is parsed (see below)
+        # Only pass --model if explicitly set — otherwise let the agent config decide
+        KIRO_MODEL_FLAG=""
+        if [ -n "$MODEL" ]; then
+            KIRO_MODEL_FLAG="--model $MODEL"
+        fi
+        KIRO_BASE_CMD="kiro-cli chat --no-interactive --trust-all-tools $KIRO_MODEL_FLAG"
+        AGENT_CMD="" # set after MODE is known
         ;;
     *)
         AGENT_CMD="$AGENT"
@@ -61,8 +67,9 @@ MAX_ITERATIONS=0
 IDEA_ID=""
 
 case "$1" in
-    plan)     MODE="plan";     MAX_ITERATIONS=${2:-0} ;;
-    research) MODE="research"; IDEA_ID="$2"
+    plan)      MODE="plan";      MAX_ITERATIONS=${2:-0} ;;
+    interview) MODE="interview"; MAX_ITERATIONS=${2:-1} ;;
+    research)  MODE="research";  IDEA_ID="$2"
               [ -z "$IDEA_ID" ] && { echo "Usage: ./loop.sh research <id>"; exit 1; }
               MAX_ITERATIONS=1 ;;
     review)   MODE="review";   MAX_ITERATIONS=1
@@ -71,6 +78,12 @@ case "$1" in
               [ -z "$IDEA_ID" ] && { echo "Usage: ./loop.sh promote <id>"; exit 1; } ;;
     [0-9]*)   MODE="build";    MAX_ITERATIONS=$1 ;;
 esac
+
+# --- Resolve Kiro agent per mode ---
+if [ "$AGENT" = "kiro" ] && [ -z "$AGENT_CMD" ]; then
+    KIRO_AGENT="ralph_${MODE}"
+    AGENT_CMD="$KIRO_BASE_CMD --agent $KIRO_AGENT --"
+fi
 
 # --- Promote mode (no loop needed) ---
 if [ "$MODE" = "promote" ]; then

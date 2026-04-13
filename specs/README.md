@@ -45,13 +45,13 @@ Core platform capabilities — what the system does and how its modules behave.
 
 | Spec | Module |
 |---|---|
-| [prd.md](prd.md) | All — technical constraints and phase |
+| [project-prd.md](project-prd.md) | All — technical constraints and phase |
 | [system/ledger/](system/ledger/) | Universal data model — nodes, edges, questions, answers |
 | [system/agent-runner/](system/agent-runner/) | AgentRun record, prompt assembly, dedup, sidecar, observability |
 | [system/knowledge/](system/knowledge/) | Vector store, MD indexing, LLM response indexing, context retrieval |
 | [system/sandbox/](system/sandbox/) | Container lifecycle, Docker dispatcher |
 | [system/analytics/](system/analytics/) | LLM metrics, product events, feature flag exposures, audit log |
-| [system/feature-flags.md](system/feature-flags.md) | Feature flag schema, hypothesis requirement, lifecycle |
+| [system/feature-flags/](system/feature-flags/) | Feature flag schema, hypothesis requirement, lifecycle |
 | [system/practices.md](system/practices.md) | Practices files — what they are and when they load |
 
 ## Product Specs (`product/`)

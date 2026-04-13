@@ -23,7 +23,10 @@ Loaded every build iteration. Language-agnostic rules that apply to all code wri
 ## Files
 - One concept per file
 - Filename should make its contents guessable without opening it
-- Group files by feature or domain, not by type (e.g. `user/` not `models/`, `handlers/`, `utils/`)
+- Group files by feature or domain at the top level (e.g. `modules/knowledge/` not
+  a flat `models/`, `services/`, `utils/`). Within a feature module, framework
+  conventions (models/, services/, controllers/) are acceptable — the module boundary
+  is the feature boundary
 
 ## Dead Code
 - Delete it — never comment it out
@@ -38,6 +41,44 @@ Loaded every build iteration. Language-agnostic rules that apply to all code wri
 - Prefer stdlib
 - Add a package only when the benefit clearly outweighs the cost of the dependency
 - Pin versions explicitly
+
+## Refactoring vs Rewriting
+
+A refactor is a behavior-preserving transformation — same inputs, same outputs, better
+structure. If the change can break something, it's a rewrite. Call it what it is.
+
+A rewrite is a bet: you're wagering that the new code will be better enough to justify
+the risk of breaking what works. Before proposing one, answer:
+
+1. What's the concrete problem with the current code? ("messy" is not a problem)
+2. What breaks or gets harder if we leave it alone?
+3. What's the blast radius if the rewrite introduces a bug?
+4. Is there a smaller, behavior-preserving refactor that gets 80% of the benefit?
+
+If you can't answer #1 and #2 with specifics, don't touch it. Working code that looks
+ugly is better than clean code that doesn't work.
+
+LLMs are biased toward rewrites — they optimize for "clean" over "safe". Resist the
+urge to rewrite a module just because you'd write it differently from scratch. The
+review loop proposes refactor beats; the human decides which bets are worth taking.
+
+Reference: [That's Not Refactoring](https://www.codewithjason.com/thats-not-refactoring/)
+
+## Code Navigation
+
+Prefer LSP-powered tools (`code` tool) over grep for navigating code:
+- Finding where a method is defined → `goto_definition`, not `grep "def method_name"`
+- Finding all callers of a method → `find_references`, not `grep "method_name"`
+- Understanding a class interface → `get_document_symbols`, not reading the whole file
+- Checking types or signatures → `get_hover`, not scanning for comments
+
+Grep is for literal text in comments, config values, and non-code patterns. If you're
+searching for a symbol name, use the code tool first. Fall back to grep only when LSP
+is unavailable or returns no results.
+
+This matters for cost: `find_references` returns precise locations. Grep returns every
+line containing the string, including false positives in comments, strings, and unrelated
+code — each of which costs tokens to read and discard.
 
 ## General
 - No magic numbers — name constants

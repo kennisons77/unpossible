@@ -15,6 +15,10 @@ Unpossible is both the platform and its own first project — it develops itself
 ## Quickstart
 
 ```bash
+# Install LSP servers for code intelligence (one-time)
+gem install ruby-lsp
+go install golang.org/x/tools/gopls@latest
+
 # Build test image
 docker compose -f infra/docker-compose.yml build
 
@@ -37,9 +41,8 @@ Each loop iteration:
 make build       # Build loop, unlimited iterations
 make build1      # Build loop, 1 iteration
 make plan        # Plan loop, unlimited iterations
-make plan1       # Plan loop, 1 iteration (gap analysis / dry run)
-make reflect     # Reflect loop
-make research    # Research loop
+make research    # Research loop, then re-plan to integrate findings
+make review      # Review loop, 1 iteration (analyse codebase, propose beats)
 ```
 
 ## File Structure
@@ -80,3 +83,9 @@ make research    # Research loop
 ## Phase
 
 Phase 0 — Local development. Docker Compose only. No CI, no staging, no production config.
+
+## Validation
+
+```bash
+./scripts/validate-refs.sh   # Check all cross-references (agent configs, markdown links, lookup tables)
+```
