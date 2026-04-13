@@ -1,0 +1,19 @@
+{
+  "name": "ralph_research",
+  "description": "Research loop agent — investigates spikes with minimal context",
+  "prompt": null,
+  "tools": [
+    "read",
+    "write",
+    "shell",
+    "grep",
+    "glob",
+    "thinking",
+    "delegate"
+  ],
+  "resources": [
+    "file://AGENTS.md",
+    "file://specs/practices/cost.md"
+  ],
+  "model": null
+}

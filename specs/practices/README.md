@@ -7,15 +7,16 @@ See `specs/system/practices.md` for the full loading rules.
 
 ## Index
 
-| File | Domain | Loaded when |
-|---|---|---|
-| [coding.md](coding.md) | Coding | build |
-| [planning.md](planning.md) | Planning | plan |
-| [testing.md](testing.md) | Testing | build |
-| [verification.md](verification.md) | Verification | build |
-| [automation.md](automation.md) | Automation | build |
-| [cost.md](cost.md) | Cost | all |
-| [version-control.md](version-control.md) | Version control | build |
-| [zed.md](zed.md) | Editor | all |
-| [security.md](security.md) | Security | build |
-| [threat-modeling.md](threat-modeling.md) | Threat modeling | plan, build |
+| File                                       | Domain          | Loaded when                    |
+|--------------------------------------------|-----------------|--------------------------------|
+| [changeability.md](changeability.md)       | Changeability   | plan, review, build (on demand) |
+| [coding.md](coding.md)                     | Coding          | review, build (on demand)      |
+| [planning.md](planning.md)                 | Planning        | plan                           |
+| [verification.md](verification.md)         | Verification    | plan, build (on demand)        |
+| [automation.md](automation.md)             | Automation      | build (on demand)              |
+| [cost.md](cost.md)                         | Cost            | all                            |
+| [version-control.md](version-control.md)   | Version control | build                          |
+| [security.md](security.md)                 | Security        | build (on demand)              |
+| [threat-modeling.md](threat-modeling.md)    | Threat modeling | build (on demand)              |
+| [lookup-tables.md](lookup-tables.md)       | Lookup tables   | build (on demand)              |
+| [zed.md](zed.md)                           | Editor          | human reference only           |
