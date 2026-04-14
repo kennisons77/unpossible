@@ -37,7 +37,9 @@ platform-agnostic and implementation-free. Practices are irrelevant at this stag
 
 **Plan loop** — `planning.md`, `verification.md`, and `changeability.md` are loaded
 to shape beat titles, ensure AC maps to tests, and evaluate structural decisions.
-`cost.md` is always present. Platform practices are layered on top of the base spec.
+`structural-vocabulary.md` is loaded to provide named abstractions for describing
+planned work. `cost.md` is always present. Platform practices are layered on top of
+the base spec.
 
 **Build loop** — `cost.md` and `version-control.md` are always present. All others
 are retrieved on demand from the knowledge base when the agent encounters an issue or
@@ -47,9 +49,9 @@ active stack.
 **Research loop** — `cost.md` only. Research is about collecting information, not
 applying coding discipline.
 
-**Review loop** — `changeability.md` and `coding.md` are loaded. `cost.md` is always
-present. The review loop evaluates accumulated changes against structural and
-refactoring principles.
+**Review loop** — `changeability.md`, `coding.md`, and `structural-vocabulary.md`
+are loaded. `cost.md` is always present. The review loop evaluates accumulated changes
+against structural and refactoring principles.
 
 ## File Map
 
@@ -65,6 +67,8 @@ refactoring principles.
 | `threat-modeling.md` |        |      | on demand |        |          |
 | `automation.md`      |        |      | on demand |        |          |
 | `lookup-tables.md`   |        |      | on demand |        |          |
+| `retry.md`           |        |      | on demand |        |          |
+| `structural-vocabulary.md` |  | ✓    | on demand | ✓      |          |
 | `zed.md`             |        |      |           |        |          |
 
 `zed.md` is never loaded by agents — it is for human reference only.

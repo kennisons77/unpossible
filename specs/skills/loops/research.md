@@ -37,3 +37,23 @@ Run a research pass on a spike node. Each invocation is one pass.
 - High-confidence findings written to `specs/platform/{platform}/` with source reference
 - Deferred findings marked `status: deferred` in the platform file — not yet default practice
 - Video sources stored as title + URL only — no content fetched
+
+## Investigation → Resolution Workflow
+
+When the problem isn't "what should we build?" but "what's broken in what we built?",
+use a two-phase approach:
+
+**Phase 1 — Investigation loop** (research variant):
+- Scope: a running system, not external sources
+- Goal: find what's broken and classify the failures
+- Permissions: read logs, add temporary logging, exercise APIs — but do not fix
+- Output: a findings document listing each failure with its category and location
+
+**Phase 2 — Resolution loop** (targeted build):
+- Input: the investigation findings
+- Goal: fix one category of failure at a time
+- Plan from the findings — don't re-investigate during the build
+
+The separation matters because investigation and resolution have different failure
+modes. Investigation that also fixes tends to fix symptoms instead of causes.
+Resolution without investigation tends to fix the wrong thing. Keep them apart.

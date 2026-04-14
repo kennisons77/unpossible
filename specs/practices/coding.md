@@ -36,6 +36,11 @@ Loaded every build iteration. Language-agnostic rules that apply to all code wri
 - Explicit and visible — no silent swallows
 - Errors should propagate with context so the call site can understand what failed
 - Don't log *and* return an error — pick one
+- **Fail-open vs fail-closed** — know which category each operation falls into.
+  Core workflow steps (tests, migrations, LLM calls) fail closed: a failure stops
+  progress. Infrastructure side-effects (activity log writes, lint checks, audit
+  events) fail open: a failure is logged and the main flow continues. If you're
+  unsure which category something is, it's fail-closed until proven otherwise
 
 ## Dependencies
 - Prefer stdlib

@@ -17,7 +17,8 @@
     "file://specs/practices/cost.md",
     "file://specs/practices/planning.md",
     "file://specs/practices/verification.md",
-    "file://specs/practices/changeability.md"
+    "file://specs/practices/changeability.md",
+    "file://specs/practices/structural-vocabulary.md"
   ],
   "hooks": {
     "agentSpawn": [
