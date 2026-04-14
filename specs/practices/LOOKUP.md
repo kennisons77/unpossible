@@ -45,6 +45,15 @@ Quick reference for recurring patterns in this codebase.
 | Prompt dedup | `Agents::RunStorageService` — SHA256 of normalized prompt |
 | Prompt sanitization | `Security::PromptSanitizer.sanitize(text)` — call before every LLM call |
 
+## Structural Vocabulary
+
+| Term | Location | Notes |
+|---|---|---|
+| Structural vocabulary | `specs/practices/structural-vocabulary.md` | Named abstractions for plan/review shorthand |
+| Pattern lifecycle | `specs/practices/structural-vocabulary.md` | proposed → adopted → merged/split/retired |
+| Anti-patterns | `specs/practices/structural-vocabulary.md` | Structural smells section |
+| Retry strategy | `specs/practices/retry.md` | Exponential backoff, jitter, retryable error classification |
+
 ## Testing
 
 | Pattern | Notes |

@@ -54,3 +54,20 @@ app/modules/
 - MinIO: is it needed in Phase 0, and what is stored there?
 - loop.sh location: project root `./loop.sh`
 - Go runner: copy from unpossible1 into `runner/` or reference as submodule?
+
+## Future Phase Considerations
+
+### Health Checks (Phase 3)
+
+When production infrastructure is added, define a component-level health check system:
+- Classify components as **critical** (database — unhealthy stops traffic) vs
+  **non-critical** (LLM provider — degraded but functional)
+- Single `/health` endpoint returns per-component status with latency
+- Load balancers use HTTP status code only (200 = healthy/degraded, 503 = unhealthy)
+- Each component check has an independent timeout to prevent slow checks blocking the response
+
+### Configuration Layering (Phase 2+)
+
+Evolve from flat `ENV.fetch` to a layered configuration system with clear precedence:
+CLI args > environment variables > workspace config > defaults. Use a library rather
+than hand-rolling — the layering, validation, and type coercion are solved problems.
