@@ -231,6 +231,30 @@ are under-modeled as DAGs. Pick the model that matches the actual constraints.
 Example: The ralph loop — plan → build → review → reflect. Each phase depends on
 the previous phase's output.
 
+#### Task DAG (Workflow Instance)
+
+Shape: A workflow template defines a set of tasks with dependency edges. An instance
+is created from a template, and tasks are materialized as their dependencies complete.
+The instance advances itself: when a task completes, it checks which new tasks have
+all dependencies satisfied and creates them. When all tasks are complete, the instance
+completes.
+
+Reach for it when: You need to orchestrate multi-step work where steps have
+prerequisites, assignees, and due dates — and the shape of the work is defined by a
+reusable template, not hardcoded.
+
+Gotchas: The advance logic must be idempotent — calling it twice should not create
+duplicate tasks. Due date calculation relative to events (start date, publication
+date) requires the target entity to exist and have the relevant date populated.
+Closing a workflow must close all open tasks — orphaned open tasks are a data
+integrity bug.
+
+Relevance to the ledger: a collection of planning and implementation nodes forms a
+dependency graph. A bug can be traced back through the graph to the planning or
+implementation decision that caused it — the `depends_on` and `contains` edges in
+`NodeEdge` are the same structural concept as task dependencies in a workflow. The
+ledger *is* a task DAG at the project level.
+
 #### Graph (with cycles)
 
 Shape: Nodes and edges with no acyclicity constraint. Cycles are allowed and
@@ -326,9 +350,37 @@ Each entry has a status. The status tracks how battle-tested the pattern is.
 
 All current entries above are `adopted` unless marked otherwise.
 
-### Registry — `status: merged` → Interchangeable Implementation
-Registry is a wiring mechanism for the interchangeable implementation pattern.
-Kept as a sub-concept there rather than a standalone entry.
+### Registry (dispatch) — `status: merged` → Interchangeable Implementation
+Registry-as-dispatch is a wiring mechanism for the interchangeable implementation
+pattern — an explicit lookup table mapping keys to implementations. Kept as a
+sub-concept there rather than a standalone entry.
+
+Not to be confused with Self-Registering Plugin (below), which is about *how*
+implementations get into the registry, not how callers look them up.
+
+### Self-Registering Plugin — `status: adopted`
+(Python: `@register` decorator · Ruby: `inherited` hook · OOP: plugin pattern)
+
+Shape: Implementations register themselves into a shared lookup as a side effect
+of being loaded (via decorator, metaclass, or lifecycle hook). Adding a new
+implementation requires only creating it — no central manifest to update.
+
+Reach for it when: The set of implementations grows frequently, contributors
+shouldn't need to touch a central file to add one, and you want open/closed
+behavior at the module level.
+
+Gotchas: Registration is invisible — nothing in the call site reveals what's
+registered or in what order. Load-order bugs are subtle: if a module isn't
+imported, its decorator never fires and the implementation silently doesn't exist.
+Static analysis and IDE navigation can't follow the indirection. In small
+codebases with a stable set of implementations, explicit wiring (the dispatch
+registry in Interchangeable Implementation) is simpler and easier to trace. Reach
+for this only when manual registration is an actual maintenance burden, not a
+theoretical one.
+
+Example: `@register("claude") class ClaudeProvider: ...` — importing the module
+adds `"claude"` → `ClaudeProvider` to a global dict. Callers use the dispatch
+registry; they never know registration was automatic.
 
 Retired, merged, and split entries stay in the file with their status and a note.
 This prevents re-proposing something we already tried, and gives agents context when

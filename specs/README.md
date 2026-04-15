@@ -52,6 +52,7 @@ Core platform capabilities — what the system does and how its modules behave.
 | [system/sandbox/](system/sandbox/) | Container lifecycle, Docker dispatcher |
 | [system/analytics/](system/analytics/) | LLM metrics, product events, feature flag exposures, audit log |
 | [system/feature-flags/](system/feature-flags/) | Feature flag schema, hypothesis requirement, lifecycle |
+| [system/batch-requests.md](system/batch-requests.md) | Batch request middleware — fan-out sub-requests in a single HTTP call |
 | [system/practices.md](system/practices.md) | Practices files — what they are and when they load |
 
 ## Product Specs (`product/`)

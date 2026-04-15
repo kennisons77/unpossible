@@ -9,3 +9,4 @@ Rails-specific implementation details for system-level specs. Each file extends 
 | [sandbox.md](sandbox.md) | specs/system/sandbox/spec.md |
 | [analytics.md](analytics.md) | specs/system/analytics/spec.md |
 | [api-standards.md](api-standards.md) | specs/system/api/spec.md |
+| [health-check.md](health-check.md) | specs/practices/coding.md (fail-open infrastructure) |
