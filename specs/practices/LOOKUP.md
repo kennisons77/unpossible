@@ -7,8 +7,9 @@ Quick reference for recurring patterns in this codebase.
 | Pattern | Location | Notes |
 |---|---|---|
 | `Secret` value object | `web/app/lib/secret.rb` | Wraps sensitive strings; `.expose` returns raw value; inspect/to_s/as_json → `[REDACTED]` |
-| `filter_parameters` | `config/application.rb` | Filters `:api_key, :token, :password, :secret` from logs |
+| `filter_parameters` | `config/application.rb` | Filters `:passw, :email, :secret, :token, :_key, :crypt, :salt, :certificate, :otp, :ssn, :cvv, :cvc, :otp_attempt` from logs |
 | `rack-attack` | `config/initializers/rack_attack.rb` | IP throttle → 429; safelist localhost in test |
+| Authorization enforcement | `AuthorizationConcern` | `verify_authorized` / `verify_policy_scoped` after-actions — structural safety net |
 | Audit on destructive | `Analytics::AuditLogService` | Call before any delete/update of sensitive data |
 | STRIDE checklist | `specs/practices/threat-modeling.md` | Run per trust-boundary task during planning |
 | Edge case prompts | `specs/practices/threat-modeling.md` | Targeted prompts to surface domain-specific threats |
@@ -60,4 +61,13 @@ Quick reference for recurring patterns in this codebase.
 |---|---|
 | `cache_control` | Use `travel_to` for time-dependent tests |
 | Shared service pattern | Stub external services in unit tests; real calls in integration only |
-| SimpleCov | 90% line coverage enforced; guard at top of `spec_helper.rb` |
+| SimpleCov | 85% line coverage enforced; guard at top of `spec_helper.rb` |
+
+## Infrastructure
+
+| Pattern | Notes |
+|---|---|
+| Entrypoint dispatch | One image, one `bin/entrypoint` script, multiple modes (`app`, `web`, `job`, `spec`, `lint`) |
+| Health check middleware | Rack middleware at position 0; `GET /health` → 200/503; bypasses full stack |
+| Batch requests | `POST /api/batch` middleware; fans out sub-requests internally; max 100 per batch |
+| Multi-tenancy | Schema-per-tenant or row-level; tenant resolved at middleware boundary |

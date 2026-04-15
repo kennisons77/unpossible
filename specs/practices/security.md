@@ -27,6 +27,20 @@ What counts as PII: names, email addresses, phone numbers, IP addresses (in logs
 - `AgentRun` stores `prompt_sha256` not raw prompt text
 - `AgentRun` stores token counts not response content
 
+## Parameter Filtering
+
+Rails `filter_parameters` must include at minimum:
+`:passw`, `:email`, `:secret`, `:token`, `:_key`, `:crypt`, `:salt`,
+`:certificate`, `:otp`, `:ssn`, `:cvv`, `:cvc`, `:otp_attempt`
+
+This is more aggressive than Rails defaults — notably it includes `:email` (PII)
+and `:otp_attempt` (2FA codes). The list is partial-match: `:passw` catches
+`password`, `password_confirmation`, etc.
+
+When adding a new model with sensitive fields, check whether the field name is
+already caught by partial match. If not, add it to the filter list in the same
+commit.
+
 ## Environment Variables
 
 - All secrets via `ENV.fetch('KEY')` — fails fast at startup if missing
@@ -55,6 +69,30 @@ If a secret is suspected to have been logged or transmitted:
 3. Check AgentRun records for the time window
 4. File an audit event with `severity: critical`
 5. Add the pattern to the log redactor if it wasn't already caught
+
+## Authorization Enforcement
+
+Every controller action must be authorization-checked. This is enforced structurally,
+not by convention:
+
+- `index` actions must call `policy_scope` — verified by an after-action hook
+- All other actions must call `authorize` — verified by an after-action hook
+- If a controller action forgets to authorize, the request fails with an error —
+  not silently allowed
+
+This makes unauthorized access structurally impossible in the same way that `Secret`
+makes accidental credential logging structurally impossible. The safety net catches
+omissions at development time, not in production.
+
+Authorization failures return 403 (forbidden), not 404. Returning 404 to hide
+resource existence is acceptable for specific cases but must be an explicit choice,
+not the default.
+
+### Policy Context
+
+When authorization depends on more than just the current user (e.g., the current
+organization in a multi-tenant system), wrap the context into a single object passed
+to the policy layer. Policies receive one context object — not scattered arguments.
 
 ## Audit Logging and Error Propagation
 

@@ -81,6 +81,18 @@ before committing.
 - Run the full test suite, not just tests for the code you touched
 - If unrelated tests fail, fix them — don't skip or suppress
 
+## Coverage Floor
+
+Minimum test coverage: **85%**, enforced by the coverage tool (SimpleCov for Ruby,
+equivalent for other platforms). CI fails if coverage drops below the floor.
+
+The floor is a safety net, not a target. Chasing 100% coverage leads to brittle
+tests on trivial code. Focus coverage on behavior and edge cases — not on hitting
+a number.
+
+Coverage exceptions (e.g., `# :nocov:`) require a comment explaining why the code
+is excluded. "Hard to test" is not a valid reason.
+
 ## On Failure
 
 - Read the full error output before changing anything

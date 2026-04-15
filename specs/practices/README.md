@@ -20,5 +20,7 @@ See `specs/system/practices.md` for the full loading rules.
 | [threat-modeling.md](threat-modeling.md)    | Threat modeling | build (on demand)              |
 | [lookup-tables.md](lookup-tables.md)       | Lookup tables   | build (on demand)              |
 | [retry.md](retry.md)                       | Retry strategy  | build (on demand)              |
+| [multi-tenancy.md](multi-tenancy.md)       | Multi-tenancy   | plan, build (on demand)        |
+| [entrypoint-dispatch.md](entrypoint-dispatch.md) | Containers | build (on demand)              |
 | [structural-vocabulary.md](structural-vocabulary.md) | Structural vocabulary | plan, review, build (on demand) |
 | [zed.md](zed.md)                           | Editor          | human reference only           |
