@@ -14,6 +14,12 @@ Rails.application.routes.draw do
   post '/api/agent_runs/:id/complete',  to: 'agents/agent_runs#complete', as: :complete_api_agent_run
   post '/api/agent_runs/:id/input',     to: 'agents/agent_runs#input',    as: :input_api_agent_run
 
+  # Feature flags — Analytics::FeatureFlagsController (JSON API)
+  get   '/api/feature_flags',      to: 'analytics/feature_flags#index'
+  post  '/api/feature_flags',      to: 'analytics/feature_flags#create'
+  patch '/api/feature_flags/:key', to: 'analytics/feature_flags#update', as: :api_feature_flag,
+        constraints: { key: /[^\/]+/ }
+
   # Ledger nodes — Ledger::NodesController (JSON API)
   get    '/api/nodes',          to: 'ledger/nodes#index',   as: :api_nodes
   post   '/api/nodes',          to: 'ledger/nodes#create'

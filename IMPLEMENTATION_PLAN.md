@@ -23,7 +23,7 @@ Phase: 0 (Local Development — Docker Compose only)
 
 ## Section 11 — Feature Flags Controller
 
-- [ ] 11.2 — Feature flags API controller (`web/app/modules/analytics/controllers/feature_flags_controller.rb`, `web/config/routes.rb`)
+- [x] 11.2 — Feature flags API controller (`web/app/modules/analytics/controllers/feature_flags_controller.rb`, `web/config/routes.rb`)
   `POST /api/feature_flags` — create flag with key, org_id. Duplicate key → 422. `metadata.hypothesis` not required.
   `PATCH /api/feature_flags/:key` — update enabled field.
   `GET /api/feature_flags` — list active flags (archived excluded by default, `?status=archived` to include).
