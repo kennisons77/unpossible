@@ -46,7 +46,7 @@ module Agents
 
     def agent_run_params
       params.permit(
-        :run_id, :actor_id, :node_id, :parent_run_id,
+        :run_id, :source_ref, :parent_run_id,
         :mode, :provider, :model, :prompt_sha256,
         source_node_ids: []
       )

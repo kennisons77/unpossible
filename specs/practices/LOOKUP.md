@@ -10,7 +10,7 @@ Quick reference for recurring patterns in this codebase.
 | `filter_parameters` | `config/application.rb` | Filters `:passw, :email, :secret, :token, :_key, :crypt, :salt, :certificate, :otp, :ssn, :cvv, :cvc, :otp_attempt` from logs |
 | `rack-attack` | `config/initializers/rack_attack.rb` | IP throttle → 429; safelist localhost in test |
 | Authorization enforcement | `AuthorizationConcern` | `verify_authorized` / `verify_policy_scoped` after-actions — structural safety net |
-| Audit on destructive | `Analytics::AuditLogService` | Call before any delete/update of sensitive data |
+| Audit on destructive | `Analytics::AuditLogger` | Call before any delete/update of sensitive data |
 | STRIDE checklist | `specs/practices/threat-modeling.md` | Run per trust-boundary task during planning |
 | Edge case prompts | `specs/practices/threat-modeling.md` | Targeted prompts to surface domain-specific threats |
 
@@ -43,7 +43,7 @@ Quick reference for recurring patterns in this codebase.
 |---|---|
 | `Ultrathink` | Prefix for deep reasoning prompts — triggers extended thinking |
 | Effort parameter | `low` / `medium` / `high` — controls token budget for LLM calls |
-| Prompt dedup | `Agents::RunStorageService` — SHA256 of normalized prompt |
+| Prompt dedup | `Agents::PromptDeduplicator` — SHA256 of normalized prompt |
 | Prompt sanitization | `Security::PromptSanitizer.sanitize(text)` — call before every LLM call |
 
 ## Structural Vocabulary

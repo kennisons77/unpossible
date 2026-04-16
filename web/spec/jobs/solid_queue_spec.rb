@@ -4,7 +4,7 @@ require 'rails_helper'
 
 # A minimal job used only in this spec to verify queue routing.
 class TestQueueJob < ApplicationJob
-  queue_as :knowledge
+  queue_as :analytics
 
   def perform; end
 end
@@ -14,9 +14,9 @@ RSpec.describe "Solid Queue configuration" do
     expect(Rails.application.config.active_job.queue_adapter).to eq(:solid_queue)
   end
 
-  it "routes TestQueueJob to the knowledge queue", :aggregate_failures do
+  it "routes TestQueueJob to the analytics queue", :aggregate_failures do
     # Inspect the queue name directly — no need for :test adapter
-    expect(TestQueueJob.queue_name).to eq("knowledge")
+    expect(TestQueueJob.queue_name).to eq("analytics")
   end
 
   it "does not require a Redis connection" do
@@ -36,7 +36,7 @@ RSpec.describe "Solid Queue configuration" do
     expect(queue_config_path).to exist
 
     raw = File.read(queue_config_path)
-    %w[default knowledge analytics tasks pipeline].each do |queue|
+    %w[default analytics tasks pipeline].each do |queue|
       expect(raw).to include(queue), "Expected queue.yml to mention queue '#{queue}'"
     end
   end
