@@ -8,10 +8,10 @@
     - Spec layout: `specs/system/` (platform internals), `specs/skills/` (agent instructions), `specs/practices/` (discipline rules), `specs/platform/rails/` (Rails overrides)
     - Platform overrides in `specs/platform/rails/` mirror the same structure as `specs/system/`. Read the base spec first, then layer the matching platform override on top.
 0d. Read `practices/lang/ruby.md` and `practices/framework/rails.md`.
-0e. Study `IMPLEMENTATION_PLAN.md` (if present) to understand the plan so far.
-0f. Study `web/` with up to 5 parallel Haiku subagents to understand what has been implemented.
+0e. Delete `IMPLEMENTATION_PLAN.md` if it exists. The plan is regenerated from scratch every planning loop (see `practices/general/planning.md` § Plan Freshness). Do not carry forward old plan content — discover completed work from code and git state.
+0f. Study `web/` and `go/` (if present) with up to 5 parallel Haiku subagents to understand what has been implemented.
 
-1. Perform a gap analysis comparing `web/` against the specs. Use an Opus subagent to analyze findings and create/update `IMPLEMENTATION_PLAN.md`. Ultrathink.
+1. Perform a gap analysis comparing `web/` and `go/` against the specs. Use an Opus subagent to analyze findings and create `IMPLEMENTATION_PLAN.md`. Ultrathink.
 
    Scope the plan to Phase 0 only (Docker Compose, no CI, no k8s, no staging). For each task, derive required tests from the acceptance criteria in the relevant spec and include them in the task definition.
 

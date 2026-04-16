@@ -38,6 +38,7 @@ help:
 	@echo "  make down            Stop all services"
 	@echo "  make restart         Restart rails service"
 	@echo "  make logs            Tail rails logs"
+	@echo "  make activity        Show git log with activity notes"
 	@echo "  make console         Open rails console"
 	@echo "  make db-create       Create database"
 	@echo "  make db-migrate      Run pending migrations"
@@ -116,6 +117,9 @@ restart:
 
 logs:
 	$(COMPOSE) logs -f rails
+
+activity:
+	@git log --notes --format='%C(yellow)%h %C(cyan)%ai %C(reset)%s%n%N' | head -100
 
 console:
 	$(COMPOSE) exec rails bundle exec rails console
