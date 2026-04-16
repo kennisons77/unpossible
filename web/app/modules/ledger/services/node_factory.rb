@@ -26,14 +26,14 @@ module Ledger
       raise TransitionService::TransitionError, "only answer nodes can have child questions" unless parent_answer.kind == "answer"
       raise TransitionService::TransitionError, "terminal answers cannot have child questions" if parent_answer.answer_type == "terminal"
 
-      child = Node.new(question_attrs.merge(kind: "question"))
+      child = Node.new(question_attrs.merge(kind: "question", project_id: parent_answer.project_id))
       child.save!
       NodeEdge.create!(parent: parent_answer, child: child, edge_type: "contains")
       child
     end
 
     def self.attach_research(parent_node, spike_attrs)
-      spike = Node.new(spike_attrs.merge(kind: "question", scope: "code"))
+      spike = Node.new(spike_attrs.merge(kind: "question", scope: "code", project_id: parent_node.project_id))
       spike.save!
       NodeEdge.create!(parent: parent_node, child: spike, edge_type: "research")
       spike

@@ -6,7 +6,7 @@ module Analytics
 
     STATUSES = %w[active archived].freeze
 
-    validates :key, presence: true
+    validates :key, presence: true, uniqueness: { scope: :org_id }
     validates :status, presence: true, inclusion: { in: STATUSES }
     validates :org_id, presence: true
 
