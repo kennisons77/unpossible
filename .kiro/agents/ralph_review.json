@@ -12,6 +12,15 @@
     "thinking",
     "delegate"
   ],
+  "allowedTools": [
+    "fs_read",
+    "fs_write",
+    "execute_bash",
+    "grep",
+    "glob",
+    "code",
+    "use_subagent"
+  ],
   "resources": [
     "file://AGENTS.md",
     "file://specs/practices/cost.md",

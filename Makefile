@@ -58,7 +58,8 @@ help:
 	@echo "  make build           Build loop, unlimited iterations"
 	@echo "  make plan            Plan loop, unlimited iterations"
 	@echo "  make build1          Build loop, 1 iteration"
-	@echo "  make research        Research loop, then re-plan to integrate findings"
+	@echo "  make research ID=<n> Research loop, then re-plan to integrate findings"
+	@echo "                       (omit ID to research all pending spikes)"
 	@echo "  make review          Review loop, 1 iteration (analyse codebase, propose beats)"
 	@echo ""
 	@echo "Sandbox commands:"
@@ -182,7 +183,20 @@ build1:
 	@cd $(ROOT_DIR) && AGENT=$(AGENT) MODEL=$(MODEL) $(LOOP) 1
 
 research:
-	@cd $(ROOT_DIR) && AGENT=$(AGENT) MODEL=$(MODEL) $(LOOP) research
+	@if [ -n "$(ID)" ]; then \
+		cd $(ROOT_DIR) && AGENT=$(AGENT) MODEL=$(MODEL) $(LOOP) research $(ID); \
+	else \
+		SPIKE_IDS=$$(grep -E '^\- \[ \] [0-9].*\[SPIKE\]' $(ROOT_DIR)IMPLEMENTATION_PLAN.md \
+			| sed 's/^- \[ \] \([0-9][0-9.]*\).*/\1/'); \
+		if [ -z "$$SPIKE_IDS" ]; then \
+			echo "No pending spikes found in IMPLEMENTATION_PLAN.md"; exit 0; \
+		fi; \
+		echo "Pending spikes: $$SPIKE_IDS"; \
+		for id in $$SPIKE_IDS; do \
+			echo "==> Researching spike $$id..."; \
+			cd $(ROOT_DIR) && AGENT=$(AGENT) MODEL=$(MODEL) $(LOOP) research $$id || true; \
+		done; \
+	fi
 	# TODO: POST to /api/nodes/:id to close the spike node in the ledger
 	# so dependent beats are unblocked. Currently the spike lives only in
 	# IMPLEMENTATION_PLAN.md and specs/research/; the ledger sees it via
