@@ -41,7 +41,7 @@ The following is implemented and tested (137+ examples, 0 failures, 98.48% cover
 **Spec:** `specs/platform/rails/system/health-check.md`
 **Finding:** Currently uses Rails 8 default `GET /up` via `rails/health#show`. Spec requires a custom Rack middleware at position 0 that intercepts `GET /health`, checks DB with `SELECT 1`, returns 200/503 with empty body, and bypasses all other middleware.
 
-- [ ] 2.1 — Implement `HealthCheckMiddleware` as Rack middleware at position 0 (`web/app/middleware/health_check_middleware.rb`, `web/config/application.rb`)
+- [x] 2.1 — Implement `HealthCheckMiddleware` as Rack middleware at position 0 (`web/app/middleware/health_check_middleware.rb`, `web/config/application.rb`)
   Required tests: `GET /health` returns 200 when DB is up, returns 503 when DB is down, response body is empty, no auth required, middleware runs before all other middleware
   Files: `web/app/middleware/health_check_middleware.rb`, `web/config/application.rb`, `web/spec/middleware/health_check_middleware_spec.rb`
 

@@ -38,6 +38,11 @@ module Unpossible2
     # API + full-stack (views needed for UI)
     config.api_only = false
 
+    # Health check middleware — must run before all other middleware.
+    # Explicitly required because application.rb loads before autoloading is active.
+    require_relative '../app/middleware/health_check_middleware'
+    config.middleware.insert_before(0, HealthCheckMiddleware)
+
     # Background jobs via Solid Queue (Postgres-backed, no Redis)
     config.active_job.queue_adapter = :solid_queue
   end
