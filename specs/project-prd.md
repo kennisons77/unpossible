@@ -27,8 +27,6 @@ Monorepo with namespaced Rails modules. Each module owns its models, services, j
 
 ```
 app/modules/
-  knowledge/    # vector store, MD indexing, context retrieval
-  ledger/       # universal data model — nodes, edges, questions, answers
   agents/       # agent run storage, prompt dedup, JWT auth
   sandbox/      # container lifecycle, Docker dispatcher
   analytics/    # LLM metrics, audit log, feature flags
@@ -44,16 +42,13 @@ app/modules/
 ## Data Storage
 
 - Primary store: PostgreSQL 16 with pgvector extension (vector similarity search)
-- Schema is graph-aware from day one: explicit `parent_id`, `source_id`, and relationship columns on all agent and knowledge models so traversal queries are possible without a schema migration
+- Schema is graph-aware from day one: explicit `parent_id`, `source_id`, and relationship columns on all agent models so traversal queries are possible without a schema migration
 - Phase 0: plain Postgres relations — no graph extension
 - Phase 3 candidate: Apache AGE (Postgres graph extension, openCypher) — add when traversal queries become painful in SQL. The data will already be graph-shaped; the migration is additive
 
 ## Open Questions
 
-- Multi-tenancy scope for Phase 0: single-org (hardcoded org_id = 1) or org creation flow?
-- MinIO: is it needed in Phase 0, and what is stored there?
 - loop.sh location: project root `./loop.sh`
-- Go runner: copy from unpossible1 into `runner/` or reference as submodule?
 
 ## Future Phase Considerations
 

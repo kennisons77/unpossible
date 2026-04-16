@@ -29,7 +29,7 @@ test, and extend. Produce a set of proposed beats for the user to accept or reje
    - Proposed deeper module with a thinner interface
    - What becomes easier to test after the change
 4. Wait for the user to select candidates.
-5. For each accepted candidate, POST a beat to `/api/nodes` describing the refactor.
+5. For each accepted candidate, write a beat to `IMPLEMENTATION_PLAN.md` describing the refactor.
    One beat per candidate.
 
 Do not modify any files until the user explicitly accepts a candidate.

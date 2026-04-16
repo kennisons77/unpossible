@@ -1,3 +1,5 @@
+> **SUPERSEDED — knowledge module removed. See `specs/system/reference-graph/spec.md`.**
+
 # Knowledge
 
 ## What It Does

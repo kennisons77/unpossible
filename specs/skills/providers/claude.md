@@ -17,7 +17,7 @@ description: Best practices for Claude (Anthropic) as an actor
 Apply `cache_control: {type: "ephemeral", ttl: "1h"}` to stable blocks loaded every
 iteration: practices files, prd.md, tool definitions >500 tokens.
 
-Do NOT cache: beat description, retrieved knowledge chunks — these change per iteration.
+Do NOT cache: beat description, per-iteration context (current task, retrieved file content) — these change per iteration.
 
 Cached input tokens cost ~10% of normal input rate. Cache TTL defaults to 5 minutes —
 always set `ttl: "1h"` for context shared across loop iterations.

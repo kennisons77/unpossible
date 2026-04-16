@@ -16,16 +16,16 @@ the container.
 - **Agent runner:** needs to dispatch a container, get a result back (exit code, output),
   and record what happened — without managing Docker directly.
 - **Developer:** needs to observe a running loop in real time to catch errors without
-  waiting for timeout. The durable record lives in the ledger and agent runner; the
+  waiting for timeout. The durable record lives in the agent runner; the
   container output is supplementary.
 
 ## User Scenarios
 
 **Scenario 1 — Normal loop execution:**
 The agent runner dispatches a container with the loop image and command. The container
-runs, writes code to the bind-mounted `app/` directory, and exits 0. The `ContainerRun`
+runs, writes code to the bind-mounted `web/` directory, and exits 0. The `ContainerRun`
 record is updated with the final status, exit code, and duration. The agent runner reads
-the result and posts the answer node to the ledger.
+the result.
 
 **Scenario 2 — Loop failure:**
 The container exits non-zero. The `ContainerRun` record is marked `failed` with the

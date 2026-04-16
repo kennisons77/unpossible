@@ -13,7 +13,7 @@ verdict is accepted.
 
 ## Each Iteration
 
-1. Query `/api/nodes` for the oldest open unblocked beat (scope: code).
+1. Read `IMPLEMENTATION_PLAN.md` for the oldest open unblocked beat.
 2. Read the beat's acceptance criteria and the spec it belongs to.
 3. **Design the interface** — before writing any test, agree on the interface. What are
    the inputs, outputs, and boundaries? Explore the codebase to understand what already
@@ -24,11 +24,9 @@ verdict is accepted.
 6. **Refactor** — clean up without changing behaviour. Run tests again. Still green.
 7. **Typecheck + lint** — fix any errors before continuing.
 8. **Repeat** steps 4–7 for each acceptance criterion until all are green.
-9. Commit. POST the commit as a terminal answer to the beat node.
-10. The test runner posts a verdict. If false, beat re-opens — loop continues.
-    If true, beat closes — loop moves to next beat.
-11. Log to `specs/activity.md`.
-12. Output `RALPH_COMPLETE` when no open unblocked beats remain.
+9. Commit. Mark the beat complete in `IMPLEMENTATION_PLAN.md`.
+10. Log to `specs/activity.md`.
+11. Output `RALPH_COMPLETE` when no open unblocked beats remain.
 
 ## RALPH Signals
 
@@ -52,6 +50,5 @@ lints all pass.
 ## Practices
 
 `cost.md` and `version-control.md` are always in context. All other practices
-(`coding.md`, `verification.md`, `security.md`) are retrieved on demand from the
-knowledge base — not loaded by default. If the agent hits an issue, retrieve the
-relevant practice by name before proceeding.
+(`coding.md`, `verification.md`, `security.md`) are loaded by file path on demand —
+not loaded by default. If the agent hits an issue, load the relevant practice by name before proceeding.

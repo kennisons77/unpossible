@@ -15,8 +15,7 @@ Platform-agnostic specs live here. Rails-specific implementation details live in
 A directory signals that the subject has been fully specced with intent + model:
 
 ```
-system/ledger/
-  prd.md    intent, personas, scenarios, success metrics
+system/reference-graph/
   spec.md   data model, schema, behaviour, acceptance criteria
 ```
 
@@ -25,19 +24,19 @@ into a fully specced module.
 
 ## Core Paradigm
 
-Every artifact in the system — a pitch, a PRD, a spec, a beat, a commit, a bug, a form,
-a deployment — is a **node** in the ledger: either a question or an answer.
+Every artifact in the system — a pitch, a PRD, a spec, a beat, a commit, a bug — is
+tracked in the **reference graph**: a file-and-git-native system where specs live as
+markdown files, events are appended to `LEDGER.jsonl`, and relationships are resolved
+by the Go parser reading git history and notes.
 
-- A **question** declares intent or poses a problem. It is open until an answer is accepted.
-- An **answer** responds to a question. It is either terminal (work done) or generative
-  (spawns child questions that must be resolved before the tree is complete).
-- A **generative answer** is a shared understanding checkpoint — a PRD, a spec, a
-  research finding. It requires co-acceptance before child questions open.
+- A **spec** declares intent or defines behaviour. It is the source of truth for what
+  the system does.
+- A **LEDGER.jsonl entry** records a status change, block, or spec change event.
+  Append-only — entries are never modified or deleted.
+- The **component registry** (`COMPONENTS.md` + `components.yaml`) maps canonical
+  component names to their spec and implementation paths.
 
-Nodes form a DAG via `NodeEdge` (contains / depends_on / refs). The ledger is the
-ordered sequence of all nodes by `originated_at`. It is append-only.
-
-See [`system/ledger/`](system/ledger/) for the full model.
+See [`system/reference-graph/`](system/reference-graph/) for the full model.
 
 ## System Specs (`system/`)
 
@@ -46,9 +45,8 @@ Core platform capabilities — what the system does and how its modules behave.
 | Spec | Module |
 |---|---|
 | [project-prd.md](project-prd.md) | All — technical constraints and phase |
-| [system/ledger/](system/ledger/) | Universal data model — nodes, edges, questions, answers |
+| [system/reference-graph/](system/reference-graph/) | Reference graph — files, git, LEDGER.jsonl, component registry |
 | [system/agent-runner/](system/agent-runner/) | AgentRun record, prompt assembly, dedup, sidecar, observability |
-| [system/knowledge/](system/knowledge/) | Vector store, MD indexing, LLM response indexing, context retrieval |
 | [system/sandbox/](system/sandbox/) | Container lifecycle, Docker dispatcher |
 | [system/analytics/](system/analytics/) | LLM metrics, product events, feature flag exposures, audit log |
 | [system/feature-flags/](system/feature-flags/) | Feature flag schema, hypothesis requirement, lifecycle |

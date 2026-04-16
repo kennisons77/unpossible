@@ -22,13 +22,13 @@ visible.
 ## User Scenarios
 
 **Scenario 1 — Shipping behind a flag:**
-The build loop implements a new knowledge retrieval strategy. It creates a flag
-`knowledge.vector_search` (`enabled: false`) and wraps the new code path. The beat
+The build loop implements a new analytics cost alert strategy. It creates a flag
+`analytics.cost_alerts` (`enabled: false`) and wraps the new code path. The beat
 passes tests and is committed. The new behaviour is inert in production.
 
 **Scenario 2 — Enabling a flag:**
-The developer is ready to test the new retrieval strategy. They call
-`PATCH /api/feature_flags/knowledge.vector_search` with `{ enabled: true }`. The
+The developer is ready to test the new strategy. They call
+`PATCH /api/feature_flags/analytics.cost_alerts` with `{ enabled: true }`. The
 behaviour is live without a deploy.
 
 **Scenario 3 — Emergency rollback:**

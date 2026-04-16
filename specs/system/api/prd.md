@@ -23,16 +23,14 @@ external consumers.
 ## User Scenarios
 
 **Scenario 1 — Developer explores the API:**
-A developer wants to know the request shape for posting a node to the ledger. They open
+A developer wants to know the request shape for starting an agent run. They open
 `/api/docs`, find the endpoint, read the parameters and response shape, and make the
 call. No code reading required.
 
 **Scenario 2 — Loop agent discovers endpoints:**
 Before making an API call, the loop reads `/api/docs` to confirm the endpoint path,
 required parameters, and expected response shape. It uses this to assemble the correct
-request without hardcoding assumptions.
-
-**Scenario 3 — Loop authors a new endpoint:**
+request without hardcoding assumptions.**Scenario 3 — Loop authors a new endpoint:**
 The build loop implements a new controller. The definition of done requires a
 corresponding `spec/requests/` file. When `rake rswag:specs:swaggerize` is run, it
 fails if the spec is missing or the endpoint is undocumented — the beat cannot be

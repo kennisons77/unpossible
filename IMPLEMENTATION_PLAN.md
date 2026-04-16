@@ -97,7 +97,7 @@ Phase: 0 (Local Development — Docker Compose only)
   **Depends on:** 18.1, 18.2, 18.3, 18.5
   Required tests: no dangling references to ledger or knowledge modules in LOOKUP files or routes.
 
-- [ ] 18.7 — Clean up specs and docs for ledger/knowledge removal
+- [x] 18.7 — Clean up specs and docs for ledger/knowledge removal
   Broad sweep of all spec, skill, practice, and root documentation files to remove stale ledger/knowledge references.
   **Depends on:** 18.1, 18.2
   Changes:

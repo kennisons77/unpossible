@@ -34,7 +34,7 @@ What to keep stable across iterations:
 What changes per iteration (don't cache):
 - The current task description
 - `IMPLEMENTATION_PLAN.md` (updated after each task)
-- Retrieved knowledge chunks
+- Per-iteration retrieved file content
 
 ## Activity Log Hygiene
 
