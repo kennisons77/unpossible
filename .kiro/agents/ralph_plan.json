@@ -1,0 +1,30 @@
+{
+  "name": "ralph_plan",
+  "description": "Plan loop agent — gap analysis with stable context pre-loaded",
+  "prompt": null,
+  "tools": [
+    "read",
+    "write",
+    "shell",
+    "grep",
+    "glob",
+    "code",
+    "thinking",
+    "delegate"
+  ],
+  "resources": [
+    "file://AGENTS.md",
+    "file://specs/practices/cost.md",
+    "file://specs/practices/planning.md",
+    "file://specs/practices/verification.md",
+    "file://specs/practices/changeability.md",
+    "file://specs/practices/structural-vocabulary.md",
+    "file://specs/skills/workflows/prd.md"
+  ],
+  "hooks": {
+    "agentSpawn": [
+      { "command": "./scripts/ensure-lsp.sh", "description": "Install LSP servers if missing" }
+    ]
+  },
+  "model": null
+}

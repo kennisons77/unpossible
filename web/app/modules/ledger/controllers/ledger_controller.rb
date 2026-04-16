@@ -26,23 +26,29 @@ module Ledger
       @nodes = scope.order(originated_at: :asc)
     end
 
-    # GET /ledger/tree — full project tree, text search
+    # GET /ledger/tree — project list or project tree
     def tree
-      scope = Ledger::Node.where(org_id: current_org_id)
-      if params[:q].present?
-        q = "%#{params[:q].downcase}%"
-        scope = scope.where("LOWER(title) LIKE ? OR LOWER(body) LIKE ?", q, q)
+      @projects = Ledger::Project.where(org_id: current_org_id).order(:name)
+
+      if params[:project].present?
+        @current_project = @projects.find_by!(name: params[:project])
+        scope = Ledger::Node.where(org_id: current_org_id, project_id: @current_project.id)
+        if params[:q].present?
+          q = "%#{params[:q].downcase}%"
+          scope = scope.where("LOWER(title) LIKE ? OR LOWER(body) LIKE ?", q, q)
+        end
+        all_nodes = scope.order(originated_at: :asc).to_a
+        child_ids = Ledger::NodeEdge.where(edge_type: "contains", child_id: all_nodes.map(&:id))
+                                    .pluck(:child_id).to_set
+        @root_nodes = all_nodes.reject { |n| child_ids.include?(n.id) }
+        @children_by_parent = build_children_map(all_nodes)
       end
-      all_nodes = scope.order(originated_at: :asc).to_a
-      child_ids = Ledger::NodeEdge.where(edge_type: "contains", child_id: all_nodes.map(&:id))
-                                  .pluck(:child_id).to_set
-      @root_nodes = all_nodes.reject { |n| child_ids.include?(n.id) }
-      @children_by_parent = build_children_map(all_nodes)
     end
 
     # GET /ledger/nodes/:id — node detail
     def node
       @node = Ledger::Node.find(params[:id])
+      @spec_content = read_spec(@node.spec_path)
       @ancestors = ancestors_for(@node)
       @children = Ledger::NodeEdge.where(parent_id: @node.id, edge_type: "contains")
                                   .includes(:child).map(&:child)
@@ -76,6 +82,13 @@ module Ledger
       edges.each_with_object(Hash.new { |h, k| h[k] = [] }) do |edge, map|
         map[edge.parent_id] << nodes_by_id[edge.child_id]
       end
+    end
+
+    def read_spec(spec_path)
+      return nil if spec_path.blank?
+
+      abs = File.join(Rails.root.parent.to_s, spec_path)
+      File.read(abs) if File.exist?(abs)
     end
   end
 end

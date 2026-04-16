@@ -5,6 +5,7 @@ module Ledger
     SNAPSHOT_PATH = Rails.root.join("../ledger/snapshot.yml").to_s
 
     TABLES = {
+      projects:     Ledger::Project,
       nodes:        Ledger::Node,
       node_edges:   Ledger::NodeEdge,
       audit_events: Ledger::NodeAuditEvent
@@ -25,12 +26,13 @@ module Ledger
       return unless File.exist?(path)
       return if Ledger::Node.exists? # don't clobber existing data
 
-      data = YAML.safe_load_file(path, permitted_classes: [Time, Date, ActiveSupport::TimeWithZone])
+      data = YAML.safe_load_file(path, permitted_classes: [Time, Date, ActiveSupport::TimeWithZone, ActiveSupport::TimeZone], aliases: true)
 
       ActiveRecord::Base.transaction do
-        (data["nodes"] || []).each { |attrs| Ledger::Node.insert!(attrs) }
-        (data["node_edges"] || []).each { |attrs| Ledger::NodeEdge.insert!(attrs) }
-        (data["audit_events"] || []).each { |attrs| Ledger::NodeAuditEvent.insert!(attrs) }
+        (data["projects"] || []).each { |attrs| Ledger::Project.insert!(attrs.slice(*Ledger::Project.column_names)) }
+        (data["nodes"] || []).each { |attrs| Ledger::Node.insert!(attrs.slice(*Ledger::Node.column_names)) }
+        (data["node_edges"] || []).each { |attrs| Ledger::NodeEdge.insert!(attrs.slice(*Ledger::NodeEdge.column_names)) }
+        (data["audit_events"] || []).each { |attrs| Ledger::NodeAuditEvent.insert!(attrs.slice(*Ledger::NodeAuditEvent.column_names)) }
       end
 
       count = data["nodes"]&.size || 0

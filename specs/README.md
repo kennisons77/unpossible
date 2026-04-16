@@ -1,4 +1,4 @@
-# Specs — Unpossible 2
+# Specs — Unpossible
 
 One file per feature area. Each spec defines what the feature does, who it's for, and
 its acceptance criteria. The implementation plan is derived from these specs — not the
@@ -45,13 +45,14 @@ Core platform capabilities — what the system does and how its modules behave.
 
 | Spec | Module |
 |---|---|
-| [prd.md](prd.md) | All — technical constraints and phase |
+| [project-prd.md](project-prd.md) | All — technical constraints and phase |
 | [system/ledger/](system/ledger/) | Universal data model — nodes, edges, questions, answers |
 | [system/agent-runner/](system/agent-runner/) | AgentRun record, prompt assembly, dedup, sidecar, observability |
 | [system/knowledge/](system/knowledge/) | Vector store, MD indexing, LLM response indexing, context retrieval |
 | [system/sandbox/](system/sandbox/) | Container lifecycle, Docker dispatcher |
 | [system/analytics/](system/analytics/) | LLM metrics, product events, feature flag exposures, audit log |
-| [system/feature-flags.md](system/feature-flags.md) | Feature flag schema, hypothesis requirement, lifecycle |
+| [system/feature-flags/](system/feature-flags/) | Feature flag schema, hypothesis requirement, lifecycle |
+| [system/batch-requests.md](system/batch-requests.md) | Batch request middleware — fan-out sub-requests in a single HTTP call |
 | [system/practices.md](system/practices.md) | Practices files — what they are and when they load |
 
 ## Product Specs (`product/`)

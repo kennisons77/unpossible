@@ -11,6 +11,7 @@ FactoryBot.define do
     org_id { SecureRandom.uuid }
     recorded_at { Time.current }
     status { "proposed" }
+    project { association :ledger_project, org_id: org_id }
 
     trait :answer do
       kind { "answer" }

@@ -1,6 +1,6 @@
 # Threat Modeling Practices
 
-Loaded every plan iteration. Guides threat-informed task definition and test scenario selection.
+Retrieved on demand when a task touches a trust boundary.
 
 ## When to Apply
 
