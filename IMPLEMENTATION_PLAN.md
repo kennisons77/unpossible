@@ -54,7 +54,7 @@ The following is implemented and tested (137+ examples, 0 failures, 98.48% cover
 **Spec:** `specs/system/analytics/spec.md`, `specs/platform/rails/system/analytics.md`
 **Finding:** No `Analytics::MetricsController` exists. No `Analytics::AuditEvent` model. No `Analytics::LlmMetric` model. No `Analytics::AuditLogger` service. The spec requires query endpoints and supporting models.
 
-- [ ] 3.1 — Create `Analytics::AuditEvent` model (append-only, severity enum: info/warning/critical) (`web/app/modules/analytics/models/audit_event.rb`, `web/db/migrate/..._create_analytics_audit_events.rb`)
+- [x] 3.1 — Create `Analytics::AuditEvent` model (append-only, severity enum: info/warning/critical) (`web/app/modules/analytics/models/audit_event.rb`, `web/db/migrate/..._create_analytics_audit_events.rb`)
   Required tests: validations (org_id, event_name, severity required), append-only enforcement (update/destroy raise), severity enum validates inclusion, index on (org_id, created_at)
   Files: `web/app/modules/analytics/models/audit_event.rb`, `web/db/migrate/..._create_analytics_audit_events.rb`, `web/spec/models/analytics/audit_event_spec.rb`, `web/spec/factories/analytics_audit_events.rb`
 
