@@ -85,7 +85,7 @@ activate:
 
 config:
 	@echo "━━━ Runner Config ━━━"
-	@echo "AGENT=$(AGENT)"
+	@echo "AGENT=$(AGENT)"/
 	@echo "MODEL=$(or $(MODEL),(agent default))"
 	@echo ""
 	@echo "━━━ Environment (.env) ━━━"
