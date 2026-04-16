@@ -100,6 +100,19 @@ The current phase is recorded in `specs/prd.md` under `## Phase`. Default to Pha
 
 ## IMPLEMENTATION_PLAN.md
 - It is the agent's only memory across context windows — keep it current
-- Remove completed items when the file grows large (>50 items)
 - Each item should name the files it will touch, so future iterations can target searches
-- The plan is disposable state — regenerate it entirely when it's stale or wrong
+
+## Plan Freshness
+
+IMPLEMENTATION_PLAN.md is **regenerated from scratch** on every planning loop.
+The planning loop deletes the file before writing a new one. The source of truth
+is the code and specs, not the plan — a stale plan is worse than no plan.
+
+- **Planning loops:** Delete IMPLEMENTATION_PLAN.md, gap-analyze specs vs code, write a fresh plan.
+  Completed work is discovered from code and git state, not carried forward from the old plan.
+- **Build loops:** Check off tasks and log findings to `activity.md`. Never add sections or
+  restructure the plan. If a build loop discovers missing work, it logs the finding for the
+  next planning loop to pick up.
+- **Staleness guard:** Before writing the plan, diff what the plan would say against what
+  actually exists in `web/` and `go/`. Flag any task whose artifacts already exist (skip it)
+  or any completed-looking code that has no spec coverage (add a task).
