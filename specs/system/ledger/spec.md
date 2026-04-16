@@ -1,3 +1,5 @@
+> **SUPERSEDED by `specs/system/reference-graph/spec.md`**
+
 # Ledger
 
 ## What It Does

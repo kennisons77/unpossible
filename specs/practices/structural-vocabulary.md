@@ -213,7 +213,7 @@ and usually signal that the module boundaries are wrong. In planning, a cycle
 means two tasks each depend on the other, which is a spec problem, not an
 implementation problem.
 
-Example: Module dependency graph — knowledge depends on ledger, analytics depends
+Example: Module dependency graph — analytics depends
 on agents, but no module depends on itself through any chain.
 
 #### Workflow
@@ -249,11 +249,10 @@ date) requires the target entity to exist and have the relevant date populated.
 Closing a workflow must close all open tasks — orphaned open tasks are a data
 integrity bug.
 
-Relevance to the ledger: a collection of planning and implementation nodes forms a
+Relevance to the reference graph: a collection of planning and implementation specs forms a
 dependency graph. A bug can be traced back through the graph to the planning or
-implementation decision that caused it — the `depends_on` and `contains` edges in
-`NodeEdge` are the same structural concept as task dependencies in a workflow. The
-ledger *is* a task DAG at the project level.
+implementation decision that caused it — `depends_on` refs in `IMPLEMENTATION_PLAN.md`
+are the same structural concept as task dependencies in a workflow.
 
 #### Graph (with cycles)
 

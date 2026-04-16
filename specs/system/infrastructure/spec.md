@@ -25,17 +25,15 @@ rails          ruby:3.3-slim, port 3000
 go_runner      Go sidecar, port 8080
 analytics      Go analytics sidecar, port 9100
 postgres       pgvector/pgvector:pg16, port 5432 (internal only)
-redis          redis:7-alpine, port 6379 (internal only)
 ```
 
 **`infra/docker-compose.test.yml`** — CI/test stack (ephemeral volumes, no ports exposed):
 ```
 test           runs bundle exec rspec
 postgres       same image, tmpfs volume
-redis          same image, tmpfs volume
 ```
 
-All services on a single `unpossible` bridge network. Postgres and Redis are never bound to `0.0.0.0` — internal network only.
+All services on a single `unpossible` bridge network. Postgres is never bound to `0.0.0.0` — internal network only.
 
 Image tags: always git SHA (`$(git rev-parse --short HEAD)`), never `latest`.
 

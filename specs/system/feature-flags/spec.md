@@ -52,7 +52,7 @@ end
 
 ## Naming Convention
 
-`{module}.{feature}` — e.g. `knowledge.vector_search`, `analytics.cost_alerts`.
+`{module}.{feature}` — e.g. `analytics.cost_alerts`, `agents.streaming`.
 Namespaced to prevent collisions.
 
 ## Acceptance Criteria

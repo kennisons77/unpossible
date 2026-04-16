@@ -19,10 +19,10 @@ There is no way to browse runs, inspect turns, or see cost breakdowns in a brows
 - Ordered list of turns with kind badge (agent_question, human_input, llm_response, tool_result)
 - Turn content rendered as markdown
 - Link to parent run if present
-- Link to associated ledger node if present
+- `source_ref` displayed if present
 
 ## Constraints
 
 - Server-rendered HTML (ERB), no JS framework
-- Reuse existing layout and styling patterns from ledger views
-- Auth follows the same pattern as LedgerController (authenticate_session!, bypassable with DISABLE_AUTH)
+- Reuse existing layout and styling patterns
+- Auth follows the same pattern as ApplicationController (authenticate!, bypassable with DISABLE_AUTH)

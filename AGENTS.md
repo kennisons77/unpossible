@@ -15,7 +15,7 @@ docker compose -f infra/docker-compose.test.yml run --rm test
 # Run a specific spec
 docker compose -f infra/docker-compose.test.yml run --rm test bundle exec rspec spec/path/to/spec.rb
 
-# Start full dev stack (requires Dockerfile.runner and Dockerfile.analytics)
+# Start full dev stack
 GIT_SHA=$(git rev-parse --short HEAD) docker compose -f infra/docker-compose.yml up
 ```
 
@@ -37,12 +37,11 @@ Then update `web/Gemfile` and `web/Gemfile.lock`, and rebuild the image.
 |---|---|---|
 | Rails app root | `web/` | All Ruby source |
 | Infra config | `infra/` | Dockerfiles, compose files |
-| Module code | `web/app/modules/{name}/` | knowledge, tasks, agents, sandbox, analytics |
+| Module code | `web/app/modules/{name}/` | agents, sandbox, analytics |
 | Specs | `web/spec/` | RSpec, FactoryBot, Shoulda Matchers |
 | Initializers | `web/config/initializers/` | lograge.rb, rack_attack.rb |
 | DB migrations | `web/db/migrate/` | Rails migrations |
 | Lib | `web/app/lib/` | Secret, AuthToken, Security::* |
-| Ledger jobs | `web/app/modules/ledger/jobs/` | SpecWatcherJob polls specs/**/*.md every 10s |
 
 ## SQL NULL Gotcha
 

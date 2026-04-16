@@ -28,7 +28,7 @@ the "why" only when it would be non-obvious to a future reader.
 
 | Situation | Where to record | Example |
 |---|---|---|
-| Routine implementation | Git commit message | "Add Node#closed? predicate" |
+| Routine implementation | Git commit message | "Add FeatureFlag#enabled? predicate" |
 | Non-obvious trade-off | Inline `# why:` comment | `# why: raw SQL here because AR .scope conflicts with column name` |
 | Load-bearing decision | `specs/decisions/NNNN-title.md` | Choosing pgvector over Qdrant |
 | Rejected alternative | Same decision record | "Considered X, rejected because Y" |
@@ -83,7 +83,7 @@ Code that's easy to change is code where changing one thing doesn't break five o
 LLMs read code differently than humans. They don't use an IDE, can't jump to definition
 on hover, and lose context across large files. What helps:
 
-- Self-documenting names that encode domain intent (`TransitionService.call` not
+- Self-documenting names that encode domain intent (`AuditLogger.log` not
   `Service.run`)
 - LOOKUP.md files as entry points — an LLM reads these first to orient before diving
   into source files
