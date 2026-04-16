@@ -19,7 +19,7 @@ SKILL = @cd $(PROJECT_DIR) && $(AGENT) -- "$(shell cat $(PROJECT_DIR)
         db-create db-migrate db-setup db-reset \
         build plan build1 research \
         sb-interview sb-review review prd spec server-ops \
-        start config status activate test
+        start config status activate test sandbox
 
 COMPOSE := docker compose -f $(PROJECT_DIR)infra/docker-compose.yml
 COMPOSE_TEST := docker compose -f $(PROJECT_DIR)infra/docker-compose.test.yml
@@ -45,11 +45,6 @@ help:
 	@echo "  make db-reset        Drop + create + migrate + seed"
 	@echo "  make docker-build    Build the rails image"
 	@echo "  make shell           Open bash in rails container"
-	@echo "  make ledger-export   Export ledger state to ledger/snapshot.yml"
-	@echo "  make ledger-import   Import ledger state from snapshot (empty DB only)"
-	@echo "  make ledger-seed     Seed ledger from specs + implementation plan (empty DB only)"
-	@echo "  make bulk-export     Export agent runs + knowledge to .data/snapshots/ (not in git)"
-	@echo "  make bulk-import     Import agent runs + knowledge from .data/snapshots/"
 	@echo ""
 	@echo "Workflow:"
 	@echo "  make start           Orient, research if needed, gap-fill spec, plan (1 iteration)"
@@ -114,7 +109,6 @@ up:
 	$(COMPOSE) up -d --build
 
 down:
-	@$(COMPOSE) exec rails bundle exec rake ledger:export bulk:export 2>/dev/null || echo "Snapshot skipped (container not running)"
 	$(COMPOSE) down
 
 restart:
@@ -140,22 +134,6 @@ db-setup:
 
 db-reset:
 	$(COMPOSE) exec rails bundle exec rails db:reset
-
-# --- Ledger persistence ---
-ledger-export:
-	$(COMPOSE) exec rails bundle exec rake ledger:export
-
-ledger-import:
-	$(COMPOSE) exec rails bundle exec rake ledger:import
-
-ledger-seed:
-	$(COMPOSE) exec rails bundle exec rake ledger:seed
-
-bulk-export:
-	$(COMPOSE) exec rails bundle exec rake bulk:export
-
-bulk-import:
-	$(COMPOSE) exec rails bundle exec rake bulk:import
 
 # --- Workflow ---
 
@@ -197,11 +175,6 @@ research:
 			cd $(ROOT_DIR) && AGENT=$(AGENT) MODEL=$(MODEL) $(LOOP) research $$id || true; \
 		done; \
 	fi
-	# TODO: POST to /api/nodes/:id to close the spike node in the ledger
-	# so dependent beats are unblocked. Currently the spike lives only in
-	# IMPLEMENTATION_PLAN.md and specs/research/; the ledger sees it via
-	# PlanFileSyncService but doesn't know the spike is resolved until the
-	# next plan sync. The loop should call the transition API directly.
 	@echo "==> Re-planning to integrate research findings..."
 	@cd $(ROOT_DIR) && AGENT=$(AGENT) MODEL=$(MODEL) $(LOOP) plan
 

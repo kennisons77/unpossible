@@ -41,6 +41,18 @@ RSpec.describe Agents::AgentRun, type: :model do
       run = build(:agents_agent_run, parent_run_id: nil)
       expect(run).to be_valid
     end
+
+    it 'allows nil source_ref' do
+      run = build(:agents_agent_run, source_ref: nil)
+      expect(run).to be_valid
+    end
+  end
+
+  describe 'source_ref' do
+    it 'accepts a spec path string' do
+      run = build(:agents_agent_run, source_ref: 'specs/system/agent-runner/spec.md')
+      expect(run).to be_valid
+    end
   end
 
   describe 'defaults' do

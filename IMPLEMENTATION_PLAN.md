@@ -44,7 +44,7 @@ Phase: 0 (Local Development — Docker Compose only)
 
 > Per `specs/system/reference-graph/spec.md` §6. The ledger and knowledge modules are replaced by a file-and-git-native reference graph. Postgres is retained only for operational data (agents, analytics, sandbox).
 
-- [ ] 18.1 — Remove Ledger module code (`web/app/modules/ledger/` delete, `web/spec/` delete ledger specs/factories, `web/db/migrate/XXX_drop_ledger_tables.rb` new, `web/config/routes.rb`)
+- [x] 18.1 — Remove Ledger module code (`web/app/modules/ledger/` delete, `web/spec/` delete ledger specs/factories, `web/db/migrate/XXX_drop_ledger_tables.rb` new, `web/config/routes.rb`)
   Delete all Ledger models: Node, NodeEdge, NodeAuditEvent, Actor, ActorProfile, Project.
   Delete all Ledger services: TransitionService, VerdictService, NodeLifecycleService, NodeFactory, LedgerSnapshotService, PlanFileSyncService.
   Delete all Ledger controllers: NodesController, LedgerController.
@@ -57,7 +57,7 @@ Phase: 0 (Local Development — Docker Compose only)
   Remove ledger specs: all files under `web/spec/models/ledger/`, `web/spec/requests/ledger/`, `web/spec/modules/ledger/`.
   Required tests: full suite passes with no ledger references; dropped tables do not exist in schema.
 
-- [ ] 18.2 — Remove Knowledge module code (`web/app/modules/knowledge/` delete, `web/spec/` delete knowledge specs/factories, `web/db/migrate/XXX_drop_knowledge_tables.rb` new)
+- [x] 18.2 — Remove Knowledge module code (`web/app/modules/knowledge/` delete, `web/spec/` delete knowledge specs/factories, `web/db/migrate/XXX_drop_knowledge_tables.rb` new)
   Delete all Knowledge models: LibraryItem.
   Delete all Knowledge services: MdChunker, EmbedderService, OpenAiEmbedder, ContextRetriever.
   Delete all Knowledge jobs: IndexerJob.
@@ -67,14 +67,14 @@ Phase: 0 (Local Development — Docker Compose only)
   Remove knowledge specs: all files under `web/spec/models/knowledge/`, `web/spec/modules/knowledge/`.
   Required tests: full suite passes with no knowledge references.
 
-- [ ] 18.3 — Update AgentRun to remove ledger FKs (`web/app/modules/agents/models/agent_run.rb`, `web/db/migrate/XXX_remove_ledger_fks_from_agent_runs.rb`, `web/spec/models/agents/agent_run_spec.rb`, `web/spec/factories/agents_agent_runs.rb`)
+- [x] 18.3 — Update AgentRun to remove ledger FKs (`web/app/modules/agents/models/agent_run.rb`, `web/db/migrate/XXX_remove_ledger_fks_from_agent_runs.rb`, `web/spec/models/agents/agent_run_spec.rb`, `web/spec/factories/agents_agent_runs.rb`)
   Remove `node_id` (FK → Node) and `actor_id` (FK → Actor) columns from agents_agent_runs.
   Replace with `source_ref` (string, nullable) — a spec path or plan item ref that the reference parser can resolve.
   Update AgentRun model, factory, and specs.
   **Depends on:** 18.1
   Required tests: AgentRun valid without node_id/actor_id; source_ref is nullable string.
 
-- [ ] 18.5 — Remove BulkSnapshotService and ledger_snapshot initializer (`web/app/modules/agents/services/bulk_snapshot_service.rb` delete, `web/config/initializers/ledger_snapshot.rb` delete, `web/lib/tasks/ledger.rake` delete)
+- [x] 18.5 — Remove BulkSnapshotService and ledger_snapshot initializer (`web/app/modules/agents/services/bulk_snapshot_service.rb` delete, `web/config/initializers/ledger_snapshot.rb` delete, `web/lib/tasks/ledger.rake` delete)
   BulkSnapshotService references `Ledger::ActorProfile`, `Ledger::Actor`, `Knowledge::LibraryItem` — all removed.
   `ledger_snapshot.rb` initializer references `Ledger::Node`, `Ledger::LedgerSnapshotService`, `Ledger::SpecWatcherJob` — all removed.
   `ledger.rake` references `Ledger::LedgerSnapshotService` — removed.
@@ -82,14 +82,14 @@ Phase: 0 (Local Development — Docker Compose only)
   **Depends on:** 18.1, 18.2
   Required tests: full suite passes; no references to deleted services remain.
 
-- [ ] 18.6 — Update Makefile for ledger removal (`Makefile`)
+- [x] 18.6 — Update Makefile for ledger removal (`Makefile`)
   Remove `ledger-export`, `ledger-import`, `ledger-seed`, `bulk-export`, `bulk-import` targets.
   Remove `bundle exec rake ledger:export bulk:export` from the `down` target.
   Remove ledger/bulk entries from help text.
   **Depends on:** 18.5
   Required tests: `make help` runs without errors; no references to removed rake tasks.
 
-- [ ] 18.4 — Clean up cross-module references (`web/app/modules/LOOKUP.md`, `specs/practices/LOOKUP.md`, `AGENTS.md`, `web/config/routes.rb`)
+- [x] 18.4 — Clean up cross-module references (`web/app/modules/LOOKUP.md`, `specs/practices/LOOKUP.md`, `AGENTS.md`, `web/config/routes.rb`)
   Remove ledger and knowledge references from: LOOKUP.md files, AGENTS.md module table.
   Update `web/app/modules/LOOKUP.md` to remove knowledge and ledger entries.
   Update `specs/practices/LOOKUP.md` to remove ledger-specific entries and update `Agents::RunStorageService` → `Agents::PromptDeduplicator`.

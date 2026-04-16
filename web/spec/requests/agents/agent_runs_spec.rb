@@ -8,8 +8,6 @@ RSpec.describe 'Agent Runs API', type: :request do
   let(:headers) { { 'Authorization' => "Bearer #{token}", 'Content-Type' => 'application/json' } }
   let(:sidecar_secret) { 'test-sidecar-token' }
   let(:sidecar_headers) { { 'X-Sidecar-Token' => sidecar_secret, 'Content-Type' => 'application/json' } }
-  let(:actor) { create(:ledger_actor) }
-  let(:node) { create(:ledger_node, org_id: org_id) }
 
   around do |example|
     original_auth = ENV.fetch('AUTH_SECRET', nil)
@@ -24,8 +22,7 @@ RSpec.describe 'Agent Runs API', type: :request do
   let(:valid_params) do
     {
       run_id: SecureRandom.uuid,
-      actor_id: actor.id,
-      node_id: node.id,
+      source_ref: 'specs/system/agent-runner/spec.md',
       mode: 'build',
       provider: 'claude',
       model: 'opus',
@@ -40,8 +37,8 @@ RSpec.describe 'Agent Runs API', type: :request do
       expect(JSON.parse(response.body)['status']).to eq('running')
     end
 
-    context 'with concurrent active run for same actor' do
-      before { create(:agents_agent_run, actor: actor, status: 'running') }
+    context 'with concurrent active run for same source_ref' do
+      before { create(:agents_agent_run, source_ref: 'specs/system/agent-runner/spec.md', status: 'running') }
 
       it 'returns 409' do
         post '/api/agent_runs/start', params: valid_params.to_json, headers: headers

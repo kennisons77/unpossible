@@ -1,14 +1,9 @@
 # Module LOOKUP
 
-Maps all four modules to their paths and public interfaces.
+Maps all active modules to their paths and public interfaces.
 Cross-module calls go through public service interfaces only — no direct model access across boundaries.
 
 ## Modules
-
-### knowledge
-- Path: `app/modules/knowledge/`
-- Purpose: Vector store, MD indexing, context retrieval
-- Public interface: `Knowledge::IndexerJob`, `Knowledge::RetrievalService`
 
 ### agents
 - Path: `app/modules/agents/`
@@ -18,12 +13,12 @@ Cross-module calls go through public service interfaces only — no direct model
 ### sandbox
 - Path: `app/modules/sandbox/`
 - Purpose: Container lifecycle, Docker dispatcher
-- Public interface: `Sandbox::ContainerDispatchService`
+- Public interface: `Sandbox::DockerDispatcher`
 
 ### analytics
 - Path: `app/modules/analytics/`
 - Purpose: LLM metrics, audit log, feature flags
-- Public interface: `Analytics::AuditLogService`, `Analytics::FeatureFlagService`
+- Public interface: `Analytics::AuditLogger`, `Analytics::FeatureFlag`
 
 ## Cross-Module Rules
 

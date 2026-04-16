@@ -11,8 +11,9 @@ module Agents
         return { run: cached, cached: true } if cached
       end
 
-      if AgentRun.where(actor_id: params[:actor_id], status: %w[running waiting_for_input]).exists?
-        raise ConcurrentRunError, "Concurrent run already active for this actor"
+      if params[:source_ref].present? &&
+         AgentRun.where(source_ref: params[:source_ref], status: %w[running waiting_for_input]).exists?
+        raise ConcurrentRunError, "Concurrent run already active for this source_ref"
       end
 
       run = AgentRun.new(params.merge(status: "running"))
