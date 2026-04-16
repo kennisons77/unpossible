@@ -139,19 +139,19 @@ sed -e "s|projects/<name>/|${PROJECT_DIR}/|g" \
     "$PROMPT_FILE" > "$RESOLVED_PROMPT"
 PROMPT_FILE="$RESOLVED_PROMPT"
 
-# --- Research mode: inject idea content into prompt ---
+# --- Research mode: inject beat content into prompt ---
 if [ "$MODE" = "research" ]; then
-    IDEAS_FILE="$PROJECT_DIR/IDEAS.md"
-    [ -f "$IDEAS_FILE" ] || { echo "Error: $IDEAS_FILE not found"; exit 1; }
+    PLAN_FILE="$PROJECT_DIR/IMPLEMENTATION_PLAN.md"
+    [ -f "$PLAN_FILE" ] || { echo "Error: $PLAN_FILE not found"; exit 1; }
 
-    IDEA_CONTENT=$(awk -v id="$IDEA_ID" '
-        /^## \[/ { if (found) exit; if ($0 ~ "\\[" id "\\]") found=1 }
+    BEAT_CONTENT=$(awk -v id="$IDEA_ID" '
+        /^- \[/ { if (found) exit; if ($0 ~ "^- \\[.\\] " id " ") found=1 }
         found { print }
-    ' "$IDEAS_FILE")
-    [ -z "$IDEA_CONTENT" ] && { echo "Error: idea $IDEA_ID not found"; exit 1; }
+    ' "$PLAN_FILE")
+    [ -z "$BEAT_CONTENT" ] && { echo "Error: beat $IDEA_ID not found in IMPLEMENTATION_PLAN.md"; exit 1; }
 
     TEMP_PROMPT="/tmp/prompt_research_$$.md"
-    sed "s|{IDEA_CONTENT}|$IDEA_CONTENT|" "$PROMPT_FILE" > "$TEMP_PROMPT"
+    sed "s|{IDEA_CONTENT}|$BEAT_CONTENT|" "$PROMPT_FILE" > "$TEMP_PROMPT"
     PROMPT_FILE="$TEMP_PROMPT"
 fi
 
