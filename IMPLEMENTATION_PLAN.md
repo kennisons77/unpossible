@@ -56,7 +56,7 @@ Phase: 0 (Local Development — Docker Compose only)
 > `node_id` is a plain string column (spec path or plan item ref) — not a UUID FK.
 > **Depends on:** Section 21 (stale references must be fixed first so seeds/entrypoint work).
 
-- [ ] 13.1 — Analytics::AnalyticsEvent model + migration (`web/app/modules/analytics/models/analytics_event.rb`, `web/db/migrate/XXX_create_analytics_events.rb`)
+- [x] 13.1 — Analytics::AnalyticsEvent model + migration (`web/app/modules/analytics/models/analytics_event.rb`, `web/db/migrate/XXX_create_analytics_events.rb`)
   Schema per `specs/system/analytics/spec.md`: id (UUID), org_id (UUID), distinct_id (string — opaque UUID), event_name (string), node_id (string, nullable, indexed — spec path or plan item ref), properties (jsonb), timestamp (timestamptz), received_at (timestamptz).
   Append-only: no update or destroy methods exposed.
   Index on `(org_id, event_name, timestamp)`.
