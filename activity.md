@@ -20,3 +20,16 @@ Agent activity log. Auto-updated each iteration. Trimmed to last 10 entries.
 - Removed dead `authenticate_session!` method from ApplicationController (called `new_session_path` with no route)
 - 137 examples, 0 failures, 98.48% coverage
 
+## 2026-04-16 13:33 — Analytics::AnalyticsEvent model + migration (13.1)
+
+**Mode:** Build
+**Iteration:** 54
+**Status:** Complete — 0.0.41
+
+**Changes:**
+- Created `analytics_events` table: UUID PK, org_id, distinct_id, event_name, node_id (nullable string), properties (jsonb), timestamp, received_at
+- Index on (org_id, event_name, timestamp) and node_id
+- Append-only model: update/update!/destroy/destroy! raise NotImplementedError
+- Factory + spec: validations, append-only enforcement, distinct_id UUID storage, node_id string acceptance
+- 150 examples, 0 failures, 98.57% coverage
+
