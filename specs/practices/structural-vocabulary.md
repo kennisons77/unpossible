@@ -270,6 +270,119 @@ for a cyclic graph to model dependencies, reconsider the boundaries.
 Example: A knowledge graph where documents reference each other — A links to B,
 B links to A. Valid structure, but traversal needs cycle detection.
 
+### Strategy
+(OOP: strategy pattern · FP: higher-order function / function parameter)
+
+`status: proposed`
+
+Shape: An algorithm is extracted into a separate object (or function) and passed to
+a context that delegates to it. The context's behavior changes by swapping the
+strategy, not by branching internally.
+
+Reach for it when: A single operation has multiple behavioral variants and the
+variant is selected at runtime. The context shouldn't know the details of each
+variant — only that the strategy fulfills a contract.
+
+Gotchas: Strategy and interchangeable implementation overlap — the difference is
+emphasis. Interchangeable implementation focuses on the *set* of implementations
+and how callers are decoupled from them. Strategy focuses on *runtime selection*
+of behavior by a context object. If the "strategy" is selected once at boot and
+never changes, it's just dependency injection. If the context contains a conditional
+to pick the strategy, you've moved the branching, not removed it.
+
+Example: `Scheduler.new(strategy: RoundRobin).assign(tasks)` — swap `RoundRobin`
+for `LeastLoaded` without changing `Scheduler`.
+
+### Decorator
+(OOP: decorator pattern · FP: function wrapping / middleware)
+
+`status: proposed`
+
+Shape: An object wraps another object with the same interface, adding behavior
+before or after delegating to the wrapped object. Multiple decorators can be
+stacked. The caller doesn't know whether it's talking to the original or a
+decorated version.
+
+Reach for it when: You need to layer on cross-cutting behavior (logging, caching,
+retry, metrics) without modifying the original object or subclassing it.
+
+Gotchas: Deep decorator stacks are hard to debug — a bug could live in any layer,
+and stack traces don't make the wrapping order obvious. Identity checks break
+(`decorated == original` is false). If every call site needs the same set of
+decorators, the wrapping is boilerplate — consider baking the behavior into the
+object or using a pipeline instead.
+
+Example: `LoggingProvider.new(CachingProvider.new(ClaudeProvider.new))` — each
+layer adds behavior while preserving the `complete(prompt)` interface.
+
+### Observer
+(OOP: observer/listener · Ruby: `ActiveSupport::Notifications` · FP: callback / event stream)
+
+`status: proposed`
+
+Shape: A subject emits events. Observers subscribe to those events and react
+independently. The subject doesn't know what the observers do — it only knows
+how to notify them.
+
+Reach for it when: A change in one object should trigger reactions in others, but
+you don't want the source to depend on (or even know about) the reactors. The set
+of reactions is expected to grow or vary by context.
+
+Gotchas: Invisible control flow — reading the subject's code doesn't reveal what
+happens when it fires an event. Debugging requires tracing through the subscription
+registry. Ordering between observers is usually undefined; if observers depend on
+each other's side effects, you have hidden coupling. Synchronous observers that
+raise exceptions can break the subject's flow — decide whether observers fail open
+or closed.
+
+Example: `run.on(:completed) { |r| Metrics.record(r) }` — the run doesn't know
+about metrics; it just fires the event.
+
+### Singleton
+(OOP: singleton pattern · Ruby: module with `self.` methods · FP: module-level state)
+
+`status: proposed`
+
+Shape: Exactly one instance of a thing exists for the lifetime of the process.
+Access goes through a well-known global point rather than being passed as a
+dependency.
+
+Reach for it when: A resource is genuinely process-global (connection pool, config
+registry, logger) and passing it everywhere would thread a parameter through every
+layer with no decision point.
+
+Gotchas: Singletons are global mutable state with a fancy name. They make testing
+painful — every test shares the same instance, so test isolation requires explicit
+reset. They hide dependencies: a class that uses `Config.instance` has an invisible
+dependency on `Config` that doesn't appear in its constructor. Prefer dependency
+injection for anything that might vary between contexts (test vs. production,
+tenant A vs. tenant B). Reach for singleton only when the "exactly one" constraint
+is a real invariant, not a convenience.
+
+Example: `ConnectionPool.instance` — one pool per process, shared across all
+threads.
+
+### Facade
+
+`status: proposed`
+
+Shape: A single entry point that provides a simplified interface to a complex
+subsystem. The facade delegates to internal objects but hides their interactions
+from callers.
+
+Reach for it when: A subsystem has multiple collaborating objects and external
+callers shouldn't need to know the wiring. The facade gives them one method to
+call instead of orchestrating three objects themselves.
+
+Gotchas: A facade that grows to expose every method of every internal object is
+just an indirection layer, not a simplification. If callers routinely need to
+bypass the facade to access internals, the facade's abstraction level is wrong.
+Also, facades can mask complexity that should be addressed — wrapping a tangled
+subsystem in a clean interface doesn't untangle it.
+
+Example: `Sandbox.run(code)` — internally coordinates container creation, code
+injection, execution, and cleanup. Callers see one method.
+
 ## Anti-patterns
 
 Structural smells that predict problems. Not every instance is wrong — but when you
