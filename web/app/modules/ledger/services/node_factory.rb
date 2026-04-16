@@ -5,7 +5,7 @@ module Ledger
     def self.accept(question_node, answer_attrs, changed_by: "system")
       raise TransitionService::TransitionError, "only question nodes can be accepted" unless question_node.kind == "question"
 
-      answer = Node.new(answer_attrs.merge(kind: "answer", answer_type: "terminal", org_id: question_node.org_id))
+      answer = Node.new(answer_attrs.merge(kind: "answer", answer_type: "terminal", org_id: question_node.org_id, project_id: question_node.project_id))
       answer.save!
       NodeEdge.create!(parent: question_node, child: answer, edge_type: "contains")
       TransitionService.close(question_node, changed_by: changed_by)
@@ -15,7 +15,7 @@ module Ledger
     def self.rebut(question_node, answer_attrs, changed_by: "system")
       raise TransitionService::TransitionError, "only question nodes can be rebutted" unless question_node.kind == "question"
 
-      answer = Node.new(answer_attrs.merge(kind: "answer", answer_type: "terminal", org_id: question_node.org_id))
+      answer = Node.new(answer_attrs.merge(kind: "answer", answer_type: "terminal", org_id: question_node.org_id, project_id: question_node.project_id))
       answer.save!
       NodeEdge.create!(parent: question_node, child: answer, edge_type: "contains")
       TransitionService.call(question_node, "proposed", changed_by: changed_by, reason: "rebutted")

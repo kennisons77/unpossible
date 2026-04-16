@@ -1,10 +1,12 @@
-# Makefile — Unpossible 2
-# Skills and loop commands for the unpossible2 project.
-# Run from the monorepo root: make -f projects/unpossible2/Makefile <target>
+# Makefile — Unpossible
+# Skills and loop commands for the unpossible project.
+# Run from the monorepo root: make -f projects/unpossible/Makefile <target>
 # Or from this directory: make <target>
 
 PROJECT_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 ROOT_DIR := $(PROJECT_DIR)
+SANDBOX = kiro-unpossible # TODO: make agent-agnostic — sandbox name is Kiro-specific
+SANDBOX_WORKDIR = 'unpossible'
 LOOP := $(ROOT_DIR)loop.sh
 ACTIVE_PROJECT_FILE := $(ROOT_DIR)ACTIVE_PROJECT
 ENV_FILE := $(ROOT_DIR).env
@@ -15,8 +17,8 @@ SKILL = @cd $(PROJECT_DIR) && $(AGENT) -- "$(shell cat $(PROJECT_DIR)
 .PHONY: help \
         docker-build up down restart logs console shell \
         db-create db-migrate db-setup db-reset \
-        build plan build1 plan1 reflect research \
-        interview prd spec review server-ops \
+        build plan build1 research \
+        sb-interview sb-review review prd spec server-ops \
         start config status activate test
 
 COMPOSE := docker compose -f $(PROJECT_DIR)infra/docker-compose.yml
@@ -45,6 +47,7 @@ help:
 	@echo "  make shell           Open bash in rails container"
 	@echo "  make ledger-export   Export ledger state to ledger/snapshot.yml"
 	@echo "  make ledger-import   Import ledger state from snapshot (empty DB only)"
+	@echo "  make ledger-seed     Seed ledger from specs + implementation plan (empty DB only)"
 	@echo "  make bulk-export     Export agent runs + knowledge to .data/snapshots/ (not in git)"
 	@echo "  make bulk-import     Import agent runs + knowledge from .data/snapshots/"
 	@echo ""
@@ -55,22 +58,23 @@ help:
 	@echo "  make build           Build loop, unlimited iterations"
 	@echo "  make plan            Plan loop, unlimited iterations"
 	@echo "  make build1          Build loop, 1 iteration"
-	@echo "  make plan1           Plan loop, 1 iteration"
-	@echo "  make reflect         Reflect loop"
-	@echo "  make research        Research loop (./loop.sh research <id>)"
+	@echo "  make research        Research loop, then re-plan to integrate findings"
+	@echo "  make review          Review loop, 1 iteration (analyse codebase, propose beats)"
+	@echo ""
+	@echo "Sandbox commands:"
+	@echo "  make sb-interview    Interactive interview in sandbox (persistent context)"
+	@echo "  make sb-review       Interactive code review in sandbox (discuss changes, decide direction)"
 	@echo ""
 	@echo "Skills:"
-	@echo "  make interview       Reach shared understanding before committing"
 	@echo "  make prd             Produce or update a PRD"
 	@echo "  make spec            Produce or update spec files for a PRD"
-	@echo "  make review          Analyse codebase, propose beats"
 	@echo "  make server-ops      Operate on a server"
 
 # --- Config & runner ---
 status:
 	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-	@echo "Project:  unpossible2"
-	@printf "Active:   "; if [ -f "$(ACTIVE_PROJECT_FILE)" ] && [ "$$(cat '$(ACTIVE_PROJECT_FILE)' | tr -d '[:space:]')" = "unpossible2" ]; then echo "yes ✓"; else echo "no (active: $$(cat '$(ACTIVE_PROJECT_FILE)' 2>/dev/null || echo 'unset'))"; fi
+	@echo "Project:  unpossible"
+	@printf "Active:   "; if [ -f "$(ACTIVE_PROJECT_FILE)" ] && [ "$$(cat '$(ACTIVE_PROJECT_FILE)' | tr -d '[:space:]')" = "unpossible" ]; then echo "yes ✓"; else echo "no (active: $$(cat '$(ACTIVE_PROJECT_FILE)' 2>/dev/null || echo 'unset'))"; fi
 	@echo "Agent:    $(AGENT)"
 	@echo "Model:    $(or $(MODEL),(agent default))"
 	@echo "Loop:     $(LOOP)"
@@ -79,8 +83,8 @@ status:
 	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
 activate:
-	@echo "unpossible2" > "$(ACTIVE_PROJECT_FILE)"
-	@echo "ACTIVE_PROJECT set to unpossible2"
+	@echo "unpossible" > "$(ACTIVE_PROJECT_FILE)"
+	@echo "ACTIVE_PROJECT set to unpossible"
 
 config:
 	@echo "━━━ Runner Config ━━━"
@@ -97,6 +101,7 @@ test:
 	$(COMPOSE_TEST) build
 	$(COMPOSE_TEST) run --rm test
 
+# TODO: make agent-agnostic — `docker sandbox run kiro` is Kiro-specific
 sandbox:
 	docker sandbox run kiro
 
@@ -105,7 +110,7 @@ docker-build:
 	$(COMPOSE) build rails
 
 up:
-	$(COMPOSE) up -d
+	$(COMPOSE) up -d --build
 
 down:
 	@$(COMPOSE) exec rails bundle exec rake ledger:export bulk:export 2>/dev/null || echo "Snapshot skipped (container not running)"
@@ -142,6 +147,9 @@ ledger-export:
 ledger-import:
 	$(COMPOSE) exec rails bundle exec rake ledger:import
 
+ledger-seed:
+	$(COMPOSE) exec rails bundle exec rake ledger:seed
+
 bulk-export:
 	$(COMPOSE) exec rails bundle exec rake bulk:export
 
@@ -173,27 +181,39 @@ plan:
 build1:
 	@cd $(ROOT_DIR) && AGENT=$(AGENT) MODEL=$(MODEL) $(LOOP) 1
 
-plan1:
-	@cd $(ROOT_DIR) && AGENT=$(AGENT) MODEL=$(MODEL) $(LOOP) plan 1
-
-reflect:
-	@cd $(ROOT_DIR) && AGENT=$(AGENT) MODEL=$(MODEL) $(LOOP) reflects
-
 research:
 	@cd $(ROOT_DIR) && AGENT=$(AGENT) MODEL=$(MODEL) $(LOOP) research
+	# TODO: POST to /api/nodes/:id to close the spike node in the ledger
+	# so dependent beats are unblocked. Currently the spike lives only in
+	# IMPLEMENTATION_PLAN.md and specs/research/; the ledger sees it via
+	# PlanFileSyncService but doesn't know the spike is resolved until the
+	# next plan sync. The loop should call the transition API directly.
+	@echo "==> Re-planning to integrate research findings..."
+	@cd $(ROOT_DIR) && AGENT=$(AGENT) MODEL=$(MODEL) $(LOOP) plan
+
+review:
+	@cd $(ROOT_DIR) && AGENT=$(AGENT) MODEL=$(MODEL) $(LOOP) review
 
 # --- Skill targets ---
-interview:
-	@cd $(PROJECT_DIR) && $(AGENT) -- "$(shell cat $(PROJECT_DIR)specs/skills/tools/interview.md)"
-
 prd:
 	@cd $(PROJECT_DIR) && $(AGENT) -- "$(shell cat $(PROJECT_DIR)specs/skills/workflows/prd.md)"
 
 spec:
 	@cd $(PROJECT_DIR) && $(AGENT) -- "$(shell cat $(PROJECT_DIR)specs/skills/workflows/spec.md)"
 
-review:
-	@cd $(PROJECT_DIR) && $(AGENT) -- "$(shell cat $(PROJECT_DIR)specs/skills/workflows/review.md)"
-
 server-ops:
 	@cd $(PROJECT_DIR) && $(AGENT) -- "$(shell cat $(PROJECT_DIR)specs/skills/workflows/server-ops.md)"
+
+
+# --- Sandbox Commands ---
+# TODO: make agent-agnostic — sbx and kiro-cli are Kiro-specific
+sb-run:
+	@sbx run $(SANDBOX)
+
+# TODO: make agent-agnostic — kiro-cli chat --agent is Kiro-specific
+sb-interview:
+	@sbx run $(SANDBOX) -- kiro-cli chat --agent interview
+
+# TODO: make agent-agnostic — kiro-cli chat --agent is Kiro-specific
+sb-review:
+	@sbx run $(SANDBOX) -- kiro-cli chat --agent review

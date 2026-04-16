@@ -1,4 +1,4 @@
-# AGENTS.md — Unpossible 2
+# AGENTS.md — Unpossible
 
 Operational reference. Build/run/test commands and codebase patterns only.
 Progress notes belong in IMPLEMENTATION_PLAN.md.
@@ -55,15 +55,39 @@ The project uses Docker Desktop (desktop-linux context). If Docker Desktop is no
 start it with `open -a Docker` and wait ~10s for the socket to appear at
 `~/.docker/run/docker.sock`.
 
+## Sandbox Limitation
+
+The agent runs in a sandboxed environment that cannot see or reach the host's Docker daemon.
+**Never attempt to check container status, run `docker compose` commands, or verify running
+services from within the agent.** The dev stack (Rails, Postgres, sidecars) runs exclusively
+on the host machine. All Docker operations — starting the stack, checking logs, running
+migrations, verifying container health — must be performed by the developer on the host.
+Do not assume you can observe or interact with running services.
+
 ## Key Environment Variables (test container)
 
 | Variable | Default | Purpose |
 |---|---|---|
 | `DB_HOST` | `postgres` | Postgres hostname |
-| `POSTGRES_USER` | `unpossible2` | DB user |
-| `POSTGRES_PASSWORD` | `unpossible2` | DB password |
-| `POSTGRES_DB` | `unpossible2_test` | Test DB name |
+| `POSTGRES_USER` | `unpossible` | DB user |
+| `POSTGRES_PASSWORD` | `unpossible` | DB password |
+| `POSTGRES_DB` | `unpossible_test` | Test DB name |
 | `RAILS_ENV` | `test` | Rails environment |
+
+## Agent Configs
+
+Agent configs live in `.kiro/agents/`. Each config references resource files that are
+injected as context. If a referenced file is renamed or moved, update the agent config
+in the same commit.
+
+| Agent            | Config                              | Resources                                                          | Model          |
+|------------------|-------------------------------------|--------------------------------------------------------------------|----------------|
+| `ralph_build`    | `.kiro/agents/ralph_build.json`     | AGENTS.md, cost.md, version-control.md                             | sonnet-4.6     |
+| `ralph_plan`     | `.kiro/agents/ralph_plan.json`      | AGENTS.md, cost.md, planning.md, verification.md, changeability.md, structural-vocabulary.md, prd.md | auto           |
+| `ralph_research` | `.kiro/agents/ralph_research.json`  | AGENTS.md, cost.md                                                 | auto           |
+| `ralph_review`   | `.kiro/agents/ralph_review.json`    | AGENTS.md, cost.md, changeability.md, coding.md, structural-vocabulary.md | auto           |
+| `interview`      | `.kiro/agents/interview.json`       | interview.md, prd.md, specs/README.md, AGENTS.md, cost.md                  | auto           |
+| `review`         | `.kiro/agents/review.json`          | review.md, specs/README.md, AGENTS.md, cost.md, changeability.md, coding.md, structural-vocabulary.md | auto |
 
 ## Server Operations
 

@@ -63,6 +63,21 @@ For tasks that touch trust boundaries, also derive threat-informed test scenario
 - If a requirement is ambiguous, make the ambiguity explicit in `IMPLEMENTATION_PLAN.md`
 - Never invent requirements — if something seems missing, flag it, don't add it silently
 
+## Superseding Specs
+
+A new spec can invalidate existing plan tasks. When a spec declares that a module or
+feature is being removed, replaced, or fundamentally redesigned:
+
+- Mark affected unchecked tasks as out of scope with a one-line reason
+- Add new tasks derived from the superseding spec in the correct dependency order
+- Update the plan's scope notes to prevent future iterations from re-planning removed work
+- Reorder if the new tasks must precede existing ones (e.g., removal before new code
+  that would depend on the removed module)
+
+The planner must check for contradictions between existing plan tasks and current specs
+each iteration — not only look for unplanned specs. A plan task that references a module
+marked for removal is stale and must be replaced, not executed.
+
 ## Development Phases
 
 New projects advance through phases. Each phase must be stable before the next begins.

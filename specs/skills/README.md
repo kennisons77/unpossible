@@ -1,4 +1,4 @@
-# Skills — Unpossible 2
+# Skills — Unpossible
 
 Skills are **instructions** — the body of a node that tells an actor what to do.
 They are model-agnostic. Which model executes them, how the prompt is assembled, and

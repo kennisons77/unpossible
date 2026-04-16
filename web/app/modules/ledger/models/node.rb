@@ -31,6 +31,16 @@ module Ledger
     has_many :audit_events, class_name: "Ledger::NodeAuditEvent", foreign_key: :node_id,
                             dependent: :restrict_with_error
 
+    belongs_to :project, class_name: "Ledger::Project"
+
+    has_many :parent_edges, class_name: "Ledger::NodeEdge", foreign_key: :child_id, dependent: :destroy
+    has_many :child_edges,  class_name: "Ledger::NodeEdge", foreign_key: :parent_id, dependent: :destroy
+
+    has_many :parents,  through: :parent_edges, source: :parent
+    has_many :children, through: :child_edges,  source: :child
+
+    scope :for_project, ->(name) { joins(:project).where(ledger_projects: { name: name }) }
+
     validates :kind,        inclusion: { in: KINDS }
     validates :scope,       inclusion: { in: SCOPES }
     validates :level,       inclusion: { in: LEVELS }, allow_nil: true
@@ -88,6 +98,7 @@ module Ledger
     def set_defaults
       self.recorded_at ||= Time.current
       self.status      ||= "proposed" if kind == "question"
+      self.project     ||= Ledger::Project.find_by(name: "unpossible", org_id: org_id) if org_id.present?
     end
   end
 end

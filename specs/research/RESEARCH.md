@@ -33,7 +33,7 @@ The reflect loop targets two things:
 
 Reflect loop output is a proposed change (to config, specs, or code) that goes through the normal plan/build/review cycle before being applied. The system improves itself but never bypasses its own backpressure.
 
-A framework for storing research data and ideas, and developing modular pieces — first for unpossible2 itself, then for its projects.
+A framework for storing research data and ideas, and developing modular pieces — first for unpossible itself, then for its projects.
 
 This requires:
 1. A knowledge base with efficient context retrieval (vector store + MD files)

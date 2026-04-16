@@ -2,10 +2,9 @@
   <% @ancestors.each do |a| %>
     <%= link_to a.title.presence || "(untitled)", ledger_node_path(a.id) %> /
   <% end %>
-  <strong><%= @node.title.presence || "(untitled)" %></strong>
 </nav>
 
-<h1><%= @node.title.presence || "(untitled)" %></h1>
+<!--<h1><%= @node.title.presence || "(untitled)" %></h1>-->
 <p>
   <em>
     <%= @node.kind %> · <%= @node.scope %><%= @node.level ? "/#{@node.level}" : "" %>
@@ -16,7 +15,11 @@
 </p>
 
 <section>
-  <%= render_markdown(@node.body) %>
+  <% if @spec_content %>
+    <%= render_markdown(@spec_content) %>
+  <% else %>
+    <%= render_markdown(@node.body) %>
+  <% end %>
 </section>
 
 <% if @node.citations.present? %>

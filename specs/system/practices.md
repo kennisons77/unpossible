@@ -11,14 +11,19 @@ Always in context     cost.md — shapes model selection and context loading dec
                       version-control.md — shapes every commit
 
 Loaded by plan loop   planning.md — when producing beats
-                      testing.md — when deriving test requirements from AC
+                      verification.md — when deriving test requirements from AC
+                      changeability.md — when evaluating structure
 
-Retrieved on demand   coding.md, verification.md, security.md, reflect.md
+Loaded by review loop changeability.md — when proposing refactors
+                      coding.md — refactoring-as-a-bet rules
+
+Retrieved on demand   coding.md, verification.md, security.md
+                      threat-modeling.md, automation.md
                       — pulled from knowledge base when the agent hits an issue
                         or when the instruction explicitly references them
 
 Platform practices    specs/platform/{platform}/ — layered on top of base spec
-                      by the plan loop, not loaded by default
+                      by the plan and build loops, not loaded by default
 ```
 
 Prompt caching is applied automatically by the provider adapter to `cost.md` and
@@ -30,37 +35,40 @@ Practices authors do not add cache annotations manually.
 **PRD and spec authoring** — practices are not loaded. PRDs and specs are
 platform-agnostic and implementation-free. Practices are irrelevant at this stage.
 
-**Plan loop** — `planning.md` and `testing.md` are loaded to shape beat titles and
-ensure AC maps to tests. `cost.md` is always present. Platform practices are layered
-on top of the base spec.
+**Plan loop** — `planning.md`, `verification.md`, and `changeability.md` are loaded
+to shape beat titles, ensure AC maps to tests, and evaluate structural decisions.
+`structural-vocabulary.md` is loaded to provide named abstractions for describing
+planned work. `cost.md` is always present. Platform practices are layered on top of
+the base spec.
 
 **Build loop** — `cost.md` and `version-control.md` are always present. All others
 are retrieved on demand from the knowledge base when the agent encounters an issue or
-the instruction references them explicitly.
+the instruction references them explicitly. Platform overrides are loaded for the
+active stack.
 
 **Research loop** — `cost.md` only. Research is about collecting information, not
 applying coding discipline.
 
-**Reflect loop** — `reflect.md` loaded when written. `cost.md` always present.
+**Review loop** — `changeability.md`, `coding.md`, and `structural-vocabulary.md`
+are loaded. `cost.md` is always present. The review loop evaluates accumulated changes
+against structural and refactoring principles.
 
 ## File Map
 
-| File | Always | Plan | Build | Research | Reflect |
-|---|---|---|---|---|---|
-| `cost.md` | ✓ | ✓ | ✓ | ✓ | ✓ |
-| `version-control.md` | | | ✓ | | |
-| `planning.md` | | ✓ | | | |
-| `testing.md` | | ✓ | | | |
-| `coding.md` | | | on demand | | |
-| `verification.md` | | | on demand | | |
-| `security.md` | | | on demand | | |
-| `automation.md` | | | on demand | | |
-| `reflect.md` | | | | | ✓ |
-| `zed.md` | | | | | |
+| File                 | Always | Plan | Build     | Review | Research |
+|----------------------|--------|------|-----------|--------|----------|
+| `cost.md`            | ✓      | ✓    | ✓         | ✓      | ✓        |
+| `version-control.md` |        |      | ✓         |        |          |
+| `planning.md`        |        | ✓    |           |        |          |
+| `verification.md`    |        | ✓    | on demand |        |          |
+| `changeability.md`   |        | ✓    | on demand | ✓      |          |
+| `coding.md`          |        |      | on demand | ✓      |          |
+| `security.md`        |        |      | on demand |        |          |
+| `threat-modeling.md` |        |      | on demand |        |          |
+| `automation.md`      |        |      | on demand |        |          |
+| `lookup-tables.md`   |        |      | on demand |        |          |
+| `retry.md`           |        |      | on demand |        |          |
+| `structural-vocabulary.md` |  | ✓    | on demand | ✓      |          |
+| `zed.md`             |        |      |           |        |          |
 
 `zed.md` is never loaded by agents — it is for human reference only.
-
-## Missing Files
-
-- `security.md` — secrets handling, PII, attack surface rules
-- `reflect.md` — reflect loop analysis and improvement proposals

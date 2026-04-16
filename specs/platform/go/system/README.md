@@ -1,4 +1,4 @@
-# Go System Overrides — Unpossible 2
+# Go System Overrides — Unpossible
 
 Go-specific implementation details for system-level specs. Each file extends the corresponding `specs/system/` spec.
 
