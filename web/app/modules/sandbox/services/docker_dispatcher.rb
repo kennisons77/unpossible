@@ -15,9 +15,11 @@ module Sandbox
     # @param image [String] Docker image to run
     # @param command [Array<String>] Command + args (no shell interpolation)
     # @param env [Hash] Environment variables to pass to the container
+    # @param org_id [String] UUID of the owning org
     # @return [Hash] { exit_code:, stdout:, stderr:, duration_ms: }
-    def dispatch(image:, command:, env: {})
+    def dispatch(image:, command:, env: {}, org_id:)
       container_run = ContainerRun.create!(
+        org_id: org_id,
         image: image,
         command: command.join(" "),
         status: "running",

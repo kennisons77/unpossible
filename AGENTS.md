@@ -15,7 +15,7 @@ docker compose -f infra/docker-compose.test.yml run --rm test
 # Run a specific spec
 docker compose -f infra/docker-compose.test.yml run --rm test bundle exec rspec spec/path/to/spec.rb
 
-# Start full dev stack (requires Dockerfile.runner and Dockerfile.analytics)
+# Start full dev stack
 GIT_SHA=$(git rev-parse --short HEAD) docker compose -f infra/docker-compose.yml up
 ```
 
@@ -37,12 +37,11 @@ Then update `web/Gemfile` and `web/Gemfile.lock`, and rebuild the image.
 |---|---|---|
 | Rails app root | `web/` | All Ruby source |
 | Infra config | `infra/` | Dockerfiles, compose files |
-| Module code | `web/app/modules/{name}/` | knowledge, tasks, agents, sandbox, analytics |
+| Module code | `web/app/modules/{name}/` | agents, sandbox, analytics |
 | Specs | `web/spec/` | RSpec, FactoryBot, Shoulda Matchers |
 | Initializers | `web/config/initializers/` | lograge.rb, rack_attack.rb |
 | DB migrations | `web/db/migrate/` | Rails migrations |
 | Lib | `web/app/lib/` | Secret, AuthToken, Security::* |
-| Ledger jobs | `web/app/modules/ledger/jobs/` | SpecWatcherJob polls specs/**/*.md every 10s |
 
 ## SQL NULL Gotcha
 
@@ -82,12 +81,12 @@ in the same commit.
 
 | Agent            | Config                              | Resources                                                          | Model          |
 |------------------|-------------------------------------|--------------------------------------------------------------------|----------------|
-| `ralph_build`    | `.kiro/agents/ralph_build.json`     | AGENTS.md, cost.md, version-control.md                             | sonnet-4.6     |
-| `ralph_plan`     | `.kiro/agents/ralph_plan.json`      | AGENTS.md, cost.md, planning.md, verification.md, changeability.md, structural-vocabulary.md, prd.md | auto           |
-| `ralph_research` | `.kiro/agents/ralph_research.json`  | AGENTS.md, cost.md                                                 | auto           |
-| `ralph_review`   | `.kiro/agents/ralph_review.json`    | AGENTS.md, cost.md, changeability.md, coding.md, structural-vocabulary.md | auto           |
-| `interview`      | `.kiro/agents/interview.json`       | interview.md, prd.md, specs/README.md, AGENTS.md, cost.md                  | auto           |
-| `review`         | `.kiro/agents/review.json`          | review.md, specs/README.md, AGENTS.md, cost.md, changeability.md, coding.md, structural-vocabulary.md | auto |
+| `ralph_build`    | `.kiro/agents/ralph_build.json`     | AGENTS.md, cost.md, version-control.md, skills/**/*.md             | sonnet-4.6     |
+| `ralph_plan`     | `.kiro/agents/ralph_plan.json`      | AGENTS.md, cost.md, planning.md, verification.md, changeability.md, structural-vocabulary.md, skills/**/*.md | auto           |
+| `ralph_research` | `.kiro/agents/ralph_research.json`  | AGENTS.md, cost.md, skills/**/*.md                                 | auto           |
+| `ralph_review`   | `.kiro/agents/ralph_review.json`    | AGENTS.md, cost.md, changeability.md, coding.md, structural-vocabulary.md, skills/**/*.md | auto           |
+| `interview`      | `.kiro/agents/interview.json`       | specs/README.md, AGENTS.md, cost.md, skills/**/*.md                | auto           |
+| `review`         | `.kiro/agents/review.json`          | specs/README.md, AGENTS.md, cost.md, changeability.md, coding.md, structural-vocabulary.md, skills/**/*.md | auto |
 
 ## Server Operations
 

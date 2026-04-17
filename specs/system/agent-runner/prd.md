@@ -6,7 +6,7 @@
 
 ## Intent
 
-The Agent Runner executes beats from the ledger against LLM providers. It assembles
+The Agent Runner executes beats from the implementation plan against LLM providers. It assembles
 prompts, manages multi-turn conversations including human input pauses, records results,
 and deduplicates repeated calls. There is no sidecar — provider calls are made directly
 from Rails via HTTP.
@@ -18,15 +18,14 @@ from Rails via HTTP.
 - **Human:** needs to answer agent questions from the UI or CLI without blocking the
   loop for other work
 - **System:** needs a complete audit trail of every LLM call — tokens, cost, duration,
-  which knowledge was loaded
+  which context was loaded
 - **Reflect loop:** needs to query execution history to find patterns in cost and errors
 
 ## User Scenarios
 
 **Scenario 1 — Normal beat execution:**
-The build loop picks an open beat. The runner assembles the instruction + context +
-principles into a prompt, calls the provider, records the result, and posts the answer
-node back to the ledger.
+The build loop picks an open beat from `IMPLEMENTATION_PLAN.md`. The runner assembles the instruction + context +
+principles into a prompt, calls the provider, and records the result.
 
 **Scenario 2 — Dedup hit:**
 The same beat is submitted with identical context within 24 hours. The runner returns

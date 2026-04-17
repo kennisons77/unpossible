@@ -23,7 +23,7 @@ Loaded every build iteration. Language-agnostic rules that apply to all code wri
 ## Files
 - One concept per file
 - Filename should make its contents guessable without opening it
-- Group files by feature or domain at the top level (e.g. `modules/knowledge/` not
+- Group files by feature or domain at the top level (e.g. `modules/analytics/` not
   a flat `models/`, `services/`, `utils/`). Within a feature module, framework
   conventions (models/, services/, controllers/) are acceptable — the module boundary
   is the feature boundary

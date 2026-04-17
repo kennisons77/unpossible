@@ -2,7 +2,7 @@
 
 Skills are **instructions** — the body of a node that tells an actor what to do.
 They are model-agnostic. Which model executes them, how the prompt is assembled, and
-how it is cached are concerns of the `ActorProfile`, not the instruction.
+how it is cached are concerns of the agent config (`.kiro/agents/`), not the instruction.
 
 ## Frontmatter
 
@@ -11,11 +11,11 @@ name:    slug
 kind:    tool | workflow | loop
 command: how a human invokes it
 runs:    once | n | until <condition>
-actor:   default | plan | build | research | review  ← ActorProfile name
+actor:   default | plan | build | research | review  ← agent config name
 ```
 
-`actor` references an `ActorProfile` record. The profile owns provider, model,
-allowed_tools, and prompt_template. Swap the profile to change how the instruction
+`actor` references an agent config in `.kiro/agents/`. The config owns provider, model,
+allowed_tools, and prompt_template. Swap the config to change how the instruction
 executes — the instruction itself doesn't change.
 
 See `specs/system/agent-runner/spec.md` for how instructions are assembled, cached, and delivered
@@ -64,7 +64,7 @@ Workflows run until a condition passes.
 
 ## Providers (`providers/`)
 
-Best practices for specific providers as actors. Referenced by ActorProfile config.
+Best practices for specific providers as actors. Referenced by agent config.
 
 | Provider | Notes |
 |---|---|

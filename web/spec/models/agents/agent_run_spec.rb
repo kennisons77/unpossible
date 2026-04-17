@@ -9,6 +9,12 @@ RSpec.describe Agents::AgentRun, type: :model do
       expect(run).to be_valid
     end
 
+    it 'validates org_id presence' do
+      run = build(:agents_agent_run, org_id: nil)
+      expect(run).not_to be_valid
+      expect(run.errors[:org_id]).to be_present
+    end
+
     it 'validates mode inclusion' do
       run = build(:agents_agent_run, mode: 'invalid')
       expect(run).not_to be_valid
@@ -39,6 +45,18 @@ RSpec.describe Agents::AgentRun, type: :model do
   describe 'nullable fields' do
     it 'allows nil parent_run_id' do
       run = build(:agents_agent_run, parent_run_id: nil)
+      expect(run).to be_valid
+    end
+
+    it 'allows nil source_ref' do
+      run = build(:agents_agent_run, source_ref: nil)
+      expect(run).to be_valid
+    end
+  end
+
+  describe 'source_ref' do
+    it 'accepts a spec path string' do
+      run = build(:agents_agent_run, source_ref: 'specs/system/agent-runner/spec.md')
       expect(run).to be_valid
     end
   end

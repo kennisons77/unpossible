@@ -8,6 +8,7 @@ module Sandbox
 
     belongs_to :agent_run, class_name: "Agents::AgentRun", optional: true
 
+    validates :org_id, presence: true
     validates :image, presence: true
     validates :command, presence: true
     validates :status, presence: true, inclusion: { in: STATUSES }

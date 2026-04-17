@@ -27,14 +27,14 @@ Repeated context (system prompts, practices files, specs) is the largest cost dr
 in loops. Minimize what's loaded per iteration:
 
 What to keep stable across iterations:
-- `specs/prd.md` (rarely changes)
+- `specs/project-prd.md` (rarely changes)
 - `practices/*.md` files (stable reference material)
 - Large tool definitions or schema blocks
 
 What changes per iteration (don't cache):
 - The current task description
 - `IMPLEMENTATION_PLAN.md` (updated after each task)
-- Retrieved knowledge chunks
+- Per-iteration retrieved file content
 
 ## Activity Log Hygiene
 

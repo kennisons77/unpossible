@@ -20,5 +20,8 @@ Rails.application.configure do
   config.active_record.migration_error = :page_load
   config.active_record.maintain_test_schema = false
 
+  # Use test adapter so have_enqueued_job matchers work; jobs are not executed inline
+  config.active_job.queue_adapter = :test
+
   config.log_level = :debug
 end

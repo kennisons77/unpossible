@@ -2,9 +2,9 @@
 
 FactoryBot.define do
   factory :agents_agent_run, class: 'Agents::AgentRun' do
+    org_id { SecureRandom.uuid }
     run_id { SecureRandom.uuid }
-    association :actor, factory: :ledger_actor
-    association :node, factory: :ledger_node
+    source_ref { nil }
     parent_run_id { nil }
     mode { 'build' }
     provider { 'claude' }

@@ -27,20 +27,6 @@ class ApplicationController < ActionController::Base
     render json: { error: 'Unauthorized' }, status: :unauthorized
   end
 
-  # HTML session auth — redirects to login instead of rendering JSON
-  def authenticate_session!
-    return dev_bypass! if dev_auth_disabled?
-
-    token = session[:auth_token] || bearer_token
-    raise AuthToken::InvalidToken, 'Missing token' if token.nil?
-
-    payload = AuthToken.decode(token)
-    @current_org_id = payload[:org_id]
-    @current_user_id = payload[:user_id]
-  rescue AuthToken::ExpiredToken, AuthToken::InvalidToken
-    redirect_to new_session_path
-  end
-
   def current_org_id
     @current_org_id
   end

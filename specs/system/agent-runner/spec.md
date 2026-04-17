@@ -11,12 +11,11 @@ and deduplicates repeated calls.
 ```
 AgentRun
   run_id               UUID
-  actor_id             FK → Actor (ledger)
-  node_id              FK → Node being answered
+  source_ref           string, nullable — spec path or plan item ref (e.g. "specs/system/agent-runner/spec.md")
   parent_run_id        nullable — set when this is a subagent run
   mode                 plan | build | review | reflect | research
-  provider             from ActorProfile at time of run
-  model                from ActorProfile at time of run
+  provider             string — provider name at time of run
+  model                string — model name at time of run
   prompt_sha256        SHA256 of assembled prompt
   status               running | waiting_for_input | completed | failed
   input_tokens
@@ -24,7 +23,7 @@ AgentRun
   cost_estimate_usd
   duration_ms
   response_truncated   boolean
-  source_node_ids      ledger nodes retrieved for context
+  source_node_ids      spec paths or plan item refs retrieved for context
 ```
 
 ## AgentRunTurn Record
@@ -76,10 +75,10 @@ for how to use this flag in benchmark test cases.
 ## Assembly Pipeline
 
 1. Load instruction body (skill file)
-2. Retrieve context chunks from knowledge base scoped to the node
+2. Retrieve context from `specs/practices/` files declared in skill frontmatter
 3. Load principles files declared in skill frontmatter
 4. Unless `agent_override: true`, run enrichment tools and append results as `tool_result` turns
-5. Wrap with ActorProfile `prompt_template` (falls back to `PROMPT_{mode}.md`)
+5. Wrap with agent config `prompt_template` (falls back to `PROMPT_{mode}.md`)
 6. Compute `prompt_sha256`
 7. Check dedup — if recent successful run with same hash exists, return it
 8. Call provider HTTP API with callable tools passed in `tools` array
@@ -144,17 +143,17 @@ in-memory session state across job executions.
 
 ## Concurrency
 
-One active run per actor at a time, enforced via solid_queue concurrency key on `actor_id`.
+One active run per agent config at a time, enforced via solid_queue concurrency key on `source_ref`.
 A concurrent run request while a run is active returns 409.
 
 ## Observability
 
-`AgentRun` records provide the audit trail: tokens, cost, duration, status, source nodes.
+`AgentRun` records provide the audit trail: tokens, cost, duration, status, source refs.
 
 ## Acceptance Criteria
 
 - Start creates an AgentRun with status `running` and enqueues the job
-- Concurrent run request for same actor while a run is active → 409
+- Concurrent run request for same agent config while a run is active → 409
 - Dedup hit returns cached run — no provider call made
 - Complete updates the record with provider results and status `completed`
 - Duplicate (run_id) → 422

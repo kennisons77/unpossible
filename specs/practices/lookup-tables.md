@@ -41,8 +41,8 @@ These are the four tables an agent needs at the start of any iteration.
 Prefer concept references over path references in prose:
 
 ```
-✓  "see the ledger spec"
-✗  "see specs/system/ledger/spec.md"
+✓  "see the reference-graph spec"
+✗  "see specs/system/reference-graph/spec.md"
 ```
 
 Hard-coded paths belong only in lookup tables and `AGENTS.md`, where exactness is

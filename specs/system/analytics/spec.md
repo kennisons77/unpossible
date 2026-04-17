@@ -16,8 +16,8 @@ infrastructure.
   adapters (PostHog, Datadog, custom webhook) are a post-MVP concern. The analytics
   module will define the adapter interface; projects built with unpossible can plug in
   concrete adapters without changing the core store.
-- Future agent diagnosis — `node_id` on LLM events is the explicit join key to ledger
-  state, enabling an agent to reconstruct what happened during a failing run
+- Future agent diagnosis — `node_id` on LLM events is the explicit join key to the
+  reference graph, enabling an agent to reconstruct what happened during a failing run
 
 ## Ingest Architecture
 
@@ -38,8 +38,8 @@ change shape to accommodate it.
 ## Signal Categories
 
 ### LLM metrics
-Per agent run: provider, model, tokens, cost, mode, duration. `node_id` is the ledger
-node ID — the explicit join key between analytics events and ledger state.
+Per agent run: provider, model, tokens, cost, mode, duration. `node_id` is a string ref —
+a spec path or plan item ref that the reference parser can resolve.
 ```
 event_name: "llm.run_completed"
 properties: { provider, model, input_tokens, output_tokens, cost_usd, mode, node_id, duration_ms }
@@ -87,7 +87,7 @@ analytics_events
   org_id        uuid
   distinct_id   string  — opaque UUID; never an email or name
   event_name    string  — namespaced
-  node_id       uuid    — ledger node ID; indexed; nullable (non-LLM events may omit)
+  node_id       string  — spec path or plan item ref; indexed; nullable (non-LLM events may omit)
   properties    jsonb   — filtered through PII redaction before storage
   timestamp     timestamptz
   received_at   timestamptz

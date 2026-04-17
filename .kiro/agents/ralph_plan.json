@@ -12,6 +12,15 @@
     "thinking",
     "delegate"
   ],
+  "allowedTools": [
+    "fs_read",
+    "fs_write",
+    "execute_bash",
+    "grep",
+    "glob",
+    "code",
+    "use_subagent"
+  ],
   "resources": [
     "file://AGENTS.md",
     "file://specs/practices/cost.md",
@@ -19,7 +28,7 @@
     "file://specs/practices/verification.md",
     "file://specs/practices/changeability.md",
     "file://specs/practices/structural-vocabulary.md",
-    "file://specs/skills/workflows/prd.md"
+    "skill://specs/skills/**/*.md"
   ],
   "hooks": {
     "agentSpawn": [
