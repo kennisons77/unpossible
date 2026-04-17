@@ -16,9 +16,11 @@ Agent activity log. Auto-updated each iteration. Trimmed to last 10 entries.
 - Added agents queue to config/queue.yml; updated solid_queue_spec
 - 235 examples, 0 failures, 98.6% coverage
 
-## 2026-04-17 13:46 — Task 4.3: Complete endpoint calls AuditLogger (tag 0.0.53)
+## 2026-04-17 13:51 — Task 4.4: Provider adapter build_prompt with pinned+sliding token budget (tag 0.0.54)
 
 **Changes:**
-- AgentRunsController#complete calls Analytics::AuditLogger.log after RunStorageService.complete
-- Added request spec asserting AuditLogger.log is called with org_id, event_name, and properties
-- 236 examples, 0 failures, 98.6% coverage
+- Updated build_prompt signature to (node:, context_chunks:, principles:, turns:, token_budget:) across all adapters
+- Implemented pinned+sliding trimming in ProviderAdapter#apply_turn_budget: always keeps agent_question/human_input, drops oldest llm_response/tool_result first
+- Raises TokenBudgetExceeded when pinned turns alone exceed budget
+- AgentRunJob calls build_prompt before call_provider; rescues TokenBudgetExceeded → waiting_for_input
+- 254 examples, 0 failures, 99.19% coverage
