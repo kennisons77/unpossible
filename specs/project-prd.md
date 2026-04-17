@@ -15,7 +15,7 @@ Unpossible is both the platform and its own first project — it develops itself
 - Base image: ruby:3.3-slim
 - Test command (in container): bundle exec rspec
 - Port: 3000
-- Sidecar: Go 1.22 runner (separate container, same pod)
+- Go: Go 1.22 binaries under `go/` (single go.mod) — runner sidecar, analytics ingest sidecar, reference-graph parser CLI
 
 ## Phase
 
