@@ -2,6 +2,7 @@
 
 FactoryBot.define do
   factory :agents_agent_run, class: 'Agents::AgentRun' do
+    org_id { SecureRandom.uuid }
     run_id { SecureRandom.uuid }
     source_ref { nil }
     parent_run_id { nil }

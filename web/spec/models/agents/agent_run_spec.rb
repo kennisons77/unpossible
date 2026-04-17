@@ -9,6 +9,12 @@ RSpec.describe Agents::AgentRun, type: :model do
       expect(run).to be_valid
     end
 
+    it 'validates org_id presence' do
+      run = build(:agents_agent_run, org_id: nil)
+      expect(run).not_to be_valid
+      expect(run.errors[:org_id]).to be_present
+    end
+
     it 'validates mode inclusion' do
       run = build(:agents_agent_run, mode: 'invalid')
       expect(run).not_to be_valid

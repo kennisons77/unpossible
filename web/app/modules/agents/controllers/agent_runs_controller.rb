@@ -6,7 +6,7 @@ module Agents
     before_action :set_agent_run, only: %i[complete input]
 
     def start
-      result = RunStorageService.start(agent_run_params)
+      result = RunStorageService.start(agent_run_params.merge(org_id: current_org_id))
       status = result[:cached] ? :ok : :created
       render json: result[:run], status: status
     rescue RunStorageService::ConcurrentRunError

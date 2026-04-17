@@ -1,353 +1,242 @@
-# IMPLEMENTATION_PLAN.md
+# IMPLEMENTATION_PLAN.md — Unpossible
 
-**Generated:** 2026-04-17
 **Phase:** 0 (Local — Docker Compose only)
-**Source of truth:** specs/ + web/ + git state
+**Generated:** 2026-04-17
+**Source of truth:** specs/ + web/ + go/ code state
 
----
+## Scope
+
+Phase 0 only. No CI, no k8s, no staging, no production config.
+Ledger and Knowledge modules are **superseded** by `specs/system/reference-graph/spec.md` — all ledger/knowledge code has been removed. No tasks reference those modules.
 
 ## Completed Work (discovered from code)
 
-The following is implemented and tested (169 examples, 0 failures as of tag 0.0.43):
+The following are implemented and tested (169 examples, 0 failures, 98.68% coverage as of tag 0.0.43):
+
+- [x] Rails 8 skeleton with module autoloading (`web/config/application.rb`)
+- [x] Secret value object (`web/app/lib/secret.rb`) — redacts in inspect/to_s/as_json, .expose returns raw
+- [x] AuthToken JWT encode/decode (`web/app/lib/auth_token.rb`) — HS256, 24h TTL
+- [x] ApplicationController authenticate! with JWT + sidecar token + dev bypass
+- [x] POST /api/auth/token endpoint (`web/app/controllers/api/auth_controller.rb`)
+- [x] Security: PromptSanitizer, LogRedactor (`web/app/lib/security/`)
+- [x] Rack::Attack rate limiting (`web/config/initializers/rack_attack.rb`)
+- [x] Lograge structured logging (`web/config/initializers/lograge.rb`)
+- [x] Agents::AgentRun model with validations, modes, statuses
+- [x] Agents::AgentRunTurn model with kinds, purged_at
+- [x] Agents::ProviderAdapter + ClaudeAdapter + KiroAdapter + OpenAiAdapter
+- [x] Agents::PromptDeduplicator — SHA256 + mode lookup within 24h
+- [x] Agents::RunStorageService — start (with dedup + concurrency check), complete, record_input
+- [x] Agents::AgentRunsController — POST start/complete/input with auth
+- [x] Sandbox::ContainerRun model with status enum, duration_ms
+- [x] Sandbox::DockerDispatcher — shells out to docker run --rm, secret filtering, timeout
+- [x] Analytics::FeatureFlag model — enabled?, archived returns false, unique key per org
+- [x] Analytics::FeatureFlagsController — CRUD with auth
+- [x] Analytics::AnalyticsEvent model — append-only, validations, node_id column
+- [x] Analytics::AuditEvent model — append-only, severity enum
+- [x] HealthCheckMiddleware — GET /health at position 0, SELECT 1, 200/503
+- [x] Ledger + Knowledge module removal (migrations, code, tests all cleaned up)
+- [x] AgentRun FK migration — actor_id/node_id removed, source_ref added
+- [x] Solid Queue configured as ActiveJob adapter
+- [x] filter_parameters includes all sensitive keys
+- [x] Infra: Dockerfile (ruby:3.3-slim), Dockerfile.test (ruby:3.3)
+- [x] Infra: docker-compose.yml (rails + postgres), docker-compose.test.yml (test + postgres)
+- [x] Module scaffold spec verifying directory structure
+- [x] MarkdownHelper with syntax highlighting (redcarpet + rouge)
+
+## Open Tasks
+
+### Section 1 — Infrastructure Gaps (High Priority)
+
+- [ ] 1.1 — Uncomment and configure go_runner service in docker-compose.yml (`infra/docker-compose.yml`)
+  Spec: `specs/system/infrastructure/spec.md` — Phase 0 requires go_runner on port 8080
+  **Blocked by:** 6.1 (Go runner sidecar must exist first)
+  Required tests: `docker compose up` starts go_runner, port 8080 reachable on internal network
+
+- [ ] 1.2 — Uncomment and configure analytics sidecar service in docker-compose.yml (`infra/docker-compose.yml`)
+  Spec: `specs/system/infrastructure/spec.md` — Phase 0 requires analytics sidecar on port 9100
+  **Blocked by:** 7.1 (Go analytics sidecar must exist first)
+  Required tests: `docker compose up` starts analytics sidecar, port 9100 reachable on internal network
+
+### Section 2 — Multi-tenancy: Missing org_id Columns
+
+- [x] 2.1 — Add org_id to agents_agent_runs table (`web/db/migrate/`, `web/app/modules/agents/models/agent_run.rb`)
+  Spec: `specs/practices/multi-tenancy.md` — "org_id on every table from day one"; `specs/project-prd.md` — "org_id present on all records"
+  Required tests: AgentRun validates org_id presence, factory includes org_id, request specs pass org_id from JWT
+
+- [ ] 2.2 — Add org_id to sandbox_container_runs table (`web/db/migrate/`, `web/app/modules/sandbox/models/container_run.rb`)
+  Spec: `specs/practices/multi-tenancy.md`
+  Required tests: ContainerRun validates org_id presence, factory includes org_id
+
+### Section 3 — Analytics Module: Missing Components
+
+- [ ] 3.1 — Create Analytics::LlmMetric model (`web/db/migrate/`, `web/app/modules/analytics/models/llm_metric.rb`, `web/spec/models/analytics/llm_metric_spec.rb`)
+  Spec: `specs/platform/rails/system/analytics.md` — per agent run cost/token record, cost_estimate_usd decimal(10,6), index on (org_id, provider, model, created_at)
+  Required tests: validates org_id/provider/model presence, cost_estimate_usd stored as decimal(10,6), index exists, append-only enforcement
+
+- [ ] 3.2 — Create Analytics::AuditLogger service (`web/app/modules/analytics/services/audit_logger.rb`, `web/spec/modules/analytics/services/audit_logger_spec.rb`)
+  Spec: `specs/platform/rails/system/analytics.md` — `AuditLogger.log(...)` async, never raises, fire-and-forget
+  Required tests: AuditLogger.log creates AuditEvent, failure logs to Rails logger without raising, enqueues on analytics queue
+
+- [ ] 3.3 — Create Analytics::AuditLogJob (`web/app/modules/analytics/jobs/audit_log_job.rb`, `web/spec/jobs/analytics/audit_log_job_spec.rb`)
+  Spec: `specs/platform/rails/system/analytics.md` — Active Job on `analytics` queue
+  Required tests: job enqueues on analytics queue, creates AuditEvent record, handles errors without raising
+
+- [ ] 3.4 — Create Analytics::MetricsController with LLM, loops, and summary endpoints (`web/app/modules/analytics/controllers/metrics_controller.rb`, `web/spec/requests/analytics/metrics_spec.rb`, `web/config/routes.rb`)
+  Spec: `specs/system/analytics/spec.md` — GET /api/analytics/llm, /loops, /summary; `specs/platform/rails/system/analytics.md` — JWT auth required
+  Required tests: GET /api/analytics/llm returns cost by provider/model filterable by date, GET /api/analytics/loops returns run counts/failure rates by mode, GET /api/analytics/summary returns weekly totals, all return 401 without auth
+
+- [ ] 3.5 — Add events and flags/:key endpoints to MetricsController (`web/app/modules/analytics/controllers/metrics_controller.rb`, `web/spec/requests/analytics/metrics_spec.rb`, `web/config/routes.rb`)
+  Spec: `specs/system/analytics/spec.md` — GET /api/analytics/events (paginated, filterable), GET /api/analytics/flags/:key (exposure counts + conversion rates)
+  Required tests: events endpoint paginates and filters by event_name/org_id/date, flags/:key returns exposure counts per variant, both return 401 without auth
+
+- [ ] 3.6 — Auto-fire $feature_flag_called on FeatureFlag.enabled? (`web/app/modules/analytics/models/feature_flag.rb`, `web/spec/models/analytics/feature_flag_spec.rb`)
+  Spec: `specs/system/analytics/spec.md` AC — "Feature flag evaluation automatically fires $feature_flag_called — no manual instrumentation"
+  Note: In Phase 0 without the Go ingest sidecar, this should write directly to analytics_events or enqueue a job. The spec says fire-and-forget to the ingest endpoint, but the sidecar doesn't exist yet. Implement as a direct AnalyticsEvent.create (fail-open) until the sidecar is available.
+  Required tests: FeatureFlag.enabled? creates a $feature_flag_called event with flag_key/variant/enabled, failure to create event does not raise
+
+### Section 4 — Agent Runner: Missing Features
+
+- [ ] 4.1 — AgentRunJob for Solid Queue execution (`web/app/modules/agents/jobs/agent_run_job.rb`, `web/spec/jobs/agents/agent_run_job_spec.rb`)
+  Spec: `specs/system/agent-runner/spec.md` — "Job completes — no thread held", "Job resumes: reconstructs turn history"
+  Required tests: job enqueues, calls provider adapter, records turns, handles pause/resume, concurrency key on source_ref
+
+- [ ] 4.2 — Turn Content GC Job (`web/app/modules/agents/jobs/turn_content_gc_job.rb`, `web/spec/jobs/agents/turn_content_gc_job_spec.rb`, `web/config/recurring.yml`)
+  Spec: `specs/system/agent-runner/spec.md` — "Background job purges turn content for completed runs older than N days (default: 30). Sets purged_at and clears content."
+  Required tests: purges content on completed runs older than 30 days, sets purged_at, retains turn record, never purges failed or waiting_for_input runs, idempotent
+
+- [ ] 4.3 — Complete endpoint calls AuditLogger (`web/app/modules/agents/controllers/agent_runs_controller.rb`)
+  Spec: `specs/platform/rails/system/agents.md` — "Complete endpoint calls Analytics::AuditLogger"
+  **Depends on:** 3.2
+  Required tests: completing a run creates an audit event via AuditLogger
+
+- [ ] 4.4 — Provider adapter build_prompt with pinned+sliding token budget (`web/app/modules/agents/services/provider_adapter.rb`, adapters)
+  Spec: `specs/system/agent-runner/spec.md` — "build_prompt(node:, context_chunks:, principles:, turns:, token_budget:)" with pinned+sliding strategy
+  Note: Current adapters have a simplified build_prompt(messages) signature. The spec requires a richer interface with token budget management.
+  Required tests: always includes system prompt + agent_question + human_input turns, trims llm_response/tool_result from oldest, aborts with RALPH_WAITING if still over budget after trimming
 
-- Rails 8 skeleton with autoloading for `app/modules/`
-- Auth: `AuthToken` (JWT encode/decode), `Secret` value object, `ApplicationController#authenticate!`, sidecar auth, `Api::AuthController`, dev bypass
-- Security: `Security::PromptSanitizer`, `Security::LogRedactor`, lograge, `filter_parameters`
-- Rate limiting: `Rack::Attack` (300/5min general, 10/min auth)
-- Health check: `HealthCheckMiddleware` at position 0 (GET /health → 200/503)
-- Agents module: `AgentRun`, `AgentRunTurn`, `ProviderAdapter` (Claude/Kiro/OpenAI), `PromptDeduplicator`, `RunStorageService`, `AgentRunsController` (start/complete/input)
-- Sandbox module: `ContainerRun`, `DockerDispatcher`
-- Analytics module: `AnalyticsEvent` (append-only), `AuditEvent` (append-only, severity enum), `FeatureFlag` (enabled?/lifecycle), `FeatureFlagsController` (CRUD)
-- Ledger + Knowledge modules fully removed (migrations, models, services, controllers, jobs)
-- AgentRun FK columns replaced with `source_ref` string
-- Infrastructure: `Dockerfile`, `Dockerfile.test`, `docker-compose.yml`, `docker-compose.test.yml`
-- Solid Queue configured (Postgres-backed, no Redis)
-- Module LOOKUP.md
+### Section 5 — Batch Request Middleware
 
----
+- [ ] 5.1 — Batch request Rack middleware (`web/app/middleware/batch_request_middleware.rb`, `web/spec/middleware/batch_request_middleware_spec.rb`, `web/config/application.rb`)
+  Spec: `specs/system/batch-requests.md` — POST /api/batch fans out sub-requests internally, returns aggregated responses
+  Required tests: fans out sub-requests through full Rack stack, responses ordered (response[i] = request[i]), individual failures captured (not abort batch), max batch size enforced (422), malformed JSON returns 422, inherits auth from outer request
 
-## Gap Analysis
+### Section 6 — Go Runner Sidecar
 
-### Section 1 — Reference Graph: Controlled Commit Skill (Priority 1)
+- [ ] 6.1 — [SPIKE] Research Go runner sidecar implementation — run `./loop.sh research go-runner` (see specs/skills/tools/research.md)
+  Spec: `specs/platform/go/system/runner.md` — POST /run with Basic Auth, mutex, token parsing, callback to Rails
+  Note: No Go code exists in the repo. This spike must determine: directory structure (runner/ vs go/runner/), build tooling, test approach, and how to integrate with the existing Docker Compose stack. The spec references `runner/main.go`.
+  **Blocks:** 1.1, 6.2
 
-**Spec:** `specs/system/reference-graph/spec.md` § Component 1
-**Status:** Not started. No LEDGER.jsonl, no commit skill, no structured commit tooling.
+- [ ] 6.2 — Build Go runner sidecar (`runner/main.go`, `runner/go.mod`, `infra/Dockerfile.runner`)
+  Spec: `specs/platform/go/system/runner.md`
+  **Depends on:** 6.1
+  Required tests: go test ./... exits 0, POST /run without Basic Auth → 401, concurrent POST /run → 409, calls Rails complete endpoint after loop exits, token counts parsed from stream-json stdout, GET /healthz returns 200, GET /ready returns 200, GET /metrics returns Prometheus text
 
-This is a file-and-git-native skill, not a Rails model. It atomically stages code + appends LEDGER.jsonl + updates IMPLEMENTATION_PLAN.md + commits. The build loop currently uses raw `git commit`.
+### Section 7 — Go Analytics Sidecar
 
-- [ ] 1.1 — [SPIKE] Research controlled commit skill design — run `./loop.sh research controlled-commit` (see specs/skills/tools/research.md)
-  Spec has open questions about plan item renumbering and LEDGER.jsonl growth. Spike should resolve the file format, the shell script or Ruby script interface, and how the build loop invokes it.
-  Required tests: n/a (spike produces a research finding, not code)
+- [ ] 7.1 — [SPIKE] Research Go analytics sidecar implementation — run `./loop.sh research go-analytics` (see specs/skills/tools/research.md)
+  Spec: `specs/platform/go/system/analytics.md` — POST /capture returns 202, in-memory queue, batch flush, PII filtering
+  Note: No Go code exists. Same structural questions as 6.1.
+  **Blocks:** 1.2, 7.2
 
-### Section 2 — Reference Graph: Go Reference Parser (Priority 2)
+- [ ] 7.2 — Build Go analytics sidecar (`analytics-sidecar/main.go`, `analytics-sidecar/go.mod`, `infra/Dockerfile.analytics`)
+  Spec: `specs/platform/go/system/analytics.md`
+  **Depends on:** 7.1
+  Required tests: go test ./... exits 0, POST /capture returns 202 immediately, events flushed within 5s or 100 events, events buffered on Postgres unavailability, GET /healthz returns 200, non-UUID distinct_id rejected
 
-**Spec:** `specs/system/reference-graph/spec.md` § Component 2
-**Status:** Not started. No `go/` directory exists. The parser is a standalone Go binary.
+### Section 8 — API Documentation (rswag)
 
-- [ ] 2.1 — [SPIKE] Research Go reference parser architecture — run `./loop.sh research go-parser` (see specs/skills/tools/research.md)
-  Spike should define: input file formats, output JSON schema, node/edge types, how to parse LEDGER.jsonl + IMPLEMENTATION_PLAN.md + spec files + RSpec `spec:` tags + git log + git notes. Also resolve open question about plan item renumbering (title-based stable refs vs numeric IDs).
-  Required tests: n/a (spike)
+- [ ] 8.1 — Set up rswag gem and Swagger UI (`web/Gemfile`, `web/spec/swagger_helper.rb`, `web/config/initializers/rswag.rb`, `web/swagger/v1/swagger.yaml`)
+  Spec: `specs/system/api/spec.md`, `specs/platform/rails/system/api-standards.md` — rswag for OpenAPI docs at /api/docs
+  Note: rswag gem is not in Gemfile and no rswag config exists. Gems must be pre-downloaded to vendor/cache (no outbound network in Docker).
+  Required tests: GET /api/docs returns 200 without auth, rake rswag:specs:swaggerize exits 0
 
-### Section 3 — Analytics: LlmMetric Model
+- [ ] 8.2 — Convert existing request specs to rswag format (`web/spec/requests/`)
+  Spec: `specs/platform/rails/system/api-standards.md` — "Written using rswag DSL — each example both tests the endpoint and contributes to the generated spec"
+  **Depends on:** 8.1
+  Required tests: all existing endpoints appear in swagger.yaml, rake rswag:specs:swaggerize exits 0
 
-**Spec:** `specs/platform/rails/system/analytics.md` — `Analytics::LlmMetric` per agent run cost/token record
-**Status:** Not implemented. No `llm_metrics` table, no model.
+### Section 9 — Reference Graph (Priority Components for Phase 0)
 
-- [ ] 3.1 — Create `Analytics::LlmMetric` model and migration (`web/app/modules/analytics/models/llm_metric.rb`, `web/db/migrate/`)
-  Schema: `id (uuid), org_id (uuid), agent_run_id (uuid FK), provider (string), model (string), input_tokens (int), output_tokens (int), cost_estimate_usd (decimal 10,6), mode (string), node_id (string), duration_ms (int), timestamps`
-  Index on `(org_id, provider, model, created_at)`
-  Required tests: validations (org_id, provider, model required), agent_run association, cost_estimate_usd precision, node_id accepts string refs
+- [ ] 9.1 — [SPIKE] Research reference graph controlled commit skill — run `./loop.sh research ref-graph-commit` (see specs/skills/tools/research.md)
+  Spec: `specs/system/reference-graph/spec.md` § Controlled Commit Skill (Priority 1)
+  Note: This is the foundational component — all other reference graph work depends on it. The spike should determine: skill file format, LEDGER.jsonl schema, atomic commit sequence, and integration with loop.sh.
+  **Blocks:** 9.2, 9.3
 
-### Section 4 — Analytics: AuditLogger Service
+- [ ] 9.2 — Create LEDGER.jsonl and controlled commit skill (`specs/skills/tools/commit.md`, `scripts/commit.sh` or equivalent)
+  Spec: `specs/system/reference-graph/spec.md` § Controlled Commit Skill
+  **Depends on:** 9.1
+  Required tests: commit atomically updates code + LEDGER.jsonl + IMPLEMENTATION_PLAN.md, LEDGER.jsonl is append-only, entries are valid JSON, status transitions recorded with sha/reason
 
-**Spec:** `specs/platform/rails/system/analytics.md` — `Analytics::AuditLogger.log(...)` async, never raises, fire-and-forget
-**Status:** Not implemented. No `AuditLogger` service, no `AuditLogJob`.
+- [ ] 9.3 — [SPIKE] Research Go reference parser — run `./loop.sh research ref-graph-parser` (see specs/skills/tools/research.md)
+  Spec: `specs/system/reference-graph/spec.md` § Go Reference Parser (Priority 2)
+  Note: The parser is a standalone Go binary. Spike should determine: input parsing strategy (markdown frontmatter, LEDGER.jsonl, git log), output JSON schema, and how PR nodes are reconstructed from ledger events.
+  **Depends on:** 9.1
+  **Blocks:** 9.4
 
-- [ ] 4.1 — Create `Analytics::AuditLogger` service and `Analytics::AuditLogJob` (`web/app/modules/analytics/services/audit_logger.rb`, `web/app/modules/analytics/jobs/audit_log_job.rb`)
-  `AuditLogger.log(org_id:, event_name:, severity:, properties: {})` enqueues `AuditLogJob` on `analytics` queue. Never raises — catches all exceptions and logs to Rails logger.
-  Required tests: enqueues job, creates AuditEvent record when job runs, failure logs to Rails logger without raising, severity validation
+- [ ] 9.4 — Build Go reference parser (`go/parser/main.go`, `go/parser/go.mod`)
+  Spec: `specs/system/reference-graph/spec.md` § Go Reference Parser
+  **Depends on:** 9.3
+  Required tests: go test ./... exits 0, deterministic output (same inputs → same JSON), parses spec files for frontmatter/headers/links, parses LEDGER.jsonl for status/blocked/unblocked/pr events, parses IMPLEMENTATION_PLAN.md for beat items, emits PR nodes from pr_opened/pr_review/pr_merged events, resolves git notes on merge commits
 
-### Section 5 — Analytics: MetricsController
+- [ ] 9.5 — PR skill for creating pull requests with graph metadata (`specs/skills/tools/pr.md`, `scripts/pr.sh` or equivalent)
+  Spec: `specs/system/reference-graph/spec.md` § PR Events in LEDGER.jsonl
+  **Depends on:** 9.2
+  Required tests: creates PR via gh pr create, appends pr_opened event to LEDGER.jsonl with task_ids/spec_refs/sha range, pr_merged event appended on merge
 
-**Spec:** `specs/platform/rails/system/analytics.md` — `Analytics::MetricsController` with JWT auth
-**Status:** Not implemented. No controller, no routes.
+### Section 10 — UI Views (Proposed Specs)
 
-Depends on: 3.1 (LlmMetric model)
+- [ ] 10.1 — Agent Runs UI — run history and detail views (`web/app/controllers/agent_runs_controller.rb`, `web/app/views/agent_runs/`, `web/config/routes.rb`, `web/spec/requests/agent_runs_ui_spec.rb`)
+  Spec: `specs/system/agent-runs-ui.md` — GET /agent_runs (paginated list), GET /agent_runs/:id (detail with turns)
+  Required tests: index renders paginated list with mode/status/tokens/cost, detail renders turns with kind badges, markdown content rendered, filters by mode and status, auth required (or DISABLE_AUTH bypass)
 
-- [ ] 5.1 — Create `Analytics::MetricsController` with LLM, loops, and summary endpoints (`web/app/modules/analytics/controllers/metrics_controller.rb`, `web/config/routes.rb`)
-  Endpoints: `GET /api/analytics/llm`, `GET /api/analytics/loops`, `GET /api/analytics/summary`
-  All require JWT auth. LLM endpoint aggregates by provider/model with date range filter. Loops endpoint returns run counts/failure rates by mode. Summary returns total cost this week + loop error rate.
-  Required tests: 200 happy path for each endpoint, 401 without auth, date range filtering, correct aggregation math
-  Required request spec: `web/spec/requests/analytics/metrics_spec.rb`
+- [ ] 10.2 — Analytics Dashboard UI — summary and LLM metrics views (`web/app/controllers/analytics_dashboard_controller.rb`, `web/app/views/analytics/`, `web/config/routes.rb`, `web/spec/requests/analytics_dashboard_ui_spec.rb`)
+  Spec: `specs/system/analytics-dashboard-ui.md` — GET /analytics (summary cards + recent runs), GET /analytics/llm (cost breakdown)
+  **Depends on:** 3.1, 3.4
+  Required tests: dashboard renders summary cards (total cost, total runs, failure rate), LLM page renders cost by provider/model, filterable by date range, auth required
 
-### Section 6 — Analytics: Events and Flags Query Endpoints
+- [ ] 10.3 — Reference Graph read-only web UI — current, open, condensed views (`web/app/controllers/reference_graph_controller.rb`, `web/app/views/reference_graph/`, `web/config/routes.rb`)
+  Spec: `specs/system/reference-graph/spec.md` § Read-Only Web UI (Priority 5)
+  **Depends on:** 9.4
+  Required tests: current view renders in-progress beat + ancestor chain, open view lists non-closed items with filters, condensed view renders collapsible tree with text search, all server-rendered HTML, auth required
 
-**Spec:** `specs/platform/rails/product/analytics.md` — `GET /api/analytics/events`, `GET /api/analytics/flags/:key`
-**Status:** Not implemented. No events endpoint, no flags/:key endpoint.
+### Section 11 — Spec-Level Gaps and Cleanup
 
-- [ ] 6.1 — Add events and flags/:key endpoints to MetricsController (`web/app/modules/analytics/controllers/metrics_controller.rb`, `web/config/routes.rb`)
-  `GET /api/analytics/events` — paginated event list, filterable by event_name, org_id, date range
-  `GET /api/analytics/flags/:key` — exposure counts and conversion rates per variant
-  Required tests: pagination, filtering by event_name and date range, flags/:key returns exposure counts, 401 without auth, 404 for unknown flag key
+- [ ] 11.1 — Add spec: tags to existing RSpec files linking to spec sections (`web/spec/`)
+  Spec: `specs/system/reference-graph/spec.md` § Spec Reference Tags in Tests (Priority 3)
+  Required tests: spec: metadata present on describe blocks, references valid spec paths
 
-### Section 7 — Analytics: FeatureFlagExposure Model
+- [ ] 11.2 — LOOKUP.md files for each module directory (`web/app/modules/agents/LOOKUP.md`, `web/app/modules/analytics/LOOKUP.md`, `web/app/modules/sandbox/LOOKUP.md`)
+  Spec: `specs/practices/changeability.md` § LOOKUP.md Convention
+  Note: `web/app/modules/LOOKUP.md` exists at the top level but individual module LOOKUP.md files are missing.
+  Required tests: n/a (documentation only)
 
-**Spec:** `specs/platform/rails/product/analytics.md` — `Analytics::FeatureFlagExposure`
-**Status:** Not implemented. No model, no migration.
+## Ambiguities and Notes
 
-- [ ] 7.1 — Create `Analytics::FeatureFlagExposure` model and migration (`web/app/modules/analytics/models/feature_flag_exposure.rb`, `web/db/migrate/`)
-  Schema: `id (uuid), org_id (uuid), flag_key (string), distinct_id (string), variant (string), timestamps`
-  Index on `(org_id, flag_key, distinct_id)`
-  Required tests: validations, index uniqueness behavior, distinct_id is UUID not email
+1. **FeatureFlag.enabled? auto-fire without Go sidecar:** The spec says `$feature_flag_called` is fired via the analytics ingest sidecar (Go, port 9100). The sidecar doesn't exist yet. Task 3.6 implements a direct-write fallback. When the sidecar lands (7.2), the fire mechanism should switch to HTTP POST to the sidecar.
 
-### Section 8 — Analytics: Auto-fire `$feature_flag_called` on FeatureFlag.enabled?
+2. **Provider adapter signature mismatch:** Current adapters implement `build_prompt(messages)` but the spec requires `build_prompt(node:, context_chunks:, principles:, turns:, token_budget:)`. Task 4.4 addresses this. The existing simplified interface works for current callers but doesn't implement pinned+sliding trimming.
 
-**Spec:** `specs/system/analytics/spec.md` — Feature flag evaluation automatically fires `$feature_flag_called`
-**Spec:** `specs/platform/rails/product/analytics.md` — `enabled?` fires `$feature_flag_called` automatically
-**Status:** Not implemented. `FeatureFlag.enabled?` does not fire any event.
+3. **rswag gem availability:** rswag gems must be downloaded to `web/vendor/cache/` before the Docker build. Task 8.1 includes this step.
 
-Depends on: 7.1 (FeatureFlagExposure model)
+4. **Ledger UI spec is superseded:** `specs/system/ledger/ui.md` is marked superseded. The reference graph web UI (10.3) replaces it with current/open/condensed views consuming the Go parser's JSON output.
 
-- [ ] 8.1 — Update `FeatureFlag.enabled?` to auto-fire `$feature_flag_called` event (`web/app/modules/analytics/models/feature_flag.rb`)
-  On every call to `enabled?`, create an `AnalyticsEvent` with `event_name: "$feature_flag_called"` and properties `{ flag_key:, variant:, enabled: }`. Fire-and-forget — never raise on failure.
-  Required tests: calling `enabled?` creates an analytics event, event has correct properties, failure to create event does not raise, distinct_id is UUID
+5. **Knowledge module is superseded:** `specs/system/knowledge/` is marked superseded. No tasks reference it.
 
-### Section 9 — Agent Runs: `iteration` Field and Unique Index
+6. **Log Tail Relay:** `specs/system/log-tail-relay.md` is status: proposed with open questions. No tasks planned — it needs a decision on approach before implementation.
 
-**Spec:** `specs/platform/rails/system/agents.md` — Unique index on `(run_id, iteration)`, duplicate → 422
-**Status:** Partially implemented. `AgentRun` has `run_id` with uniqueness validation but no `iteration` column. The spec requires `(run_id, iteration)` composite uniqueness.
+7. **Analytics Dashboard UI and Agent Runs UI** are status: proposed. Tasks 10.1 and 10.2 are included because the PRD says "Rails 8 full stack — not API-only; views needed for UI" and these are the only UI specs defined.
 
-- [ ] 9.1 — Add `iteration` column to `agents_agent_runs` and update unique index (`web/db/migrate/`, `web/app/modules/agents/models/agent_run.rb`)
-  Add `iteration` integer column (nullable for backward compat). Replace unique index on `run_id` with unique index on `(run_id, iteration)`. Update model validation.
-  Required tests: duplicate (run_id, iteration) → DB-level rejection, different iterations for same run_id allowed, controller returns 422 on duplicate
-
-### Section 10 — Agent Runs: `cost_estimate_usd` Column
-
-**Spec:** `specs/platform/rails/system/agents.md` — `cost_estimate_usd` decimal(10,6)
-**Status:** Implemented. Column exists in migration `20260409000003`. ✓ No action needed.
-
-### Section 11 — Agent Runs: `source_library_item_ids` → `source_node_ids`
-
-**Spec:** `specs/platform/rails/system/agents.md` — `source_library_item_ids` jsonb, default `[]`
-**Status:** The spec says `source_library_item_ids` but the reference-graph spec superseded knowledge module. The column is already `source_node_ids` (jsonb, default `[]`) which aligns with the reference-graph spec's string refs. The platform override spec is stale on this name. No action needed — the implementation is correct for the superseding spec.
-
-### Section 12 — Agent Runs: Complete Endpoint Calls AuditLogger
-
-**Spec:** `specs/platform/rails/system/agents.md` — Complete endpoint calls `Analytics::AuditLogger`
-**Status:** Not implemented. `AgentRunsController#complete` does not call `AuditLogger`.
-
-Depends on: 4.1 (AuditLogger service)
-
-- [ ] 12.1 — Add `AuditLogger.log` call to `AgentRunsController#complete` (`web/app/modules/agents/controllers/agent_runs_controller.rb`)
-  After successful completion, call `Analytics::AuditLogger.log(org_id:, event_name: "agent_run.completed", severity: "info", properties: { run_id:, mode:, provider:, model: })`.
-  Required tests: completing a run enqueues an audit log job, audit event created with correct properties
-
-### Section 13 — Batch Request Middleware
-
-**Spec:** `specs/system/batch-requests.md`
-**Status:** Not implemented. No middleware, no route.
-
-- [ ] 13.1 — Create batch request Rack middleware (`web/app/middleware/batch_request_middleware.rb`, `web/config/application.rb`)
-  Intercepts `POST /api/batch`. Fans out sub-requests internally through the Rack stack. Returns aggregated responses. Max batch size 100 (422 if exceeded). Malformed JSON → 422. Individual sub-request failures captured in response array. Requires auth (inherits from outer request).
-  Required tests: happy path with 2 sub-requests, max batch size exceeded → 422, malformed JSON → 422, individual sub-request failure captured, auth required, response ordering matches request ordering
-
-### Section 14 — API Documentation (rswag)
-
-**Spec:** `specs/system/api/spec.md`, `specs/platform/rails/system/api-standards.md`
-**Status:** Not implemented. No rswag gem, no swagger config, no request specs using rswag DSL, no `/api/docs` endpoint.
-
-- [ ] 14.1 — Add rswag gems and configure Swagger UI (`web/Gemfile`, `web/vendor/cache/`, `web/spec/swagger_helper.rb`, `web/config/initializers/rswag.rb`)
-  Add `rswag-api`, `rswag-ui`, `rswag-specs` gems. Download to vendor/cache. Configure Swagger UI at `/api/docs` (unauthenticated). Create `swagger_helper.rb`.
-  Required tests: `GET /api/docs` returns 200 without auth, `rake rswag:specs:swaggerize` exits 0
-
-- [ ] 14.2 — Convert existing request specs to rswag DSL (`web/spec/requests/`)
-  Convert `api/auth_spec.rb`, `agents/agent_runs_spec.rb`, `analytics/feature_flags_spec.rb` to rswag format. Each spec both tests the endpoint and contributes to generated OpenAPI spec.
-  Required tests: all existing request spec assertions still pass, `swagger/v1/swagger.yaml` generated and lists all endpoints
-
-### Section 15 — Infrastructure: docker-compose.yml Gaps
-
-**Spec:** `specs/system/infrastructure/spec.md`
-**Status:** Partially compliant. Issues found:
-
-1. **Postgres port binding** — Postgres in `docker-compose.yml` has no `ports:` section (good — internal only). ✓
-2. **Image tags** — `docker-compose.yml` uses `${GIT_SHA:-dev}` for rails image. Spec says "always git SHA, never `latest`". The `:-dev` fallback is acceptable for local dev. ✓
-3. **Go runner and analytics sidecars** — commented out in `docker-compose.yml`. Spec requires `go_runner` (port 8080) and `analytics` (port 9100) services. These are Go services that don't exist yet.
-4. **Redis** — commented out. Not required by current code (Solid Queue is Postgres-backed). ✓
-
-- [ ] 15.1 — [SPIKE] Research Go analytics sidecar design — run `./loop.sh research go-analytics-sidecar` (see specs/skills/tools/research.md)
-  The analytics spec requires a Go ingest sidecar (`POST /capture`, port 9100) with in-memory queue and batch flush. This is a Go service. Spike should define: minimal Go service structure, flush strategy, Postgres connection, event schema, and how Rails fire-and-forget calls it.
-  Required tests: n/a (spike)
-
-### Section 16 — Infrastructure: Dockerfile Uses `ruby:3.3` Not `ruby:3.3-slim`
-
-**Spec:** `specs/project-prd.md` — Base image: `ruby:3.3-slim`
-**Status:** `Dockerfile` final stage uses `ruby:3.3-slim` ✓. Builder stage uses `ruby:3.3` (full, for compilation). This is correct — the builder needs build tools, the final image is slim.
-
-### Section 17 — Spec Reference Tags in Tests (Priority 3)
-
-**Spec:** `specs/system/reference-graph/spec.md` § Component 3
-**Status:** Not started. No `spec:` metadata tags in any RSpec file.
-
-Depends on: 2.1 (Go parser spike — defines the tag format the parser will consume)
-
-- [ ] 17.1 — Add `spec:` metadata tags to existing RSpec files (`web/spec/`)
-  Add `spec: "specs/system/..."` metadata to existing describe blocks. Start with agent_run, feature_flag, health_check, auth specs. Reference the spec section each test covers.
-  Required tests: RSpec metadata is parseable, tags reference valid spec paths (validate with `scripts/validate-refs.sh` if applicable)
-
-### Section 18 — Reference Graph: LEDGER.jsonl Bootstrap
-
-**Spec:** `specs/system/reference-graph/spec.md` § File Schemas
-**Status:** No LEDGER.jsonl exists.
-
-Depends on: 1.1 (controlled commit skill spike)
-
-- [ ] 18.1 — Create initial LEDGER.jsonl with bootstrap entries
-  Create `LEDGER.jsonl` at project root. Backfill status entries for completed work from git history. Define the append-only convention.
-  Required tests: LEDGER.jsonl is valid JSON-per-line, entries have required fields (ts, type, ref)
-
-### Section 19 — Sandbox: ContainerRun `stdout`/`stderr` Columns
-
-**Spec:** `specs/system/sandbox/prd.md` — ContainerRun record includes `stdout`, `stderr`
-**Status:** `DockerDispatcher` writes `stdout` and `stderr` to the record, but need to verify the migration has these columns.
-
-- [x] 19.1 — Verify `sandbox_container_runs` table has `stdout` and `stderr` text columns (`web/db/migrate/20260409000005_create_sandbox_container_runs.rb`)
-  **Verified:** Migration includes `t.text :stdout` and `t.text :stderr`. Covered by `docker_dispatcher_spec.rb`.
-
-### Section 20 — Agent Runs UI (Proposed)
-
-**Spec:** `specs/system/agent-runs-ui.md` (status: proposed)
-**Status:** Not implemented. No views, no HTML controllers.
-
-- [ ] 20.1 — Create Agent Runs HTML views (`web/app/controllers/agent_runs_controller.rb`, `web/app/views/agent_runs/`)
-  `GET /agent_runs` — paginated list (mode, status, provider/model, tokens, cost, duration, created_at), filterable by mode and status
-  `GET /agent_runs/:id` — run detail with turns, markdown rendering, parent run link, source_ref
-  Server-rendered ERB, no JS framework. Auth via `authenticate!`.
-  Required tests: 200 for index and show, pagination, mode/status filtering, turn content rendered as markdown, 401 without auth
-
-### Section 21 — Analytics Dashboard UI (Proposed)
-
-**Spec:** `specs/system/analytics-dashboard-ui.md` (status: proposed)
-**Status:** Not implemented. No views.
-
-Depends on: 3.1 (LlmMetric model), 5.1 (MetricsController)
-
-- [ ] 21.1 — Create Analytics Dashboard HTML views (`web/app/controllers/analytics_dashboard_controller.rb`, `web/app/views/analytics_dashboard/`)
-  `GET /analytics` — summary cards (total cost, total runs, failure rate), cost by provider/model, recent runs
-  `GET /analytics/llm` — cost/token breakdown by provider and model, date range filter
-  Server-rendered ERB. Auth via `authenticate!`.
-  Required tests: 200 for dashboard and llm views, summary cards show correct data, 401 without auth
-
-### Section 22 — Log Tail Relay (Proposed)
-
-**Spec:** `specs/system/log-tail-relay.md` (status: proposed)
-**Status:** Not implemented. Spec has unresolved open questions.
-
-- [ ] 22.1 — [SPIKE] Research log tail relay approach — run `./loop.sh research log-tail-relay` (see specs/skills/tools/research.md)
-  Resolve: file relay vs HTTP endpoint vs clipboard/pipe, which services to cover, proactive vs triggered.
-  Required tests: n/a (spike)
-
-### Section 23 — Multi-tenancy: Add `org_id` to Agents and Sandbox Tables
-
-**Spec:** `specs/practices/multi-tenancy.md`, `specs/project-prd.md` — `org_id` present on all records from day one
-**Status:** Not implemented. `agents_agent_runs`, `agents_agent_run_turns`, and `sandbox_container_runs` have no `org_id` column. Analytics tables already have it.
-
-- [ ] 23.1 — Add `org_id` to `agents_agent_runs` and `sandbox_container_runs` (`web/db/migrate/`)
-  Add `org_id` (uuid, nullable initially for backward compat, with default from `DEFAULT_ORG_ID`). Backfill existing rows. Add index.
-  Required tests: new records include org_id, queries can filter by org_id
-
-### Section 24 — Turn Content GC Job
-
-**Spec:** `specs/system/agent-runner/spec.md` § Turn Content GC
-**Status:** Not implemented. `purged_at` column exists on `agents_agent_run_turns` but no GC job.
-
-- [ ] 24.1 — Create `Agents::TurnContentGcJob` (`web/app/modules/agents/jobs/turn_content_gc_job.rb`, `web/config/recurring.yml`)
-  Solid Queue recurring job. Purges turn content for completed runs older than 30 days. Sets `purged_at = now()` and clears `content`. Never purges failed or `waiting_for_input` runs.
-  Required tests: purges content on old completed runs, retains turn record skeleton, skips failed runs, skips waiting_for_input runs, idempotent (re-running doesn't error)
-
-### Section 25 — RunStorageService Unit Spec
-
-**Spec:** `specs/platform/rails/system/api-standards.md` — every controller has a corresponding `spec/requests/` file
-**Status:** `RunStorageService` has no dedicated spec (tested indirectly through controller spec). The service is internal — no request spec needed. However, a unit spec would improve coverage.
-
-- [ ] 25.1 — Create `RunStorageService` unit spec (`web/spec/modules/agents/services/run_storage_service_spec.rb`)
-  Required tests: start creates run with status running, dedup hit returns cached run, concurrent run raises ConcurrentRunError, duplicate run_id raises DuplicateRunError, complete updates status, record_input appends turn and sets status running
-
-### Section 26 — Missing LOOKUP.md Files
-
-**Spec:** `specs/practices/changeability.md` — every module directory gets a LOOKUP.md
-**Status:** `web/app/modules/LOOKUP.md` exists (top-level). Individual module directories (`agents/`, `sandbox/`, `analytics/`) do not have their own LOOKUP.md files.
-
-- [ ] 26.1 — Create per-module LOOKUP.md files (`web/app/modules/agents/LOOKUP.md`, `web/app/modules/sandbox/LOOKUP.md`, `web/app/modules/analytics/LOOKUP.md`)
-  Each file: purpose (one sentence), public interface, cross-module rules.
-  Required tests: n/a (documentation)
-
----
-
-## Task Dependency Order
+## Dependency Graph
 
 ```
-Independent (can start now):
-  3.1  LlmMetric model
-  4.1  AuditLogger service + AuditLogJob
-  7.1  FeatureFlagExposure model
-  9.1  AgentRun iteration column
-  13.1 Batch request middleware
-  14.1 rswag setup
-  17.1 Spec reference tags (soft dependency on 2.1 for format, but can use draft format)
-  19.1 Verify ContainerRun columns ✓ DONE
-  23.1 Add org_id to agents/sandbox tables
-  24.1 Turn Content GC job
-  25.1 RunStorageService unit spec
-  26.1 LOOKUP.md files
-  20.1 Agent Runs UI
-
-Spikes (block downstream work):
-  1.1  Controlled commit skill spike → blocks 18.1
-  2.1  Go parser spike → blocks 17.1 (format), Go implementation (Phase 0 scope TBD)
-  15.1 Go analytics sidecar spike → blocks sidecar implementation
-  22.1 Log tail relay spike → blocks relay implementation
-
-After 3.1:
-  5.1  MetricsController
-
-After 4.1:
-  12.1 AuditLogger call in complete endpoint
-
-After 5.1:
-  6.1  Events and flags/:key endpoints
-  21.1 Analytics Dashboard UI
-
-After 7.1:
-  8.1  Auto-fire $feature_flag_called
-
-After 14.1:
-  14.2 Convert request specs to rswag
-
-After 1.1:
-  18.1 LEDGER.jsonl bootstrap
+6.1 (spike: go runner) → 6.2 (build runner) → 1.1 (uncomment compose)
+7.1 (spike: go analytics) → 7.2 (build analytics) → 1.2 (uncomment compose)
+3.2 (AuditLogger) → 4.3 (complete calls AuditLogger)
+3.1 (LlmMetric) + 3.4 (MetricsController) → 10.2 (Analytics Dashboard UI)
+8.1 (rswag setup) → 8.2 (convert specs)
+9.1 (spike: commit skill) → 9.2 (commit skill) → 9.5 (PR skill)
+9.1 → 9.3 (spike: parser) → 9.4 (build parser) → 10.3 (ref graph UI)
 ```
 
----
-
-## Out of Scope (Phase 0)
-
-- Go runner sidecar (`Dockerfile.runner`, port 8080) — Go binary not yet written
-- Go analytics sidecar (`Dockerfile.analytics`, port 9100) — Go binary not yet written
-- CI (Phase 1), staging (Phase 2), production (Phase 3)
-- NixOS, k8s manifests, SOPS secrets
-- Redis (not needed — Solid Queue is Postgres-backed)
-- Streaming output, ActionCable, websockets
-- Apache AGE graph extension
-- Outbound analytics adapters (PostHog, Datadog)
-- LLM-resolved acceptance tests
-- Multi-provider fallback
-- Percentage rollout for feature flags
-- Knowledge module (removed, superseded by reference graph)
-- Ledger module (removed, superseded by reference graph)
-
-## Notes
-
-- The reference-graph spec supersedes both ledger and knowledge specs. All ledger/knowledge code has been removed. The reference graph is file-and-git-native — the Go parser and LEDGER.jsonl are the new system.
-- `source_library_item_ids` in `specs/platform/rails/system/agents.md` is stale — the field is `source_node_ids` (string refs) per the reference-graph spec. No action needed.
-- The `specs/system/analytics-dashboard-ui.md` and `specs/system/agent-runs-ui.md` are marked `proposed`. Tasks are included but lower priority.
-- `specs/system/log-tail-relay.md` is marked `proposed` with unresolved open questions. Spike task created.
+All other tasks are independent and can be worked in any order.

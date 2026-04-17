@@ -34,7 +34,9 @@ RSpec.describe 'Agent Runs API', type: :request do
     it 'creates AgentRun with status running and returns 201' do
       post '/api/agent_runs/start', params: valid_params.to_json, headers: headers
       expect(response).to have_http_status(:created)
-      expect(JSON.parse(response.body)['status']).to eq('running')
+      body = JSON.parse(response.body)
+      expect(body['status']).to eq('running')
+      expect(Agents::AgentRun.find(body['id']).org_id).to eq(org_id)
     end
 
     context 'with concurrent active run for same source_ref' do
