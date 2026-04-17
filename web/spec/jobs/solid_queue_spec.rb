@@ -39,7 +39,7 @@ RSpec.describe "Solid Queue configuration" do
     expect(queue_config_path).to exist
 
     raw = File.read(queue_config_path)
-    %w[default analytics tasks pipeline].each do |queue|
+    %w[default agents analytics tasks pipeline].each do |queue|
       expect(raw).to include(queue), "Expected queue.yml to mention queue '#{queue}'"
     end
   end

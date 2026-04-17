@@ -10,6 +10,7 @@ module Agents
 
     validates :position, presence: true
     validates :kind, presence: true, inclusion: { in: KINDS }
-    validates :content, presence: true
+    # content is required on creation; cleared (set to nil) only by TurnContentGcJob after purged_at is set
+    validates :content, presence: true, unless: :purged_at?
   end
 end
