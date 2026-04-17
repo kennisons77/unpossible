@@ -65,17 +65,44 @@ Inputs:
 - Spec files (markdown) — parsed for frontmatter, section headers, inter-file links
 - IMPLEMENTATION_PLAN.md — parsed for beat items with structured metadata
 - Test files (RSpec) — parsed for `spec:` tags linking to spec sections
-- LEDGER.jsonl — parsed for status transitions, blocking events
+- LEDGER.jsonl — parsed for status transitions, blocking events, PR lifecycle events
 - Git log — commits, messages, SHAs
-- Git notes — rich blobs attached to commits
+- Git notes — rich blobs attached to commits (including review decision summaries)
 
 Output: JSON graph of nodes and edges suitable for web UI consumption.
+
+The parser reconstructs PR nodes from `pr_opened`/`pr_review`/`pr_merged` events in
+LEDGER.jsonl. It does not call the GitHub API. All PR metadata needed for the graph
+is captured in the ledger at event time by the PR skill.
+
+PR node example:
+```json
+{
+  "id": "pr:42",
+  "type": "pull_request",
+  "branch": "ralph/20260417-1150",
+  "state": "merged",
+  "task_ids": ["3.2", "3.3"],
+  "spec_refs": ["specs/system/analytics/spec.md"],
+  "commits": ["abc1234", "bcd2345", "def5678"],
+  "reviews": [
+    {"reviewer": "ken", "verdict": "approved", "thread_count": 1}
+  ],
+  "merge_sha": "aaa1111"
+}
+```
+
+Commits between `sha_first` and `sha_last` are resolved from `git log`. Review
+decisions stored as git notes on the merge commit are attached to the PR node as
+child nodes.
 
 Node types (derived from file conventions, not a database enum):
 - Spec section → question
 - PRD → generative answer
 - Beat (plan item) → question
 - Commit → terminal answer
+- Pull request → grouping answer (bundles commits into a reviewable unit)
+- Review thread → evaluative answer (captures why-not-X decisions)
 - Passing test suite → acceptance
 - Failing test → rebuttal
 - Research finding → terminal answer
@@ -85,6 +112,10 @@ Edge types (derived from file references):
 - `blocked-by` in plan item → depends_on
 - `spec:` tag in test → refs
 - Git SHA in LEDGER.jsonl → refs
+- PR → commit → contains (PR groups its commits)
+- PR → beat → implements (PR addresses plan tasks)
+- PR → spec section → addresses (PR traces to spec)
+- Review thread → PR → reviews (review feedback on a PR)
 
 ### 3. Spec Reference Tags in Tests (Priority 3)
 
@@ -169,7 +200,25 @@ Append-only. One JSON object per line.
 {"ts":"2026-04-14T20:00:00Z","type":"spec_changed","path":"specs/system/api/spec.md","section":"rate-limiting","sha":"def456a","content_hash":"sha256:..."}
 ```
 
-Event types: `status`, `blocked`, `unblocked`, `spec_changed`.
+Event types: `status`, `blocked`, `unblocked`, `spec_changed`, `pr_opened`, `pr_review`, `pr_merged`.
+
+#### Pull Request Events
+
+```json
+{"ts":"2026-04-17T12:00:00Z","type":"pr_opened","pr_number":42,"branch":"ralph/20260417-1150","task_ids":["3.2","3.3"],"spec_refs":["specs/system/analytics/spec.md"],"sha_first":"abc1234","sha_last":"def5678"}
+{"ts":"2026-04-17T14:00:00Z","type":"pr_review","pr_number":42,"reviewer":"ken","verdict":"changes_requested","thread_count":3}
+{"ts":"2026-04-17T15:00:00Z","type":"pr_merged","pr_number":42,"merge_sha":"aaa1111"}
+```
+
+- `pr_opened` — recorded by the PR skill when `gh pr create` succeeds. Links the PR
+  to its branch, task IDs, spec refs, and commit range.
+- `pr_review` — recorded manually (Phase 0) or by webhook (future) when a review is
+  submitted. `verdict` is one of `approved`, `changes_requested`, `commented`.
+- `pr_merged` — recorded when the PR is merged. `merge_sha` is the merge commit on main.
+
+Review decisions (why-not-X answers, scope clarifications, design tradeoffs) are
+attached as git notes on the merge commit, not stored in LEDGER.jsonl. This keeps
+the ledger lean and puts rich context where the parser already looks.
 
 ### IMPLEMENTATION_PLAN.md item format
 
@@ -212,6 +261,14 @@ Pushed via `git push origin refs/notes/*`.
 - AgentRun and analytics events use string refs instead of integer FKs to ledger tables
 - No Postgres tables exist for project state (nodes, edges, audit events)
 - Existing agent and analytics functionality is unaffected by removal
+- PR skill creates a pull request with task IDs and spec refs in the description
+- `pr_opened` event is appended to LEDGER.jsonl when a PR is created
+- `pr_merged` event is appended to LEDGER.jsonl when a PR is merged
+- `pr_review` event is appended to LEDGER.jsonl when a review is submitted
+- Reference parser emits PR nodes with edges to commits, tasks, and spec sections
+- Review decisions are stored as git notes on the merge commit, not in LEDGER.jsonl
+- Parser resolves git notes on merge commits and attaches them to the PR node
+- A production bug can be traced through the graph: code → commit → PR → task → spec
 
 ## Open Questions
 
@@ -221,6 +278,9 @@ Pushed via `git push origin refs/notes/*`.
 | LEDGER.jsonl growth over time | Periodic summarization (like activity.md trimming) — define threshold later |
 | How to handle plan item renumbering when items are removed | Reference parser should use stable refs (title-based) not numeric IDs |
 | LLM-resolved acceptance tests — cost model and workflow | Future spike, not in scope for initial build |
+| PR review sync automation (Phase 1+) | Phase 0 is manual `pr_review` ledger entries. A GitHub webhook or `gh api` polling script could automate this. Define trigger and frequency when CI exists. |
+| Review thread granularity in the graph | Phase 0 stores thread count + summary in git notes. Individual thread-level nodes (linking a review comment to a specific code range) are a future extension. |
+| PR description drift after force-push | If commits are amended after PR creation, the ledger's `sha_first`/`sha_last` become stale. Mitigation: re-run PR skill to append a corrective `pr_opened` event, or accept staleness in Phase 0. |
 
 ---
 

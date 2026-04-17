@@ -26,7 +26,8 @@
     "file://specs/practices/cost.md",
     "file://specs/practices/changeability.md",
     "file://specs/practices/coding.md",
-    "file://specs/practices/structural-vocabulary.md"
+    "file://specs/practices/structural-vocabulary.md",
+    "skill://specs/skills/**/*.md"
   ],
   "hooks": {
     "agentSpawn": [
