@@ -69,7 +69,7 @@ or leave gaps the loop fills with assumptions. Zed's project search is the fix.
 
 **Before running the loop:**
 
-1. Open all active spec files in a split pane: `specs/prd.md` left, the relevant
+1. Open all active spec files in a split pane: `specs/project-prd.md` left, the relevant
    activity spec right
 2. Use `cmd+shift+f` (project search) to search for any feature name or term you're
    about to implement — verify it appears consistently across all spec files
@@ -77,7 +77,7 @@ or leave gaps the loop fills with assumptions. Zed's project search is the fix.
    the loop will exploit
 
 **Split pane layout for spec work:**
-- Left pane: `specs/prd.md` (constraints — language, framework, port)
+- Left pane: `specs/project-prd.md` (constraints — language, framework, port)
 - Right pane: the activity spec you're currently writing
 - Terminal panel (collapsed): available via `cmd+j` when you need to run `plan1` to
   check Claude's interpretation

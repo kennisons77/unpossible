@@ -20,7 +20,7 @@ Phase 0, push-to-deploy in Phase 2.
 - **Build loop:** writes and maintains infra files within the current phase only. Checks
   the current phase before writing any infra file — never adds Phase N+1 infrastructure.
 - **Projects built with unpossible:** each project gets its own compose stack generated
-  by the loop from `specs/prd.md`. Infrastructure is not shared between projects.
+  by the loop from `specs/project-prd.md`. Infrastructure is not shared between projects.
 
 ## User Scenarios
 
@@ -31,7 +31,7 @@ developer runs the loop. Tests pass inside the container. Everything works witho
 installing Ruby, Go, or Postgres locally.
 
 **Scenario 2 — New project bootstrapped:**
-The loop reads `specs/prd.md` for a new project, finds the language and base image, and
+The loop reads `specs/project-prd.md` for a new project, finds the language and base image, and
 writes `infra/Dockerfile` and `infra/docker-compose.yml`. The developer runs
 `docker compose up` and the project stack starts. No manual Dockerfile authoring.
 
@@ -58,7 +58,7 @@ torn down. The tunnel identity expires.
 - As the build loop, I want to know the current phase so I never add infrastructure
   ahead of schedule.
 - As the build loop, I want to generate `infra/Dockerfile` and `infra/docker-compose.yml`
-  for new projects from `specs/prd.md` so projects are runnable without manual setup.
+  for new projects from `specs/project-prd.md` so projects are runnable without manual setup.
 - As a developer, I want phase advancement to be explicit so I control when complexity
   is introduced.
 - As the platform, I want agent sandbox runs in Phase 2 to use short-lived WireGuard
@@ -84,7 +84,7 @@ torn down. The tunnel identity expires.
   ephemeral volumes, no exposed ports.
 - **Image tags** — always git SHA, never `latest`.
 - **Project bootstrap** — loop generates `infra/Dockerfile` and `infra/docker-compose.yml`
-  for each project from `specs/prd.md` (language, base image, test command, port).
+  for each project from `specs/project-prd.md` (language, base image, test command, port).
 - **Phase gate** — loop checks current phase before writing any infra file. Phase N+1
   files are never created until an explicit "Advance to Phase N" task is in the plan.
 

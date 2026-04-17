@@ -81,7 +81,7 @@ marked for removal is stale and must be replaced, not executed.
 ## Development Phases
 
 New projects advance through phases. Each phase must be stable before the next begins.
-The current phase is recorded in `specs/prd.md` under `## Phase`. Default to Phase 0 for new projects.
+The current phase is recorded in `specs/project-prd.md` under `## Phase`. Default to Phase 0 for new projects.
 
 | Phase | Name | Infrastructure | Goal |
 |---|---|---|---|
