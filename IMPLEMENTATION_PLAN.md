@@ -63,7 +63,7 @@ The following are implemented and tested (169 examples, 0 failures, 98.68% cover
   Spec: `specs/practices/multi-tenancy.md` — "org_id on every table from day one"; `specs/project-prd.md` — "org_id present on all records"
   Required tests: AgentRun validates org_id presence, factory includes org_id, request specs pass org_id from JWT
 
-- [ ] 2.2 — Add org_id to sandbox_container_runs table (`web/db/migrate/`, `web/app/modules/sandbox/models/container_run.rb`)
+- [x] 2.2 — Add org_id to sandbox_container_runs table (`web/db/migrate/`, `web/app/modules/sandbox/models/container_run.rb`)
   Spec: `specs/practices/multi-tenancy.md`
   Required tests: ContainerRun validates org_id presence, factory includes org_id
 

@@ -32,15 +32,14 @@ Agent activity log. Auto-updated each iteration. Trimmed to last 10 entries.
 
 ---
 
-## 2026-04-17 12:50 — Plan regeneration
+## 2026-04-17 12:58 — Task 2.1: Add org_id to agents_agent_runs (tag 0.0.44)
 
-**Mode:** Plan
-**Iteration:** 58
+**Mode:** Build
+**Iteration:** 59
 
 **Changes:**
-- Deleted and regenerated IMPLEMENTATION_PLAN.md from scratch
-- Full gap analysis: specs vs web/ code, all system specs + platform overrides reviewed
-- 11 sections, 4 spikes, ~25 build tasks identified
-- Key gaps: LlmMetric model, AuditLogger service, MetricsController, auto-fire $feature_flag_called, batch middleware, rswag setup, org_id on agents/sandbox tables, Turn Content GC job, Go sidecars (runner + analytics — no Go code exists), reference graph components (commit skill, parser, PR skill), Agent Runs UI, Analytics Dashboard UI
-- Confirmed completed: all 25+ items from prior iterations verified in code
-- Trimmed activity.md to last 10 entries
+- Created `web/db/migrate/20260417000001_add_org_id_to_agents_agent_runs.rb` — uuid NOT NULL + index
+- Updated `web/app/modules/agents/models/agent_run.rb` — validates org_id presence
+- Updated `web/app/modules/agents/controllers/agent_runs_controller.rb` — injects org_id from JWT in start action
+- Updated factory and request spec to assert org_id set from JWT
+- 170 examples, 0 failures, 98.69% coverage
