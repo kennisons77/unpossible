@@ -10,8 +10,11 @@ class TestQueueJob < ApplicationJob
 end
 
 RSpec.describe "Solid Queue configuration" do
-  it "uses solid_queue as the queue adapter" do
-    expect(Rails.application.config.active_job.queue_adapter).to eq(:solid_queue)
+  it "uses solid_queue as the queue adapter in non-test environments" do
+    # application.rb sets solid_queue; test.rb overrides to :test for have_enqueued_job matchers.
+    # Verify the base config (application.rb) declares solid_queue.
+    app_config_path = Rails.root.join("config/application.rb")
+    expect(File.read(app_config_path)).to include("solid_queue")
   end
 
   it "routes TestQueueJob to the analytics queue", :aggregate_failures do

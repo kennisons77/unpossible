@@ -96,7 +96,7 @@ The following are implemented and tested (169 examples, 0 failures, 98.68% cover
 
 ### Section 4 — Agent Runner: Missing Features
 
-- [ ] 4.1 — AgentRunJob for Solid Queue execution (`web/app/modules/agents/jobs/agent_run_job.rb`, `web/spec/jobs/agents/agent_run_job_spec.rb`)
+- [x] 4.1 — AgentRunJob for Solid Queue execution (`web/app/modules/agents/jobs/agent_run_job.rb`, `web/spec/jobs/agents/agent_run_job_spec.rb`)
   Spec: `specs/system/agent-runner/spec.md` — "Job completes — no thread held", "Job resumes: reconstructs turn history"
   Required tests: job enqueues, calls provider adapter, records turns, handles pause/resume, concurrency key on source_ref
 
