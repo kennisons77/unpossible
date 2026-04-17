@@ -89,7 +89,7 @@ The following are implemented and tested (169 examples, 0 failures, 98.68% cover
   Spec: `specs/system/analytics/spec.md` — GET /api/analytics/events (paginated, filterable), GET /api/analytics/flags/:key (exposure counts + conversion rates)
   Required tests: events endpoint paginates and filters by event_name/org_id/date, flags/:key returns exposure counts per variant, both return 401 without auth
 
-- [ ] 3.6 — Auto-fire $feature_flag_called on FeatureFlag.enabled? (`web/app/modules/analytics/models/feature_flag.rb`, `web/spec/models/analytics/feature_flag_spec.rb`)
+- [x] 3.6 — Auto-fire $feature_flag_called on FeatureFlag.enabled? (`web/app/modules/analytics/models/feature_flag.rb`, `web/spec/models/analytics/feature_flag_spec.rb`)
   Spec: `specs/system/analytics/spec.md` AC — "Feature flag evaluation automatically fires $feature_flag_called — no manual instrumentation"
   Note: In Phase 0 without the Go ingest sidecar, this should write directly to analytics_events or enqueue a job. The spec says fire-and-forget to the ingest endpoint, but the sidecar doesn't exist yet. Implement as a direct AnalyticsEvent.create (fail-open) until the sidecar is available.
   Required tests: FeatureFlag.enabled? creates a $feature_flag_called event with flag_key/variant/enabled, failure to create event does not raise
