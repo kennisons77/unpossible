@@ -19,4 +19,9 @@ Rails.application.routes.draw do
   post  '/api/feature_flags',      to: 'analytics/feature_flags#create'
   patch '/api/feature_flags/:key', to: 'analytics/feature_flags#update', as: :api_feature_flag,
         constraints: { key: /[^\/]+/ }
+
+  # Analytics metrics — Analytics::MetricsController (JSON API)
+  get '/api/analytics/llm',     to: 'analytics/metrics#llm'
+  get '/api/analytics/loops',   to: 'analytics/metrics#loops'
+  get '/api/analytics/summary', to: 'analytics/metrics#summary'
 end
