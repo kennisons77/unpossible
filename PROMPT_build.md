@@ -28,5 +28,6 @@
 - Keep `AGENTS.md` operational only (build/run/test commands and codebase patterns).
 - Implement functionality completely. Placeholders and stubs waste future iterations.
 - If you discover a pattern worth preserving, append it to the relevant practices file under `specs/practices/`.
-- After a successful commit, trim `activity.md` to the last 10 entries.
+- After a successful commit, write an `activity.md` entry following `specs/practices/decision-journal.md` (Thinking, Challenges, Alternatives considered, Tradeoffs taken). Then trim to the last 10 entries.
+- After writing the `activity.md` entry, print the full decision journal entry (Thinking, Challenges, Alternatives considered, Tradeoffs taken) to the console so it is visible in the terminal output.
 - Output `RALPH_COMPLETE` when the task is done and committed. Output `RALPH_WAITING: <question>` if you need human input before proceeding.

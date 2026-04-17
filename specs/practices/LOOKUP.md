@@ -55,6 +55,13 @@ Quick reference for recurring patterns in this codebase.
 | Anti-patterns | `specs/practices/structural-vocabulary.md` | Structural smells section |
 | Retry strategy | `specs/practices/retry.md` | Exponential backoff, jitter, retryable error classification |
 
+## Decision Journal
+
+| Pattern | Location | Notes |
+|---|---|---|
+| Activity log format | `specs/practices/decision-journal.md` | Thinking, Challenges, Alternatives, Tradeoffs per entry |
+| Git notes (future) | `specs/practices/decision-journal.md` | Archival copy of journal attached to commit |
+
 ## Testing
 
 | Pattern | Notes |
