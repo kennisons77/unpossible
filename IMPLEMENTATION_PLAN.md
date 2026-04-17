@@ -133,7 +133,7 @@ Describes loading strategy for practices files. This is agent configuration, not
 
 ### Section 1: Reference Graph — Controlled Commit Skill
 
-- [ ] 1.1 — Create LEDGER.jsonl schema and append utility (`web/app/lib/ledger_appender.rb`)
+- [x] 1.1 — Create LEDGER.jsonl schema and append utility (`web/app/lib/ledger_appender.rb`)
   Required tests: appends valid JSON line, validates event types (status/blocked/unblocked/spec_changed/pr_opened/pr_review/pr_merged), file is append-only, idempotent on duplicate entries
   Files: `web/app/lib/ledger_appender.rb`, `spec/lib/ledger_appender_spec.rb`, `LEDGER.jsonl`
 
