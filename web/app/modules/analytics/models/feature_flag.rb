@@ -12,9 +12,25 @@ module Analytics
 
     def self.enabled?(org_id:, key:)
       flag = find_by(org_id: org_id, key: key)
-      return false if flag.nil? || flag.status == 'archived'
+      result = flag.nil? || flag.status == 'archived' ? false : flag.enabled
 
-      flag.enabled
+      fire_flag_called_event(org_id: org_id, key: key, enabled: result)
+
+      result
     end
+
+    def self.fire_flag_called_event(org_id:, key:, enabled:)
+      AnalyticsEvent.create!(
+        org_id: org_id,
+        distinct_id: org_id,
+        event_name: '$feature_flag_called',
+        properties: { flag_key: key, variant: enabled ? 'enabled' : 'disabled', enabled: enabled },
+        timestamp: Time.current,
+        received_at: Time.current
+      )
+    rescue StandardError => e
+      Rails.logger.warn("FeatureFlag: failed to fire $feature_flag_called for #{key}: #{e.message}")
+    end
+    private_class_method :fire_flag_called_event
   end
 end

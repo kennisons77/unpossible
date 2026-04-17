@@ -24,6 +24,31 @@ RSpec.describe Analytics::FeatureFlag, type: :model do
       create(:analytics_feature_flag, org_id: org_id, key: 'test.disabled', enabled: false, status: 'active')
       expect(described_class.enabled?(org_id: org_id, key: 'test.disabled')).to be false
     end
+
+    it 'fires $feature_flag_called event on evaluation' do
+      create(:analytics_feature_flag, org_id: org_id, key: 'test.fire', enabled: true, status: 'active')
+      expect { described_class.enabled?(org_id: org_id, key: 'test.fire') }
+        .to change { Analytics::AnalyticsEvent.where(event_name: '$feature_flag_called').count }.by(1)
+
+      event = Analytics::AnalyticsEvent.find_by(event_name: '$feature_flag_called')
+      expect(event.properties['flag_key']).to eq('test.fire')
+      expect(event.properties['enabled']).to be true
+      expect(event.properties['variant']).to eq('enabled')
+    end
+
+    it 'fires $feature_flag_called with enabled: false for disabled flag' do
+      create(:analytics_feature_flag, org_id: org_id, key: 'test.off', enabled: false, status: 'active')
+      described_class.enabled?(org_id: org_id, key: 'test.off')
+
+      event = Analytics::AnalyticsEvent.find_by(event_name: '$feature_flag_called')
+      expect(event.properties['enabled']).to be false
+      expect(event.properties['variant']).to eq('disabled')
+    end
+
+    it 'does not raise when event creation fails' do
+      allow(Analytics::AnalyticsEvent).to receive(:create!).and_raise(ActiveRecord::StatementInvalid)
+      expect { described_class.enabled?(org_id: org_id, key: 'nonexistent.flag') }.not_to raise_error
+    end
   end
 
   describe 'uniqueness' do
