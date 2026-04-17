@@ -137,7 +137,7 @@ Describes loading strategy for practices files. This is agent configuration, not
   Required tests: appends valid JSON line, validates event types (status/blocked/unblocked/spec_changed/pr_opened/pr_review/pr_merged), file is append-only, idempotent on duplicate entries
   Files: `web/app/lib/ledger_appender.rb`, `spec/lib/ledger_appender_spec.rb`, `LEDGER.jsonl`
 
-- [ ] 1.2 — Create controlled commit skill script (`scripts/controlled-commit.sh`)
+- [x] 1.2 — Create controlled commit skill script (`scripts/controlled-commit.sh`)
   Required tests: atomically stages code + LEDGER.jsonl + IMPLEMENTATION_PLAN.md, commits with structured message, fails atomically (nothing committed on error), appends status event to LEDGER.jsonl
   Files: `scripts/controlled-commit.sh`, test via shell script or integration spec
 
