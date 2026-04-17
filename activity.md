@@ -6,11 +6,12 @@ Agent activity log. Auto-updated each iteration. Trimmed to last 10 entries.
 
 ---
 
-## 2026-04-17 13:41 — Task 4.1: AgentRunJob for Solid Queue execution (tag 0.0.51)
+## 2026-04-17 13:43 — Task 4.2: TurnContentGcJob (tag 0.0.52)
 
 **Changes:**
-- Created `web/app/modules/agents/jobs/agent_run_job.rb` — :agents queue, pause/resume, turn history reconstruction
-- RunStorageService#start enqueues job; record_input re-enqueues on resume
-- Added call_provider to ProviderAdapter base interface
-- Set queue_adapter = :test in test.rb; updated solid_queue_spec to check application.rb config
-- 225 examples, 0 failures, 98.57% coverage
+- Created `web/app/modules/agents/jobs/turn_content_gc_job.rb` — :agents queue, batched purge of completed run turns older than 30 days
+- Migration 20260417000004: allow null content on agents_agent_run_turns
+- AgentRunTurn: content validates presence only when not purged
+- Registered recurring job in config/recurring.yml (daily at midnight)
+- Added agents queue to config/queue.yml; updated solid_queue_spec
+- 235 examples, 0 failures, 98.6% coverage
