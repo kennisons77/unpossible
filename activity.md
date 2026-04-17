@@ -2,7 +2,7 @@
 
 Agent activity log. Auto-updated each iteration. Trimmed to last 10 entries.
 
-[Prior entries summarised: 57 iterations — initial planning through 0.0.43. Key milestones: Rails skeleton + test infra, security (Secret, LogRedactor, PromptSanitizer, rack-attack, brakeman), JWT auth, Ledger module (built then fully removed), Knowledge module (built then fully removed), Agents module (AgentRun, AgentRunTurn, ProviderAdapter, PromptDeduplicator, AgentRunsController), Sandbox module (ContainerRun, DockerDispatcher), Analytics::FeatureFlag + controller, Analytics::AnalyticsEvent model, Analytics::AuditEvent model, HealthCheckMiddleware, Ledger+Knowledge removal, specs/docs cleanup, stale reference cleanup.]
+[Prior entries summarised: 61 iterations — initial planning through 0.0.48. Key milestones: Rails skeleton + test infra, security (Secret, LogRedactor, PromptSanitizer, rack-attack), JWT auth, Agents module (AgentRun, AgentRunTurn, ProviderAdapter, PromptDeduplicator, AgentRunsController), Sandbox module (ContainerRun, DockerDispatcher), Analytics module (FeatureFlag, AnalyticsEvent, AuditEvent, LlmMetric, AuditLogger, AuditLogJob, MetricsController), HealthCheckMiddleware, Ledger+Knowledge removal, org_id migrations (2.1, 2.2).]
 
 ---
 
@@ -32,10 +32,11 @@ Agent activity log. Auto-updated each iteration. Trimmed to last 10 entries.
 
 ---
 
-## 2026-04-17 13:25 — Task 3.4: Analytics::MetricsController (tag 0.0.48)
+## 2026-04-17 13:34 — Task 3.5: events + flags/:key endpoints (tag 0.0.49)
 
 **Changes:**
-- Created `web/app/modules/analytics/controllers/metrics_controller.rb` — GET /api/analytics/llm, /loops, /summary; all require JWT auth
-- Added routes for all three endpoints
-- Created `web/spec/requests/analytics/metrics_spec.rb` — covers aggregation, date filtering, org isolation, 401 without auth
-- 198 examples, 0 failures, 98.88% coverage
+- Added `events` action to MetricsController: paginated, filterable by event_name/date range
+- Added `flag_stats` action: exposure counts + conversion rates per variant via JSONB property queries
+- Added routes: GET /api/analytics/events, GET /api/analytics/flags/:key
+- Extended metrics_spec.rb with 9 new examples covering pagination, filtering, org isolation, conversion rates
+- 207 examples, 0 failures, 98.94% coverage
