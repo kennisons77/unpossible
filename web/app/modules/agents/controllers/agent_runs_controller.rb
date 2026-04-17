@@ -24,6 +24,11 @@ module Agents
       end
 
       RunStorageService.complete(@agent_run, complete_params)
+      Analytics::AuditLogger.log(
+        org_id: @agent_run.org_id,
+        event_name: "agent_run.completed",
+        properties: { run_id: @agent_run.run_id, mode: @agent_run.mode }
+      )
       render json: @agent_run
     end
 
