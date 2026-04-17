@@ -6,53 +6,26 @@ Agent activity log. Auto-updated each iteration. Trimmed to last 10 entries.
 
 ---
 
-## 2026-04-16 14:41 — Task 2.1: HealthCheckMiddleware (tag 0.0.42)
-
-**Mode:** Build
-**Iteration:** 56
-
-**Changes:**
-- Created `web/app/middleware/health_check_middleware.rb` — Rack middleware at position 0, intercepts GET /health, SELECT 1 check, returns 200/503 with empty body
-- Updated `web/config/application.rb` — `require_relative` + `insert_before(0, HealthCheckMiddleware)`
-- Created `web/spec/middleware/health_check_middleware_spec.rb` — 6 examples covering 200/503, no-forward, non-health passthrough, middleware position
-- 156 examples, 0 failures, 98.62% coverage
-
----
-
-## 2026-04-16 16:59 — Task 3.1: Analytics::AuditEvent model (tag 0.0.43)
-
-**Mode:** Build
-**Iteration:** 57
-
-**Changes:**
-- Created `web/db/migrate/20260416000004_create_analytics_audit_events.rb` — analytics_audit_events table with (org_id, created_at) index
-- Created `web/app/modules/analytics/models/audit_event.rb` — append-only model, severity enum info/warning/critical, validations on org_id/event_name/severity
-- Created `web/spec/factories/analytics_audit_events.rb` and `web/spec/models/analytics/audit_event_spec.rb`
-- 169 examples, 0 failures, 98.68% coverage
-
----
-
 ## 2026-04-17 13:01 — Task 2.2: Add org_id to sandbox_container_runs (tag 0.0.45)
 
-**Mode:** Build
-**Iteration:** 60
-
 **Changes:**
-- Created `web/db/migrate/20260417000002_add_org_id_to_sandbox_container_runs.rb` — uuid NOT NULL + index
-- Updated `web/app/modules/sandbox/models/container_run.rb` — validates org_id presence
-- Updated `web/app/modules/sandbox/services/docker_dispatcher.rb` — dispatch accepts org_id: keyword, passes to ContainerRun.create!
-- Updated factory and spec to supply org_id; dispatcher spec asserts org_id stored on record
+- Created migration for org_id on sandbox_container_runs; updated ContainerRun model and DockerDispatcher
 - 171 examples, 0 failures, 98.69% coverage
 
 ---
 
 ## 2026-04-17 13:05 — Task 3.1: Analytics::LlmMetric model (tag 0.0.46)
 
-**Mode:** Build
-**Iteration:** 61
+**Changes:**
+- Created analytics_llm_metrics table, LlmMetric model (append-only, decimal(10,6) cost), factory, spec
+- 182 examples, 0 failures, 98.75% coverage
+
+---
+
+## 2026-04-17 13:15 — Tasks 3.2 + 3.3: AuditLogger service + AuditLogJob (tag 0.0.47)
 
 **Changes:**
-- Created `web/db/migrate/20260417000003_create_analytics_llm_metrics.rb` — analytics_llm_metrics table, decimal(10,6) cost_estimate_usd, index on (org_id, provider, model, created_at)
-- Created `web/app/modules/analytics/models/llm_metric.rb` — append-only model, validates org_id/provider/model/cost_estimate_usd
-- Created `web/spec/factories/analytics_llm_metrics.rb` and `web/spec/models/analytics/llm_metric_spec.rb`
-- 182 examples, 0 failures, 98.75% coverage
+- Created `web/app/modules/analytics/jobs/audit_log_job.rb` — Active Job on analytics queue, creates AuditEvent via create!
+- Created `web/app/modules/analytics/services/audit_logger.rb` — fire-and-forget wrapper, rescues StandardError, logs to Rails.logger
+- Created specs for both; used `around` block to set queue_adapter: :test for enqueue matchers
+- 190 examples, 0 failures, 98.79% coverage
