@@ -20,9 +20,9 @@ The sidecar owns ingest only — capture, queue, and flush to Postgres. No query
 9100
 
 ## Files
-- `analytics-sidecar/main.go`
-- `analytics-sidecar/go.mod`
-- `analytics-sidecar/go.sum`
+- `go/cmd/analytics/main.go`
+- `go/go.mod`
+- `go/go.sum`
 
 ## Go-specific Acceptance Criteria
 - `go test ./...` exits 0

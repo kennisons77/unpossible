@@ -22,8 +22,8 @@ Two compose files:
 **`infra/docker-compose.yml`** — full local dev stack:
 ```
 rails          ruby:3.3-slim, port 3000
-go_runner      Go sidecar, port 8080
-analytics      Go analytics sidecar, port 9100
+go_runner      Go runner sidecar, port 8080 (from go/cmd/runner)
+analytics      Go analytics ingest sidecar, port 9100 (from go/cmd/analytics)
 postgres       pgvector/pgvector:pg16, port 5432 (internal only)
 ```
 
@@ -59,8 +59,8 @@ k3s is the Kubernetes distribution for single-node and small clusters. It runs a
 One pod per project. Each pod contains:
 ```
 rails container        port 3000
-go_runner sidecar      port 8080  (shares network namespace with rails)
-analytics sidecar      port 9100  (shares network namespace with rails)
+go_runner sidecar      port 8080  (go/cmd/runner — shares network namespace with rails)
+analytics sidecar      port 9100  (go/cmd/analytics — shares network namespace with rails)
 ```
 
 Postgres and Redis run as separate deployments with persistent volumes. They are not in the application pod.
@@ -149,8 +149,7 @@ The build loop maintains infra files within the current phase only. It never add
 | `infra/docker-compose.yml` | Build loop | 0 |
 | `infra/docker-compose.test.yml` | Build loop | 0 |
 | `infra/Dockerfile` (Rails) | Build loop | 0 |
-| `infra/Dockerfile.runner` (Go) | Build loop | 0 |
-| `infra/Dockerfile.analytics` (Go) | Build loop | 0 |
+| `infra/Dockerfile.go` (Go) | Build loop | 0 |
 | `.github/workflows/ci.yml` | Build loop | 1 |
 | `infra/nixos/` | Build loop | 2 |
 | `infra/k8s/` | Build loop | 2 |

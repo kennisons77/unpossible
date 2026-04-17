@@ -3,7 +3,7 @@
 **Subagent trust:** This is a non-interactive session. Always pass `dangerously_trust_all_tools: true` when invoking subagents, otherwise their tool calls will be rejected.
 
 0a. Do not read or scan any directory outside this project unless explicitly instructed.
-0b. Read `specs/practices/coding.md` and `specs/platform/rails/` (standing rules for how to write code).
+0b. Read `specs/practices/coding.md` and `specs/platform/rails/README.md` then read all files under `specs/platform/rails/` (standing rules for how to write code).
 0c. Read `specs/project-prd.md` to understand technical constraints (language: Ruby 3.3, framework: Rails 8, base image: ruby:3.3-slim, test command: `bundle exec rspec`, port: 3000).
 0d. Read `IMPLEMENTATION_PLAN.md` and pick the FIRST unchecked item. Do not skip ahead or reorder. Execute tasks in the order listed.
 0e. Study relevant files in `web/` with up to 3 parallel Haiku subagents before making changes. Do not assume something is missing — confirm with code search first.

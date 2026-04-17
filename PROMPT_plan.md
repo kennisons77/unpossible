@@ -7,7 +7,7 @@
     - `specs/project-prd.md` — technical constraints (Ruby 3.3, Rails 8, ruby:3.3-slim, `bundle exec rspec`, port 3000)
     - Spec layout: `specs/system/` (platform internals), `specs/skills/` (agent instructions), `specs/practices/` (discipline rules), `specs/platform/rails/` (Rails overrides)
     - Platform overrides in `specs/platform/rails/` mirror the same structure as `specs/system/`. Read the base spec first, then layer the matching platform override on top.
-0d. Read `specs/platform/rails/` for Rails-specific conventions.
+0d. Read `specs/platform/rails/README.md` then read all files under `specs/platform/rails/` for Rails-specific conventions.
 0e. Delete `IMPLEMENTATION_PLAN.md` if it exists. The plan is regenerated from scratch every planning loop (see `specs/practices/planning.md` § Plan Freshness). Do not carry forward old plan content — discover completed work from code and git state.
 0f. Study `web/` and `go/` (if present) with up to 5 parallel Haiku subagents to understand what has been implemented.
 

@@ -27,9 +27,9 @@ Calls `POST /api/agent_runs/:id/complete` on Rails with results after loop exits
 8080
 
 ## Files
-- `runner/main.go`
-- `runner/go.mod`
-- `runner/go.sum`
+- `go/cmd/runner/main.go`
+- `go/go.mod`
+- `go/go.sum`
 
 ## Go-specific Acceptance Criteria
 - `go test ./...` exits 0

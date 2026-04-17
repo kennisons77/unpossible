@@ -9,7 +9,7 @@ Unpossible is both the platform and its own first project — it develops itself
 - Ruby 3.3 / Rails 8 (full stack)
 - PostgreSQL 16 + pgvector
 - Solid Queue (no Redis/Sidekiq)
-- Go 1.22 sidecars (parser + analytics ingest)
+- Go 1.22 binaries (runner sidecar, analytics ingest sidecar, reference-graph parser CLI)
 - Docker Compose (Phase 0 — local only)
 
 ## Quickstart
@@ -62,14 +62,16 @@ make review      # Review loop, 1 iteration (analyse codebase, propose beats)
 │       ├── sandbox/         # Container lifecycle, Docker dispatcher
 │       └── analytics/       # LLM metrics, audit log, feature flags
 │
-├── go/                      # Go sidecars
-│   ├── cmd/parser/          # Reference-graph parser
-│   └── cmd/analytics/       # Analytics ingest sidecar
+├── go/                      # Go binaries (single go.mod)
+│   ├── cmd/runner/          # Agent loop runner sidecar
+│   ├── cmd/analytics/       # Analytics ingest sidecar
+│   ├── cmd/parser/          # Reference-graph parser (CLI)
+│   └── internal/            # Shared packages
 │
 ├── infra/
 │   ├── Dockerfile           # Rails app image (ruby:3.3-slim)
 │   ├── Dockerfile.test      # Test image
-│   ├── Dockerfile.go        # Go sidecars image
+│   ├── Dockerfile.go        # Go binaries (multi-stage: runner, analytics, parser)
 │   ├── docker-compose.yml   # Full dev stack
 │   └── docker-compose.test.yml  # Ephemeral test stack
 │
