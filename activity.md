@@ -16,3 +16,11 @@ Agent activity log. Auto-updated each iteration. Trimmed to last 10 entries.
 - 3 spike tasks: Go bootstrap, Go parser libraries, reference graph UI approach
 - Ledger+Knowledge removal confirmed complete
 - Infrastructure (Dockerfile, compose files) verified — no placeholders, correct image tags, Postgres not exposed
+
+## 2026-04-17 14:20 — Task 1.1: LedgerAppender + LEDGER.jsonl (tag 0.0.55)
+
+**Changes:**
+- `web/app/lib/ledger_appender.rb`: append-only, validates 7 event types, idempotent on duplicate lines
+- `web/spec/lib/ledger_appender_spec.rb`: 13 examples, all pass
+- `LEDGER.jsonl`: empty file created at project root
+- 267 examples, 0 failures, 99.21% coverage
