@@ -32,14 +32,15 @@ Agent activity log. Auto-updated each iteration. Trimmed to last 10 entries.
 
 ---
 
-## 2026-04-17 12:38 — Plan regeneration
+## 2026-04-17 12:50 — Plan regeneration
 
 **Mode:** Plan
 **Iteration:** 58
 
 **Changes:**
 - Deleted and regenerated IMPLEMENTATION_PLAN.md from scratch
-- Gap analysis: 26 sections, 4 spikes, ~25 build tasks
-- Key gaps: LlmMetric model, AuditLogger service, MetricsController, FeatureFlagExposure, auto-fire $feature_flag_called, batch middleware, rswag setup, org_id on agents/sandbox tables, Turn Content GC job, Agent Runs UI, Analytics Dashboard UI
-- Verified: ContainerRun stdout/stderr columns exist (19.1 ✓)
-- Trimmed activity.md
+- Full gap analysis: specs vs web/ code, all system specs + platform overrides reviewed
+- 11 sections, 4 spikes, ~25 build tasks identified
+- Key gaps: LlmMetric model, AuditLogger service, MetricsController, auto-fire $feature_flag_called, batch middleware, rswag setup, org_id on agents/sandbox tables, Turn Content GC job, Go sidecars (runner + analytics — no Go code exists), reference graph components (commit skill, parser, PR skill), Agent Runs UI, Analytics Dashboard UI
+- Confirmed completed: all 25+ items from prior iterations verified in code
+- Trimmed activity.md to last 10 entries

@@ -9,6 +9,7 @@ module Agents
 
     has_many :turns, class_name: 'Agents::AgentRunTurn', dependent: :destroy
 
+    validates :org_id, presence: true
     validates :run_id, presence: true, uniqueness: true
     validates :mode, presence: true, inclusion: { in: MODES }
     validates :provider, presence: true
