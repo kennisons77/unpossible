@@ -43,3 +43,16 @@ Agent activity log. Auto-updated each iteration. Trimmed to last 10 entries.
 - Updated `web/app/modules/sandbox/services/docker_dispatcher.rb` — dispatch accepts org_id: keyword, passes to ContainerRun.create!
 - Updated factory and spec to supply org_id; dispatcher spec asserts org_id stored on record
 - 171 examples, 0 failures, 98.69% coverage
+
+---
+
+## 2026-04-17 13:05 — Task 3.1: Analytics::LlmMetric model (tag 0.0.46)
+
+**Mode:** Build
+**Iteration:** 61
+
+**Changes:**
+- Created `web/db/migrate/20260417000003_create_analytics_llm_metrics.rb` — analytics_llm_metrics table, decimal(10,6) cost_estimate_usd, index on (org_id, provider, model, created_at)
+- Created `web/app/modules/analytics/models/llm_metric.rb` — append-only model, validates org_id/provider/model/cost_estimate_usd
+- Created `web/spec/factories/analytics_llm_metrics.rb` and `web/spec/models/analytics/llm_metric_spec.rb`
+- 182 examples, 0 failures, 98.75% coverage
