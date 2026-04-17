@@ -69,7 +69,7 @@ The following are implemented and tested (169 examples, 0 failures, 98.68% cover
 
 ### Section 3 — Analytics Module: Missing Components
 
-- [ ] 3.1 — Create Analytics::LlmMetric model (`web/db/migrate/`, `web/app/modules/analytics/models/llm_metric.rb`, `web/spec/models/analytics/llm_metric_spec.rb`)
+- [x] 3.1 — Create Analytics::LlmMetric model (`web/db/migrate/`, `web/app/modules/analytics/models/llm_metric.rb`, `web/spec/models/analytics/llm_metric_spec.rb`)
   Spec: `specs/platform/rails/system/analytics.md` — per agent run cost/token record, cost_estimate_usd decimal(10,6), index on (org_id, provider, model, created_at)
   Required tests: validates org_id/provider/model presence, cost_estimate_usd stored as decimal(10,6), index exists, append-only enforcement
 
