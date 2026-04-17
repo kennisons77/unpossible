@@ -199,12 +199,12 @@ server-ops:
 # --- Sandbox Commands ---
 # TODO: make agent-agnostic — sbx and kiro-cli are Kiro-specific
 sb-run:
-	@sbx run $(SANDBOX)
+	@sbx run $(SANDBOX) -- kiro-cli --tui
 
 # TODO: make agent-agnostic — kiro-cli chat --agent is Kiro-specific
 sb-interview:
-	@sbx run $(SANDBOX) -- kiro-cli chat --agent interview
+	@sbx run $(SANDBOX) -- kiro-cli --tui --agent interview
 
 # TODO: make agent-agnostic — kiro-cli chat --agent is Kiro-specific
 sb-review:
-	@sbx run $(SANDBOX) -- kiro-cli chat --agent review
+	@sbx run $(SANDBOX) -- kiro-cli chat --tui --agent review
