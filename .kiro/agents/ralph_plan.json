@@ -28,7 +28,7 @@
     "file://specs/practices/verification.md",
     "file://specs/practices/changeability.md",
     "file://specs/practices/structural-vocabulary.md",
-    "file://specs/skills/workflows/prd.md"
+    "skill://specs/skills/**/*.md"
   ],
   "hooks": {
     "agentSpawn": [

@@ -24,7 +24,8 @@
   "resources": [
     "file://AGENTS.md",
     "file://specs/practices/cost.md",
-    "file://specs/practices/version-control.md"
+    "file://specs/practices/version-control.md",
+    "skill://specs/skills/**/*.md"
   ],
   "hooks": {
     "agentSpawn": [

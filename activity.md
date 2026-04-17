@@ -2,7 +2,7 @@
 
 Agent activity log. Auto-updated each iteration. Trimmed to last 10 entries.
 
-[Prior entries summarised: 55 iterations — initial planning through 0.0.41. Key milestones: Rails skeleton + test infra, security (Secret, LogRedactor, PromptSanitizer, rack-attack, brakeman), JWT auth, Ledger module (built then fully removed), Knowledge module (built then fully removed), Agents module (AgentRun, AgentRunTurn, ProviderAdapter, PromptDeduplicator, AgentRunsController), Sandbox module (ContainerRun, DockerDispatcher), Analytics::FeatureFlag + controller, Analytics::AnalyticsEvent model, Ledger+Knowledge removal, specs/docs cleanup, stale reference cleanup. Plan regenerated (iteration 55) with 14-section gap analysis and 27 tasks.]
+[Prior entries summarised: 57 iterations — initial planning through 0.0.43. Key milestones: Rails skeleton + test infra, security (Secret, LogRedactor, PromptSanitizer, rack-attack, brakeman), JWT auth, Ledger module (built then fully removed), Knowledge module (built then fully removed), Agents module (AgentRun, AgentRunTurn, ProviderAdapter, PromptDeduplicator, AgentRunsController), Sandbox module (ContainerRun, DockerDispatcher), Analytics::FeatureFlag + controller, Analytics::AnalyticsEvent model, Analytics::AuditEvent model, HealthCheckMiddleware, Ledger+Knowledge removal, specs/docs cleanup, stale reference cleanup.]
 
 ---
 
@@ -29,3 +29,17 @@ Agent activity log. Auto-updated each iteration. Trimmed to last 10 entries.
 - Created `web/app/modules/analytics/models/audit_event.rb` — append-only model, severity enum info/warning/critical, validations on org_id/event_name/severity
 - Created `web/spec/factories/analytics_audit_events.rb` and `web/spec/models/analytics/audit_event_spec.rb`
 - 169 examples, 0 failures, 98.68% coverage
+
+---
+
+## 2026-04-17 12:38 — Plan regeneration
+
+**Mode:** Plan
+**Iteration:** 58
+
+**Changes:**
+- Deleted and regenerated IMPLEMENTATION_PLAN.md from scratch
+- Gap analysis: 26 sections, 4 spikes, ~25 build tasks
+- Key gaps: LlmMetric model, AuditLogger service, MetricsController, FeatureFlagExposure, auto-fire $feature_flag_called, batch middleware, rswag setup, org_id on agents/sandbox tables, Turn Content GC job, Agent Runs UI, Analytics Dashboard UI
+- Verified: ContainerRun stdout/stderr columns exist (19.1 ✓)
+- Trimmed activity.md
