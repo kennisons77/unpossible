@@ -28,11 +28,12 @@ RSpec.describe Agents::ProviderAdapter do
     subject(:adapter) { described_class.new }
 
     it "raises NotImplementedError for build_prompt" do
-      expect { adapter.build_prompt([]) }.to raise_error(NotImplementedError)
+      expect { adapter.build_prompt(node: nil, context_chunks: [], principles: [], turns: [], token_budget: 1000) }
+        .to raise_error(NotImplementedError)
     end
 
     it "raises NotImplementedError for call_provider" do
-      expect { adapter.call_provider([]) }.to raise_error(NotImplementedError)
+      expect { adapter.call_provider({}) }.to raise_error(NotImplementedError)
     end
 
     it "raises NotImplementedError for parse_response" do
@@ -44,13 +45,93 @@ RSpec.describe Agents::ProviderAdapter do
     end
   end
 
+  # Shared examples for pinned+sliding token budget behaviour
+  shared_examples "pinned+sliding token budget" do |adapter_class|
+    subject(:adapter) { adapter_class.new }
+
+    let(:base_args) { { node: "spec/foo.md", context_chunks: [], principles: [], token_budget: 200_000 } }
+
+    def turn(kind, content, position)
+      { kind: kind, content: content, position: position }
+    end
+
+    it "always includes agent_question turns" do
+      turns = [turn("agent_question", "What env?", 1), turn("human_input", "staging", 2)]
+      result = adapter.build_prompt(**base_args, turns: turns)
+      contents = result[:messages].map { |m| m[:content] }
+      expect(contents).to include("What env?", "staging")
+    end
+
+    it "always includes human_input turns" do
+      turns = [turn("human_input", "my answer", 1)]
+      result = adapter.build_prompt(**base_args, turns: turns)
+      contents = result[:messages].map { |m| m[:content] }
+      expect(contents).to include("my answer")
+    end
+
+    it "trims oldest llm_response turns when over budget" do
+      # Budget tight enough to force trimming: system is empty, each turn ~1 token
+      # Make old llm_response very large so it gets dropped
+      old_response = "x" * 4000  # ~1000 tokens
+      new_response = "y" * 4     # ~1 token
+      turns = [
+        turn("llm_response", old_response, 1),
+        turn("llm_response", new_response, 2)
+      ]
+      # Budget: 1100 tokens — old response alone is ~1000, new is ~1, pinned is 0
+      # With budget 1100, both fit. Use 50 to force dropping old.
+      result = adapter.build_prompt(**base_args, turns: turns, token_budget: 50)
+      contents = result[:messages].map { |m| m[:content] }
+      expect(contents).not_to include(old_response)
+      expect(contents).to include(new_response)
+    end
+
+    it "trims oldest tool_result turns when over budget" do
+      old_tool = "a" * 4000
+      new_tool = "b" * 4
+      turns = [
+        turn("tool_result", old_tool, 1),
+        turn("tool_result", new_tool, 2)
+      ]
+      result = adapter.build_prompt(**base_args, turns: turns, token_budget: 50)
+      contents = result[:messages].map { |m| m[:content] }
+      expect(contents).not_to include(old_tool)
+      expect(contents).to include(new_tool)
+    end
+
+    it "raises TokenBudgetExceeded when pinned turns alone exceed budget" do
+      # agent_question + human_input together exceed tiny budget
+      turns = [
+        turn("agent_question", "x" * 400, 1),  # ~100 tokens
+        turn("human_input", "y" * 400, 2)       # ~100 tokens
+      ]
+      expect {
+        adapter.build_prompt(**base_args, turns: turns, token_budget: 10)
+      }.to raise_error(Agents::ProviderAdapter::TokenBudgetExceeded)
+    end
+  end
+
   describe Agents::ClaudeAdapter do
     subject(:adapter) { described_class.new }
 
+    include_examples "pinned+sliding token budget", Agents::ClaudeAdapter
+
     it "builds a prompt with claude model" do
-      result = adapter.build_prompt([{ role: "user", content: "hello" }])
+      result = adapter.build_prompt(
+        node: "spec/foo.md", context_chunks: ["ctx"], principles: ["be concise"],
+        turns: [{ kind: "human_input", content: "hello", position: 1 }],
+        token_budget: 200_000
+      )
       expect(result[:model]).to eq("claude-sonnet-4-20250514")
       expect(result[:messages]).to eq([{ role: "user", content: "hello" }])
+    end
+
+    it "includes system content from node, principles, and context_chunks" do
+      result = adapter.build_prompt(
+        node: "node-ref", context_chunks: ["chunk1"], principles: ["principle1"],
+        turns: [], token_budget: 200_000
+      )
+      expect(result[:system]).to include("node-ref", "principle1", "chunk1")
     end
 
     it "parses response from content array" do
@@ -66,8 +147,14 @@ RSpec.describe Agents::ProviderAdapter do
   describe Agents::KiroAdapter do
     subject(:adapter) { described_class.new }
 
+    include_examples "pinned+sliding token budget", Agents::KiroAdapter
+
     it "builds a prompt with kiro model" do
-      result = adapter.build_prompt([{ role: "user", content: "hello" }])
+      result = adapter.build_prompt(
+        node: nil, context_chunks: [], principles: [],
+        turns: [{ kind: "human_input", content: "hello", position: 1 }],
+        token_budget: 200_000
+      )
       expect(result[:model]).to eq("kiro")
     end
 
@@ -84,9 +171,19 @@ RSpec.describe Agents::ProviderAdapter do
   describe Agents::OpenAiAdapter do
     subject(:adapter) { described_class.new }
 
-    it "builds a prompt with gpt-4o model" do
-      result = adapter.build_prompt([{ role: "user", content: "hello" }])
+    include_examples "pinned+sliding token budget", Agents::OpenAiAdapter
+
+    it "builds a prompt with gpt-4o model and system message" do
+      result = adapter.build_prompt(
+        node: "node-ref", context_chunks: [], principles: [],
+        turns: [{ kind: "human_input", content: "hello", position: 1 }],
+        token_budget: 200_000
+      )
       expect(result[:model]).to eq("gpt-4o")
+      system_msg = result[:messages].find { |m| m[:role] == "system" }
+      expect(system_msg[:content]).to include("node-ref")
+      user_msg = result[:messages].find { |m| m[:role] == "user" }
+      expect(user_msg[:content]).to eq("hello")
     end
 
     it "parses response from choices array" do

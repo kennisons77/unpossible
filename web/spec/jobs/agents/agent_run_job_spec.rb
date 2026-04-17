@@ -8,9 +8,12 @@ RSpec.describe Agents::AgentRunJob, type: :job do
   let(:org_id) { SecureRandom.uuid }
   let(:run) { create(:agents_agent_run, org_id: org_id, status: 'running') }
   let(:adapter) { instance_double(Agents::ClaudeAdapter) }
+  let(:built_prompt) { { model: "claude-sonnet-4-20250514", system: "", messages: [] } }
 
   before do
     allow(Agents::ProviderAdapter).to receive(:for).with(run.provider).and_return(adapter)
+    allow(adapter).to receive(:max_context_tokens).and_return(200_000)
+    allow(adapter).to receive(:build_prompt).and_return(built_prompt)
   end
 
   it 'is enqueued on the agents queue' do
@@ -79,25 +82,44 @@ RSpec.describe Agents::AgentRunJob, type: :job do
       before do
         run.turns.create!(position: 1, kind: 'agent_question', content: 'What env?')
         run.turns.create!(position: 2, kind: 'human_input', content: 'staging')
-        allow(adapter).to receive(:call_provider) do |messages|
-          # Verify turn history is reconstructed and passed
-          @received_messages = messages
-          {}
+        allow(adapter).to receive(:build_prompt) do |**kwargs|
+          # Verify turn history is reconstructed and passed to build_prompt
+          @received_turns = kwargs[:turns]
+          built_prompt
         end
+        allow(adapter).to receive(:call_provider).and_return({})
         allow(adapter).to receive(:parse_response).and_return(
           { text: 'ok', input_tokens: 5, output_tokens: 2, stop_reason: 'end_turn' }
         )
       end
 
-      it 'passes full turn history to the adapter' do
+      it 'passes full turn history to build_prompt' do
         described_class.perform_now(run.id)
-        expect(@received_messages.length).to eq(2)
-        expect(@received_messages.last[:content]).to eq('staging')
+        expect(@received_turns.length).to eq(2)
+        expect(@received_turns.last[:content]).to eq('staging')
       end
 
       it 'completes the run' do
         described_class.perform_now(run.id)
         expect(run.reload.status).to eq('completed')
+      end
+    end
+
+    context 'when token budget is exceeded' do
+      before do
+        allow(adapter).to receive(:build_prompt)
+          .and_raise(Agents::ProviderAdapter::TokenBudgetExceeded, "Pinned turns exceed token budget — RALPH_WAITING")
+      end
+
+      it 'sets status to waiting_for_input' do
+        described_class.perform_now(run.id)
+        expect(run.reload.status).to eq('waiting_for_input')
+      end
+
+      it 'appends an agent_question turn with RALPH_WAITING message' do
+        expect { described_class.perform_now(run.id) }
+          .to change { run.turns.where(kind: 'agent_question').count }.by(1)
+        expect(run.turns.last.content).to include('RALPH_WAITING')
       end
     end
 
