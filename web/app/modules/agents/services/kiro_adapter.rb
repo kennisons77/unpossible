@@ -16,7 +16,12 @@ module Agents
     end
 
     def parse_response(raw_response)
-      raw_response.dig("content", 0, "text")
+      {
+        text: raw_response.dig("content", 0, "text").to_s,
+        input_tokens: raw_response.dig("usage", "input_tokens").to_i,
+        output_tokens: raw_response.dig("usage", "output_tokens").to_i,
+        stop_reason: raw_response["stop_reason"].to_s
+      }
     end
 
     def max_context_tokens
