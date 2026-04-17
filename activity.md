@@ -32,11 +32,10 @@ Agent activity log. Auto-updated each iteration. Trimmed to last 10 entries.
 
 ---
 
-## 2026-04-17 13:34 — Task 3.5: events + flags/:key endpoints (tag 0.0.49)
+## 2026-04-17 13:37 — Task 3.6: Auto-fire $feature_flag_called on FeatureFlag.enabled? (tag 0.0.50)
 
 **Changes:**
-- Added `events` action to MetricsController: paginated, filterable by event_name/date range
-- Added `flag_stats` action: exposure counts + conversion rates per variant via JSONB property queries
-- Added routes: GET /api/analytics/events, GET /api/analytics/flags/:key
-- Extended metrics_spec.rb with 9 new examples covering pagination, filtering, org isolation, conversion rates
-- 207 examples, 0 failures, 98.94% coverage
+- Added `fire_flag_called_event` private class method to FeatureFlag; fires AnalyticsEvent on every evaluation
+- Fail-open: rescues StandardError, logs warning, never raises
+- 3 new tests: event fires, enabled:false variant, no raise on failure
+- 210 examples, 0 failures, 98.96% coverage
