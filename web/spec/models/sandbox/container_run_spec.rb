@@ -9,6 +9,12 @@ RSpec.describe Sandbox::ContainerRun, type: :model do
       expect(run).to be_valid
     end
 
+    it "requires org_id" do
+      run = build(:sandbox_container_run, org_id: nil)
+      expect(run).not_to be_valid
+      expect(run.errors[:org_id]).to be_present
+    end
+
     it "validates status inclusion" do
       run = build(:sandbox_container_run, status: "invalid")
       expect(run).not_to be_valid

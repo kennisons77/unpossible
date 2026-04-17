@@ -41,8 +41,6 @@ Key sources:
 - {source} → {what it informs}
 ```
 
-5. Store sources as `link_reference` items in the knowledge base if the app is running.
-
 Research logs are append-only. Never overwrite a prior pass.
 
 ## Source Types

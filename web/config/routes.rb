@@ -14,21 +14,17 @@ Rails.application.routes.draw do
   post '/api/agent_runs/:id/complete',  to: 'agents/agent_runs#complete', as: :complete_api_agent_run
   post '/api/agent_runs/:id/input',     to: 'agents/agent_runs#input',    as: :input_api_agent_run
 
-  # Ledger nodes — Ledger::NodesController (JSON API)
-  get    '/api/nodes',          to: 'ledger/nodes#index',   as: :api_nodes
-  post   '/api/nodes',          to: 'ledger/nodes#create'
-  get    '/api/nodes/:id',      to: 'ledger/nodes#show',    as: :api_node
-  post   '/api/nodes/:id/verdict',  to: 'ledger/nodes#verdict',  as: :verdict_api_node
-  post   '/api/nodes/:id/comments', to: 'ledger/nodes#comment',  as: :comments_api_node
+  # Feature flags — Analytics::FeatureFlagsController (JSON API)
+  get   '/api/feature_flags',      to: 'analytics/feature_flags#index'
+  post  '/api/feature_flags',      to: 'analytics/feature_flags#create'
+  patch '/api/feature_flags/:key', to: 'analytics/feature_flags#update', as: :api_feature_flag,
+        constraints: { key: /[^\/]+/ }
 
-  # Ledger UI — Ledger::LedgerController (HTML)
-  scope '/ledger' do
-    get '/',        to: 'ledger/ledger#current', as: :ledger_current
-    get '/open',    to: 'ledger/ledger#open',    as: :ledger_open
-    get '/tree',    to: 'ledger/ledger#tree',    as: :ledger_tree
-    get '/nodes/:id', to: 'ledger/ledger#node',  as: :ledger_node
-  end
-
-  # Session — stub login page (auth via JWT bearer token)
-  get '/session/new', to: proc { [200, {}, ['Login']] }, as: :new_session
+  # Analytics metrics — Analytics::MetricsController (JSON API)
+  get '/api/analytics/llm',          to: 'analytics/metrics#llm'
+  get '/api/analytics/loops',        to: 'analytics/metrics#loops'
+  get '/api/analytics/summary',      to: 'analytics/metrics#summary'
+  get '/api/analytics/events',       to: 'analytics/metrics#events'
+  get '/api/analytics/flags/:key',   to: 'analytics/metrics#flag_stats', as: :api_analytics_flag_stats,
+      constraints: { key: /[^\/]+/ }
 end

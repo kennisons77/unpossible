@@ -1,6 +1,6 @@
 # Practices
 
-Practices files live in `specs/practices/` and are indexed into the knowledge base.
+Practices files live in `specs/practices/` and are loaded by agents on demand.
 They are **reference material, not default context** — loading them every iteration
 wastes tokens on content the agent already internalises.
 
@@ -19,7 +19,7 @@ Loaded by review loop changeability.md — when proposing refactors
 
 Retrieved on demand   coding.md, verification.md, security.md
                       threat-modeling.md, automation.md
-                      — pulled from knowledge base when the agent hits an issue
+                      — loaded by file path when the agent hits an issue
                         or when the instruction explicitly references them
 
 Platform practices    specs/platform/{platform}/ — layered on top of base spec
@@ -42,7 +42,7 @@ planned work. `cost.md` is always present. Platform practices are layered on top
 the base spec.
 
 **Build loop** — `cost.md` and `version-control.md` are always present. All others
-are retrieved on demand from the knowledge base when the agent encounters an issue or
+are retrieved on demand by file path when the agent encounters an issue or
 the instruction references them explicitly. Platform overrides are loaded for the
 active stack.
 

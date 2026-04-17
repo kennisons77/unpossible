@@ -9,7 +9,7 @@ Unpossible is both the platform and its own first project — it develops itself
 - Ruby 3.3 / Rails 8 (full stack)
 - PostgreSQL 16 + pgvector
 - Solid Queue (no Redis/Sidekiq)
-- Go 1.22 runner sidecar
+- Go 1.22 binaries (runner sidecar, analytics ingest sidecar, reference-graph parser CLI)
 - Docker Compose (Phase 0 — local only)
 
 ## Quickstart
@@ -20,13 +20,13 @@ gem install ruby-lsp
 go install golang.org/x/tools/gopls@latest
 
 # Build test image
-docker compose -f infra/docker-compose.yml build
+docker compose -f infra/docker-compose.test.yml build
 
 # Run test suite
-docker compose -f infra/docker-compose.yml run --rm test
+docker compose -f infra/docker-compose.test.yml run --rm test
 
 # Run a specific spec
-docker compose -f infra/docker-compose.yml run --rm test bundle exec rspec spec/path/to/spec.rb
+docker compose -f infra/docker-compose.test.yml run --rm test bundle exec rspec spec/path/to/spec.rb
 ```
 
 ## The Ralph Wiggum Loop
@@ -56,19 +56,22 @@ make review      # Review loop, 1 iteration (analyse codebase, propose beats)
 ├── activity.md              # Agent activity log (last 10 entries)
 ├── Makefile                 # Loop and skill targets
 │
-├── app/                     # Rails application
+├── web/                     # Rails application
 │   └── app/modules/
-│       ├── knowledge/       # Vector store, MD indexing, context retrieval
-│       ├── ledger/          # Universal data model — nodes, edges, questions, answers
 │       ├── agents/          # Agent run storage, prompt dedup, JWT auth
 │       ├── sandbox/         # Container lifecycle, Docker dispatcher
 │       └── analytics/       # LLM metrics, audit log, feature flags
 │
+├── go/                      # Go binaries (single go.mod)
+│   ├── cmd/runner/          # Agent loop runner sidecar
+│   ├── cmd/analytics/       # Analytics ingest sidecar
+│   ├── cmd/parser/          # Reference-graph parser (CLI)
+│   └── internal/            # Shared packages
+│
 ├── infra/
 │   ├── Dockerfile           # Rails app image (ruby:3.3-slim)
 │   ├── Dockerfile.test      # Test image
-│   ├── Dockerfile.runner    # Go runner sidecar (golang:1.22-alpine)
-│   ├── Dockerfile.analytics # Go analytics sidecar
+│   ├── Dockerfile.go        # Go binaries (multi-stage: runner, analytics, parser)
 │   ├── docker-compose.yml   # Full dev stack
 │   └── docker-compose.test.yml  # Ephemeral test stack
 │

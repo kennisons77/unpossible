@@ -11,11 +11,10 @@
     "thinking"
   ],
   "resources": [
-    "file://specs/skills/tools/interview.md",
-    "file://specs/skills/workflows/prd.md",
     "file://specs/README.md",
     "file://AGENTS.md",
-    "file://specs/practices/cost.md"
+    "file://specs/practices/cost.md",
+    "skill://specs/skills/**/*.md"
   ],
   "model": null
 }

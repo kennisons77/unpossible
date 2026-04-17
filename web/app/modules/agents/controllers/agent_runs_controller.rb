@@ -6,7 +6,7 @@ module Agents
     before_action :set_agent_run, only: %i[complete input]
 
     def start
-      result = RunStorageService.start(agent_run_params)
+      result = RunStorageService.start(agent_run_params.merge(org_id: current_org_id))
       status = result[:cached] ? :ok : :created
       render json: result[:run], status: status
     rescue RunStorageService::ConcurrentRunError
@@ -24,6 +24,11 @@ module Agents
       end
 
       RunStorageService.complete(@agent_run, complete_params)
+      Analytics::AuditLogger.log(
+        org_id: @agent_run.org_id,
+        event_name: "agent_run.completed",
+        properties: { run_id: @agent_run.run_id, mode: @agent_run.mode }
+      )
       render json: @agent_run
     end
 
@@ -46,7 +51,7 @@ module Agents
 
     def agent_run_params
       params.permit(
-        :run_id, :actor_id, :node_id, :parent_run_id,
+        :run_id, :source_ref, :parent_run_id,
         :mode, :provider, :model, :prompt_sha256,
         source_node_ids: []
       )

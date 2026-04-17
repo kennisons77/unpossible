@@ -81,9 +81,7 @@ sudo journalctl -u <service> -n 100
 
 Services the agent manages:
 - `rails` (or the app service name defined in `AGENTS.md`)
-- `sidekiq` (background jobs)
 - `postgres` (if running as a system service rather than in Docker)
-- `redis`
 - Any service listed in the project's `AGENTS.md` lookup table
 
 ## Kubernetes Operations

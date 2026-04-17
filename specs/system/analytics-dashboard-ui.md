@@ -22,4 +22,4 @@ There is no visual overview of spend or loop health.
 
 - Server-rendered HTML (ERB), no JS framework
 - Depends on Analytics::LlmMetric and Agents::AgentRun models
-- Auth follows the same pattern as LedgerController
+- Auth follows the same pattern as ApplicationController (authenticate!, bypassable with DISABLE_AUTH)

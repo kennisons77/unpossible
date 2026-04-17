@@ -23,7 +23,7 @@ Extends `specs/system/agent-runner/spec.md`. Rails-specific implementation detai
 ## Kiro Agent Configs
 - `kiro-agents/ralph_build.json` — tools: `["read", "write", "shell", "grep", "glob"]`
 - `kiro-agents/ralph_plan.json` — tools: `["read", "write", "grep", "glob"]`
-- `kiro-agents/ralph_research.json` — tools: `["read", "write", "grep", "glob", "knowledge"]`
+- `kiro-agents/ralph_research.json` — tools: `["read", "write", "grep", "glob"]`
 - `kiro-agents/ralph_review.json` — tools: `["read", "shell", "grep", "glob"]`
 
 ## Files
@@ -40,5 +40,4 @@ Extends `specs/system/agent-runner/spec.md`. Rails-specific implementation detai
 - `ProviderAdapter.for("kiro")` returns `KiroAdapter`
 - `ProviderAdapter.for("openai")` returns `OpenAiAdapter`
 - `AgentRun` unique index on `(run_id, iteration)` enforced at DB level
-- Complete endpoint triggers `Ledger::SpecWatcherJob` when mode is plan
 - Complete endpoint calls `Analytics::AuditLogger`

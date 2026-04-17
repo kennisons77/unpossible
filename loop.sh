@@ -139,19 +139,19 @@ sed -e "s|projects/<name>/|${PROJECT_DIR}/|g" \
     "$PROMPT_FILE" > "$RESOLVED_PROMPT"
 PROMPT_FILE="$RESOLVED_PROMPT"
 
-# --- Research mode: inject idea content into prompt ---
+# --- Research mode: inject beat content into prompt ---
 if [ "$MODE" = "research" ]; then
-    IDEAS_FILE="$PROJECT_DIR/IDEAS.md"
-    [ -f "$IDEAS_FILE" ] || { echo "Error: $IDEAS_FILE not found"; exit 1; }
+    PLAN_FILE="$PROJECT_DIR/IMPLEMENTATION_PLAN.md"
+    [ -f "$PLAN_FILE" ] || { echo "Error: $PLAN_FILE not found"; exit 1; }
 
-    IDEA_CONTENT=$(awk -v id="$IDEA_ID" '
-        /^## \[/ { if (found) exit; if ($0 ~ "\\[" id "\\]") found=1 }
+    BEAT_CONTENT=$(awk -v id="$IDEA_ID" '
+        /^- \[/ { if (found) exit; if ($0 ~ "^- \\[.\\] " id " ") found=1 }
         found { print }
-    ' "$IDEAS_FILE")
-    [ -z "$IDEA_CONTENT" ] && { echo "Error: idea $IDEA_ID not found"; exit 1; }
+    ' "$PLAN_FILE")
+    [ -z "$BEAT_CONTENT" ] && { echo "Error: beat $IDEA_ID not found in IMPLEMENTATION_PLAN.md"; exit 1; }
 
     TEMP_PROMPT="/tmp/prompt_research_$$.md"
-    sed "s|{IDEA_CONTENT}|$IDEA_CONTENT|" "$PROMPT_FILE" > "$TEMP_PROMPT"
+    sed "s|{IDEA_CONTENT}|$BEAT_CONTENT|" "$PROMPT_FILE" > "$TEMP_PROMPT"
     PROMPT_FILE="$TEMP_PROMPT"
 fi
 
@@ -181,6 +181,7 @@ echo "━━━━━━━━━━━━━━━━━━━━━━━━�
 
 PR_OPENED=0
 ITERATION=0
+PREV_HEAD=$(git -C "$GIT_DIR" rev-parse HEAD 2>/dev/null || true)
 CONSECUTIVE_FAILURES=0
 MAX_CONSECUTIVE_FAILURES=3
 
@@ -205,6 +206,13 @@ while true; do
     rm -f "$AGENT_OUTPUT_FILE"
     # Strip ANSI escape codes before signal checks
     AGENT_OUTPUT_CLEAN=$(echo "$AGENT_OUTPUT" | sed 's/\x1b\[[0-9;]*m//g')
+
+    # Attach activity log entry as git note if HEAD changed
+    NEW_HEAD=$(git -C "$GIT_DIR" rev-parse HEAD 2>/dev/null || true)
+    if [ -n "$PREV_HEAD" ] && [ "$NEW_HEAD" != "$PREV_HEAD" ] && [ -x "$PROJECT_DIR/scripts/attach-activity-note.sh" ]; then
+        "$PROJECT_DIR/scripts/attach-activity-note.sh" HEAD || echo "Warning: failed to attach activity note"
+    fi
+    PREV_HEAD="$NEW_HEAD"
 
     if echo "$AGENT_OUTPUT_CLEAN" | grep -q "RALPH_COMPLETE"; then
         echo "RALPH_COMPLETE — all tasks done"
@@ -233,6 +241,7 @@ while true; do
         git -C "$GIT_DIR" push origin "$CURRENT_BRANCH" 2>/dev/null || \
             git -C "$GIT_DIR" push -u origin "$CURRENT_BRANCH" 2>/dev/null || \
             echo "Warning: git push failed — continuing"
+        git -C "$GIT_DIR" push origin refs/notes/* 2>/dev/null || true
 
         if [ "$PR_OPENED" -eq 0 ] && command -v gh &>/dev/null; then
             gh -C "$GIT_DIR" pr create \

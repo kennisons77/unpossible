@@ -11,7 +11,7 @@ projects built on it — LLM costs, loop operations, infrastructure metrics, pro
 events, and feature flag exposures. It exists so the developer can see what the system
 is doing and why it costs what it costs, so experiments can be measured against
 hypotheses, and so future agents can diagnose failures by joining analytics events to
-ledger state.
+reference graph state.
 
 ## Personas
 
@@ -20,7 +20,7 @@ ledger state.
   during a specific run.
 - **Product owner (later):** reviewing experiment results. Needs to know whether a
   feature flag variant moved the metric it was supposed to move.
-- **Agent (future):** diagnosing production failures. Needs to join a ledger node ID to
+- **Agent (future):** diagnosing production failures. Needs to join a spec path or plan item ref to
   its analytics events and error signals to understand what went wrong and propose a fix.
 
 ## User Scenarios
@@ -34,7 +34,7 @@ fine, and update the actor profile.
 **Scenario 2 — Debugging a loop failure:**
 A loop iteration exits non-zero. The developer queries `GET /api/analytics/loops`
 filtered by exit code, finds the failing iteration, and uses the `node_id` on the
-associated `llm.run_completed` event to pull up the ledger node and its full turn
+associated `llm.run_completed` event to look up the spec or plan item and its full turn
 history.
 
 **Scenario 3 — Measuring an experiment:**
@@ -49,8 +49,8 @@ pressure on the sandbox container correlating with the slowdown. They adjust the
 container resource limits.
 
 **Scenario 5 — Future agent diagnosis (post-MVP):**
-A production failure is recorded as a failed answer node in the ledger. An agent queries
-analytics for all events with that `node_id`, finds a cost spike and an OOM event on
+A production failure is recorded as a failed run. An agent queries
+analytics for all events with that `node_id` (spec path), finds a cost spike and an OOM event on
 the sandbox container at the same timestamp, and proposes a fix.
 
 ## User Stories
@@ -90,7 +90,7 @@ the sandbox container at the same timestamp, and proposes a fix.
 
 - **Signal categories:**
   - `llm.run_completed` — provider, model, input/output tokens, cost_usd, mode,
-    `node_id` (ledger node ID — explicit join key to ledger state), duration_ms
+    `node_id` (string ref — spec path or plan item ref), duration_ms
   - `loop.iteration_completed` — mode, exit_code, duration_ms, agent, model
   - `loop.rollback_triggered` — mode, iteration, reason
   - `infra.container_metrics` — container name, cpu_percent, memory_mb, disk_mb
@@ -126,7 +126,7 @@ the sandbox container at the same timestamp, and proposes a fix.
   PostHog, Datadog, or a custom webhook via an adapter. The analytics module defines the
   interface; concrete adapters are post-MVP.
 - Agent consumption — structured query endpoint for agents diagnosing failures, joining
-  `node_id` on analytics events to ledger state and error signals.
+  `node_id` on analytics events to spec paths and error signals.
 - Alerting — threshold-based alerts on cost spikes or error rate increases.
 
 ## Features Out

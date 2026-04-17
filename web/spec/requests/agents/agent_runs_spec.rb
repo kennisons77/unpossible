@@ -8,8 +8,6 @@ RSpec.describe 'Agent Runs API', type: :request do
   let(:headers) { { 'Authorization' => "Bearer #{token}", 'Content-Type' => 'application/json' } }
   let(:sidecar_secret) { 'test-sidecar-token' }
   let(:sidecar_headers) { { 'X-Sidecar-Token' => sidecar_secret, 'Content-Type' => 'application/json' } }
-  let(:actor) { create(:ledger_actor) }
-  let(:node) { create(:ledger_node, org_id: org_id) }
 
   around do |example|
     original_auth = ENV.fetch('AUTH_SECRET', nil)
@@ -24,8 +22,7 @@ RSpec.describe 'Agent Runs API', type: :request do
   let(:valid_params) do
     {
       run_id: SecureRandom.uuid,
-      actor_id: actor.id,
-      node_id: node.id,
+      source_ref: 'specs/system/agent-runner/spec.md',
       mode: 'build',
       provider: 'claude',
       model: 'opus',
@@ -37,11 +34,13 @@ RSpec.describe 'Agent Runs API', type: :request do
     it 'creates AgentRun with status running and returns 201' do
       post '/api/agent_runs/start', params: valid_params.to_json, headers: headers
       expect(response).to have_http_status(:created)
-      expect(JSON.parse(response.body)['status']).to eq('running')
+      body = JSON.parse(response.body)
+      expect(body['status']).to eq('running')
+      expect(Agents::AgentRun.find(body['id']).org_id).to eq(org_id)
     end
 
-    context 'with concurrent active run for same actor' do
-      before { create(:agents_agent_run, actor: actor, status: 'running') }
+    context 'with concurrent active run for same source_ref' do
+      before { create(:agents_agent_run, source_ref: 'specs/system/agent-runner/spec.md', status: 'running') }
 
       it 'returns 409' do
         post '/api/agent_runs/start', params: valid_params.to_json, headers: headers
@@ -85,7 +84,7 @@ RSpec.describe 'Agent Runs API', type: :request do
   end
 
   describe 'POST /api/agent_runs/:id/complete' do
-    let(:agent_run) { create(:agents_agent_run, status: 'running') }
+    let(:agent_run) { create(:agents_agent_run, status: 'running', org_id: org_id) }
 
     it 'updates record and returns 200' do
       post "/api/agent_runs/#{agent_run.id}/complete",
@@ -93,6 +92,17 @@ RSpec.describe 'Agent Runs API', type: :request do
            headers: sidecar_headers
       expect(response).to have_http_status(:ok)
       expect(agent_run.reload.status).to eq('completed')
+    end
+
+    it 'enqueues an audit event via AuditLogger' do
+      expect(Analytics::AuditLogger).to receive(:log).with(
+        org_id: agent_run.org_id,
+        event_name: "agent_run.completed",
+        properties: { run_id: agent_run.run_id, mode: agent_run.mode }
+      )
+      post "/api/agent_runs/#{agent_run.id}/complete",
+           params: { input_tokens: 100, output_tokens: 50, cost_estimate_usd: 0.001, duration_ms: 500 }.to_json,
+           headers: sidecar_headers
     end
 
     context 'without sidecar token' do

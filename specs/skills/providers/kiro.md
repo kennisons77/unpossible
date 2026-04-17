@@ -12,11 +12,11 @@ kiro-cli chat --no-interactive --trust-all-tools --model $MODEL -- "$PROMPT"
 
 Never pass `--resume` — each iteration must be a fresh session.
 
-## Actor Config
+## Agent Config
 
-Select ActorProfile by loop mode:
+Select agent config by loop mode:
 
-| Mode | Profile |
+| Mode | Config |
 |---|---|
 | build | `ralph_build` |
 | plan | `ralph_plan` |
@@ -25,7 +25,7 @@ Select ActorProfile by loop mode:
 
 ## Tool Allowlists
 
-Enforced at runtime via ActorProfile `allowed_tools` — not just declared in the prompt.
+Enforced at runtime via agent config `allowed_tools` — not just declared in the prompt.
 The runtime rejects tool calls outside the allowlist regardless of what the instruction says.
 
 ## Caching

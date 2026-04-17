@@ -19,7 +19,7 @@ SKILL = @cd $(PROJECT_DIR) && $(AGENT) -- "$(shell cat $(PROJECT_DIR)
         db-create db-migrate db-setup db-reset \
         build plan build1 research \
         sb-interview sb-review review prd spec server-ops \
-        start config status activate test
+        start config status activate test sandbox
 
 COMPOSE := docker compose -f $(PROJECT_DIR)infra/docker-compose.yml
 COMPOSE_TEST := docker compose -f $(PROJECT_DIR)infra/docker-compose.test.yml
@@ -38,6 +38,7 @@ help:
 	@echo "  make down            Stop all services"
 	@echo "  make restart         Restart rails service"
 	@echo "  make logs            Tail rails logs"
+	@echo "  make activity        Show git log with activity notes"
 	@echo "  make console         Open rails console"
 	@echo "  make db-create       Create database"
 	@echo "  make db-migrate      Run pending migrations"
@@ -45,11 +46,6 @@ help:
 	@echo "  make db-reset        Drop + create + migrate + seed"
 	@echo "  make docker-build    Build the rails image"
 	@echo "  make shell           Open bash in rails container"
-	@echo "  make ledger-export   Export ledger state to ledger/snapshot.yml"
-	@echo "  make ledger-import   Import ledger state from snapshot (empty DB only)"
-	@echo "  make ledger-seed     Seed ledger from specs + implementation plan (empty DB only)"
-	@echo "  make bulk-export     Export agent runs + knowledge to .data/snapshots/ (not in git)"
-	@echo "  make bulk-import     Import agent runs + knowledge from .data/snapshots/"
 	@echo ""
 	@echo "Workflow:"
 	@echo "  make start           Orient, research if needed, gap-fill spec, plan (1 iteration)"
@@ -58,7 +54,8 @@ help:
 	@echo "  make build           Build loop, unlimited iterations"
 	@echo "  make plan            Plan loop, unlimited iterations"
 	@echo "  make build1          Build loop, 1 iteration"
-	@echo "  make research        Research loop, then re-plan to integrate findings"
+	@echo "  make research ID=<n> Research loop, then re-plan to integrate findings"
+	@echo "                       (omit ID to research all pending spikes)"
 	@echo "  make review          Review loop, 1 iteration (analyse codebase, propose beats)"
 	@echo ""
 	@echo "Sandbox commands:"
@@ -88,7 +85,7 @@ activate:
 
 config:
 	@echo "━━━ Runner Config ━━━"
-	@echo "AGENT=$(AGENT)"
+	@echo "AGENT=$(AGENT)"/
 	@echo "MODEL=$(or $(MODEL),(agent default))"
 	@echo ""
 	@echo "━━━ Environment (.env) ━━━"
@@ -113,7 +110,6 @@ up:
 	$(COMPOSE) up -d --build
 
 down:
-	@$(COMPOSE) exec rails bundle exec rake ledger:export bulk:export 2>/dev/null || echo "Snapshot skipped (container not running)"
 	$(COMPOSE) down
 
 restart:
@@ -121,6 +117,9 @@ restart:
 
 logs:
 	$(COMPOSE) logs -f rails
+
+activity:
+	@git log --notes --format='%C(yellow)%h %C(cyan)%ai %C(reset)%s%n%N' | head -100
 
 console:
 	$(COMPOSE) exec rails bundle exec rails console
@@ -139,22 +138,6 @@ db-setup:
 
 db-reset:
 	$(COMPOSE) exec rails bundle exec rails db:reset
-
-# --- Ledger persistence ---
-ledger-export:
-	$(COMPOSE) exec rails bundle exec rake ledger:export
-
-ledger-import:
-	$(COMPOSE) exec rails bundle exec rake ledger:import
-
-ledger-seed:
-	$(COMPOSE) exec rails bundle exec rake ledger:seed
-
-bulk-export:
-	$(COMPOSE) exec rails bundle exec rake bulk:export
-
-bulk-import:
-	$(COMPOSE) exec rails bundle exec rake bulk:import
 
 # --- Workflow ---
 
@@ -182,12 +165,20 @@ build1:
 	@cd $(ROOT_DIR) && AGENT=$(AGENT) MODEL=$(MODEL) $(LOOP) 1
 
 research:
-	@cd $(ROOT_DIR) && AGENT=$(AGENT) MODEL=$(MODEL) $(LOOP) research
-	# TODO: POST to /api/nodes/:id to close the spike node in the ledger
-	# so dependent beats are unblocked. Currently the spike lives only in
-	# IMPLEMENTATION_PLAN.md and specs/research/; the ledger sees it via
-	# PlanFileSyncService but doesn't know the spike is resolved until the
-	# next plan sync. The loop should call the transition API directly.
+	@if [ -n "$(ID)" ]; then \
+		cd $(ROOT_DIR) && AGENT=$(AGENT) MODEL=$(MODEL) $(LOOP) research $(ID); \
+	else \
+		SPIKE_IDS=$$(grep -E '^\- \[ \] [0-9].*\[SPIKE\]' $(ROOT_DIR)IMPLEMENTATION_PLAN.md \
+			| sed 's/^- \[ \] \([0-9][0-9.]*\).*/\1/'); \
+		if [ -z "$$SPIKE_IDS" ]; then \
+			echo "No pending spikes found in IMPLEMENTATION_PLAN.md"; exit 0; \
+		fi; \
+		echo "Pending spikes: $$SPIKE_IDS"; \
+		for id in $$SPIKE_IDS; do \
+			echo "==> Researching spike $$id..."; \
+			cd $(ROOT_DIR) && AGENT=$(AGENT) MODEL=$(MODEL) $(LOOP) research $$id || true; \
+		done; \
+	fi
 	@echo "==> Re-planning to integrate research findings..."
 	@cd $(ROOT_DIR) && AGENT=$(AGENT) MODEL=$(MODEL) $(LOOP) plan
 

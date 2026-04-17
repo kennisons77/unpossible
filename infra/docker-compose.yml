@@ -22,7 +22,6 @@ services:
       - ../web/app:/app/app
       - ../web/config:/app/config
       - ../web/lib:/app/lib
-      - ../ledger:/ledger
       - ../.data:/.data
       - ../specs:/specs
       - ../IMPLEMENTATION_PLAN.md:/IMPLEMENTATION_PLAN.md
@@ -35,7 +34,8 @@ services:
   # go_runner:
   #   build:
   #     context: ..
-  #     dockerfile: infra/Dockerfile.runner
+  #     dockerfile: infra/Dockerfile.go
+  #     target: runner
   #   image: unpossible-runner:${GIT_SHA:-dev}
   #   ports:
   #     - "8080:8080"
@@ -45,7 +45,8 @@ services:
   # analytics:
   #   build:
   #     context: ..
-  #     dockerfile: infra/Dockerfile.analytics
+  #     dockerfile: infra/Dockerfile.go
+  #     target: analytics
   #   image: unpossible-analytics:${GIT_SHA:-dev}
   #   ports:
   #     - "9100:9100"
