@@ -104,7 +104,7 @@ The following are implemented and tested (169 examples, 0 failures, 98.68% cover
   Spec: `specs/system/agent-runner/spec.md` — "Background job purges turn content for completed runs older than N days (default: 30). Sets purged_at and clears content."
   Required tests: purges content on completed runs older than 30 days, sets purged_at, retains turn record, never purges failed or waiting_for_input runs, idempotent
 
-- [ ] 4.3 — Complete endpoint calls AuditLogger (`web/app/modules/agents/controllers/agent_runs_controller.rb`)
+- [x] 4.3 — Complete endpoint calls AuditLogger (`web/app/modules/agents/controllers/agent_runs_controller.rb`)
   Spec: `specs/platform/rails/system/agents.md` — "Complete endpoint calls Analytics::AuditLogger"
   **Depends on:** 3.2
   Required tests: completing a run creates an audit event via AuditLogger

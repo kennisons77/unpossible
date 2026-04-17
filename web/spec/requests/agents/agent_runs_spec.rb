@@ -84,7 +84,7 @@ RSpec.describe 'Agent Runs API', type: :request do
   end
 
   describe 'POST /api/agent_runs/:id/complete' do
-    let(:agent_run) { create(:agents_agent_run, status: 'running') }
+    let(:agent_run) { create(:agents_agent_run, status: 'running', org_id: org_id) }
 
     it 'updates record and returns 200' do
       post "/api/agent_runs/#{agent_run.id}/complete",
@@ -92,6 +92,17 @@ RSpec.describe 'Agent Runs API', type: :request do
            headers: sidecar_headers
       expect(response).to have_http_status(:ok)
       expect(agent_run.reload.status).to eq('completed')
+    end
+
+    it 'enqueues an audit event via AuditLogger' do
+      expect(Analytics::AuditLogger).to receive(:log).with(
+        org_id: agent_run.org_id,
+        event_name: "agent_run.completed",
+        properties: { run_id: agent_run.run_id, mode: agent_run.mode }
+      )
+      post "/api/agent_runs/#{agent_run.id}/complete",
+           params: { input_tokens: 100, output_tokens: 50, cost_estimate_usd: 0.001, duration_ms: 500 }.to_json,
+           headers: sidecar_headers
     end
 
     context 'without sidecar token' do
