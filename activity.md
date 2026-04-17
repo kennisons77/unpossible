@@ -29,3 +29,13 @@ Agent activity log. Auto-updated each iteration. Trimmed to last 10 entries.
 - Created `web/app/modules/analytics/services/audit_logger.rb` — fire-and-forget wrapper, rescues StandardError, logs to Rails.logger
 - Created specs for both; used `around` block to set queue_adapter: :test for enqueue matchers
 - 190 examples, 0 failures, 98.79% coverage
+
+---
+
+## 2026-04-17 13:25 — Task 3.4: Analytics::MetricsController (tag 0.0.48)
+
+**Changes:**
+- Created `web/app/modules/analytics/controllers/metrics_controller.rb` — GET /api/analytics/llm, /loops, /summary; all require JWT auth
+- Added routes for all three endpoints
+- Created `web/spec/requests/analytics/metrics_spec.rb` — covers aggregation, date filtering, org isolation, 401 without auth
+- 198 examples, 0 failures, 98.88% coverage
