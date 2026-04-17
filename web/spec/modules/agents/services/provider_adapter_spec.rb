@@ -134,9 +134,15 @@ RSpec.describe Agents::ProviderAdapter do
       expect(result[:system]).to include("node-ref", "principle1", "chunk1")
     end
 
-    it "parses response from content array" do
-      raw = { "content" => [{ "text" => "response text" }] }
-      expect(adapter.parse_response(raw)).to eq("response text")
+    it "parses response returning normalised hash" do
+      raw = { "content" => [{ "text" => "response text" }], "usage" => { "input_tokens" => 10, "output_tokens" => 5 }, "stop_reason" => "end_turn" }
+      result = adapter.parse_response(raw)
+      expect(result).to eq(text: "response text", input_tokens: 10, output_tokens: 5, stop_reason: "end_turn")
+    end
+
+    it "handles missing fields gracefully" do
+      result = adapter.parse_response({})
+      expect(result).to eq(text: "", input_tokens: 0, output_tokens: 0, stop_reason: "")
     end
 
     it "returns max context tokens" do
@@ -158,9 +164,15 @@ RSpec.describe Agents::ProviderAdapter do
       expect(result[:model]).to eq("kiro")
     end
 
-    it "parses response from content array" do
-      raw = { "content" => [{ "text" => "response text" }] }
-      expect(adapter.parse_response(raw)).to eq("response text")
+    it "parses response returning normalised hash" do
+      raw = { "content" => [{ "text" => "response text" }], "usage" => { "input_tokens" => 10, "output_tokens" => 5 }, "stop_reason" => "end_turn" }
+      result = adapter.parse_response(raw)
+      expect(result).to eq(text: "response text", input_tokens: 10, output_tokens: 5, stop_reason: "end_turn")
+    end
+
+    it "handles missing fields gracefully" do
+      result = adapter.parse_response({})
+      expect(result).to eq(text: "", input_tokens: 0, output_tokens: 0, stop_reason: "")
     end
 
     it "returns max context tokens" do
@@ -186,9 +198,15 @@ RSpec.describe Agents::ProviderAdapter do
       expect(user_msg[:content]).to eq("hello")
     end
 
-    it "parses response from choices array" do
-      raw = { "choices" => [{ "message" => { "content" => "response text" } }] }
-      expect(adapter.parse_response(raw)).to eq("response text")
+    it "parses response returning normalised hash" do
+      raw = { "choices" => [{ "message" => { "content" => "response text" }, "finish_reason" => "stop" }], "usage" => { "prompt_tokens" => 10, "completion_tokens" => 5 } }
+      result = adapter.parse_response(raw)
+      expect(result).to eq(text: "response text", input_tokens: 10, output_tokens: 5, stop_reason: "stop")
+    end
+
+    it "handles missing fields gracefully" do
+      result = adapter.parse_response({})
+      expect(result).to eq(text: "", input_tokens: 0, output_tokens: 0, stop_reason: "")
     end
 
     it "returns max context tokens" do
