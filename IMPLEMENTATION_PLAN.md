@@ -85,7 +85,7 @@ The following are implemented and tested (169 examples, 0 failures, 98.68% cover
   Spec: `specs/system/analytics/spec.md` — GET /api/analytics/llm, /loops, /summary; `specs/platform/rails/system/analytics.md` — JWT auth required
   Required tests: GET /api/analytics/llm returns cost by provider/model filterable by date, GET /api/analytics/loops returns run counts/failure rates by mode, GET /api/analytics/summary returns weekly totals, all return 401 without auth
 
-- [ ] 3.5 — Add events and flags/:key endpoints to MetricsController (`web/app/modules/analytics/controllers/metrics_controller.rb`, `web/spec/requests/analytics/metrics_spec.rb`, `web/config/routes.rb`)
+- [x] 3.5 — Add events and flags/:key endpoints to MetricsController (`web/app/modules/analytics/controllers/metrics_controller.rb`, `web/spec/requests/analytics/metrics_spec.rb`, `web/config/routes.rb`)
   Spec: `specs/system/analytics/spec.md` — GET /api/analytics/events (paginated, filterable), GET /api/analytics/flags/:key (exposure counts + conversion rates)
   Required tests: events endpoint paginates and filters by event_name/org_id/date, flags/:key returns exposure counts per variant, both return 401 without auth
 

@@ -113,4 +113,113 @@ RSpec.describe 'Analytics Metrics API', type: :request do
       expect(response).to have_http_status(:unauthorized)
     end
   end
+
+  describe 'GET /api/analytics/events' do
+    let(:other_org) { SecureRandom.uuid }
+
+    before do
+      create(:analytics_event, org_id: org_id, event_name: 'task.promoted',
+             timestamp: 1.hour.ago, received_at: 1.hour.ago)
+      create(:analytics_event, org_id: org_id, event_name: 'loop.iteration_completed',
+             timestamp: 2.hours.ago, received_at: 2.hours.ago)
+      create(:analytics_event, org_id: org_id, event_name: 'task.promoted',
+             timestamp: 3.days.ago, received_at: 3.days.ago)
+      # different org — must not appear
+      create(:analytics_event, org_id: other_org, event_name: 'task.promoted')
+    end
+
+    it 'returns paginated events for the org' do
+      get '/api/analytics/events', headers: headers
+      expect(response).to have_http_status(:ok)
+      body = JSON.parse(response.body)
+      expect(body['total']).to eq(3)
+      expect(body['events'].size).to eq(3)
+      expect(body['page']).to eq(1)
+    end
+
+    it 'filters by event_name' do
+      get '/api/analytics/events', params: { event_name: 'task.promoted' }, headers: headers
+      body = JSON.parse(response.body)
+      expect(body['total']).to eq(2)
+      expect(body['events'].all? { |e| e['event_name'] == 'task.promoted' }).to be true
+    end
+
+    it 'filters by from date' do
+      get '/api/analytics/events', params: { from: 2.days.ago.iso8601 }, headers: headers
+      body = JSON.parse(response.body)
+      expect(body['total']).to eq(2)
+    end
+
+    it 'filters by to date' do
+      get '/api/analytics/events', params: { to: 2.days.ago.iso8601 }, headers: headers
+      body = JSON.parse(response.body)
+      expect(body['total']).to eq(1)
+    end
+
+    it 'paginates results' do
+      get '/api/analytics/events', params: { per_page: 2, page: 1 }, headers: headers
+      body = JSON.parse(response.body)
+      expect(body['events'].size).to eq(2)
+      expect(body['per_page']).to eq(2)
+    end
+
+    it 'returns 401 without auth' do
+      get '/api/analytics/events'
+      expect(response).to have_http_status(:unauthorized)
+    end
+  end
+
+  describe 'GET /api/analytics/flags/:key' do
+    let(:flag_key) { 'experiment.new_ui' }
+    let(:user_a)   { SecureRandom.uuid }
+    let(:user_b)   { SecureRandom.uuid }
+    let(:user_c)   { SecureRandom.uuid }
+
+    before do
+      # user_a exposed to variant "control", then converted
+      create(:analytics_event, org_id: org_id, event_name: '$feature_flag_called',
+             distinct_id: user_a, properties: { flag_key: flag_key, variant: 'control', enabled: true })
+      create(:analytics_event, org_id: org_id, event_name: 'task.promoted',
+             distinct_id: user_a)
+
+      # user_b exposed to variant "treatment", no conversion
+      create(:analytics_event, org_id: org_id, event_name: '$feature_flag_called',
+             distinct_id: user_b, properties: { flag_key: flag_key, variant: 'treatment', enabled: true })
+
+      # user_c exposed to variant "treatment", converted
+      create(:analytics_event, org_id: org_id, event_name: '$feature_flag_called',
+             distinct_id: user_c, properties: { flag_key: flag_key, variant: 'treatment', enabled: true })
+      create(:analytics_event, org_id: org_id, event_name: 'task.promoted',
+             distinct_id: user_c)
+
+      # different flag — must not appear
+      create(:analytics_event, org_id: org_id, event_name: '$feature_flag_called',
+             distinct_id: SecureRandom.uuid, properties: { flag_key: 'other.flag', variant: 'control', enabled: false })
+    end
+
+    it 'returns exposure counts per variant' do
+      get "/api/analytics/flags/#{flag_key}", headers: headers
+      expect(response).to have_http_status(:ok)
+      body = JSON.parse(response.body)
+      expect(body['flag_key']).to eq(flag_key)
+      control   = body['variants'].find { |v| v['variant'] == 'control' }
+      treatment = body['variants'].find { |v| v['variant'] == 'treatment' }
+      expect(control['exposure_count']).to eq(1)
+      expect(treatment['exposure_count']).to eq(2)
+    end
+
+    it 'returns conversion rates per variant' do
+      get "/api/analytics/flags/#{flag_key}", headers: headers
+      body = JSON.parse(response.body)
+      control   = body['variants'].find { |v| v['variant'] == 'control' }
+      treatment = body['variants'].find { |v| v['variant'] == 'treatment' }
+      expect(control['conversion_rate']).to eq(1.0)
+      expect(treatment['conversion_rate']).to eq(0.5)
+    end
+
+    it 'returns 401 without auth' do
+      get "/api/analytics/flags/#{flag_key}"
+      expect(response).to have_http_status(:unauthorized)
+    end
+  end
 end
