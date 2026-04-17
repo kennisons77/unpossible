@@ -81,7 +81,7 @@ The following are implemented and tested (169 examples, 0 failures, 98.68% cover
   Spec: `specs/platform/rails/system/analytics.md` — Active Job on `analytics` queue
   Required tests: job enqueues on analytics queue, creates AuditEvent record, handles errors without raising
 
-- [ ] 3.4 — Create Analytics::MetricsController with LLM, loops, and summary endpoints (`web/app/modules/analytics/controllers/metrics_controller.rb`, `web/spec/requests/analytics/metrics_spec.rb`, `web/config/routes.rb`)
+- [x] 3.4 — Create Analytics::MetricsController with LLM, loops, and summary endpoints (`web/app/modules/analytics/controllers/metrics_controller.rb`, `web/spec/requests/analytics/metrics_spec.rb`, `web/config/routes.rb`)
   Spec: `specs/system/analytics/spec.md` — GET /api/analytics/llm, /loops, /summary; `specs/platform/rails/system/analytics.md` — JWT auth required
   Required tests: GET /api/analytics/llm returns cost by provider/model filterable by date, GET /api/analytics/loops returns run counts/failure rates by mode, GET /api/analytics/summary returns weekly totals, all return 401 without auth
 
