@@ -31,6 +31,10 @@ RSpec.describe Agents::ProviderAdapter do
       expect { adapter.build_prompt([]) }.to raise_error(NotImplementedError)
     end
 
+    it "raises NotImplementedError for call_provider" do
+      expect { adapter.call_provider([]) }.to raise_error(NotImplementedError)
+    end
+
     it "raises NotImplementedError for parse_response" do
       expect { adapter.parse_response({}) }.to raise_error(NotImplementedError)
     end

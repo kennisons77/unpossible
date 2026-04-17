@@ -18,6 +18,7 @@ module Agents
 
       run = AgentRun.new(params.merge(status: "running"))
       run.save!
+      AgentRunJob.perform_later(run.id)
       { run: run, cached: false }
     rescue ActiveRecord::RecordInvalid => e
       raise DuplicateRunError, "Duplicate run_id" if e.record.errors[:run_id]&.include?("has already been taken")
@@ -36,6 +37,7 @@ module Agents
         content: content
       )
       run.update!(status: "running")
+      AgentRunJob.perform_later(run.id)
       turn
     end
   end

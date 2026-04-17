@@ -19,6 +19,11 @@ module Agents
       raise NotImplementedError, "#{self.class}#build_prompt must be implemented"
     end
 
+    # Makes the HTTP call to the provider. Returns raw provider response.
+    def call_provider(_messages)
+      raise NotImplementedError, "#{self.class}#call_provider must be implemented"
+    end
+
     def parse_response(_raw_response)
       raise NotImplementedError, "#{self.class}#parse_response must be implemented"
     end
