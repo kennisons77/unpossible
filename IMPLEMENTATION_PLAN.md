@@ -100,7 +100,7 @@ The following are implemented and tested (169 examples, 0 failures, 98.68% cover
   Spec: `specs/system/agent-runner/spec.md` — "Job completes — no thread held", "Job resumes: reconstructs turn history"
   Required tests: job enqueues, calls provider adapter, records turns, handles pause/resume, concurrency key on source_ref
 
-- [ ] 4.2 — Turn Content GC Job (`web/app/modules/agents/jobs/turn_content_gc_job.rb`, `web/spec/jobs/agents/turn_content_gc_job_spec.rb`, `web/config/recurring.yml`)
+- [x] 4.2 — Turn Content GC Job (`web/app/modules/agents/jobs/turn_content_gc_job.rb`, `web/spec/jobs/agents/turn_content_gc_job_spec.rb`, `web/config/recurring.yml`)
   Spec: `specs/system/agent-runner/spec.md` — "Background job purges turn content for completed runs older than N days (default: 30). Sets purged_at and clears content."
   Required tests: purges content on completed runs older than 30 days, sets purged_at, retains turn record, never purges failed or waiting_for_input runs, idempotent
 
