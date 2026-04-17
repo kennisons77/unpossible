@@ -17,10 +17,9 @@ Agent activity log. Auto-updated each iteration. Trimmed to last 10 entries.
 - Ledger+Knowledge removal confirmed complete
 - Infrastructure (Dockerfile, compose files) verified — no placeholders, correct image tags, Postgres not exposed
 
-## 2026-04-17 14:20 — Task 1.1: LedgerAppender + LEDGER.jsonl (tag 0.0.55)
+## 2026-04-17 15:45 — Task 1.2: Controlled commit skill script (tag 0.0.56)
 
 **Changes:**
-- `web/app/lib/ledger_appender.rb`: append-only, validates 7 event types, idempotent on duplicate lines
-- `web/spec/lib/ledger_appender_spec.rb`: 13 examples, all pass
-- `LEDGER.jsonl`: empty file created at project root
-- 267 examples, 0 failures, 99.21% coverage
+- `scripts/controlled-commit.sh`: atomically stages code + LEDGER.jsonl + IMPLEMENTATION_PLAN.md, commits with structured message; --ledger/--plan overrides for testability; marks task done in plan when --to=done; idempotent LEDGER.jsonl append
+- `scripts/test-controlled-commit.sh`: 10 shell tests, 20 assertions, all pass
+- 267 RSpec examples, 0 failures, 99.21% coverage
