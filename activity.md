@@ -15,3 +15,10 @@ Agent activity log. Auto-updated each iteration. Trimmed to last 10 entries.
 - Registered recurring job in config/recurring.yml (daily at midnight)
 - Added agents queue to config/queue.yml; updated solid_queue_spec
 - 235 examples, 0 failures, 98.6% coverage
+
+## 2026-04-17 13:46 — Task 4.3: Complete endpoint calls AuditLogger (tag 0.0.53)
+
+**Changes:**
+- AgentRunsController#complete calls Analytics::AuditLogger.log after RunStorageService.complete
+- Added request spec asserting AuditLogger.log is called with org_id, event_name, and properties
+- 236 examples, 0 failures, 98.6% coverage
