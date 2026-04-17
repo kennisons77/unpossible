@@ -15,9 +15,17 @@ module Agents
       return unless run && run.status == "running"
 
       adapter = ProviderAdapter.for(run.provider)
-      messages = build_messages(run)
+      turns = build_turn_hashes(run)
 
-      raw = adapter.call_provider(messages)
+      prompt = adapter.build_prompt(
+        node: run.source_ref,
+        context_chunks: [],
+        principles: [],
+        turns: turns,
+        token_budget: adapter.max_context_tokens
+      )
+
+      raw = adapter.call_provider(prompt)
       result = adapter.parse_response(raw)
 
       if result[:stop_reason] == "agent_question"
@@ -32,23 +40,17 @@ module Agents
           output_tokens: result[:output_tokens]
         )
       end
+    rescue ProviderAdapter::TokenBudgetExceeded => e
+      append_turn(run, kind: "agent_question", content: "RALPH_WAITING: #{e.message}")
+      run.update!(status: "waiting_for_input")
     end
 
     private
 
-    # Reconstruct conversation history from persisted turns.
-    def build_messages(run)
+    # Reconstruct conversation history from persisted turns as hashes for build_prompt.
+    def build_turn_hashes(run)
       run.turns.order(:position).map do |turn|
-        { role: turn_role(turn.kind), content: turn.content }
-      end
-    end
-
-    def turn_role(kind)
-      case kind
-      when "human_input" then "user"
-      when "agent_question" then "assistant"
-      when "llm_response" then "assistant"
-      when "tool_result" then "user"
+        { kind: turn.kind, content: turn.content, position: turn.position }
       end
     end
 

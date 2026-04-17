@@ -109,7 +109,7 @@ The following are implemented and tested (169 examples, 0 failures, 98.68% cover
   **Depends on:** 3.2
   Required tests: completing a run creates an audit event via AuditLogger
 
-- [ ] 4.4 — Provider adapter build_prompt with pinned+sliding token budget (`web/app/modules/agents/services/provider_adapter.rb`, adapters)
+- [x] 4.4 — Provider adapter build_prompt with pinned+sliding token budget (`web/app/modules/agents/services/provider_adapter.rb`, adapters)
   Spec: `specs/system/agent-runner/spec.md` — "build_prompt(node:, context_chunks:, principles:, turns:, token_budget:)" with pinned+sliding strategy
   Note: Current adapters have a simplified build_prompt(messages) signature. The spec requires a richer interface with token budget management.
   Required tests: always includes system prompt + agent_question + human_input turns, trims llm_response/tool_result from oldest, aborts with RALPH_WAITING if still over budget after trimming
