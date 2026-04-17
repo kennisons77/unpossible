@@ -32,14 +32,14 @@ Agent activity log. Auto-updated each iteration. Trimmed to last 10 entries.
 
 ---
 
-## 2026-04-17 12:58 — Task 2.1: Add org_id to agents_agent_runs (tag 0.0.44)
+## 2026-04-17 13:01 — Task 2.2: Add org_id to sandbox_container_runs (tag 0.0.45)
 
 **Mode:** Build
-**Iteration:** 59
+**Iteration:** 60
 
 **Changes:**
-- Created `web/db/migrate/20260417000001_add_org_id_to_agents_agent_runs.rb` — uuid NOT NULL + index
-- Updated `web/app/modules/agents/models/agent_run.rb` — validates org_id presence
-- Updated `web/app/modules/agents/controllers/agent_runs_controller.rb` — injects org_id from JWT in start action
-- Updated factory and request spec to assert org_id set from JWT
-- 170 examples, 0 failures, 98.69% coverage
+- Created `web/db/migrate/20260417000002_add_org_id_to_sandbox_container_runs.rb` — uuid NOT NULL + index
+- Updated `web/app/modules/sandbox/models/container_run.rb` — validates org_id presence
+- Updated `web/app/modules/sandbox/services/docker_dispatcher.rb` — dispatch accepts org_id: keyword, passes to ContainerRun.create!
+- Updated factory and spec to supply org_id; dispatcher spec asserts org_id stored on record
+- 171 examples, 0 failures, 98.69% coverage
