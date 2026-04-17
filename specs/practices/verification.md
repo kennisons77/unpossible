@@ -34,7 +34,7 @@ actual progress. Every skipped test or suppressed error is a hole in that pressu
    machines). Not required when unit + integration tests cover the behavior adequately.
    Each property test must include a comment explaining the invariant it verifies.
 4. **Linters** — run every iteration. Enforce code style and catch static errors early.
-5. **Playwright** (optional) — enabled by declaring `UI: true` in `specs/prd.md`.
+5. **Playwright** (optional) — enabled by declaring `UI: true` in `specs/project-prd.md`.
 
 ## What to Test
 
