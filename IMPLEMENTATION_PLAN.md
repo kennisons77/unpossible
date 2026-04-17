@@ -73,11 +73,11 @@ The following are implemented and tested (169 examples, 0 failures, 98.68% cover
   Spec: `specs/platform/rails/system/analytics.md` — per agent run cost/token record, cost_estimate_usd decimal(10,6), index on (org_id, provider, model, created_at)
   Required tests: validates org_id/provider/model presence, cost_estimate_usd stored as decimal(10,6), index exists, append-only enforcement
 
-- [ ] 3.2 — Create Analytics::AuditLogger service (`web/app/modules/analytics/services/audit_logger.rb`, `web/spec/modules/analytics/services/audit_logger_spec.rb`)
+- [x] 3.2 — Create Analytics::AuditLogger service (`web/app/modules/analytics/services/audit_logger.rb`, `web/spec/modules/analytics/services/audit_logger_spec.rb`)
   Spec: `specs/platform/rails/system/analytics.md` — `AuditLogger.log(...)` async, never raises, fire-and-forget
   Required tests: AuditLogger.log creates AuditEvent, failure logs to Rails logger without raising, enqueues on analytics queue
 
-- [ ] 3.3 — Create Analytics::AuditLogJob (`web/app/modules/analytics/jobs/audit_log_job.rb`, `web/spec/jobs/analytics/audit_log_job_spec.rb`)
+- [x] 3.3 — Create Analytics::AuditLogJob (`web/app/modules/analytics/jobs/audit_log_job.rb`, `web/spec/jobs/analytics/audit_log_job_spec.rb`)
   Spec: `specs/platform/rails/system/analytics.md` — Active Job on `analytics` queue
   Required tests: job enqueues on analytics queue, creates AuditEvent record, handles errors without raising
 
