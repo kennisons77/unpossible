@@ -56,6 +56,78 @@ module Analytics
       }
     end
 
+    # GET /api/analytics/events
+    # Returns paginated analytics events, filterable by event_name, org_id, and date range.
+    def events
+      scope = AnalyticsEvent.where(org_id: current_org_id)
+      scope = scope.where(event_name: params[:event_name]) if params[:event_name].present?
+      scope = scope.where('timestamp >= ?', Time.parse(params[:from])) if params[:from].present?
+      scope = scope.where('timestamp <= ?', Time.parse(params[:to])) if params[:to].present?
+
+      page     = [params.fetch(:page, 1).to_i, 1].max
+      per_page = [params.fetch(:per_page, 50).to_i, 200].min
+
+      total  = scope.count
+      events = scope.order(timestamp: :desc).offset((page - 1) * per_page).limit(per_page)
+
+      render json: {
+        total: total,
+        page: page,
+        per_page: per_page,
+        events: events.map { |e|
+          {
+            id: e.id,
+            event_name: e.event_name,
+            distinct_id: e.distinct_id,
+            node_id: e.node_id,
+            properties: e.properties,
+            timestamp: e.timestamp.iso8601,
+            received_at: e.received_at.iso8601
+          }
+        }
+      }
+    end
+
+    # GET /api/analytics/flags/:key
+    # Returns exposure counts and conversion rates per variant for a feature flag.
+    def flag_stats
+      key = params[:key]
+
+      exposures = AnalyticsEvent
+        .where(org_id: current_org_id, event_name: '$feature_flag_called')
+        .where("properties->>'flag_key' = ?", key)
+
+      by_variant = exposures.group("properties->>'variant'").count
+
+      # Conversion: any event from the same distinct_id after the exposure
+      conversion_rates = by_variant.keys.each_with_object({}) do |variant, acc|
+        exposed_ids = exposures
+          .where("properties->>'variant' = ?", variant)
+          .pluck(:distinct_id)
+
+        next acc[variant] = 0.0 if exposed_ids.empty?
+
+        converted = AnalyticsEvent
+          .where(org_id: current_org_id)
+          .where(distinct_id: exposed_ids)
+          .where.not(event_name: '$feature_flag_called')
+          .select(:distinct_id).distinct.count
+
+        acc[variant] = (converted.to_f / exposed_ids.size).round(4)
+      end
+
+      render json: {
+        flag_key: key,
+        variants: by_variant.map { |variant, count|
+          {
+            variant: variant,
+            exposure_count: count,
+            conversion_rate: conversion_rates[variant] || 0.0
+          }
+        }
+      }
+    end
+
     # GET /api/analytics/summary
     # Returns weekly totals: cost, tasks completed, loop error rate.
     def summary

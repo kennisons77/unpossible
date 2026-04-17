@@ -21,7 +21,10 @@ Rails.application.routes.draw do
         constraints: { key: /[^\/]+/ }
 
   # Analytics metrics — Analytics::MetricsController (JSON API)
-  get '/api/analytics/llm',     to: 'analytics/metrics#llm'
-  get '/api/analytics/loops',   to: 'analytics/metrics#loops'
-  get '/api/analytics/summary', to: 'analytics/metrics#summary'
+  get '/api/analytics/llm',          to: 'analytics/metrics#llm'
+  get '/api/analytics/loops',        to: 'analytics/metrics#loops'
+  get '/api/analytics/summary',      to: 'analytics/metrics#summary'
+  get '/api/analytics/events',       to: 'analytics/metrics#events'
+  get '/api/analytics/flags/:key',   to: 'analytics/metrics#flag_stats', as: :api_analytics_flag_stats,
+      constraints: { key: /[^\/]+/ }
 end
