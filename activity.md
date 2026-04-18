@@ -63,3 +63,33 @@ Agent activity log. Auto-updated each iteration. Trimmed to last 10 entries.
 
 **Tradeoffs taken:**
 - Commented-out code is normally dead code (delete it). Here it's a scaffold placeholder for a known future service — the annotation makes that distinction explicit. If the Go sidecars are never built, the stubs should be deleted at that point.
+
+---
+
+## 2026-04-18 14:17 — Task 2.1: Wire limits_concurrency in AgentRunJob (tag 0.0.60)
+
+**Changes:**
+- Added `limits_concurrency to: 1, key: ..., duration: 30.minutes` macro to `AgentRunJob`
+- Key lambda calls `concurrency_key_for(run_id: agent_run_id.to_s, source_ref: source_ref)` using job arguments
+- Updated `RunStorageService#start` and `#record_input` to pass `source_ref` as second arg to `perform_later`
+- Updated `perform` signature to accept optional `_source_ref` (ignored — only needed for the key)
+- Added 3 new tests: `concurrency_limit` is 1, key uses source_ref when present, falls back to run_id string
+- Updated `record_input` re-enqueue test to assert `.with(run.id, run.source_ref)`
+- 274 examples, 0 failures, 99.41% coverage
+
+**Thinking:**
+- Solid Queue's `limits_concurrency` key lambda is called via `instance_exec(*arguments)` — so it receives the job's `perform_later` arguments as positional params
+- The key needs `source_ref` at enqueue time, but `perform` only received `agent_run_id` (DB integer). Two options: DB lookup in the lambda, or pass source_ref as a second argument. Passing it is cheaper (no extra query) and makes the concurrency key deterministic without I/O
+- `_source_ref` in `perform` is intentionally ignored — it's only there so Solid Queue can deserialize the job correctly; the actual run lookup uses `agent_run_id`
+
+**Challenges:**
+- Needed to inspect the Solid Queue gem source (`active_job/concurrency_controls.rb`) to confirm the lambda receives `*arguments` via `instance_exec`, not the job instance. The public docs don't spell this out clearly
+- `concurrency_key_for` uses `run_id` (UUID string) as fallback, but the job argument is the DB integer id. Used `.to_s` on the integer — unique enough for a fallback key since DB ids are unique per run
+
+**Alternatives considered:**
+- DB lookup in the key lambda: `AgentRun.find(agent_run_id)&.source_ref || agent_run_id.to_s` — works but adds a query at enqueue time, and the run may not be committed yet in edge cases
+- Pass `run.run_id` (UUID) instead of `run.id` (integer): more semantically correct as a fallback, but requires changing the `perform` signature to accept UUID and look up by it — unnecessary complexity
+
+**Tradeoffs taken:**
+- The service-layer concurrent run check in `RunStorageService` is now redundant with the queue-level control, but both are kept: the service check gives an immediate 409 to the caller; the queue-level control handles the case where two jobs are enqueued before either starts executing
+- `duration: 30.minutes` is a guess — if agent runs routinely exceed 30 minutes, a second job for the same source_ref could slip through. Should be revisited when real run durations are known
