@@ -38,7 +38,7 @@ The following is implemented and tested (270 examples, 0 failures, 99.21% covera
 ### 1.1 Docker Compose: uncomment Go sidecar stubs or remove them
 The spec (`infrastructure/concept.md`) defines `go_runner` (port 8080) and `analytics` sidecar (port 9100) in the compose file. They are currently commented out. The `go/` directory does not exist. These sidecars are Go binaries — they cannot be built until `go/` exists.
 
-- [ ] 1.1 — Remove or annotate commented Go sidecar stubs in `infra/docker-compose.yml` with explicit "Phase 0: Go sidecars not yet built" comments (`infra/docker-compose.yml`)
+- [x] 1.1 — Remove or annotate commented Go sidecar stubs in `infra/docker-compose.yml` with explicit "Phase 0: Go sidecars not yet built" comments (`infra/docker-compose.yml`)
   Required tests: `docker compose config` validates without errors
 
 ### 1.2 Postgres port binding
