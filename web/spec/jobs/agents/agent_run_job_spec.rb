@@ -155,6 +155,46 @@ RSpec.describe Agents::AgentRunJob, type: :job do
         expect { described_class.perform_now(0) }.not_to raise_error
       end
     end
+
+    context 'when agent_override is true' do
+      let(:run) { create(:agents_agent_run, org_id: org_id, status: 'running', agent_override: true) }
+
+      before do
+        allow(adapter).to receive(:call_provider).and_return({ 'content' => [{ 'text' => 'done' }] })
+        allow(adapter).to receive(:parse_response).and_return(
+          { text: 'done', input_tokens: 10, output_tokens: 5, stop_reason: 'end_turn' }
+        )
+      end
+
+      it 'skips enrichment (passes empty context_chunks and principles)' do
+        expect(adapter).to receive(:build_prompt).with(
+          hash_including(context_chunks: [], principles: [])
+        ).and_return(built_prompt)
+        described_class.perform_now(run.id)
+      end
+
+      it 'still completes the run' do
+        described_class.perform_now(run.id)
+        expect(run.reload.status).to eq('completed')
+      end
+    end
+
+    context 'when agent_override is false' do
+      let(:run) { create(:agents_agent_run, org_id: org_id, status: 'running', agent_override: false) }
+
+      before do
+        allow(adapter).to receive(:call_provider).and_return({ 'content' => [{ 'text' => 'done' }] })
+        allow(adapter).to receive(:parse_response).and_return(
+          { text: 'done', input_tokens: 10, output_tokens: 5, stop_reason: 'end_turn' }
+        )
+      end
+
+      it 'calls load_enrichment (enrichment path taken)' do
+        job = described_class.new
+        expect(job).to receive(:load_enrichment).with(anything).and_call_original
+        job.perform(run.id)
+      end
+    end
   end
 
   describe 'enqueuing from RunStorageService' do
