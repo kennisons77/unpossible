@@ -42,3 +42,24 @@ Agent activity log. Auto-updated each iteration. Trimmed to last 10 entries.
 **Tradeoffs taken:**
 - Sidecar can access any org's run via `complete` — acceptable because sidecar token is a shared secret controlled by the platform, not a user credential
 - If we ever add per-org sidecar tokens, `complete` will need scoping too — the nil-check makes that future change obvious
+
+---
+
+## 2026-04-18 14:08 — Task 1.1: Annotate Go sidecar stubs in docker-compose.yml (tag 0.0.59)
+
+**Changes:**
+- Added "Phase 0: Go sidecars not yet built" comment block above commented-out `go_runner` and `analytics` service stubs in `infra/docker-compose.yml`
+- References tasks 8.2 and 8.6 as the unlock conditions
+- `docker compose config` validates without errors; 271 examples, 0 failures
+
+**Thinking:**
+- Straightforward annotation. The stubs were already commented out; the task only required making the intent explicit so future readers don't wonder whether they were accidentally disabled.
+
+**Challenges:**
+- None. The change is purely documentary.
+
+**Alternatives considered:**
+- Deleting the stubs entirely: cleaner file, but loses the service shape as a reference when Go sidecars are eventually built. Annotation preserves intent at zero cost.
+
+**Tradeoffs taken:**
+- Commented-out code is normally dead code (delete it). Here it's a scaffold placeholder for a known future service — the annotation makes that distinction explicit. If the Go sidecars are never built, the stubs should be deleted at that point.
