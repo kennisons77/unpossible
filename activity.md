@@ -93,3 +93,34 @@ Agent activity log. Auto-updated each iteration. Trimmed to last 10 entries.
 **Tradeoffs taken:**
 - The service-layer concurrent run check in `RunStorageService` is now redundant with the queue-level control, but both are kept: the service check gives an immediate 409 to the caller; the queue-level control handles the case where two jobs are enqueued before either starts executing
 - `duration: 30.minutes` is a guess — if agent runs routinely exceed 30 minutes, a second job for the same source_ref could slip through. Should be revisited when real run durations are known
+
+---
+
+## 2026-04-18 14:23 — Task 2.2: Implement call_provider on all three adapters (tag 0.0.61)
+
+**Changes:**
+- `ClaudeAdapter#call_provider`: HTTP POST to `api.anthropic.com/v1/messages` via `Net::HTTP`, API key from `ANTHROPIC_API_KEY` wrapped in `Secret`, returns error hash on any exception without raising
+- `OpenAiAdapter#call_provider`: HTTP POST to `api.openai.com/v1/chat/completions`, `Authorization: Bearer` from `OPENAI_API_KEY` Secret, same error handling
+- `KiroAdapter#call_provider`: subprocess via `Open3.capture3("kiro-cli", "chat", "--no-interactive", "--trust-all-tools", "--", input)`, returns error hash on non-zero exit or missing binary
+- Added `webmock`, `rexml`, `addressable`, `crack`, `hashdiff`, `public_suffix` to Gemfile/vendor/cache for HTTP stubbing in tests
+- 20 new tests in `call_provider_spec.rb`: correct endpoint, headers, API key injection, parsed response, error handling, API key not in error output
+- 290 examples, 0 failures, 99.46% coverage
+
+**Thinking:**
+- `Net::HTTP` is stdlib — no new gem needed for Claude and OpenAI. The spec says "Call provider HTTP API directly (no sidecar)" and the Gemfile had no HTTP client gem, so stdlib was the right choice
+- Kiro is a CLI tool, not an HTTP API. The `kiro.md` provider spec shows `kiro-cli chat --no-interactive --trust-all-tools -- "$PROMPT"`. Using `Open3.capture3` with an array of args (not a shell string) avoids shell injection
+- API keys are wrapped in `Secret` at the call site so they never appear in `inspect`, `to_s`, or error messages — the `expose` call happens only at the HTTP header assignment line
+
+**Challenges:**
+- `crack` gem (a WebMock dependency for XML parsing) requires `rexml`, which is a stdlib gem that must be explicitly required in Ruby 3.x. The `ruby:3.3-slim` base image doesn't bundle it. Had to add `rexml` as an explicit gem dependency and download it to vendor/cache
+- WebMock blocks all real HTTP by default when required — this is the desired behavior for tests, but required adding `stub_request` calls for every HTTP-touching test
+
+**Alternatives considered:**
+- Using `Faraday` or `HTTParty` for HTTP: cleaner API but adds a gem dependency with no benefit over `Net::HTTP` for simple POST calls
+- Mocking `Net::HTTP` directly with RSpec doubles instead of WebMock: more brittle (tied to implementation), harder to read, doesn't test the actual HTTP construction
+- Raising on HTTP errors instead of returning an error hash: the spec says "handles HTTP errors gracefully (returns error hash, does not raise)" — the job layer decides what to do with the error
+
+**Tradeoffs taken:**
+- `KiroAdapter#call_provider` serializes the prompt to a flat string for the CLI. This loses the structured message format (roles, system/user separation). If Kiro ever exposes an HTTP API, the adapter should be updated to use it directly
+- Error messages in the returned hash say "Provider call failed" without the original exception message — this prevents leaking internal details but makes debugging harder. The exception class is included (`e.class.name`) as a compromise
+- `read_timeout: 120` is a guess for both Claude and OpenAI. Long-running completions may time out. Should be made configurable via env var if real usage shows timeouts
