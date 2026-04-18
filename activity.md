@@ -17,6 +17,32 @@ Agent activity log. Auto-updated each iteration. Trimmed to last 10 entries.
 
 ---
 
+## 2026-04-18 14:31 — Task 2.3: Add agent_override flag to AgentRun (tag 0.0.62)
+
+**Changes:**
+- Migration: `add_column :agents_agent_runs, :agent_override, :boolean, null: false, default: false`
+- `AgentRun`: `attribute :agent_override, :boolean, default: false` with explanatory comment
+- `AgentRunJob`: extracted `load_enrichment` private method; bypass it when `run.agent_override` is true; callable tools still passed regardless
+- 5 new tests: model defaults, model accepts true/false, job skips enrichment on override, job still completes run on override, job calls load_enrichment when override is false
+- 296 examples, 0 failures, 99.47% coverage
+
+**Thinking:**
+- The spec says "enrichment tools skipped, callable tools still passed." Enrichment = context_chunks + principles loading. Callable tools are a separate concern (passed to the provider as tool definitions). The current job passes empty arrays for both — extracting `load_enrichment` makes the bypass point explicit and positions task 2.6 (skill assembly) cleanly: it only needs to fill in `load_enrichment`.
+- `attribute :agent_override, :boolean, default: false` is redundant with the DB default but makes the model self-documenting and ensures the attribute is typed correctly in memory before a DB round-trip.
+
+**Challenges:**
+- No real challenges. The enrichment path is currently a stub (returns `[[], []]`), so the override branch and the non-override branch produce identical behavior today. The test for "calls load_enrichment when override is false" uses `expect(job).to receive(:load_enrichment)` to verify the code path is taken, not the output.
+
+**Alternatives considered:**
+- Inline the bypass in `perform` without extracting `load_enrichment`: saves one method but makes task 2.6 harder — the skill assembler would need to be wired into `perform` directly with no clear seam.
+- Store `agent_override` as a jsonb metadata field instead of a column: avoids a migration but makes querying and validation harder. A boolean column is the right type for a boolean flag.
+
+**Tradeoffs taken:**
+- `load_enrichment` currently returns `[[], []]` regardless of the run — it's a stub. When task 2.6 is implemented, it will do real work. The override flag correctly bypasses it even now (no-op bypass of a no-op), which is correct behavior.
+- The `attribute` declaration in the model is technically redundant with the DB column. If the column is ever removed, the attribute declaration would silently persist as an in-memory-only attribute. Low risk for a boolean flag.
+
+---
+
 ## 2026-04-18 14:04 — Task 2.6b: Scope set_agent_run to current_org_id (tag 0.0.58)
 
 **Changes:**

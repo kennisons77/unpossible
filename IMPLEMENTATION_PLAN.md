@@ -74,7 +74,7 @@ All three adapters inherit `call_provider` from the base class which raises `Not
 ### 2.3 agent_override flag missing
 Spec requires `AgentRun` to accept `agent_override: boolean` — when true, enrichment tools are skipped. No column exists, no logic implemented.
 
-- [ ] 2.3 — Add `agent_override` boolean column to `agents_agent_runs` and skip enrichment when true (`web/db/migrate/`, `web/app/modules/agents/models/agent_run.rb`, `web/app/modules/agents/jobs/agent_run_job.rb`)
+- [x] 2.3 — Add `agent_override` boolean column to `agents_agent_runs` and skip enrichment when true (`web/db/migrate/`, `web/app/modules/agents/models/agent_run.rb`, `web/app/modules/agents/jobs/agent_run_job.rb`)
   Required tests: AgentRun accepts agent_override, AgentRunJob skips enrichment tools when agent_override is true, callable tools still passed when agent_override is true
 
 ### 2.4 LlmMetric not created on run completion
