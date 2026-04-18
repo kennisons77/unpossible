@@ -10,7 +10,15 @@ module Agents
       source_ref.presence || run_id
     end
 
-    def perform(agent_run_id)
+    # Solid Queue concurrency control: block a second job for the same source_ref
+    # until the first completes. Arguments are (agent_run_id, source_ref).
+    limits_concurrency to: 1,
+                       key: ->(agent_run_id, source_ref = nil) {
+                         self.class.concurrency_key_for(run_id: agent_run_id.to_s, source_ref: source_ref)
+                       },
+                       duration: 30.minutes
+
+    def perform(agent_run_id, _source_ref = nil)
       run = AgentRun.find_by(id: agent_run_id)
       return unless run && run.status == "running"
 

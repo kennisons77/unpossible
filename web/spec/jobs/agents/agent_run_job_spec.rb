@@ -20,6 +20,24 @@ RSpec.describe Agents::AgentRunJob, type: :job do
     expect(described_class.queue_name).to eq('agents')
   end
 
+  describe 'limits_concurrency' do
+    it 'declares concurrency limit of 1' do
+      expect(described_class.concurrency_limit).to eq(1)
+    end
+
+    it 'uses source_ref as concurrency key when present' do
+      job = described_class.new
+      job.arguments = [run.id, 'specifications/foo.md']
+      expect(job.concurrency_key).to include('specifications/foo.md')
+    end
+
+    it 'falls back to run_id string when source_ref is absent' do
+      job = described_class.new
+      job.arguments = [run.id, nil]
+      expect(job.concurrency_key).to include(run.id.to_s)
+    end
+  end
+
   describe 'concurrency key helper' do
     it 'uses source_ref when present' do
       expect(described_class.concurrency_key_for(run_id: 'r1', source_ref: 'specifications/foo.md'))
@@ -161,7 +179,7 @@ RSpec.describe Agents::AgentRunJob, type: :job do
     it 're-enqueues AgentRunJob when human input is recorded' do
       expect {
         Agents::RunStorageService.record_input(run, content: 'my answer')
-      }.to have_enqueued_job(described_class).with(run.id)
+      }.to have_enqueued_job(described_class).with(run.id, run.source_ref)
     end
   end
 end
