@@ -14,7 +14,7 @@ COPY web/vendor/cache ./vendor/cache
 RUN bundle install --local --jobs 4
 
 COPY web/ .
-COPY specs/ /specs/
+COPY specifications/ /specifications/
 
 # Create DB and run migrations before tests
 COPY infra/entrypoint-test.sh /entrypoint-test.sh

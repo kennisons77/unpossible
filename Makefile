@@ -5,7 +5,7 @@
 
 PROJECT_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 ROOT_DIR := $(PROJECT_DIR)
-SANDBOX = kiro-unpossible # TODO: make agent-agnostic — sandbox name is Kiro-specific
+SANDBOX = $(AGENT)-unpossible
 SANDBOX_WORKDIR = 'unpossible'
 LOOP := $(ROOT_DIR)loop.sh
 ACTIVE_PROJECT_FILE := $(ROOT_DIR)ACTIVE_PROJECT
@@ -18,7 +18,7 @@ SKILL = @cd $(PROJECT_DIR) && $(AGENT) -- "$(shell cat $(PROJECT_DIR)
         docker-build up down restart logs console shell \
         db-create db-migrate db-setup db-reset \
         build plan build1 research \
-        sb-interview sb-review review prd spec server-ops \
+        sb-interview sb-review review requirements concept server-ops \
         start config status activate test sandbox
 
 COMPOSE := docker compose -f $(PROJECT_DIR)infra/docker-compose.yml
@@ -48,7 +48,7 @@ help:
 	@echo "  make shell           Open bash in rails container"
 	@echo ""
 	@echo "Workflow:"
-	@echo "  make start           Orient, research if needed, gap-fill spec, plan (1 iteration)"
+	@echo "  make start           Orient, research if needed, gap-fill concept, plan (1 iteration)"
 	@echo ""
 	@echo "Loop commands:"
 	@echo "  make build           Build loop, unlimited iterations"
@@ -63,8 +63,8 @@ help:
 	@echo "  make sb-review       Interactive code review in sandbox (discuss changes, decide direction)"
 	@echo ""
 	@echo "Skills:"
-	@echo "  make prd             Produce or update a PRD"
-	@echo "  make spec            Produce or update spec files for a PRD"
+	@echo "  make requirements     Produce or update requirements"
+	@echo "  make concept         Produce or update concept files for requirements"
 	@echo "  make server-ops      Operate on a server"
 
 # --- Config & runner ---
@@ -98,9 +98,8 @@ test:
 	$(COMPOSE_TEST) build
 	$(COMPOSE_TEST) run --rm test
 
-# TODO: make agent-agnostic — `docker sandbox run kiro` is Kiro-specific
 sandbox:
-	docker sandbox run kiro
+	docker sandbox run $(AGENT)
 
 # --- Rails server ---
 docker-build:
@@ -141,15 +140,15 @@ db-reset:
 
 # --- Workflow ---
 
-# Start a feature: orient the agent, check for prior research, gap-fill the spec,
+# Start a feature: orient the agent, check for prior research, gap-fill the concept,
 # then run one plan iteration so you can review the beats before committing to a full run.
 start:
 	@echo "==> Reading orientation files..."
-	@cat $(PROJECT_DIR)specs/README.md
+	@cat $(PROJECT_DIR)specifications/README.md
 	@cat $(PROJECT_DIR)AGENTS.md
 	@echo ""
-	@echo "==> Checking for prior research and gap-filling spec..."
-	@cd $(PROJECT_DIR) && $(AGENT) -- "$(shell cat $(PROJECT_DIR)specs/skills/tools/research.md)\n\n$(shell cat $(PROJECT_DIR)specs/skills/workflows/spec.md)"
+	@echo "==> Checking for prior research and gap-filling concept..."
+	@cd $(PROJECT_DIR) && $(AGENT) -- "$(shell cat $(PROJECT_DIR)specifications/skills/tools/research.md)\n\n$(shell cat $(PROJECT_DIR)specifications/skills/workflows/concept.md)"
 	@echo ""
 	@echo "==> Running plan (1 iteration) — review beats before running make plan or make build..."
 	@cd $(PROJECT_DIR) && $(LOOP) plan 1
@@ -186,25 +185,22 @@ review:
 	@cd $(ROOT_DIR) && AGENT=$(AGENT) MODEL=$(MODEL) $(LOOP) review
 
 # --- Skill targets ---
-prd:
-	@cd $(PROJECT_DIR) && $(AGENT) -- "$(shell cat $(PROJECT_DIR)specs/skills/workflows/prd.md)"
+requirements:
+	@cd $(PROJECT_DIR) && $(AGENT) -- "$(shell cat $(PROJECT_DIR)specifications/skills/workflows/requirements.md)"
 
-spec:
-	@cd $(PROJECT_DIR) && $(AGENT) -- "$(shell cat $(PROJECT_DIR)specs/skills/workflows/spec.md)"
+concept:
+	@cd $(PROJECT_DIR) && $(AGENT) -- "$(shell cat $(PROJECT_DIR)specifications/skills/workflows/concept.md)"
 
 server-ops:
-	@cd $(PROJECT_DIR) && $(AGENT) -- "$(shell cat $(PROJECT_DIR)specs/skills/workflows/server-ops.md)"
+	@cd $(PROJECT_DIR) && $(AGENT) -- "$(shell cat $(PROJECT_DIR)specifications/skills/workflows/server-ops.md)"
 
 
 # --- Sandbox Commands ---
-# TODO: make agent-agnostic — sbx and kiro-cli are Kiro-specific
 sb-run:
-	@sbx run $(SANDBOX) -- kiro-cli --tui
+	@sbx run $(SANDBOX) -- $(shell scripts/sandbox-args.sh $(AGENT) run)
 
-# TODO: make agent-agnostic — kiro-cli chat --agent is Kiro-specific
 sb-interview:
-	@sbx run $(SANDBOX) -- kiro-cli --tui --agent interview
+	@sbx run $(SANDBOX) -- $(shell scripts/sandbox-args.sh $(AGENT) interview)
 
-# TODO: make agent-agnostic — kiro-cli chat --agent is Kiro-specific
 sb-review:
-	@sbx run $(SANDBOX) -- kiro-cli chat --tui --agent review
+	@sbx run $(SANDBOX) -- $(shell scripts/sandbox-args.sh $(AGENT) review)

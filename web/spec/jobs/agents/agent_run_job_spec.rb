@@ -22,8 +22,8 @@ RSpec.describe Agents::AgentRunJob, type: :job do
 
   describe 'concurrency key helper' do
     it 'uses source_ref when present' do
-      expect(described_class.concurrency_key_for(run_id: 'r1', source_ref: 'specs/foo.md'))
-        .to eq('specs/foo.md')
+      expect(described_class.concurrency_key_for(run_id: 'r1', source_ref: 'specifications/foo.md'))
+        .to eq('specifications/foo.md')
     end
 
     it 'falls back to run_id when source_ref is absent' do

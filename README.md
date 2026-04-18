@@ -75,8 +75,8 @@ make review      # Review loop, 1 iteration (analyse codebase, propose beats)
 │   ├── docker-compose.yml   # Full dev stack
 │   └── docker-compose.test.yml  # Ephemeral test stack
 │
-└── specs/
-    ├── project-prd.md       # Technical constraints and phase model
+└── specifications/
+    ├── project-requirements.md       # Technical constraints and phase model
     ├── system/              # Platform internals specs
     ├── platform/rails/      # Rails-specific overrides
     ├── practices/           # Discipline rules
