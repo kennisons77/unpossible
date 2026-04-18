@@ -15,6 +15,7 @@ See `specifications/system/practices.md` for the full loading rules.
 | [verification.md](verification.md)         | Verification    | plan, build (on demand)        |
 | [automation.md](automation.md)             | Automation      | build (on demand)              |
 | [cost.md](cost.md)                         | Cost            | all                            |
+| [Developer.md](Developer.md)               | Developer       | all                            |
 | [version-control.md](version-control.md)   | Version control | build                          |
 | [security.md](security.md)                 | Security        | build (on demand)              |
 | [threat-modeling.md](threat-modeling.md)    | Threat modeling | build (on demand)              |
