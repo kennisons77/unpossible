@@ -1,359 +1,337 @@
-# IMPLEMENTATION_PLAN.md — Unpossible
+# IMPLEMENTATION_PLAN.md
 
-**Phase:** 0 (Local — Docker Compose only)
-**Generated:** 2026-04-17T15:57
-**Scope:** Phase 0 tasks only. No CI, no staging, no production config.
+Generated: 2026-04-18
+Phase: 0 — Local (Docker Compose only)
+Scope: Phase 0 MVP per `specifications/project-requirements.md`
 
 ## Completed Work (discovered from code + git)
 
-The following is implemented and tested (267 RSpec examples, 0 failures per last run):
+The following is implemented and tested (270 examples, 0 failures, 99.21% coverage as of tag 0.0.57):
 
-- **Infrastructure:** Dockerfile (ruby:3.3-slim), Dockerfile.test (ruby:3.3), docker-compose.yml (rails + postgres), docker-compose.test.yml (ephemeral test stack). Image tags use `${GIT_SHA:-dev}`. Postgres not bound to 0.0.0.0. No `infra/k8s/` or `infra/nixos/` directories.
-- **Auth:** Secret value object, AuthToken (JWT HS256), ApplicationController#authenticate!, POST /api/auth/token, X-Sidecar-Token sidecar auth, DISABLE_AUTH dev bypass, rack-attack rate limiting.
-- **Security:** Security::PromptSanitizer, Security::LogRedactor, lograge structured logging with redaction, filter_parameters configured.
-- **Agents module:** AgentRun model (modes, statuses, org_id, source_ref, parent_run_id, prompt_sha256, source_node_ids), AgentRunTurn model (kinds, purged_at), RunStorageService (start/complete/record_input, dedup, concurrency check), PromptDeduplicator, ProviderAdapter base with pinned+sliding token budget, ClaudeAdapter, KiroAdapter, OpenAiAdapter (build_prompt + parse_response), AgentRunsController (start/complete/input endpoints), AgentRunJob (Solid Queue execution with pause/resume), TurnContentGcJob (30-day retention, skips failed/waiting_for_input).
-- **Sandbox module:** ContainerRun model (statuses, org_id, agent_run_id nullable), DockerDispatcher (shells out to docker run --rm, argument array, secret filtering, timeout).
-- **Analytics module:** AnalyticsEvent model (append-only, org_id, distinct_id, event_name, node_id indexed, properties jsonb), AuditEvent model (append-only, severity enum), LlmMetric model (append-only, org_id, provider, model, cost_estimate_usd decimal(10,6)), FeatureFlag model (key unique per org, enabled, status active/archived, auto-fires $feature_flag_called), AuditLogger (async via AuditLogJob, fail-open), MetricsController (llm, loops, summary, events, flag_stats endpoints), FeatureFlagsController (index/create/update).
-- **Health check:** HealthCheckMiddleware at position 0, GET /health → 200/503.
-- **Ledger/Knowledge removal:** All ledger and knowledge tables dropped, FKs removed from agent_runs, source_ref string column added.
-- **Reference graph (partial):** LedgerAppender (append-only LEDGER.jsonl, valid event types, idempotent), controlled-commit.sh script (atomic commit + ledger + plan update).
-- **Module scaffold:** LOOKUP.md, namespace resolution, autoload paths configured.
+- **Infrastructure:** `infra/Dockerfile`, `infra/Dockerfile.test`, `infra/docker-compose.yml`, `infra/docker-compose.test.yml`, entrypoints, pgvector/pg16
+- **Auth:** `AuthToken` (JWT encode/decode), `Secret` value object, `ApplicationController#authenticate!`, sidecar auth (`X-Sidecar-Token`), `Api::AuthController` (POST /api/auth/token), dev bypass (DISABLE_AUTH)
+- **Security:** `Security::PromptSanitizer`, `Security::LogRedactor`, `filter_parameters`, `rack-attack` rate limiting
+- **Agents module:** `AgentRun` model (modes, statuses, validations, unique run_id), `AgentRunTurn` model (kinds, purged_at), `ProviderAdapter` base + `ClaudeAdapter` / `KiroAdapter` / `OpenAiAdapter` (build_prompt with pinned+sliding trimming, parse_response normalised hash), `PromptDeduplicator`, `RunStorageService` (start/complete/record_input, dedup, concurrent run check), `AgentRunsController` (start/complete/input endpoints), `AgentRunJob` (Solid Queue, turn reconstruction, pause/resume), `TurnContentGcJob` (30-day retention, skips failed/waiting)
+- **Sandbox module:** `ContainerRun` model (statuses, duration_ms, optional agent_run), `DockerDispatcher` (argument array, Secret filtering, timeout, record creation)
+- **Analytics module:** `AnalyticsEvent` (append-only), `AuditEvent` (append-only, severities), `LlmMetric` (append-only), `FeatureFlag` (enabled?, auto-fires $feature_flag_called, archived returns false), `AuditLogger` (async, never raises), `AuditLogJob`, `MetricsController` (llm/loops/summary/events/flag_stats), `FeatureFlagsController` (index/create/update)
+- **Health check:** `HealthCheckMiddleware` at position 0, GET /health → 200/503
+- **Ledger/Knowledge removal:** Tables dropped, FKs replaced with source_ref string
+- **Reference graph partial:** `LedgerAppender`, `scripts/controlled-commit.sh`
+- **Module scaffold:** Namespace resolution, LOOKUP.md files
 
-## Spec Contradictions
+## Spec Contradictions & Ambiguities
 
-**FeatureFlag metadata.hypothesis:** Base spec (`specifications/system/feature-flags/concept.md`) says `metadata.hypothesis` is optional in Phase 0. Rails platform override (`specifications/platform/rails/product/analytics.md`) says it's required on creation → 422. Current code and tests treat it as optional. **Resolution: follow the base spec — optional in Phase 0.** The platform override appears to describe post-MVP behaviour. Flag for human review if this is wrong.
+1. **FeatureFlagExposure model:** Rails platform override (`product/analytics.md`) references `Analytics::FeatureFlagExposure` model and `feature_flag_exposures` table. However, the current implementation fires `$feature_flag_called` as an `AnalyticsEvent` — no separate model exists. The feature-flags requirements say exposure events go through the analytics ingest. **Resolution:** The AnalyticsEvent approach is correct for Phase 0. FeatureFlagExposure as a separate model is speculative generality — the AnalyticsEvent already captures the same data. Flag for review if query performance on exposures becomes an issue.
 
----
+2. **FeatureFlag metadata.hypothesis:** `feature-flags/concept.md` says "optional in Phase 0", `product/analytics.md` says "required on creation → 422 if missing". The requirements file says "not required in Phase 0". **Resolution:** Follow requirements — optional in Phase 0.
 
-## Section 1 — Reference Graph: Controlled Commit & Ledger (Priority 1)
-
-> Spec: `specifications/system/reference-graph/concept.md` § Components 1–2
-
-- [x] 1.1 LedgerAppender for LEDGER.jsonl (`web/app/lib/ledger_appender.rb`, `web/spec/lib/ledger_appender_spec.rb`)
-- [x] 1.2 Controlled commit skill script (`scripts/controlled-commit.sh`, `scripts/test-controlled-commit.sh`)
+3. **Batch request middleware:** `specifications/system/batch-requests.md` exists but has no requirements file and no acceptance criteria tied to a specific phase. It's a proposed feature. **Resolution:** Include as a task since it's a defined spec, but lower priority.
 
 ---
 
-## Section 2 — Provider Adapters: parse_response Normalisation
+## Section 1 — Infrastructure Gaps
 
-> Spec: `specifications/system/agent-runner/concept.md` § Provider Adapter Interface
-> The spec requires `parse_response` to return `{text:, input_tokens:, output_tokens:, stop_reason:}`.
-> Current adapters return a plain string (e.g. `raw_response.dig("content", 0, "text")`).
-> AgentRunJob already expects a hash (tests mock it as a hash). The adapters themselves are inconsistent.
+- [x] Dockerfile, docker-compose.yml, docker-compose.test.yml — all exist and functional
+- [x] Postgres pgvector/pg16 — configured
+- [x] Health check middleware — implemented
 
-- [x] 2.1 Fix ClaudeAdapter#parse_response to return normalised hash (`web/app/modules/agents/services/claude_adapter.rb`, `web/spec/modules/agents/services/provider_adapter_spec.rb`)
-  Required tests: parse_response returns hash with :text, :input_tokens, :output_tokens, :stop_reason keys; handles missing fields gracefully
+### 1.1 Docker Compose: uncomment Go sidecar stubs or remove them
+The spec (`infrastructure/concept.md`) defines `go_runner` (port 8080) and `analytics` sidecar (port 9100) in the compose file. They are currently commented out. The `go/` directory does not exist. These sidecars are Go binaries — they cannot be built until `go/` exists.
 
-- [x] 2.2 Fix KiroAdapter#parse_response to return normalised hash (`web/app/modules/agents/services/kiro_adapter.rb`, `web/spec/modules/agents/services/provider_adapter_spec.rb`)
-  Required tests: same as 2.1
+- [ ] 1.1 — Remove or annotate commented Go sidecar stubs in `infra/docker-compose.yml` with explicit "Phase 0: Go sidecars not yet built" comments (`infra/docker-compose.yml`)
+  Required tests: `docker compose config` validates without errors
 
-- [x] 2.3 Fix OpenAiAdapter#parse_response to return normalised hash (`web/app/modules/agents/services/open_ai_adapter.rb`, `web/spec/modules/agents/services/provider_adapter_spec.rb`)
-  Required tests: same as 2.1
+### 1.2 Postgres port binding
+Spec says "Postgres is never bound to 0.0.0.0 — internal network only." Current compose file does not expose postgres ports externally — **compliant**. No task needed.
 
----
-
-## Section 3 — Provider Adapters: call_provider HTTP Implementation
-
-> Spec: `specifications/system/agent-runner/concept.md` § Provider Adapter Interface
-> `call_provider` is currently `raise NotImplementedError`. The spec requires direct HTTP calls to provider APIs.
-
-- [ ] 3.1 Implement ClaudeAdapter#call_provider with HTTP POST to Anthropic API (`web/app/modules/agents/services/claude_adapter.rb`, `web/spec/modules/agents/services/provider_adapter_spec.rb`)
-  Required tests: sends correct headers (x-api-key, anthropic-version), sends correct body shape, returns raw response hash, API key wrapped in Secret and never logged
-  Required threat tests: API key not present in logs or error messages
-
-- [ ] 3.2 Implement OpenAiAdapter#call_provider with HTTP POST to OpenAI API (`web/app/modules/agents/services/open_ai_adapter.rb`, `web/spec/modules/agents/services/provider_adapter_spec.rb`)
-  Required tests: sends correct headers (Authorization: Bearer), sends correct body shape, returns raw response hash, API key wrapped in Secret and never logged
-  Required threat tests: API key not present in logs or error messages
-
-- [ ] 3.3 Implement KiroAdapter#call_provider — determine invocation method (`web/app/modules/agents/services/kiro_adapter.rb`, `web/spec/modules/agents/services/provider_adapter_spec.rb`)
-  Required tests: invocation works, returns raw response, API key not logged
-  Note: Kiro invocation may differ from HTTP API pattern — check `specifications/skills/providers/kiro.md` for details.
+### 1.3 Image tags
+Spec says "always git SHA, never latest." Dev compose uses `${GIT_SHA:-dev}` — acceptable for Phase 0 local dev. Test compose has no image tag (builds inline). **Compliant for Phase 0.**
 
 ---
 
-## Section 4 — API Documentation (rswag)
+## Section 2 — Agents Module Gaps
 
-> Spec: `specifications/system/api/concept.md`, `specifications/system/api/requirements.md`, `specifications/platform/rails/system/api-standards.md`
-> rswag is not installed. No swagger.yaml exists. No spec/requests/ files use rswag DSL.
-> Existing request specs use plain RSpec request syntax.
+- [x] AgentRun model, AgentRunTurn model
+- [x] ProviderAdapter + 3 adapters (build_prompt, parse_response)
+- [x] PromptDeduplicator, RunStorageService
+- [x] AgentRunsController (start/complete/input)
+- [x] AgentRunJob (turn reconstruction, pause/resume)
+- [x] TurnContentGcJob
 
-- [ ] 4.1 Add rswag gems and configure (`web/Gemfile`, `web/Gemfile.lock`, `web/vendor/cache/`, `web/spec/swagger_helper.rb`, `web/config/initializers/rswag.rb`, `swagger/v1/swagger.yaml`)
-  Required tests: `GET /api/docs` returns 200 without authentication; `rake rswag:specs:swaggerize` exits 0
-  Note: gems must be pre-downloaded to `web/vendor/cache/` per AGENTS.md § Adding New Gems
+### 2.1 Solid Queue concurrency key not wired
+`AgentRunJob.concurrency_key_for` exists as a class method but is not connected to Solid Queue's `limits_concurrency` DSL. The spec requires "one active run per agent config at a time, enforced via solid_queue concurrency key on source_ref." Currently, concurrent runs are only checked at the service layer (RunStorageService), not at the job queue level.
 
-- [ ] 4.2 Convert existing request specs to rswag DSL — auth endpoints (`web/spec/requests/api/auth_spec.rb`)
-  Required tests: existing test coverage preserved; spec contributes to swagger.yaml
+- [ ] 2.1 — Wire `limits_concurrency` in `AgentRunJob` using Solid Queue DSL (`web/app/modules/agents/jobs/agent_run_job.rb`)
+  Required tests: job declares `limits_concurrency` with key from `concurrency_key_for`, second job for same source_ref is blocked (not run in parallel)
 
-- [ ] 4.3 Convert existing request specs to rswag DSL — agent_runs endpoints (`web/spec/requests/agents/agent_runs_spec.rb`)
-  Required tests: existing test coverage preserved; spec contributes to swagger.yaml
+### 2.2 call_provider not implemented on concrete adapters
+All three adapters inherit `call_provider` from the base class which raises `NotImplementedError`. The spec requires adapters to make HTTP calls to provider APIs. AgentRunJob calls `adapter.call_provider(prompt)`.
 
-- [ ] 4.4 Convert existing request specs to rswag DSL — feature_flags endpoints (`web/spec/requests/analytics/feature_flags_spec.rb`)
-  Required tests: existing test coverage preserved; spec contributes to swagger.yaml
+- [ ] 2.2 — Implement `call_provider` on `ClaudeAdapter`, `KiroAdapter`, `OpenAiAdapter` with HTTP calls to provider APIs (`web/app/modules/agents/services/claude_adapter.rb`, `kiro_adapter.rb`, `open_ai_adapter.rb`)
+  Required tests: each adapter makes HTTP POST to correct provider URL, passes correct headers (API key via Secret), returns raw response hash, handles HTTP errors gracefully (returns error hash, does not raise)
+  Required threat tests: API key never appears in logs or error messages
 
-- [ ] 4.5 Convert existing request specs to rswag DSL — metrics endpoints (`web/spec/requests/analytics/metrics_spec.rb`)
-  Required tests: existing test coverage preserved; spec contributes to swagger.yaml
+### 2.3 agent_override flag missing
+Spec requires `AgentRun` to accept `agent_override: boolean` — when true, enrichment tools are skipped. No column exists, no logic implemented.
 
-- [ ] 4.6 Add rswag route for `/api/docs` and verify swagger.yaml generation (`web/config/routes.rb`, `swagger/v1/swagger.yaml`)
-  Required tests: `GET /api/docs` returns 200; swagger.yaml lists all API endpoints
+- [ ] 2.3 — Add `agent_override` boolean column to `agents_agent_runs` and skip enrichment when true (`web/db/migrate/`, `web/app/modules/agents/models/agent_run.rb`, `web/app/modules/agents/jobs/agent_run_job.rb`)
+  Required tests: AgentRun accepts agent_override, AgentRunJob skips enrichment tools when agent_override is true, callable tools still passed when agent_override is true
+
+### 2.4 LlmMetric not created on run completion
+`AgentRunsController#complete` updates the run and logs an audit event, but never creates an `Analytics::LlmMetric` record. The spec requires per-run cost/token recording in LlmMetric.
+
+- [ ] 2.4 — Create `Analytics::LlmMetric` record when an agent run completes (`web/app/modules/agents/controllers/agent_runs_controller.rb` or `web/app/modules/agents/services/run_storage_service.rb`)
+  Required tests: completing a run creates an LlmMetric with correct provider, model, tokens, cost_estimate_usd, agent_run_id, org_id
+
+### 2.5 Skill frontmatter parsing + assembly pipeline
+The spec defines a 7-step assembly pipeline: load instruction body, retrieve context from practices files, load principles, run enrichment tools, wrap with prompt_template, compute prompt_sha256, check dedup. Currently, `AgentRunJob` passes empty arrays for `context_chunks` and `principles`. No skill file parsing exists.
+
+- [ ] [SPIKE] 2.5 — Research skill frontmatter parsing and assembly pipeline — run `./loop.sh research skill-assembly` (see specifications/skills/tools/research.md)
+  Blocks: 2.6
+
+- [ ] 2.6 — Implement skill frontmatter parsing and assembly pipeline (`web/app/modules/agents/services/skill_assembler.rb`, `web/app/modules/agents/jobs/agent_run_job.rb`)
+  Depends on: 2.5
+  Required tests: parses YAML frontmatter from skill file, loads context_chunks from declared practices files, loads principles, computes prompt_sha256 from assembled content, enrichment tools run before first LLM call and results appear as tool_result turns
+
+### 2.6b AgentRunsController: org_id scoping on set_agent_run
+`set_agent_run` uses `AgentRun.find(params[:id])` without scoping to `current_org_id`. Cross-org access is possible.
+
+- [x] 2.6b — Scope `set_agent_run` to `current_org_id` in `AgentRunsController` (`web/app/modules/agents/controllers/agent_runs_controller.rb`)
+  Required tests: complete/input for a run belonging to a different org returns 404
+  Required threat tests: cross-org agent run access returns 404
 
 ---
 
-## Section 5 — Batch Request Middleware
+## Section 3 — Sandbox Module Gaps
 
-> Spec: `specifications/system/batch-requests.md`
-> Not implemented. No middleware, no tests.
+- [x] ContainerRun model
+- [x] DockerDispatcher (dispatch, timeout, secret filtering, record creation)
 
-- [ ] 5.1 Implement BatchRequestMiddleware (`web/app/middleware/batch_request_middleware.rb`, `web/spec/middleware/batch_request_middleware_spec.rb`)
-  Required tests: POST /api/batch fans out sub-requests and returns aggregated responses; responses ordered by request index; individual sub-request failures captured (not batch failure); max batch size enforced (422 on exceed); malformed JSON returns 422; sub-requests share auth context; batch endpoint requires authentication
+### 3.1 DockerDispatcher missing agent_run_id parameter
+The spec says `agent_run_id` is an FK on ContainerRun. `DockerDispatcher#dispatch` accepts `org_id` but not `agent_run_id`. ContainerRun records are created without linking to the triggering agent run.
 
-- [ ] 5.2 Register BatchRequestMiddleware in application.rb and add route (`web/config/application.rb`, `web/config/routes.rb`)
-  Required tests: POST /api/batch is routable and processed by middleware
+- [ ] 3.1 — Add `agent_run_id` parameter to `DockerDispatcher#dispatch` and pass it to `ContainerRun.create!` (`web/app/modules/sandbox/services/docker_dispatcher.rb`)
+  Required tests: dispatch with agent_run_id creates ContainerRun linked to the agent run, dispatch without agent_run_id creates ContainerRun with nil agent_run_id
+
+### 3.2 DockerDispatcher missing security flags
+Spec requires containers to run "non-root, no `--privileged`". Current `build_args` does not pass `--user` or security flags.
+
+- [ ] 3.2 — Add `--user` and `--security-opt=no-new-privileges` flags to `DockerDispatcher#build_args` (`web/app/modules/sandbox/services/docker_dispatcher.rb`)
+  Required tests: docker command includes `--user` flag, docker command does not include `--privileged`
 
 ---
 
-## Section 6 — Go Sidecars & CLI
+## Section 4 — Analytics Module Gaps
 
-> Specs: `specifications/platform/go/README.md`, `specifications/platform/go/system/runner.md`, `specifications/platform/go/system/analytics.md`, `specifications/system/reference-graph/concept.md` § Go Reference Parser
-> The entire `go/` directory does not exist. No Go code, no Dockerfile.go, no go.mod.
+- [x] AnalyticsEvent, AuditEvent, LlmMetric, FeatureFlag models
+- [x] AuditLogger, AuditLogJob
+- [x] MetricsController (llm/loops/summary/events/flag_stats)
+- [x] FeatureFlagsController (index/create/update)
 
-- [ ] [SPIKE] 6.1 Research Go project bootstrap — run `./loop.sh research go-bootstrap` (see specifications/skills/tools/research.md)
-  Scope: Determine Go module structure, dependency management for offline builds, multi-stage Dockerfile.go pattern, test strategy for sidecars (mock HTTP, mock Postgres). Blocks 6.2–6.8.
+### 4.1 FeatureFlagsController: org_id not set from auth on create
+`create_params` permits `:org_id` from the request body. The org_id should come from the authenticated user's token (`current_org_id`), not from the request body — otherwise a client can create flags for any org.
 
-- [ ] 6.2 Bootstrap Go module and Dockerfile.go (`go/go.mod`, `go/go.sum`, `go/cmd/runner/main.go`, `go/cmd/analytics/main.go`, `go/cmd/parser/main.go`, `infra/Dockerfile.go`)
+- [ ] 4.1 — Set `org_id` from `current_org_id` in `FeatureFlagsController#create`, remove `:org_id` from `create_params` (`web/app/modules/analytics/controllers/feature_flags_controller.rb`)
+  Required tests: creating a flag uses org_id from JWT, not from request body
+  Required threat tests: cannot create a flag for a different org by passing org_id in body
+
+### 4.2 MetricsController: events endpoint missing org_id scoping note
+The events endpoint correctly scopes to `current_org_id`. **Compliant.** No task needed.
+
+### 4.3 AnalyticsEvent: PII redaction on properties
+Spec requires "properties filtered through PII redaction before storage." No redaction exists on AnalyticsEvent creation.
+
+- [ ] 4.3 — Add PII redaction callback on `AnalyticsEvent` before create that scrubs known PII patterns from `properties` (`web/app/modules/analytics/models/analytics_event.rb`)
+  Required tests: email addresses in properties are redacted before save, phone numbers in properties are redacted before save, non-PII properties are preserved
+
+---
+
+## Section 5 — Auth Gaps
+
+- [x] AuthToken (encode/decode/secret)
+- [x] Secret value object
+- [x] ApplicationController#authenticate!
+- [x] Api::AuthController
+- [x] Sidecar auth (X-Sidecar-Token)
+
+### 5.1 Route protection audit
+Spec requires "every route is explicitly public or authenticated — no route is accidentally unprotected." Current routes: `/up` (public, Rails health), `/health` (public, middleware), `/api/auth/token` (public). All other routes go through controllers with `before_action :authenticate!`. **Compliant.**
+
+No tasks needed for auth.
+
+---
+
+## Section 6 — API Documentation (rswag)
+
+Spec requires rswag for OpenAPI docs at `/api/docs`, request specs using rswag DSL, and `rake rswag:specs:swaggerize` as a build gate.
+
+### 6.1 Install rswag gems
+rswag is not in the Gemfile. No swagger files exist. No rswag initializer exists.
+
+- [ ] 6.1 — Add rswag gems to Gemfile, download to vendor/cache, install, generate initializer and swagger_helper (`web/Gemfile`, `web/Gemfile.lock`, `web/vendor/cache/`, `web/config/initializers/rswag.rb`, `web/spec/swagger_helper.rb`)
+  Required tests: `rake rswag:specs:swaggerize` exits 0, GET /api/docs returns 200
+
+### 6.2 Convert existing request specs to rswag DSL
+Existing request specs (`spec/requests/agents/agent_runs_spec.rb`, `spec/requests/api/auth_spec.rb`, `spec/requests/analytics/feature_flags_spec.rb`, `spec/requests/analytics/metrics_spec.rb`) use plain RSpec. They need to be converted to rswag DSL so they generate OpenAPI documentation.
+
+- [ ] 6.2 — Convert `spec/requests/api/auth_spec.rb` to rswag DSL (`web/spec/requests/api/auth_spec.rb`)
   Depends on: 6.1
-  Required tests: `go build ./...` succeeds; `go test ./...` exits 0; Dockerfile.go multi-stage build produces runner, analytics, and parser binaries
+  Required tests: spec passes, `rake rswag:specs:swaggerize` includes auth endpoint
 
-- [ ] 6.3 Implement Go analytics ingest sidecar (`go/cmd/analytics/main.go`, `go/internal/`)
-  Depends on: 6.2
-  Required tests: POST /capture returns 202 immediately; events flushed within 5s or 100 events; events buffered on Postgres unavailability; GET /healthz returns 200; non-UUID distinct_id rejected; properties filtered through PII patterns
-  Required threat tests: ingest endpoint not reachable from outside internal network (compose network config)
+- [ ] 6.3 — Convert `spec/requests/agents/agent_runs_spec.rb` to rswag DSL (`web/spec/requests/agents/agent_runs_spec.rb`)
+  Depends on: 6.1
+  Required tests: spec passes, `rake rswag:specs:swaggerize` includes agent_runs endpoints
 
-- [ ] 6.4 Implement Go runner sidecar (`go/cmd/runner/main.go`, `go/internal/`)
-  Depends on: 6.2
-  Required tests: POST /run without Basic Auth → 401; concurrent POST /run → 409; calls Rails complete endpoint after loop exits (mock server); token counts parsed from stream-json stdout; GET /healthz returns 200; GET /ready returns 200; GET /metrics returns Prometheus text format
+- [ ] 6.4 — Convert `spec/requests/analytics/feature_flags_spec.rb` to rswag DSL (`web/spec/requests/analytics/feature_flags_spec.rb`)
+  Depends on: 6.1
+  Required tests: spec passes, `rake rswag:specs:swaggerize` includes feature_flags endpoints
 
-- [ ] 6.5 Uncomment go_runner and analytics services in docker-compose.yml (`infra/docker-compose.yml`)
-  Depends on: 6.3, 6.4
-  Required tests: `docker compose up` starts all services including Go sidecars
-
-- [ ] [SPIKE] 6.6 Research Go reference parser libraries — run `./loop.sh research go-parser-libs` (see specifications/skills/tools/research.md)
-  Scope: Evaluate Go libraries for markdown frontmatter parsing, JSONL parsing, git log/notes traversal. Blocks 6.7.
-
-- [ ] 6.7 Implement Go reference parser CLI (`go/cmd/parser/main.go`, `go/internal/`)
-  Depends on: 6.2, 6.6
-  Required tests: parser produces deterministic JSON graph from files + git + LEDGER.jsonl; spec: tags in RSpec files parsed and appear as edges; blocked-by references parsed as dependency edges; PR events from LEDGER.jsonl produce PR nodes; parser runs as standalone binary with no runtime dependencies
+- [ ] 6.5 — Convert `spec/requests/analytics/metrics_spec.rb` to rswag DSL (`web/spec/requests/analytics/metrics_spec.rb`)
+  Depends on: 6.1
+  Required tests: spec passes, `rake rswag:specs:swaggerize` includes metrics endpoints
 
 ---
 
-## Section 7 — Agent Run: agent_override Flag
+## Section 7 — Batch Request Middleware
 
-> Spec: `specifications/system/agent-runner/concept.md` § Agent Override Flag
-> Not implemented. No `agent_override` column on AgentRun, no skip logic in AgentRunJob.
+Spec: `specifications/system/batch-requests.md`. No requirements file exists. Proposed feature.
 
-- [ ] 7.1 Add agent_override boolean to AgentRun and wire skip logic (`web/db/migrate/YYYYMMDD_add_agent_override_to_agent_runs.rb`, `web/app/modules/agents/models/agent_run.rb`, `web/app/modules/agents/jobs/agent_run_job.rb`, `web/spec/models/agents/agent_run_spec.rb`, `web/spec/jobs/agents/agent_run_job_spec.rb`)
-  Required tests: agent_override defaults to false; when true, enrichment tools are skipped; callable tools still passed to provider; AgentRunsController accepts agent_override param
+- [ ] 7.1 — Implement `BatchRequestMiddleware` for `POST /api/batch` (`web/app/middleware/batch_request_middleware.rb`, `web/config/application.rb`, `web/config/routes.rb`)
+  Required tests: fans out sub-requests and returns aggregated responses, respects max batch size (422 on exceed), individual sub-request failures don't fail the batch, malformed JSON returns 422, sub-requests share auth context, responses ordered to match requests
 
 ---
 
-## Section 8 — Agent Run: Enrichment & Callable Tools
+## Section 8 — Reference Graph (Phase 0 scope only)
 
-> Spec: `specifications/system/agent-runner/concept.md` § Skill Frontmatter — Tool Declaration, § Assembly Pipeline
-> Not implemented. AgentRunJob does not load skill frontmatter, does not run enrichment tools, does not pass callable tools to provider.
+The reference graph spec (`specifications/system/reference-graph/concept.md`) defines 7 components. Phase 0 scope is limited to what's buildable without Go and without CI.
 
-- [ ] 8.1 Implement skill frontmatter parsing for tool declarations (`web/app/modules/agents/services/skill_loader.rb`, `web/spec/modules/agents/services/skill_loader_spec.rb`)
-  Required tests: parses `tools.enrich` and `tools.callable` from YAML frontmatter; returns empty arrays when not present; handles malformed frontmatter gracefully
+- [x] Controlled commit skill (`scripts/controlled-commit.sh`)
+- [x] LedgerAppender
 
-- [ ] 8.2 Wire enrichment tools into AgentRunJob assembly pipeline (`web/app/modules/agents/jobs/agent_run_job.rb`, `web/spec/jobs/agents/agent_run_job_spec.rb`)
+### 8.1 Go reference parser
+The reference parser is a standalone Go binary. The `go/` directory does not exist. This is a significant piece of work requiring Go project setup.
+
+- [ ] [SPIKE] 8.1 — Research Go reference parser architecture and file walking strategy — run `./loop.sh research reference-parser` (see specifications/skills/tools/research.md)
+  Blocks: 8.2
+
+- [ ] 8.2 — Bootstrap `go/` directory with `go.mod`, `cmd/parser/main.go` skeleton, and Dockerfile.go (`go/go.mod`, `go/cmd/parser/main.go`, `infra/Dockerfile.go`)
   Depends on: 8.1
-  Required tests: enrichment tools run before first LLM call; results appear as tool_result turns; skipped when agent_override is true
+  Required tests: `go build ./cmd/parser` succeeds, parser accepts a project root path argument
 
-- [ ] 8.3 Pass callable tools to provider in build_prompt (`web/app/modules/agents/services/provider_adapter.rb`, adapters, `web/spec/modules/agents/services/provider_adapter_spec.rb`)
-  Depends on: 8.1
-  Required tests: callable tools array passed in provider-native format; empty array when no callable tools declared
+- [ ] 8.3 — Implement reference parser: walk spec files, parse frontmatter and links, produce JSON graph (`go/cmd/parser/`)
+  Depends on: 8.2
+  Required tests: parser produces deterministic JSON from test fixtures, spec files appear as nodes, markdown links appear as edges, IMPLEMENTATION_PLAN.md items parsed with status and blocked-by
 
----
+- [ ] 8.4 — Implement reference parser: LEDGER.jsonl parsing and PR node reconstruction (`go/cmd/parser/`)
+  Depends on: 8.3
+  Required tests: status events parsed, PR events produce PR nodes with edges to commits/tasks/specs, git log integration produces commit nodes
 
-## Section 9 — Agent Run: Assembly Pipeline Context Loading
+### 8.5 Go analytics ingest sidecar
+Spec requires a Go sidecar at port 9100 for `POST /capture` with in-memory queue and batch flush.
 
-> Spec: `specifications/system/agent-runner/concept.md` § Assembly Pipeline steps 1–5
-> AgentRunJob currently passes empty arrays for context_chunks and principles. The spec requires loading instruction body, context from practices files, and principles from skill frontmatter.
+- [ ] [SPIKE] 8.5 — Research Go analytics ingest sidecar design — run `./loop.sh research analytics-ingest` (see specifications/skills/tools/research.md)
+  Blocks: 8.6
 
-- [ ] 9.1 Load instruction body and context/principles from skill frontmatter in AgentRunJob (`web/app/modules/agents/jobs/agent_run_job.rb`, `web/spec/jobs/agents/agent_run_job_spec.rb`)
-  Depends on: 8.1
-  Required tests: instruction body loaded from skill file path; context_chunks populated from practices files declared in frontmatter; principles populated from principles files declared in frontmatter; missing files handled gracefully (logged, not raised)
+- [ ] 8.6 — Implement Go analytics ingest sidecar (`go/cmd/analytics/main.go`)
+  Depends on: 8.5
+  Required tests: POST /capture returns 202 immediately, events flushed to Postgres within 5s or 100 events, events buffered in memory on Postgres unavailability, internal network only
 
----
+### 8.7 Go runner sidecar
+Spec requires a Go runner sidecar at port 8080. This is the agent execution sidecar.
 
-## Section 10 — Analytics: LlmMetric Creation on Run Complete
+- [ ] [SPIKE] 8.7 — Research Go runner sidecar scope and interface — run `./loop.sh research runner-sidecar` (see specifications/skills/tools/research.md)
+  Blocks: 8.8
 
-> Spec: `specifications/platform/rails/system/analytics.md` — LlmMetric is per agent run cost/token record.
-> LlmMetric model exists but is never created. AgentRunsController#complete calls AuditLogger but does not create an LlmMetric.
-
-- [ ] 10.1 Create LlmMetric record when agent run completes (`web/app/modules/agents/controllers/agent_runs_controller.rb` or `web/app/modules/agents/services/run_storage_service.rb`, `web/spec/requests/agents/agent_runs_spec.rb`)
-  Required tests: completing an agent run creates an LlmMetric with correct provider, model, tokens, cost, org_id, agent_run_id; no LlmMetric created on failed runs
-
----
-
-## Section 11 — Sandbox: ContainerRun stdout/stderr Capture
-
-> Spec: `specifications/system/sandbox/requirements.md` — stdout and stderr captured in full after completion.
-> DockerDispatcher captures stdout/stderr and stores in ContainerRun record. ✓ Implemented.
-> However, the spec also requires `agent_run_id` to be set on dispatch. Currently DockerDispatcher does not accept agent_run_id.
-
-- [ ] 11.1 Accept and store agent_run_id in DockerDispatcher#dispatch (`web/app/modules/sandbox/services/docker_dispatcher.rb`, `web/spec/modules/sandbox/services/docker_dispatcher_spec.rb`)
-  Required tests: agent_run_id passed to dispatch is stored on ContainerRun; agent_run_id is optional (nullable)
+- [ ] 8.8 — Implement Go runner sidecar (`go/cmd/runner/main.go`)
+  Depends on: 8.7
+  Required tests: sidecar starts on port 8080, accepts run requests, calls back to Rails on completion with X-Sidecar-Token
 
 ---
 
-## Section 12 — Reference Graph: Spec Reference Tags Convention
+## Section 9 — Spec Reference Tags in Tests
 
-> Spec: `specifications/system/reference-graph/concept.md` § Spec Reference Tags in Tests (Priority 3)
-> Convention for `spec:` metadata tags in RSpec. No existing tests use this convention.
+Spec requires `spec:` metadata tags in RSpec files linking tests to spec sections. No tests currently use this convention.
 
-- [ ] 12.1 Add spec: metadata tags to existing RSpec files as exemplar (`web/spec/models/agents/agent_run_spec.rb`, `web/spec/models/analytics/feature_flag_spec.rb`)
-  Required tests: spec: tag is valid RSpec metadata and does not break test execution; at least 2 spec files demonstrate the convention
-
----
-
-## Section 13 — Reference Graph: Web UI (Read-Only)
-
-> Spec: `specifications/system/reference-graph/concept.md` § Read-Only Web UI (Priority 5)
-> No views exist. Rails is configured as full-stack (not API-only). Views needed for: Current, Open, Condensed.
-> Depends on Go reference parser (6.7) for JSON graph data.
-
-- [ ] [SPIKE] 13.1 Research reference graph UI approach — run `./loop.sh research ref-graph-ui` (see specifications/skills/tools/research.md)
-  Scope: Determine how to render parser JSON output in server-rendered ERB views. Collapsible tree for condensed view. Text search without full-text index. Blocks 13.2–13.4.
-
-- [ ] 13.2 Implement Current view — in-progress beat + ancestor chain (`web/app/controllers/reference_graph_controller.rb`, `web/app/views/reference_graph/current.html.erb`)
-  Depends on: 6.7, 13.1
-  Required tests: renders without JS; shows in-progress question with ancestor chain; markdown body rendered with syntax highlighting; unauthenticated requests redirect to login
-
-- [ ] 13.3 Implement Open view — all non-closed questions (`web/app/views/reference_graph/open.html.erb`)
-  Depends on: 6.7, 13.1
-  Required tests: renders without JS; filterable by scope, level, status; sorted by oldest originated_at first; unauthenticated requests redirect to login
-
-- [ ] 13.4 Implement Condensed view — full project tree with search (`web/app/views/reference_graph/condensed.html.erb`)
-  Depends on: 6.7, 13.1
-  Required tests: renders without JS; collapsible tree; text search filters by title and body (case-insensitive); closed nodes collapsed by default; unauthenticated requests redirect to login
+- [ ] 9.1 — Add `spec:` metadata tags to existing RSpec files linking to relevant spec sections (`web/spec/**/*_spec.rb`)
+  Required tests: at least one spec per module uses `spec:` tag, tags reference valid spec file paths
 
 ---
 
-## Section 14 — Agent Runs UI
+## Section 10 — UI Views (proposed specs)
 
-> Spec: `specifications/system/agent-runs-ui.md` (status: proposed)
-> No views exist.
+Three proposed UI specs exist: `agent-runs-ui.md`, `analytics-dashboard-ui.md`, and reference-graph web UI (component 5 in reference-graph/concept.md). All require server-rendered HTML (ERB). No views directory exists.
 
-- [ ] 14.1 Implement Agent Run History view (`web/app/controllers/agent_runs_ui_controller.rb`, `web/app/views/agent_runs/index.html.erb`)
-  Required tests: paginated list of runs, most recent first; columns: mode, status, provider/model, tokens, cost, duration, created_at; filterable by mode and status; server-rendered HTML; auth required
+- [ ] 10.1 — Create `web/app/views/` directory structure and application layout (`web/app/views/layouts/application.html.erb`)
+  Required tests: layout renders without error
 
-- [ ] 14.2 Implement Agent Run Detail view (`web/app/views/agent_runs/show.html.erb`)
-  Required tests: run metadata displayed; ordered turns with kind badge; turn content rendered as markdown; link to parent run if present; source_ref displayed; auth required
+- [ ] 10.2 — Implement Agent Runs UI: run history list and run detail views (`web/app/views/agent_runs/`, `web/app/controllers/agent_runs_controller.rb` or new HTML controller, `web/config/routes.rb`)
+  Required tests: GET /agent_runs returns 200 with paginated list, GET /agent_runs/:id returns 200 with turn content, filterable by mode and status
 
----
-
-## Section 15 — Analytics Dashboard UI
-
-> Spec: `specifications/system/analytics-dashboard-ui.md` (status: proposed)
-> No views exist.
-
-- [ ] 15.1 Implement Analytics Dashboard view (`web/app/controllers/analytics_ui_controller.rb`, `web/app/views/analytics/dashboard.html.erb`)
-  Required tests: summary cards (total cost, total runs, failure rate); cost by provider/model table; recent runs list (last 20); server-rendered HTML; auth required
-
-- [ ] 15.2 Implement LLM Metrics view (`web/app/views/analytics/llm.html.erb`)
-  Required tests: cost and token breakdown by provider/model; filterable by date range; server-rendered HTML; auth required
+- [ ] 10.3 — Implement Analytics Dashboard UI: summary cards, cost by provider, recent runs (`web/app/views/analytics/`, `web/app/controllers/analytics/dashboard_controller.rb`, `web/config/routes.rb`)
+  Required tests: GET /analytics returns 200 with summary data, GET /analytics/llm returns 200 with cost breakdown
 
 ---
 
-## Section 16 — CI Drift Detection
+## Section 11 — Recurring Jobs Configuration
 
-> Spec: `specifications/system/reference-graph/concept.md` § CI Drift Detection (Priority 4)
-> Not implemented. Phase 0 scope: the script/tool itself, not CI integration (that's Phase 1).
+### 11.1 TurnContentGcJob recurring schedule
+`config/recurring.yml` defines the GC job only for production. It should also run in development for local testing.
 
-- [ ] 16.1 Implement spec content hash recording in LEDGER.jsonl (`scripts/` or `web/app/lib/`)
-  Depends on: 1.1
-  Required tests: spec_changed events appended to LEDGER.jsonl when spec content changes; content_hash is SHA256 of section content; idempotent — unchanged specs produce no events
-
-- [ ] 16.2 Implement drift detection script that compares spec hashes (`scripts/detect-drift.sh` or Go CLI)
-  Depends on: 16.1
-  Required tests: flags spec sections that changed since linked tests last passed; does not fail the build (informational only); deterministic output
+- [ ] 11.1 — Add development schedule for `TurnContentGcJob` in `config/recurring.yml` (`web/config/recurring.yml`)
+  Required tests: recurring.yml is valid YAML, development section includes turn_content_gc
 
 ---
 
-## Section 17 — Recurring Jobs: Turn Content GC in recurring.yml
+## Section 12 — Cross-Cutting Gaps
 
-> Spec: `specifications/system/agent-runner/concept.md` § Turn Content GC
-> TurnContentGcJob exists and is tested. recurring.yml has it configured for production only.
-> Verify it also runs in development (or is at least testable).
+### 12.1 SimpleCov coverage floor
+Spec requires 85% minimum coverage enforced by SimpleCov. Need to verify SimpleCov is configured with a floor.
 
-- [x] 17.1 TurnContentGcJob configured in recurring.yml — already done (production schedule: daily at midnight). No action needed for Phase 0.
+- [ ] 12.1 — Configure SimpleCov with 85% minimum coverage floor in `spec/spec_helper.rb` (`web/spec/spec_helper.rb`)
+  Required tests: SimpleCov configured, minimum_coverage set to 85
 
----
-
-## Section 18 — Infrastructure Gaps
-
-> Spec: `specifications/system/infrastructure/concept.md`
-
-- [ ] 18.1 Verify Postgres port is not bound to 0.0.0.0 in docker-compose.yml — ✓ already correct (no `ports:` on postgres service). No action needed.
-
-- [ ] 18.2 Add `ports:` binding restriction comment to docker-compose.yml for clarity (`infra/docker-compose.yml`)
-  Required tests: N/A (documentation only)
-
-Note: go_runner and analytics services are commented out in docker-compose.yml. They will be uncommented in task 6.5 after Go sidecars are built.
+### 12.2 Lograge structured logging
+Lograge is installed and configured. **Compliant.** No task needed.
 
 ---
 
-## Section 19 — Missing: Solid Queue Concurrency Key on AgentRunJob
-
-> Spec: `specifications/system/agent-runner/concept.md` § Concurrency — one active run per agent config via solid_queue concurrency key.
-> AgentRunJob defines `concurrency_key_for` helper but does not actually use Solid Queue's `limits_concurrency` DSL.
-
-- [ ] 19.1 Wire Solid Queue concurrency control on AgentRunJob (`web/app/modules/agents/jobs/agent_run_job.rb`, `web/spec/jobs/agents/agent_run_job_spec.rb`)
-  Required tests: Solid Queue concurrency key is set using source_ref (or run_id fallback); concurrent job for same key is rejected/queued per Solid Queue semantics
-
----
-
-## Section 20 — Missing: FeatureFlagExposure Model
-
-> Spec: `specifications/platform/rails/product/analytics.md` — lists `Analytics::FeatureFlagExposure` model.
-> Not implemented. Currently, flag exposures are stored as AnalyticsEvent records with event_name `$feature_flag_called`.
-> The platform override lists it as a separate model. However, the base analytics spec stores exposures as analytics events.
-> **Resolution: the current approach (AnalyticsEvent) matches the base spec. FeatureFlagExposure as a separate model is likely a platform override detail that was specced but not needed — the join on AnalyticsEvent works. Flag for human review.**
-
-No task — current implementation matches base spec. Flagged for review.
-
----
-
-## Dependency Graph
+## Task Dependency Order
 
 ```
-6.1 (spike: Go bootstrap) → 6.2 → 6.3, 6.4, 6.7
-6.6 (spike: Go parser libs) → 6.7
-6.3 + 6.4 → 6.5
-6.7 + 13.1 (spike: UI approach) → 13.2, 13.3, 13.4
-8.1 → 8.2, 8.3, 9.1
-7.1 → 8.2 (agent_override skip logic)
-1.1 → 16.1 → 16.2
+Independent (can start immediately):
+  1.1, 2.1, 2.3, 2.4, 2.6b, 3.1, 3.2, 4.1, 4.3, 6.1, 9.1, 10.1, 11.1, 12.1
+
+After 6.1:
+  6.2, 6.3, 6.4, 6.5
+
+After spike 2.5:
+  2.6
+
+After spike 8.1:
+  8.2 → 8.3 → 8.4
+
+After spike 8.5:
+  8.6
+
+After spike 8.7:
+  8.8
+
+After 10.1:
+  10.2, 10.3
+
+Standalone (no blockers, lower priority):
+  2.2 (call_provider — requires provider API keys in env)
+  7.1 (batch middleware — proposed spec, no requirements file)
 ```
 
-All other tasks are independent and can be executed in any order.
+## Priority Order (recommended build sequence)
 
-## Recommended Execution Order
-
-1. **2.1–2.3** — parse_response normalisation (quick fixes, unblock correct AgentRunJob behaviour)
-2. **19.1** — Solid Queue concurrency key (small fix, correctness)
-3. **10.1** — LlmMetric creation on run complete (small, unblocks analytics accuracy)
-4. **11.1** — DockerDispatcher agent_run_id (small fix)
-5. **7.1** — agent_override flag
-6. **8.1** — skill frontmatter parsing (unblocks 8.2, 8.3, 9.1)
-7. **8.2, 8.3** — enrichment + callable tools
-8. **9.1** — assembly pipeline context loading
-9. **3.1–3.3** — call_provider HTTP implementation
-10. **5.1–5.2** — batch request middleware
-11. **4.1–4.6** — rswag API documentation
-12. **12.1** — spec reference tags exemplar
-13. **6.1** (spike) → **6.2** → **6.3, 6.4** → **6.5** — Go sidecars
-14. **6.6** (spike) → **6.7** — Go reference parser
-15. **14.1–14.2** — Agent Runs UI
-16. **15.1–15.2** — Analytics Dashboard UI
-17. **13.1** (spike) → **13.2–13.4** — Reference Graph UI
-18. **16.1–16.2** — CI drift detection
+1. **Security fixes first:** 2.6b (cross-org access), 4.1 (org_id from auth)
+2. **Data integrity:** 2.4 (LlmMetric on complete), 3.1 (agent_run_id linking)
+3. **Spec compliance:** 2.1 (SQ concurrency), 2.3 (agent_override), 3.2 (container security flags), 4.3 (PII redaction)
+4. **API docs:** 6.1 → 6.2–6.5
+5. **Coverage:** 12.1 (SimpleCov floor)
+6. **Spikes:** 2.5, 8.1, 8.5, 8.7
+7. **Go sidecars:** 8.2–8.4, 8.6, 8.8
+8. **UI:** 10.1–10.3
+9. **Lower priority:** 1.1, 7.1, 9.1, 11.1
