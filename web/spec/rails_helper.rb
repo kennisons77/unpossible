@@ -7,6 +7,7 @@ require 'rspec/rails'
 require 'factory_bot_rails'
 require 'shoulda/matchers'
 require 'database_cleaner/active_record'
+require 'webmock/rspec'
 
 Dir[File.join(__dir__, 'support', '**', '*.rb')].each { |f| require f }
 

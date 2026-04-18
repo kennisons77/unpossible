@@ -67,7 +67,7 @@ Spec says "always git SHA, never latest." Dev compose uses `${GIT_SHA:-dev}` —
 ### 2.2 call_provider not implemented on concrete adapters
 All three adapters inherit `call_provider` from the base class which raises `NotImplementedError`. The spec requires adapters to make HTTP calls to provider APIs. AgentRunJob calls `adapter.call_provider(prompt)`.
 
-- [ ] 2.2 — Implement `call_provider` on `ClaudeAdapter`, `KiroAdapter`, `OpenAiAdapter` with HTTP calls to provider APIs (`web/app/modules/agents/services/claude_adapter.rb`, `kiro_adapter.rb`, `open_ai_adapter.rb`)
+- [x] 2.2 — Implement `call_provider` on `ClaudeAdapter`, `KiroAdapter`, `OpenAiAdapter` with HTTP calls to provider APIs (`web/app/modules/agents/services/claude_adapter.rb`, `kiro_adapter.rb`, `open_ai_adapter.rb`)
   Required tests: each adapter makes HTTP POST to correct provider URL, passes correct headers (API key via Secret), returns raw response hash, handles HTTP errors gracefully (returns error hash, does not raise)
   Required threat tests: API key never appears in logs or error messages
 

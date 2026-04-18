@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+require "open3"
+require "json"
+
 module Agents
   class KiroAdapter < ProviderAdapter
     MAX_CONTEXT_TOKENS = 200_000
@@ -13,6 +16,22 @@ module Agents
       messages = trimmed_turns.map { |t| { role: turn_role(t[:kind]), content: t[:content] } }
 
       { model: "kiro", system: system_content, messages: messages }
+    end
+
+    # Kiro is a CLI tool — invoke kiro-cli as a subprocess.
+    # The prompt is serialized to a single string: system + messages concatenated.
+    def call_provider(prompt)
+      text = build_cli_input(prompt)
+      stdout, stderr, status = Open3.capture3("kiro-cli", "chat", "--no-interactive", "--trust-all-tools", "--", text)
+
+      if status.success?
+        { "content" => [{ "text" => stdout.strip }], "usage" => {}, "stop_reason" => "end_turn" }
+      else
+        Rails.logger.error("KiroAdapter: kiro-cli exited #{status.exitstatus}")
+        { "error" => { "type" => "CliError", "message" => "Provider call failed" } }
+      end
+    rescue StandardError => e
+      { "error" => { "type" => e.class.name, "message" => "Provider call failed" } }
     end
 
     def parse_response(raw_response)
@@ -43,6 +62,15 @@ module Agents
       when "human_input", "tool_result" then "user"
       else "assistant"
       end
+    end
+
+    def build_cli_input(prompt)
+      parts = []
+      parts << prompt[:system] if prompt[:system].present?
+      Array(prompt[:messages]).each do |msg|
+        parts << "#{msg[:role]}: #{msg[:content]}"
+      end
+      parts.join("\n\n")
     end
   end
 end

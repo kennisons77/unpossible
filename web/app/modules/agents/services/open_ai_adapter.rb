@@ -1,8 +1,12 @@
 # frozen_string_literal: true
 
+require "net/http"
+require "json"
+
 module Agents
   class OpenAiAdapter < ProviderAdapter
     MAX_CONTEXT_TOKENS = 128_000
+    API_URL = URI("https://api.openai.com/v1/chat/completions").freeze
 
     def build_prompt(node:, context_chunks:, principles:, turns:, token_budget:)
       system_content = assemble_system(node, context_chunks, principles)
@@ -17,6 +21,24 @@ module Agents
       messages.concat(trimmed_turns.map { |t| { role: turn_role(t[:kind]), content: t[:content] } })
 
       { model: "gpt-4o", messages: messages }
+    end
+
+    def call_provider(prompt)
+      api_key = Secret.new(ENV.fetch("OPENAI_API_KEY", ""))
+
+      http = Net::HTTP.new(API_URL.host, API_URL.port)
+      http.use_ssl = true
+      http.read_timeout = 120
+
+      request = Net::HTTP::Post.new(API_URL.path)
+      request["Content-Type"] = "application/json"
+      request["Authorization"] = "Bearer #{api_key.expose}"
+      request.body = prompt.to_json
+
+      response = http.request(request)
+      JSON.parse(response.body)
+    rescue StandardError => e
+      { "error" => { "type" => e.class.name, "message" => "Provider call failed" } }
     end
 
     def parse_response(raw_response)
