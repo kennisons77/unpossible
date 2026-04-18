@@ -59,6 +59,7 @@ Quick reference for recurring patterns in this codebase.
 
 | Pattern | Location | Notes |
 |---|---|---|
+| Developer pushback | `specifications/practices/Developer.md` | Challenges premature optimization, speculative design, YAGNI violations |
 | Activity log format | `specifications/practices/decision-journal.md` | Thinking, Challenges, Alternatives, Tradeoffs per entry |
 | Git notes (future) | `specifications/practices/decision-journal.md` | Archival copy of journal attached to commit |
 
