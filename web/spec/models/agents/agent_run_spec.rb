@@ -56,7 +56,7 @@ RSpec.describe Agents::AgentRun, type: :model do
 
   describe 'source_ref' do
     it 'accepts a spec path string' do
-      run = build(:agents_agent_run, source_ref: 'specs/system/agent-runner/spec.md')
+      run = build(:agents_agent_run, source_ref: 'specifications/system/agent-runner/concept.md')
       expect(run).to be_valid
     end
   end

@@ -23,12 +23,12 @@
   ],
   "resources": [
     "file://AGENTS.md",
-    "file://specs/practices/cost.md",
-    "file://specs/practices/planning.md",
-    "file://specs/practices/verification.md",
-    "file://specs/practices/changeability.md",
-    "file://specs/practices/structural-vocabulary.md",
-    "skill://specs/skills/**/*.md"
+    "file://specifications/practices/cost.md",
+    "file://specifications/practices/planning.md",
+    "file://specifications/practices/verification.md",
+    "file://specifications/practices/changeability.md",
+    "file://specifications/practices/structural-vocabulary.md",
+    "skill://specifications/skills/**/*.md"
   ],
   "hooks": {
     "agentSpawn": [

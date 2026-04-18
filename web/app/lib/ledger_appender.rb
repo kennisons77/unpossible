@@ -4,7 +4,7 @@
 # The file is append-only — entries are never modified or deleted.
 # Idempotent: duplicate entries (same ts + type + ref/path) are silently skipped.
 class LedgerAppender
-  VALID_TYPES = %w[status blocked unblocked spec_changed pr_opened pr_review pr_merged].freeze
+  VALID_TYPES = %w[status blocked unblocked spec_changed spec_removed pr_opened pr_review pr_merged].freeze
 
   # Default path relative to Rails.root (or project root in non-Rails contexts).
   DEFAULT_PATH = File.expand_path('../../../../LEDGER.jsonl', __dir__)

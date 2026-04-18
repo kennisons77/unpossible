@@ -1,1 +1,6 @@
 {"ts":"2026-04-17T20:45:07Z","type":"status","ref":"1.2","from":"todo","to":"done","sha":null,"reason":"tests green, 20 shell tests pass, 267 rspec examples 0 failures"}
+{"ts":"2026-04-18T18:35:37Z","type":"spec_removed","path":"specifications/system/ledger/requirements.md","reason":"Superseded by specifications/system/reference-graph/concept.md"}
+{"ts":"2026-04-18T18:35:37Z","type":"spec_removed","path":"specifications/system/ledger/concept.md","reason":"Superseded by specifications/system/reference-graph/concept.md"}
+{"ts":"2026-04-18T18:35:37Z","type":"spec_removed","path":"specifications/system/ledger/ui.md","reason":"Superseded by specifications/system/reference-graph/concept.md"}
+{"ts":"2026-04-18T18:35:37Z","type":"spec_removed","path":"specifications/system/knowledge/requirements.md","reason":"Knowledge module removed per specifications/system/reference-graph/concept.md"}
+{"ts":"2026-04-18T18:35:37Z","type":"spec_removed","path":"specifications/system/knowledge/concept.md","reason":"Knowledge module removed per specifications/system/reference-graph/concept.md"}
