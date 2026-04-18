@@ -61,7 +61,7 @@ Spec says "always git SHA, never latest." Dev compose uses `${GIT_SHA:-dev}` —
 ### 2.1 Solid Queue concurrency key not wired
 `AgentRunJob.concurrency_key_for` exists as a class method but is not connected to Solid Queue's `limits_concurrency` DSL. The spec requires "one active run per agent config at a time, enforced via solid_queue concurrency key on source_ref." Currently, concurrent runs are only checked at the service layer (RunStorageService), not at the job queue level.
 
-- [ ] 2.1 — Wire `limits_concurrency` in `AgentRunJob` using Solid Queue DSL (`web/app/modules/agents/jobs/agent_run_job.rb`)
+- [x] 2.1 — Wire `limits_concurrency` in `AgentRunJob` using Solid Queue DSL (`web/app/modules/agents/jobs/agent_run_job.rb`)
   Required tests: job declares `limits_concurrency` with key from `concurrency_key_for`, second job for same source_ref is blocked (not run in parallel)
 
 ### 2.2 call_provider not implemented on concrete adapters
