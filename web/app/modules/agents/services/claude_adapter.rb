@@ -1,8 +1,13 @@
 # frozen_string_literal: true
 
+require "net/http"
+require "json"
+
 module Agents
   class ClaudeAdapter < ProviderAdapter
     MAX_CONTEXT_TOKENS = 200_000
+    API_URL = URI("https://api.anthropic.com/v1/messages").freeze
+    API_VERSION = "2023-06-01"
 
     def build_prompt(node:, context_chunks:, principles:, turns:, token_budget:)
       system_content = assemble_system(node, context_chunks, principles)
@@ -13,6 +18,25 @@ module Agents
       messages = trimmed_turns.map { |t| { role: turn_role(t[:kind]), content: t[:content] } }
 
       { model: "claude-sonnet-4-20250514", system: system_content, messages: messages }
+    end
+
+    def call_provider(prompt)
+      api_key = Secret.new(ENV.fetch("ANTHROPIC_API_KEY", ""))
+
+      http = Net::HTTP.new(API_URL.host, API_URL.port)
+      http.use_ssl = true
+      http.read_timeout = 120
+
+      request = Net::HTTP::Post.new(API_URL.path)
+      request["Content-Type"] = "application/json"
+      request["x-api-key"] = api_key.expose
+      request["anthropic-version"] = API_VERSION
+      request.body = prompt.to_json
+
+      response = http.request(request)
+      JSON.parse(response.body)
+    rescue StandardError => e
+      { "error" => { "type" => e.class.name, "message" => "Provider call failed" } }
     end
 
     def parse_response(raw_response)
