@@ -25,10 +25,14 @@ module Agents
       adapter = ProviderAdapter.for(run.provider)
       turns = build_turn_hashes(run)
 
+      # Enrichment (context_chunks, principles) is skipped when agent_override is true.
+      # Callable tools are always passed regardless of agent_override.
+      context_chunks, principles = run.agent_override ? [[], []] : load_enrichment(run)
+
       prompt = adapter.build_prompt(
         node: run.source_ref,
-        context_chunks: [],
-        principles: [],
+        context_chunks: context_chunks,
+        principles: principles,
         turns: turns,
         token_budget: adapter.max_context_tokens
       )
@@ -54,6 +58,13 @@ module Agents
     end
 
     private
+
+    # Enrichment loads context and principles from skill files.
+    # Returns [context_chunks, principles]. Currently returns empty arrays
+    # until skill assembly (task 2.6) is implemented.
+    def load_enrichment(_run)
+      [[], []]
+    end
 
     # Reconstruct conversation history from persisted turns as hashes for build_prompt.
     def build_turn_hashes(run)
