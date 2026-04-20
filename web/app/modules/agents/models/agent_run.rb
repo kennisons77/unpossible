@@ -15,5 +15,9 @@ module Agents
     validates :provider, presence: true
     validates :model, presence: true
     validates :status, presence: true, inclusion: { in: STATUSES }
+
+    # When true, enrichment tools (context_chunks, principles loading) are skipped.
+    # Callable tools are still passed to the provider.
+    attribute :agent_override, :boolean, default: false
   end
 end

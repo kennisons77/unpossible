@@ -18,8 +18,8 @@ RSpec.describe 'Module scaffold' do
       expect(Rails.root.join('app/modules/LOOKUP.md')).to exist
     end
 
-    it 'specs/practices/LOOKUP.md exists' do
-      expect(Pathname.new('/specs/practices/LOOKUP.md')).to exist
+    it 'specifications/practices/LOOKUP.md exists' do
+      expect(Pathname.new('/specifications/practices/LOOKUP.md')).to exist
     end
   end
 end

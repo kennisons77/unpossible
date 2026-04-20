@@ -22,7 +22,7 @@ RSpec.describe 'Agent Runs API', type: :request do
   let(:valid_params) do
     {
       run_id: SecureRandom.uuid,
-      source_ref: 'specs/system/agent-runner/spec.md',
+      source_ref: 'specifications/system/agent-runner/concept.md',
       mode: 'build',
       provider: 'claude',
       model: 'opus',
@@ -40,7 +40,7 @@ RSpec.describe 'Agent Runs API', type: :request do
     end
 
     context 'with concurrent active run for same source_ref' do
-      before { create(:agents_agent_run, source_ref: 'specs/system/agent-runner/spec.md', status: 'running') }
+      before { create(:agents_agent_run, source_ref: 'specifications/system/agent-runner/concept.md', status: 'running') }
 
       it 'returns 409' do
         post '/api/agent_runs/start', params: valid_params.to_json, headers: headers
@@ -116,7 +116,7 @@ RSpec.describe 'Agent Runs API', type: :request do
   end
 
   describe 'POST /api/agent_runs/:id/input' do
-    let(:agent_run) { create(:agents_agent_run, status: 'waiting_for_input') }
+    let(:agent_run) { create(:agents_agent_run, status: 'waiting_for_input', org_id: org_id) }
 
     it 'appends human_input turn and returns 200' do
       post "/api/agent_runs/#{agent_run.id}/input",
@@ -127,6 +127,14 @@ RSpec.describe 'Agent Runs API', type: :request do
       expect(turn.kind).to eq('human_input')
       expect(turn.content).to eq('Here is my answer')
       expect(agent_run.reload.status).to eq('running')
+    end
+
+    it 'returns 404 for a run belonging to a different org' do
+      other_run = create(:agents_agent_run, status: 'waiting_for_input', org_id: SecureRandom.uuid)
+      post "/api/agent_runs/#{other_run.id}/input",
+           params: { content: 'answer' }.to_json,
+           headers: headers
+      expect(response).to have_http_status(:not_found)
     end
 
     context 'without auth' do

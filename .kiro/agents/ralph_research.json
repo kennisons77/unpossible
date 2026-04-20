@@ -21,8 +21,8 @@
   ],
   "resources": [
     "file://AGENTS.md",
-    "file://specs/practices/cost.md",
-    "skill://specs/skills/**/*.md"
+    "file://specifications/practices/cost.md",
+    "skill://specifications/skills/**/*.md"
   ],
   "model": null
 }
