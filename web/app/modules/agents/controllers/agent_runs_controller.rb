@@ -40,7 +40,8 @@ module Agents
     private
 
     def set_agent_run
-      @agent_run = AgentRun.find(params[:id])
+      scope = current_org_id ? AgentRun.where(org_id: current_org_id) : AgentRun.all
+      @agent_run = scope.find(params[:id])
     rescue ActiveRecord::RecordNotFound
       render json: { error: "Not found" }, status: :not_found
     end

@@ -85,8 +85,8 @@ in the same commit.
 | `ralph_plan`     | `.kiro/agents/ralph_plan.json`      | AGENTS.md, cost.md, planning.md, verification.md, changeability.md, structural-vocabulary.md, skills/**/*.md | auto           |
 | `ralph_research` | `.kiro/agents/ralph_research.json`  | AGENTS.md, cost.md, skills/**/*.md                                 | auto           |
 | `ralph_review`   | `.kiro/agents/ralph_review.json`    | AGENTS.md, cost.md, changeability.md, coding.md, structural-vocabulary.md, skills/**/*.md | auto           |
-| `interview`      | `.kiro/agents/interview.json`       | specs/README.md, AGENTS.md, cost.md, skills/**/*.md                | auto           |
-| `review`         | `.kiro/agents/review.json`          | specs/README.md, AGENTS.md, cost.md, changeability.md, coding.md, structural-vocabulary.md, skills/**/*.md | auto |
+| `interview`      | `.kiro/agents/interview.json`       | specifications/README.md, AGENTS.md, cost.md, skills/**/*.md                | auto           |
+| `review`         | `.kiro/agents/review.json`          | specifications/README.md, AGENTS.md, cost.md, changeability.md, coding.md, structural-vocabulary.md, skills/**/*.md | auto |
 
 ## Server Operations
 

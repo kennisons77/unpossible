@@ -6,7 +6,7 @@
 #   ./loop.sh plan 1       # Plan mode, 1 iteration
 #   ./loop.sh research 3   # Research mode, idea ID 3
 #   ./loop.sh review       # Review mode
-#   ./loop.sh promote 3    # Promote idea ID 3 to a spec
+#   ./loop.sh promote 3    # Promote idea ID 3 to a concept
 #
 # Environment variables:
 #   AGENT   - "claude" (default), "kiro", or a custom command (reads stdin)
@@ -107,7 +107,7 @@ if [ "$MODE" = "promote" ]; then
 
     SPEC_FILENAME=$(echo "$IDEA_TITLE" | tr '[:upper:]' '[:lower:]' \
         | sed 's/[^a-z0-9]/-/g;s/--*/-/g;s/^-//;s/-$//')
-    SPEC_PATH="$PROJECT_DIR/specs/$SPEC_FILENAME.md"
+    SPEC_PATH="$PROJECT_DIR/specifications/$SPEC_FILENAME.md"
     printf '# %s\n\n%s\n' "$IDEA_TITLE" "$IDEA_CONTENT" > "$SPEC_PATH"
     echo "Created: $SPEC_PATH"
 

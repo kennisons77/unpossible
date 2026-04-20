@@ -10,17 +10,29 @@ module Agents
       source_ref.presence || run_id
     end
 
-    def perform(agent_run_id)
+    # Solid Queue concurrency control: block a second job for the same source_ref
+    # until the first completes. Arguments are (agent_run_id, source_ref).
+    limits_concurrency to: 1,
+                       key: ->(agent_run_id, source_ref = nil) {
+                         self.class.concurrency_key_for(run_id: agent_run_id.to_s, source_ref: source_ref)
+                       },
+                       duration: 30.minutes
+
+    def perform(agent_run_id, _source_ref = nil)
       run = AgentRun.find_by(id: agent_run_id)
       return unless run && run.status == "running"
 
       adapter = ProviderAdapter.for(run.provider)
       turns = build_turn_hashes(run)
 
+      # Enrichment (context_chunks, principles) is skipped when agent_override is true.
+      # Callable tools are always passed regardless of agent_override.
+      context_chunks, principles = run.agent_override ? [[], []] : load_enrichment(run)
+
       prompt = adapter.build_prompt(
         node: run.source_ref,
-        context_chunks: [],
-        principles: [],
+        context_chunks: context_chunks,
+        principles: principles,
         turns: turns,
         token_budget: adapter.max_context_tokens
       )
@@ -46,6 +58,13 @@ module Agents
     end
 
     private
+
+    # Enrichment loads context and principles from skill files.
+    # Returns [context_chunks, principles]. Currently returns empty arrays
+    # until skill assembly (task 2.6) is implemented.
+    def load_enrichment(_run)
+      [[], []]
+    end
 
     # Reconstruct conversation history from persisted turns as hashes for build_prompt.
     def build_turn_hashes(run)

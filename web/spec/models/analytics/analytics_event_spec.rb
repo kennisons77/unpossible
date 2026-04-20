@@ -60,8 +60,8 @@ RSpec.describe Analytics::AnalyticsEvent, type: :model do
 
   describe 'node_id' do
     it 'accepts string values' do
-      event = create(:analytics_event, node_id: 'specs/system/analytics/spec.md')
-      expect(event.reload.node_id).to eq('specs/system/analytics/spec.md')
+      event = create(:analytics_event, node_id: 'specifications/system/analytics/concept.md')
+      expect(event.reload.node_id).to eq('specifications/system/analytics/concept.md')
     end
 
     it 'is nullable' do

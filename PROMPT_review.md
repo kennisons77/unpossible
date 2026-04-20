@@ -1,5 +1,5 @@
 0a. Do not read or scan any directory outside this project unless explicitly instructed.
-0b. Read `specs/` to understand the current specs and acceptance criteria.
+0b. Read `specifications/` to understand the current concepts and acceptance criteria.
 
 **Subagent trust:** This is a non-interactive session. Always pass `dangerously_trust_all_tools: true` when invoking subagents, otherwise their tool calls will be rejected.
 
@@ -19,7 +19,7 @@ test, and extend.
 ## Steps
 
 1. Explore the codebase. Do not make any changes.
-2. Compare specs against implementation. Note gaps and inconsistencies.
+2. Compare concepts against implementation. Note gaps and inconsistencies.
 3. Present 3–5 deepening candidates. For each:
    - Current structure and why it causes confusion
    - Proposed deeper module with a thinner interface

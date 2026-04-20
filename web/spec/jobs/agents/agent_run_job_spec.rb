@@ -20,10 +20,28 @@ RSpec.describe Agents::AgentRunJob, type: :job do
     expect(described_class.queue_name).to eq('agents')
   end
 
+  describe 'limits_concurrency' do
+    it 'declares concurrency limit of 1' do
+      expect(described_class.concurrency_limit).to eq(1)
+    end
+
+    it 'uses source_ref as concurrency key when present' do
+      job = described_class.new
+      job.arguments = [run.id, 'specifications/foo.md']
+      expect(job.concurrency_key).to include('specifications/foo.md')
+    end
+
+    it 'falls back to run_id string when source_ref is absent' do
+      job = described_class.new
+      job.arguments = [run.id, nil]
+      expect(job.concurrency_key).to include(run.id.to_s)
+    end
+  end
+
   describe 'concurrency key helper' do
     it 'uses source_ref when present' do
-      expect(described_class.concurrency_key_for(run_id: 'r1', source_ref: 'specs/foo.md'))
-        .to eq('specs/foo.md')
+      expect(described_class.concurrency_key_for(run_id: 'r1', source_ref: 'specifications/foo.md'))
+        .to eq('specifications/foo.md')
     end
 
     it 'falls back to run_id when source_ref is absent' do
@@ -137,6 +155,46 @@ RSpec.describe Agents::AgentRunJob, type: :job do
         expect { described_class.perform_now(0) }.not_to raise_error
       end
     end
+
+    context 'when agent_override is true' do
+      let(:run) { create(:agents_agent_run, org_id: org_id, status: 'running', agent_override: true) }
+
+      before do
+        allow(adapter).to receive(:call_provider).and_return({ 'content' => [{ 'text' => 'done' }] })
+        allow(adapter).to receive(:parse_response).and_return(
+          { text: 'done', input_tokens: 10, output_tokens: 5, stop_reason: 'end_turn' }
+        )
+      end
+
+      it 'skips enrichment (passes empty context_chunks and principles)' do
+        expect(adapter).to receive(:build_prompt).with(
+          hash_including(context_chunks: [], principles: [])
+        ).and_return(built_prompt)
+        described_class.perform_now(run.id)
+      end
+
+      it 'still completes the run' do
+        described_class.perform_now(run.id)
+        expect(run.reload.status).to eq('completed')
+      end
+    end
+
+    context 'when agent_override is false' do
+      let(:run) { create(:agents_agent_run, org_id: org_id, status: 'running', agent_override: false) }
+
+      before do
+        allow(adapter).to receive(:call_provider).and_return({ 'content' => [{ 'text' => 'done' }] })
+        allow(adapter).to receive(:parse_response).and_return(
+          { text: 'done', input_tokens: 10, output_tokens: 5, stop_reason: 'end_turn' }
+        )
+      end
+
+      it 'calls load_enrichment (enrichment path taken)' do
+        job = described_class.new
+        expect(job).to receive(:load_enrichment).with(anything).and_call_original
+        job.perform(run.id)
+      end
+    end
   end
 
   describe 'enqueuing from RunStorageService' do
@@ -161,7 +219,7 @@ RSpec.describe Agents::AgentRunJob, type: :job do
     it 're-enqueues AgentRunJob when human input is recorded' do
       expect {
         Agents::RunStorageService.record_input(run, content: 'my answer')
-      }.to have_enqueued_job(described_class).with(run.id)
+      }.to have_enqueued_job(described_class).with(run.id, run.source_ref)
     end
   end
 end
