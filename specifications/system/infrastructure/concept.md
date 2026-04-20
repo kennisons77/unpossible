@@ -1,3 +1,11 @@
+---
+name: infrastructure
+kind: concept
+status: active
+description: Phase model — Docker Compose → CI → staging → production
+modules: []
+---
+
 # Infrastructure
 
 ## Phase Model

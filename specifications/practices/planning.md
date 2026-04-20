@@ -1,3 +1,11 @@
+---
+name: planning
+kind: practice
+domain: Planning
+description: Spec granularity, beat structure, and plan-loop conventions
+loaded_by: [plan]
+---
+
 # General Planning Practices
 
 Loaded every plan iteration. Guides how to analyze specs and produce an implementation plan.

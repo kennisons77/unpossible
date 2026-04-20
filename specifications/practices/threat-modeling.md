@@ -1,3 +1,11 @@
+---
+name: threat-modeling
+kind: practice
+domain: Threat modeling
+description: STRIDE analysis at trust boundaries before implementation
+loaded_by: [build]
+---
+
 # Threat Modeling Practices
 
 Retrieved on demand when a task touches a trust boundary.

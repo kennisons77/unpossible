@@ -36,6 +36,50 @@ system/reference-graph/
 Apply this to any subject as it matures from a concept-only file into a fully specified
 module.
 
+## Frontmatter
+
+Every spec file has YAML frontmatter. The schema varies by kind.
+
+### Concept and requirements
+
+```yaml
+name:        slug                            # matches directory or file stem
+kind:        concept | requirements          # what this file is
+status:      draft | active | proposed | deprecated
+description: one-line summary                # what this spec is about
+modules:     [module, ...]                   # web/app/modules/{name}/, empty if cross-cutting
+```
+
+`status` values:
+- `active` — implemented and current. Agents should plan and build against it.
+- `draft` — specified but not yet implemented. Agents may plan against it.
+- `proposed` — idea-stage. Not ready for planning.
+- `deprecated` — superseded. Agents must not produce beats for it.
+
+`modules` connects the spec to code paths. An empty array means the spec is
+cross-cutting (infrastructure, auth, practices).
+
+### Platform override
+
+```yaml
+name:        slug                           # matches the core spec it extends
+kind:        platform                       # always 'platform'
+status:      draft | active | proposed | deprecated
+platform:    rails | go                     # which runtime
+extends:     system/path/to/concept.md      # core spec this file layers on
+description: one-line summary
+modules:     [module, ...]
+```
+
+Platform files extend a core spec — they don't repeat it. The `extends` field is
+the machine-readable link to the parent spec (relative to `specifications/`).
+The `platform` field says which runtime this override applies to.
+
+Other file types (skills, practices) have their own schemas documented in their
+respective READMEs:
+- Skills: [`skills/README.md`](skills/README.md)
+- Practices: [`practices/README.md`](practices/README.md)
+
 ## Core Paradigm
 
 Every artifact in the system — a brief, a concept, requirements, a beat, a commit, a
@@ -66,6 +110,7 @@ Core platform capabilities — what the system does and how its modules behave.
 | [system/feature-flags/](system/feature-flags/) | Feature flag schema, hypothesis requirement, lifecycle |
 | [system/batch-requests.md](system/batch-requests.md) | Batch request middleware — fan-out sub-requests in a single HTTP call |
 | [system/practices.md](system/practices.md) | Practices files — what they are and when they load |
+| [system/repo-map/](system/repo-map/) | AST-based codebase summary, token-budgeted, injected as agent resource |
 
 ## Product Specifications (`product/`)
 

@@ -1,3 +1,11 @@
+---
+name: entrypoint-dispatch
+kind: practice
+domain: Containers
+description: Single entrypoint script dispatches container role by first argument
+loaded_by: [build]
+---
+
 # Entrypoint Dispatch
 
 Loaded on demand during build when the work touches container images or service startup.

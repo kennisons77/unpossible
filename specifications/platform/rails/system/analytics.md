@@ -1,6 +1,16 @@
+---
+name: analytics
+kind: platform
+status: active
+platform: rails
+extends: system/analytics/concept.md
+description: ActiveRecord models, audit logger, LLM metrics — Rails implementation
+modules: [analytics]
+---
+
 # Analytics System — Rails Platform Override
 
-Extends `specifications/system/analytics.md`. Rails-specific implementation only.
+Extends `specifications/system/analytics/concept.md`. Rails-specific implementation only.
 
 ## Models
 - `Analytics::AnalyticsEvent` — append-only, no update/destroy exposed

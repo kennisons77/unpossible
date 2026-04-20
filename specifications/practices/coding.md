@@ -1,3 +1,11 @@
+---
+name: coding
+kind: practice
+domain: Coding
+description: Language-agnostic rules for comments, naming, structure, and error handling
+loaded_by: [review, build]
+---
+
 # General Coding Practices
 
 Loaded every build iteration. Language-agnostic rules that apply to all code written in this project.

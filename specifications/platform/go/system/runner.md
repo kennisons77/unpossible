@@ -1,6 +1,16 @@
+---
+name: runner
+kind: platform
+status: active
+platform: go
+extends: system/agent-runner/concept.md
+description: Loop executor sidecar — POST /run, token parsing, callback to Rails
+modules: []
+---
+
 # Runner Sidecar — Go Platform Override
 
-Extends `specifications/runner.md`. Go implementation details only.
+Extends `specifications/system/agent-runner/concept.md`. Go implementation details only.
 
 ## Invocation
 `POST /run` — Basic Auth. Executes `loop.sh` via `exec.CommandContext`. Mutex enforces one run at a time.

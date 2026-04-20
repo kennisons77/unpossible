@@ -1,6 +1,12 @@
-# Analytics Dashboard UI
+---
+name: analytics-dashboard-ui
+kind: concept
+status: proposed
+description: Visual overview of LLM spend, token usage, and loop health
+modules: [analytics]
+---
 
-<!-- status: proposed -->
+# Analytics Dashboard UI
 
 ## Problem
 

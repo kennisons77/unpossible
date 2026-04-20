@@ -1,6 +1,16 @@
+---
+name: api-standards
+kind: platform
+status: active
+platform: rails
+extends: system/api/concept.md
+description: rswag, Swagger UI, request specs, error envelope — Rails implementation
+modules: []
+---
+
 # API Documentation & Request Testing — Rails Platform Override
 
-Extends `specifications/system/api-standards.md`. Rails-specific implementation only.
+Extends `specifications/system/api/concept.md`. Rails-specific implementation only.
 
 ## Documentation
 - Gem: `rswag` (`rswag-api` + `rswag-ui` + `rswag-specs`)

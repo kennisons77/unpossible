@@ -1,3 +1,11 @@
+---
+name: api
+kind: concept
+status: active
+description: Every endpoint documented and covered by request integration tests
+modules: []
+---
+
 # API Documentation & Request Testing
 
 ## What It Does

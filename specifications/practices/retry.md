@@ -1,3 +1,11 @@
+---
+name: retry
+kind: practice
+domain: Retry strategy
+description: Retry only transient failures — exponential backoff, jitter, circuit breakers
+loaded_by: [build]
+---
+
 # Retry Strategy
 
 Loaded on demand when building gateway or external API integration code.

@@ -1,7 +1,12 @@
-# Reference Graph
+---
+name: reference-graph
+kind: concept
+status: draft
+description: File-and-git-native traceability — specs, commits, PRs, tests as a graph
+modules: []
+---
 
-- **Status:** Draft
-- **Created:** 2026-04-14
+# Reference Graph
 
 ## What It Does
 

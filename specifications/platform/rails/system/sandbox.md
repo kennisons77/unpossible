@@ -1,6 +1,16 @@
+---
+name: sandbox
+kind: platform
+status: active
+platform: rails
+extends: system/sandbox/concept.md
+description: ContainerRun model, DockerDispatcher service — Rails implementation
+modules: [sandbox]
+---
+
 # Sandbox Module — Rails Platform Override
 
-Extends `specifications/sandbox.md`. Rails-specific implementation details only.
+Extends `specifications/system/sandbox/concept.md`. Rails-specific implementation details only.
 
 ## Model
 - `Sandbox::ContainerRun` — ActiveRecord, `app/modules/sandbox/models/container_run.rb`

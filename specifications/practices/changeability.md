@@ -1,3 +1,11 @@
+---
+name: changeability
+kind: practice
+domain: Changeability
+description: Rules for code that is easy to change for humans and LLMs
+loaded_by: [plan, review, build]
+---
+
 # Changeability
 
 Code that is easy to change for both humans and LLMs. Loaded by plan and review loops;

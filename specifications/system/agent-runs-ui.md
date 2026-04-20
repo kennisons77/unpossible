@@ -1,6 +1,12 @@
-# Agent Runs UI
+---
+name: agent-runs-ui
+kind: concept
+status: proposed
+description: Browse agent run history, inspect turns, see cost breakdowns in a browser
+modules: [agents]
+---
 
-<!-- status: proposed -->
+# Agent Runs UI
 
 ## Problem
 

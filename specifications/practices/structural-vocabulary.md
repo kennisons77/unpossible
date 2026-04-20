@@ -1,3 +1,11 @@
+---
+name: structural-vocabulary
+kind: practice
+domain: Structural vocabulary
+description: Named abstractions for describing code shape — patterns, not prescriptions
+loaded_by: [plan, review, build]
+---
+
 # Structural Vocabulary
 
 A shared index of named abstractions for describing the shape of code above the

@@ -1,3 +1,11 @@
+---
+name: auth
+kind: concept
+status: active
+description: Token-based user auth and shared-secret internal service auth
+modules: []
+---
+
 # Authentication
 
 ## What It Does

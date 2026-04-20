@@ -1,3 +1,11 @@
+---
+name: practices
+kind: concept
+status: active
+description: What practice files are and when agents load them
+modules: []
+---
+
 # Practices
 
 Practices files live in `specifications/practices/` and are loaded by agents on demand.

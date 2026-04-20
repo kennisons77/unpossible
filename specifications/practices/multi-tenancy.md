@@ -1,3 +1,11 @@
+---
+name: multi-tenancy
+kind: practice
+domain: Multi-tenancy
+description: Tenant isolation as a correctness property — default-deny scoping
+loaded_by: [plan, build]
+---
+
 # Multi-Tenancy
 
 Loaded on demand during plan and build when the work touches tenant isolation,

@@ -1,3 +1,11 @@
+---
+name: lookup
+kind: practice
+domain: Reference
+description: Quick-reference table of recurring patterns and their locations
+loaded_by: [all]
+---
+
 # Practices LOOKUP
 
 Quick reference for recurring patterns in this codebase.
