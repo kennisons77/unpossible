@@ -1,3 +1,11 @@
+---
+name: security
+kind: practice
+domain: Security
+description: Minimum attack surface, secrets never travel, PII masked before leaving process
+loaded_by: [build]
+---
+
 # Security & PII
 
 ## Principles

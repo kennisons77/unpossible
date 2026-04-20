@@ -1,3 +1,13 @@
+---
+name: analytics
+kind: platform
+status: active
+platform: rails
+extends: system/analytics/concept.md
+description: FeatureFlag model, exposure tracking, product event endpoints — Rails
+modules: [analytics]
+---
+
 # Analytics Product — Rails Platform Override
 
 Extends `specifications/system/analytics/concept.md`. Rails-specific implementation only.

@@ -1,3 +1,11 @@
+---
+name: analytics
+kind: concept
+status: active
+description: Single store for LLM costs, loop ops, product events, and feature flag exposures
+modules: [analytics]
+---
+
 # Analytics
 
 ## What It Does

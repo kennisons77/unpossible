@@ -1,3 +1,13 @@
+---
+name: health-check
+kind: platform
+status: active
+platform: rails
+extends: practices/coding.md
+description: Rack middleware at position 0 — responds before router or auth
+modules: []
+---
+
 # Health Check Middleware — Rails Platform Override
 
 Extends `specifications/practices/coding.md` § Error Handling (fail-open infrastructure).

@@ -1,3 +1,11 @@
+---
+name: version-control
+kind: practice
+domain: Version control
+description: One Update Rule — rename a file, update its lookup table row in the same commit
+loaded_by: [build]
+---
+
 # Version Control
 
 ## One Update Rule

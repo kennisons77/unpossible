@@ -1,3 +1,11 @@
+---
+name: cost
+kind: practice
+domain: Cost
+description: Control token spend — cheapest model that works, subagent caps, cache strategy
+loaded_by: [all]
+---
+
 # Cost Management
 
 Reference for controlling token spend in autonomous loops. Agent-agnostic principles.

@@ -1,3 +1,11 @@
+---
+name: agent-runner
+kind: concept
+status: active
+description: Prompt assembly, provider HTTP calls, multi-turn conversations, dedup
+modules: [agents]
+---
+
 # Agent Runner
 
 ## What It Does

@@ -1,3 +1,11 @@
+---
+name: lookup-tables
+kind: practice
+domain: Lookup tables
+description: How to build and maintain markdown tables that map terms to locations
+loaded_by: [build]
+---
+
 # Lookup Tables
 
 ## What They Are

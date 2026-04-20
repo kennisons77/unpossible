@@ -1,3 +1,11 @@
+---
+name: zed
+kind: practice
+domain: Editor
+description: Zed setup and workflows for running loops and reviewing output in-editor
+loaded_by: [human]
+---
+
 # Zed Editor Practices
 
 Principles for using Zed effectively in the unpossible workflow. The goal is to keep

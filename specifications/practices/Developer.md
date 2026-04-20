@@ -1,3 +1,11 @@
+---
+name: developer
+kind: practice
+domain: Developer
+description: Pushback against premature optimization and speculative design
+loaded_by: [all]
+---
+
 # Developer
 
 Pushback practice. Loaded by all agent configs. Challenges premature optimization,

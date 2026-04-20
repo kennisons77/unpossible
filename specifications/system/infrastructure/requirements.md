@@ -1,8 +1,12 @@
-# Requirements: Infrastructure
+---
+name: infrastructure
+kind: requirements
+status: draft
+description: Deterministic reproducible deployments at every phase
+modules: []
+---
 
-- **Status:** Draft
-- **Created:** 2026-04-01
-- **Last revised:** 2026-04-01
+# Requirements: Infrastructure
 
 ## Intent
 

@@ -1,3 +1,13 @@
+---
+name: agents
+kind: platform
+status: active
+platform: rails
+extends: system/agent-runner/concept.md
+description: AgentRun model, services, JWT auth, prompt dedup — Rails implementation
+modules: [agents]
+---
+
 # Agents Module — Rails Platform Override
 
 Extends `specifications/system/agent-runner/concept.md`. Rails-specific implementation details only.

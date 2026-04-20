@@ -1,3 +1,11 @@
+---
+name: verification
+kind: practice
+domain: Verification
+description: Acceptance-driven backpressure — task not done until validation suite passes
+loaded_by: [plan, build]
+---
+
 # Verification
 
 Loaded by plan loop (for AC-to-test derivation) and build loop (on demand).

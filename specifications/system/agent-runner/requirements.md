@@ -1,8 +1,12 @@
-# Requirements: Agent Runner
+---
+name: agent-runner
+kind: requirements
+status: draft
+description: AgentRun schema, turn recording, provider adapter interface, cost tracking
+modules: [agents]
+---
 
-- **Status:** Draft
-- **Created:** 2026-04-01
-- **Last revised:** 2026-04-01
+# Requirements: Agent Runner
 
 ## Intent
 

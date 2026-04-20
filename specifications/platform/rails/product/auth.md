@@ -1,6 +1,16 @@
+---
+name: auth
+kind: platform
+status: active
+platform: rails
+extends: system/auth/concept.md
+description: JWT tokens, authenticate! before_action, internal shared secret — Rails
+modules: []
+---
+
 # Authentication — Rails Platform Override
 
-Extends `specifications/practices/auth.md`. Rails-specific implementation details only.
+Extends `specifications/system/auth/concept.md`. Rails-specific implementation details only.
 
 ## Token Format
 JWT. Claims: `org_id`, `user_id`, `exp`. Encoded/decoded via `web/app/lib/auth_token.rb`.

@@ -1,6 +1,12 @@
-# Log Tail Relay
+---
+name: log-tail-relay
+kind: concept
+status: proposed
+description: Stream host Docker logs into the agent sandbox for debugging
+modules: []
+---
 
-<!-- status: proposed -->
+# Log Tail Relay
 
 ## Problem
 

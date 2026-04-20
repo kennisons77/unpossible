@@ -1,8 +1,12 @@
-# Requirements: Sandbox
+---
+name: sandbox
+kind: requirements
+status: draft
+description: DockerDispatcher interface, container run record, timeout, secret filtering
+modules: [sandbox]
+---
 
-- **Status:** Draft
-- **Created:** 2026-04-01
-- **Last revised:** 2026-04-01
+# Requirements: Sandbox
 
 ## Intent
 

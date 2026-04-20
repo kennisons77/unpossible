@@ -1,6 +1,16 @@
+---
+name: analytics
+kind: platform
+status: active
+platform: go
+extends: system/analytics/concept.md
+description: Ingest sidecar — capture, queue, flush to Postgres, no query endpoints
+modules: []
+---
+
 # Analytics — Go Platform Override
 
-Extends `specifications/analytics.md`. Go sidecar implementation only.
+Extends `specifications/system/analytics/concept.md`. Go sidecar implementation only.
 
 ## Responsibilities
 The sidecar owns ingest only — capture, queue, and flush to Postgres. No query endpoints. No business logic.

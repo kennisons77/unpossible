@@ -1,3 +1,11 @@
+---
+name: project-requirements
+kind: requirements
+status: active
+description: Technical constraints, stack choices, and phase model for the whole project
+modules: []
+---
+
 # Requirements — Unpossible
 
 ## What We're Building

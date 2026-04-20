@@ -1,8 +1,12 @@
-# Requirements: Analytics
+---
+name: analytics
+kind: requirements
+status: draft
+description: Event schema, ingest pipeline, query endpoints, retention policy
+modules: [analytics]
+---
 
-- **Status:** Draft
-- **Created:** 2026-04-01
-- **Last revised:** 2026-04-01
+# Requirements: Analytics
 
 ## Intent
 

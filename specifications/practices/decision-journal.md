@@ -1,3 +1,11 @@
+---
+name: decision-journal
+kind: practice
+domain: Decision journal
+description: Record thinking, challenges, and alternatives in each activity log entry
+loaded_by: [build]
+---
+
 # Decision Journal
 
 Every build loop iteration writes a decision journal entry in `activity.md` alongside

@@ -1,8 +1,12 @@
-# Requirements: Feature Flags
+---
+name: feature-flags
+kind: requirements
+status: draft
+description: Flag schema, lifecycle states, exposure tracking, hypothesis requirement
+modules: [analytics]
+---
 
-- **Status:** Draft
-- **Created:** 2026-04-01
-- **Last revised:** 2026-04-01
+# Requirements: Feature Flags
 
 ## Intent
 

@@ -1,3 +1,11 @@
+---
+name: feature-flags
+kind: concept
+status: active
+description: Runtime kill switches that decouple deployment from release
+modules: [analytics]
+---
+
 # Feature Flags
 
 ## What It Does

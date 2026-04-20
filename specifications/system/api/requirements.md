@@ -1,8 +1,12 @@
-# Requirements: API Documentation & Request Testing
+---
+name: api
+kind: requirements
+status: draft
+description: OpenAPI generation, request spec conventions, error response shape
+modules: []
+---
 
-- **Status:** Draft
-- **Created:** 2026-04-01
-- **Last revised:** 2026-04-01
+# Requirements: API Documentation & Request Testing
 
 ## Intent
 

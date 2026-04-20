@@ -1,3 +1,11 @@
+---
+name: sandbox
+kind: concept
+status: active
+description: Isolated container lifecycle for agent execution — separate from app stack
+modules: [sandbox]
+---
+
 # Sandbox Module
 
 ## What It Does

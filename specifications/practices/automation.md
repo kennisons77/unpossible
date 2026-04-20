@@ -1,3 +1,11 @@
+---
+name: automation
+kind: practice
+domain: Automation
+description: Prefer scripts over LLM calls for deterministic tasks
+loaded_by: [build]
+---
+
 # Automation
 
 When a task is deterministic — the same input always produces the same output — prefer

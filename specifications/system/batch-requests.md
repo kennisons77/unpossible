@@ -1,3 +1,11 @@
+---
+name: batch-requests
+kind: concept
+status: active
+description: Rack middleware fans out sub-requests in a single HTTP call
+modules: []
+---
+
 # Batch Request Middleware
 
 ## What It Does
