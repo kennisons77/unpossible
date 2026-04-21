@@ -122,6 +122,30 @@ Agent activity log. Auto-updated each iteration. Trimmed to last 10 entries.
 
 ---
 
+## 2026-04-21 13:35 — Task 2.4: Create LlmMetric on agent run completion (tag 0.0.63)
+
+**Changes:**
+- `RunStorageService.complete` now calls `Analytics::LlmMetric.create!` after updating the run record
+- Reads `org_id`, `provider`, `model`, `id` from the run; reads `input_tokens`, `output_tokens`, `cost_estimate_usd` from the updated run attributes
+- Added test: completing a run creates an LlmMetric with correct org_id, provider, model, agent_run_id, input_tokens, output_tokens, cost_estimate_usd
+- 297 examples, 0 failures, 99.47% coverage
+
+**Thinking:**
+- `RunStorageService.complete` is the single point where a run transitions to `completed` — the right place to create the metric. Putting it in the controller would duplicate the logic if `complete` is ever called from a job or another service path.
+- Reading token/cost values from `run` after `update!` (not from `attrs` directly) ensures the metric reflects what was actually persisted, not what was passed in.
+
+**Challenges:**
+- None. The LlmMetric model and migration already existed; this was purely wiring the creation call into the completion path.
+
+**Alternatives considered:**
+- Creating the metric in `AgentRunsController#complete`: would work but couples the metric creation to the HTTP layer. If `complete` is ever called from a background job, the metric would be missed.
+- Using an ActiveRecord callback (`after_update`) on `AgentRun`: more implicit, harder to test in isolation, and would fire on any status update (not just completion).
+
+**Tradeoffs taken:**
+- `LlmMetric.create!` is fail-closed — if it raises, the `complete` call fails and the run is not marked completed. This is intentional: a missing metric is a data integrity problem, not a side-effect. If this becomes too strict (e.g., metric creation fails due to a transient DB issue), it can be wrapped in a rescue and logged, but that decision should be explicit.
+
+---
+
 ## 2026-04-18 14:23 — Task 2.2: Implement call_provider on all three adapters (tag 0.0.61)
 
 **Changes:**
