@@ -105,6 +105,23 @@ RSpec.describe 'Agent Runs API', type: :request do
            headers: sidecar_headers
     end
 
+    it 'creates an LlmMetric record with correct attributes' do
+      expect {
+        post "/api/agent_runs/#{agent_run.id}/complete",
+             params: { input_tokens: 100, output_tokens: 50, cost_estimate_usd: '0.001234', duration_ms: 500 }.to_json,
+             headers: sidecar_headers
+      }.to change(Analytics::LlmMetric, :count).by(1)
+
+      metric = Analytics::LlmMetric.last
+      expect(metric.org_id).to eq(agent_run.org_id)
+      expect(metric.provider).to eq(agent_run.provider)
+      expect(metric.model).to eq(agent_run.model)
+      expect(metric.agent_run_id).to eq(agent_run.id)
+      expect(metric.input_tokens).to eq(100)
+      expect(metric.output_tokens).to eq(50)
+      expect(metric.cost_estimate_usd).to eq(BigDecimal('0.001234'))
+    end
+
     context 'without sidecar token' do
       it 'returns 401' do
         post "/api/agent_runs/#{agent_run.id}/complete",
