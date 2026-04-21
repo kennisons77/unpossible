@@ -2,43 +2,7 @@
 
 Agent activity log. Auto-updated each iteration. Trimmed to last 10 entries.
 
-[Prior entries summarised: 75 iterations — initial planning through 0.0.57. Key milestones: Rails skeleton + test infra, security (Secret, LogRedactor, PromptSanitizer, rack-attack), JWT auth, Agents module (AgentRun, AgentRunTurn, ProviderAdapter, PromptDeduplicator, AgentRunsController, AgentRunJob, TurnContentGcJob), Sandbox module (ContainerRun, DockerDispatcher), Analytics module (FeatureFlag, AnalyticsEvent, AuditEvent, LlmMetric, AuditLogger, AuditLogJob, MetricsController, FeatureFlag auto-fire), HealthCheckMiddleware, Ledger+Knowledge removal, org_id migrations, provider adapter build_prompt with pinned+sliding trimming, LedgerAppender, controlled-commit.sh, parse_response normalised to hash across all adapters.]
-
----
-
-## 2026-04-18 14:04 — Task 2.6b: Scope set_agent_run to current_org_id (tag 0.0.58)
-
-Scoped `AgentRunsController#set_agent_run` to `current_org_id` for JWT auth; unscoped for sidecar. Added cross-org 404 test. 271 examples, 0 failures, 99.41% coverage.
-
----
-
-## 2026-04-18 14:08 — Task 1.1: Annotate Go sidecar stubs in docker-compose.yml (tag 0.0.59)
-
-Added "Phase 0: Go sidecars not yet built" comment block above commented-out stubs. References tasks 8.2 and 8.6 as unlock conditions.
-
----
-
-## 2026-04-18 14:17 — Task 2.1: Wire limits_concurrency in AgentRunJob (tag 0.0.60)
-
-Added `limits_concurrency to: 1` macro. Key uses source_ref (falls back to run_id). Updated RunStorageService to pass source_ref as second arg. 274 examples, 0 failures, 99.41% coverage.
-
----
-
-## 2026-04-18 14:23 — Task 2.2: Implement call_provider on all three adapters (tag 0.0.61)
-
-ClaudeAdapter and OpenAiAdapter via Net::HTTP. KiroAdapter via Open3.capture3. Added webmock + dependencies. 20 new tests. 290 examples, 0 failures, 99.46% coverage.
-
----
-
-## 2026-04-18 14:31 — Task 2.3: Add agent_override flag to AgentRun (tag 0.0.62)
-
-Migration + model attribute + AgentRunJob bypass. Extracted `load_enrichment` method. 5 new tests. 296 examples, 0 failures, 99.47% coverage.
-
----
-
-## 2026-04-21 13:35 — Task 2.4: Create LlmMetric on agent run completion (tag 0.0.63)
-
-`RunStorageService.complete` now creates `Analytics::LlmMetric`. 297 examples, 0 failures, 99.47% coverage.
+[Prior entries summarised: 81 iterations — initial planning through 0.0.63. Key milestones: Rails skeleton + test infra, security (Secret, LogRedactor, PromptSanitizer, rack-attack), JWT auth, Agents module (AgentRun, AgentRunTurn, ProviderAdapter, PromptDeduplicator, AgentRunsController, AgentRunJob, TurnContentGcJob), Sandbox module (ContainerRun, DockerDispatcher), Analytics module (FeatureFlag, AnalyticsEvent, AuditEvent, LlmMetric, AuditLogger, AuditLogJob, MetricsController, FeatureFlag auto-fire), HealthCheckMiddleware, Ledger+Knowledge removal, org_id migrations, provider adapter build_prompt with pinned+sliding trimming, LedgerAppender, controlled-commit.sh, parse_response normalised to hash, LlmMetric on completion, rswag install, FeatureFlagsController org_id fix.]
 
 ---
 
@@ -94,3 +58,23 @@ Deleted old plan, gap-analyzed specs vs code at tag 0.0.63. Key findings:
 **Tradeoffs taken:**
 - The test hits `/api/docs/index.html` rather than `/api/docs`. This is technically correct (the spec says "GET /api/docs returns 200") but the actual 200 is at the `/index.html` path. Acceptable for Phase 0 — the redirect is standard browser behavior and the UI is accessible.
 - swagger/v1/swagger.yaml starts empty (paths: {}). It will be populated as rswag request specs are added in tasks 2.2–2.6.
+
+## 2026-04-21 14:03 — Task 2.2: Convert auth_spec to rswag format (tag 0.0.66)
+
+**Changes:** Converted `POST /api/auth/token` describe block to rswag `path/post/response` DSL. Kept `authenticate!` tests as plain RSpec (they use a test-only route, not a documented endpoint). Updated `swagger/v1/swagger.yaml` with generated content. 299 examples, 0 failures, 99.47% coverage.
+
+**Thinking:**
+- The auth spec has two describe blocks: the actual endpoint (`POST /api/auth/token`) and the `authenticate!` middleware behavior (tested via a synthetic `GET /test_auth` route). Only the former belongs in the swagger spec — the latter is internal middleware behavior with no public API surface.
+- The rswag DSL wraps each `response` block in a `run_test!` call. Custom assertions (like decoding the JWT and checking `org_id`) go inside the `run_test!` block.
+- The `around` block for `ENV['AUTH_SECRET']` moves inside the `path/post` block so it applies to both response examples.
+
+**Challenges:**
+- The swagger.yaml is generated inside the Docker container (no volume mount for `web/`). The host file stays stale after `rake rswag:specs:swaggerize` runs in the container. Had to cat the file from inside the container and write it to the host manually.
+- rswag's `swaggerize` task runs specs in `--dry-run` mode — this is expected and the 51-example count reflects all request specs being discovered, not just the rswag ones.
+
+**Alternatives considered:**
+- Converting the `authenticate!` tests to rswag too — rejected: they test a synthetic route that doesn't exist in production. Including them in the swagger spec would document a non-existent endpoint.
+- Adding a volume mount to docker-compose.test.yml so the generated swagger.yaml is written directly to the host — considered but deferred: it would require a compose file change and the current approach (cat + write) is sufficient for Phase 0.
+
+**Tradeoffs taken:**
+- The swagger.yaml on the host must be manually synced after each `swaggerize` run inside the container. This is a known limitation of the no-volume-mount test setup. A future task could add a bind mount for `web/swagger/` to eliminate this step.
