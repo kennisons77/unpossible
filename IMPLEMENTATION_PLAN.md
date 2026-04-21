@@ -80,7 +80,7 @@ Spec requires `AgentRun` to accept `agent_override: boolean` — when true, enri
 ### 2.4 LlmMetric not created on run completion
 `AgentRunsController#complete` updates the run and logs an audit event, but never creates an `Analytics::LlmMetric` record. The spec requires per-run cost/token recording in LlmMetric.
 
-- [ ] 2.4 — Create `Analytics::LlmMetric` record when an agent run completes (`web/app/modules/agents/controllers/agent_runs_controller.rb` or `web/app/modules/agents/services/run_storage_service.rb`)
+- [x] 2.4 — Create `Analytics::LlmMetric` record when an agent run completes (`web/app/modules/agents/controllers/agent_runs_controller.rb` or `web/app/modules/agents/services/run_storage_service.rb`)
   Required tests: completing a run creates an LlmMetric with correct provider, model, tokens, cost_estimate_usd, agent_run_id, org_id
 
 ### 2.5 Skill frontmatter parsing + assembly pipeline
