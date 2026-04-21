@@ -56,7 +56,7 @@ rswag is not installed. No swagger/OpenAPI docs exist. The spec requires every e
 - [x] 2.3 — Convert `spec/requests/agents/agent_runs_spec.rb` to rswag format (`web/spec/requests/agents/agent_runs_spec.rb`)
   Required tests: start 201, start dedup 200, start concurrent 409, start duplicate 422, start 401, complete 200, complete 401, input 200, input 404, generated swagger includes all agent_runs endpoints
 
-- [ ] 2.4 — Convert `spec/requests/analytics/metrics_spec.rb` to rswag format (`web/spec/requests/analytics/metrics_spec.rb`)
+- [x] 2.4 — Convert `spec/requests/analytics/metrics_spec.rb` to rswag format (`web/spec/requests/analytics/metrics_spec.rb`)
   Required tests: llm 200, llm 401, loops 200, loops 401, summary 200, summary 401, events 200, events 401, flag_stats 200, flag_stats 401, generated swagger includes all analytics endpoints
 
 - [ ] 2.5 — Convert `spec/requests/analytics/feature_flags_spec.rb` to rswag format (`web/spec/requests/analytics/feature_flags_spec.rb`)
