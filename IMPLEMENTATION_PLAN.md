@@ -47,7 +47,7 @@ Scope: Phase 0 MVP per `specifications/project-requirements.md`
 
 rswag is not installed. No swagger/OpenAPI docs exist. The spec requires every endpoint documented and covered by rswag request specs.
 
-- [ ] 2.1 — Install rswag gems and configure Swagger UI at /api/docs (`web/Gemfile`, `web/Gemfile.lock`, `web/vendor/cache/`, `web/config/initializers/rswag.rb`, `web/spec/swagger_helper.rb`, `web/swagger/v1/swagger.yaml`)
+- [x] 2.1 — Install rswag gems and configure Swagger UI at /api/docs (`web/Gemfile`, `web/Gemfile.lock`, `web/vendor/cache/`, `web/config/initializers/rswag.rb`, `web/spec/swagger_helper.rb`, `web/swagger/v1/swagger.yaml`)
   Required tests: `GET /api/docs` returns 200 without authentication, `rake rswag:specs:swaggerize` exits 0
 
 - [ ] 2.2 — Convert `spec/requests/api/auth_spec.rb` to rswag format (`web/spec/requests/api/auth_spec.rb`)

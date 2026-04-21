@@ -16,11 +16,15 @@ gem 'redcarpet', '~> 3.6'
 gem 'rouge', '~> 4.4'
 gem 'bootsnap', '~> 1.18', require: false
 
+gem 'rswag-api', '~> 2.17'
+gem 'rswag-ui', '~> 2.17'
+
 group :development, :test do
   gem 'rspec-rails', '~> 7.0'
   gem 'factory_bot_rails', '~> 6.4'
   gem 'brakeman', '~> 6.2', require: false
   gem 'bundler-audit', '~> 0.9', require: false
+  gem 'rswag-specs', '~> 2.17'
 end
 
 group :test do
