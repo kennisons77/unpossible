@@ -15,7 +15,7 @@ module Analytics
     end
 
     def create
-      flag = FeatureFlag.new(create_params.merge(status: 'active', enabled: false))
+      flag = FeatureFlag.new(create_params.merge(org_id: current_org_id, status: 'active', enabled: false))
       if flag.save
         render json: flag, status: :created
       else
@@ -40,7 +40,7 @@ module Analytics
     end
 
     def create_params
-      params.permit(:key, :org_id, metadata: {})
+      params.permit(:key, metadata: {})
     end
 
     def update_params
