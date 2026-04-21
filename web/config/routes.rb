@@ -1,6 +1,10 @@
 # frozen_string_literal: true
 
 Rails.application.routes.draw do
+  # Swagger UI — unauthenticated
+  mount Rswag::Ui::Engine => '/api/docs'
+  mount Rswag::Api::Engine => '/api-docs'
+
   # Health check — Rails 8 default, unauthenticated
   get 'up' => 'rails/health#show', as: :rails_health_check
 
