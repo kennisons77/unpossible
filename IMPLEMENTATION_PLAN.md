@@ -59,7 +59,7 @@ rswag is not installed. No swagger/OpenAPI docs exist. The spec requires every e
 - [x] 2.4 — Convert `spec/requests/analytics/metrics_spec.rb` to rswag format (`web/spec/requests/analytics/metrics_spec.rb`)
   Required tests: llm 200, llm 401, loops 200, loops 401, summary 200, summary 401, events 200, events 401, flag_stats 200, flag_stats 401, generated swagger includes all analytics endpoints
 
-- [ ] 2.5 — Convert `spec/requests/analytics/feature_flags_spec.rb` to rswag format (`web/spec/requests/analytics/feature_flags_spec.rb`)
+- [x] 2.5 — Convert `spec/requests/analytics/feature_flags_spec.rb` to rswag format (`web/spec/requests/analytics/feature_flags_spec.rb`)
   Required tests: index 200, index 401, create 201, create 422, update 200, update 404, generated swagger includes all feature_flags endpoints
 
 - [ ] 2.6 — Add rswag request spec for GET /health (`web/spec/requests/health_spec.rb`)
