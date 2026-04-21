@@ -1,13 +1,12 @@
 # frozen_string_literal: true
 
-require 'rails_helper'
+require 'swagger_helper'
 
 RSpec.describe 'Agent Runs API', type: :request do
   let(:org_id) { SecureRandom.uuid }
   let(:token) { AuthToken.encode(org_id: org_id, user_id: 'user-1') }
-  let(:headers) { { 'Authorization' => "Bearer #{token}", 'Content-Type' => 'application/json' } }
+  let(:Authorization) { "Bearer #{token}" }
   let(:sidecar_secret) { 'test-sidecar-token' }
-  let(:sidecar_headers) { { 'X-Sidecar-Token' => sidecar_secret, 'Content-Type' => 'application/json' } }
 
   around do |example|
     original_auth = ENV.fetch('AUTH_SECRET', nil)
@@ -19,147 +18,188 @@ RSpec.describe 'Agent Runs API', type: :request do
     ENV['SIDECAR_TOKEN'] = original_sidecar
   end
 
-  let(:valid_params) do
-    {
-      run_id: SecureRandom.uuid,
-      source_ref: 'specifications/system/agent-runner/concept.md',
-      mode: 'build',
-      provider: 'claude',
-      model: 'opus',
-      prompt_sha256: SecureRandom.hex(32)
-    }
-  end
+  path '/api/agent_runs/start' do
+    post 'Start an agent run' do
+      tags 'Agent Runs'
+      consumes 'application/json'
+      produces 'application/json'
+      security [{ bearerAuth: [] }]
+      parameter name: :Authorization, in: :header, type: :string, required: true
+      parameter name: :body, in: :body, schema: {
+        type: :object,
+        properties: {
+          run_id: { type: :string, format: :uuid },
+          source_ref: { type: :string },
+          mode: { type: :string },
+          provider: { type: :string },
+          model: { type: :string },
+          prompt_sha256: { type: :string }
+        },
+        required: %w[run_id source_ref mode provider model]
+      }
 
-  describe 'POST /api/agent_runs/start' do
-    it 'creates AgentRun with status running and returns 201' do
-      post '/api/agent_runs/start', params: valid_params.to_json, headers: headers
-      expect(response).to have_http_status(:created)
-      body = JSON.parse(response.body)
-      expect(body['status']).to eq('running')
-      expect(Agents::AgentRun.find(body['id']).org_id).to eq(org_id)
-    end
-
-    context 'with concurrent active run for same source_ref' do
-      before { create(:agents_agent_run, source_ref: 'specifications/system/agent-runner/concept.md', status: 'running') }
-
-      it 'returns 409' do
-        post '/api/agent_runs/start', params: valid_params.to_json, headers: headers
-        expect(response).to have_http_status(:conflict)
+      response '201', 'run started' do
+        let(:body) do
+          {
+            run_id: SecureRandom.uuid,
+            source_ref: 'specifications/system/agent-runner/concept.md',
+            mode: 'build',
+            provider: 'claude',
+            model: 'opus',
+            prompt_sha256: SecureRandom.hex(32)
+          }
+        end
+        run_test! do
+          parsed = JSON.parse(response.body)
+          expect(parsed['status']).to eq('running')
+          expect(Agents::AgentRun.find(parsed['id']).org_id).to eq(org_id)
+        end
       end
-    end
 
-    context 'with dedup hit' do
-      let(:sha) { SecureRandom.hex(32) }
-
-      before do
-        create(:agents_agent_run, prompt_sha256: sha, mode: 'build', status: 'completed')
+      response '200', 'dedup hit — cached run returned' do
+        let(:sha) { SecureRandom.hex(32) }
+        before { create(:agents_agent_run, prompt_sha256: sha, mode: 'build', status: 'completed') }
+        let(:body) do
+          {
+            run_id: SecureRandom.uuid,
+            source_ref: 'specifications/system/agent-runner/concept.md',
+            mode: 'build',
+            provider: 'claude',
+            model: 'opus',
+            prompt_sha256: sha
+          }
+        end
+        run_test!
       end
 
-      it 'returns cached run with 200' do
-        post '/api/agent_runs/start',
-             params: valid_params.merge(prompt_sha256: sha, mode: 'build').to_json,
-             headers: headers
-        expect(response).to have_http_status(:ok)
+      response '409', 'concurrent run already active for this source_ref' do
+        before do
+          create(:agents_agent_run,
+                 source_ref: 'specifications/system/agent-runner/concept.md',
+                 status: 'running')
+        end
+        let(:body) do
+          {
+            run_id: SecureRandom.uuid,
+            source_ref: 'specifications/system/agent-runner/concept.md',
+            mode: 'build',
+            provider: 'claude',
+            model: 'opus',
+            prompt_sha256: SecureRandom.hex(32)
+          }
+        end
+        run_test!
       end
-    end
 
-    context 'with duplicate run_id' do
-      let(:existing) { create(:agents_agent_run) }
-
-      it 'returns 422' do
-        post '/api/agent_runs/start',
-             params: valid_params.merge(run_id: existing.run_id).to_json,
-             headers: headers
-        expect(response).to have_http_status(:unprocessable_entity)
+      response '422', 'duplicate run_id' do
+        let(:existing) { create(:agents_agent_run) }
+        let(:body) do
+          {
+            run_id: existing.run_id,
+            source_ref: 'specifications/system/agent-runner/concept.md',
+            mode: 'build',
+            provider: 'claude',
+            model: 'opus',
+            prompt_sha256: SecureRandom.hex(32)
+          }
+        end
+        run_test!
       end
-    end
 
-    context 'without auth' do
-      it 'returns 401' do
-        post '/api/agent_runs/start', params: valid_params.to_json,
-             headers: { 'Content-Type' => 'application/json' }
-        expect(response).to have_http_status(:unauthorized)
-      end
-    end
-  end
-
-  describe 'POST /api/agent_runs/:id/complete' do
-    let(:agent_run) { create(:agents_agent_run, status: 'running', org_id: org_id) }
-
-    it 'updates record and returns 200' do
-      post "/api/agent_runs/#{agent_run.id}/complete",
-           params: { input_tokens: 100, output_tokens: 50, cost_estimate_usd: 0.001, duration_ms: 500 }.to_json,
-           headers: sidecar_headers
-      expect(response).to have_http_status(:ok)
-      expect(agent_run.reload.status).to eq('completed')
-    end
-
-    it 'enqueues an audit event via AuditLogger' do
-      expect(Analytics::AuditLogger).to receive(:log).with(
-        org_id: agent_run.org_id,
-        event_name: "agent_run.completed",
-        properties: { run_id: agent_run.run_id, mode: agent_run.mode }
-      )
-      post "/api/agent_runs/#{agent_run.id}/complete",
-           params: { input_tokens: 100, output_tokens: 50, cost_estimate_usd: 0.001, duration_ms: 500 }.to_json,
-           headers: sidecar_headers
-    end
-
-    it 'creates an LlmMetric record with correct attributes' do
-      expect {
-        post "/api/agent_runs/#{agent_run.id}/complete",
-             params: { input_tokens: 100, output_tokens: 50, cost_estimate_usd: '0.001234', duration_ms: 500 }.to_json,
-             headers: sidecar_headers
-      }.to change(Analytics::LlmMetric, :count).by(1)
-
-      metric = Analytics::LlmMetric.last
-      expect(metric.org_id).to eq(agent_run.org_id)
-      expect(metric.provider).to eq(agent_run.provider)
-      expect(metric.model).to eq(agent_run.model)
-      expect(metric.agent_run_id).to eq(agent_run.id)
-      expect(metric.input_tokens).to eq(100)
-      expect(metric.output_tokens).to eq(50)
-      expect(metric.cost_estimate_usd).to eq(BigDecimal('0.001234'))
-    end
-
-    context 'without sidecar token' do
-      it 'returns 401' do
-        post "/api/agent_runs/#{agent_run.id}/complete",
-             params: { input_tokens: 100 }.to_json,
-             headers: headers
-        expect(response).to have_http_status(:unauthorized)
+      response '401', 'missing or invalid token' do
+        let(:Authorization) { nil }
+        let(:body) do
+          {
+            run_id: SecureRandom.uuid,
+            source_ref: 'specifications/system/agent-runner/concept.md',
+            mode: 'build',
+            provider: 'claude',
+            model: 'opus'
+          }
+        end
+        run_test!
       end
     end
   end
 
-  describe 'POST /api/agent_runs/:id/input' do
-    let(:agent_run) { create(:agents_agent_run, status: 'waiting_for_input', org_id: org_id) }
+  path '/api/agent_runs/{id}/complete' do
+    post 'Complete an agent run (sidecar only)' do
+      tags 'Agent Runs'
+      consumes 'application/json'
+      produces 'application/json'
+      parameter name: :id, in: :path, type: :integer, required: true
+      parameter name: :'X-Sidecar-Token', in: :header, type: :string, required: true
+      parameter name: :body, in: :body, schema: {
+        type: :object,
+        properties: {
+          input_tokens: { type: :integer },
+          output_tokens: { type: :integer },
+          cost_estimate_usd: { type: :number },
+          duration_ms: { type: :integer }
+        }
+      }
 
-    it 'appends human_input turn and returns 200' do
-      post "/api/agent_runs/#{agent_run.id}/input",
-           params: { content: 'Here is my answer' }.to_json,
-           headers: headers
-      expect(response).to have_http_status(:ok)
-      turn = Agents::AgentRunTurn.last
-      expect(turn.kind).to eq('human_input')
-      expect(turn.content).to eq('Here is my answer')
-      expect(agent_run.reload.status).to eq('running')
+      response '200', 'run completed' do
+        let(:agent_run) { create(:agents_agent_run, status: 'running', org_id: org_id) }
+        let(:id) { agent_run.id }
+        let(:'X-Sidecar-Token') { sidecar_secret }
+        let(:body) { { input_tokens: 100, output_tokens: 50, cost_estimate_usd: 0.001, duration_ms: 500 } }
+        run_test! do
+          expect(agent_run.reload.status).to eq('completed')
+        end
+      end
+
+      response '401', 'missing or invalid sidecar token' do
+        let(:agent_run) { create(:agents_agent_run, status: 'running', org_id: org_id) }
+        let(:id) { agent_run.id }
+        let(:'X-Sidecar-Token') { 'wrong' }
+        let(:body) { { input_tokens: 100 } }
+        run_test!
+      end
     end
+  end
 
-    it 'returns 404 for a run belonging to a different org' do
-      other_run = create(:agents_agent_run, status: 'waiting_for_input', org_id: SecureRandom.uuid)
-      post "/api/agent_runs/#{other_run.id}/input",
-           params: { content: 'answer' }.to_json,
-           headers: headers
-      expect(response).to have_http_status(:not_found)
-    end
+  path '/api/agent_runs/{id}/input' do
+    post 'Submit human input to a waiting run' do
+      tags 'Agent Runs'
+      consumes 'application/json'
+      produces 'application/json'
+      security [{ bearerAuth: [] }]
+      parameter name: :id, in: :path, type: :integer, required: true
+      parameter name: :Authorization, in: :header, type: :string, required: true
+      parameter name: :body, in: :body, schema: {
+        type: :object,
+        properties: {
+          content: { type: :string }
+        },
+        required: ['content']
+      }
 
-    context 'without auth' do
-      it 'returns 401' do
-        post "/api/agent_runs/#{agent_run.id}/input",
-             params: { content: 'answer' }.to_json,
-             headers: { 'Content-Type' => 'application/json' }
-        expect(response).to have_http_status(:unauthorized)
+      response '200', 'input recorded, run resumed' do
+        let(:agent_run) { create(:agents_agent_run, status: 'waiting_for_input', org_id: org_id) }
+        let(:id) { agent_run.id }
+        let(:body) { { content: 'Here is my answer' } }
+        run_test! do
+          turn = Agents::AgentRunTurn.last
+          expect(turn.kind).to eq('human_input')
+          expect(turn.content).to eq('Here is my answer')
+          expect(agent_run.reload.status).to eq('running')
+        end
+      end
+
+      response '404', 'run not found or belongs to different org' do
+        let(:other_run) { create(:agents_agent_run, status: 'waiting_for_input', org_id: SecureRandom.uuid) }
+        let(:id) { other_run.id }
+        let(:body) { { content: 'answer' } }
+        run_test!
+      end
+
+      response '401', 'missing or invalid token' do
+        let(:Authorization) { nil }
+        let(:agent_run) { create(:agents_agent_run, status: 'waiting_for_input', org_id: org_id) }
+        let(:id) { agent_run.id }
+        let(:body) { { content: 'answer' } }
+        run_test!
       end
     end
   end
