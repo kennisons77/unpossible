@@ -15,12 +15,24 @@ RSpec.describe 'Feature Flags API', type: :request do
   end
 
   describe 'POST /api/feature_flags' do
-    let(:valid_params) { { key: 'module.feature', org_id: org_id } }
+    let(:valid_params) { { key: 'module.feature' } }
 
     it 'creates flag and returns 201' do
       post '/api/feature_flags', params: valid_params.to_json, headers: headers
       expect(response).to have_http_status(:created)
       expect(JSON.parse(response.body)['key']).to eq('module.feature')
+    end
+
+    it 'sets org_id from JWT token, not from params' do
+      post '/api/feature_flags', params: { key: 'module.feature' }.to_json, headers: headers
+      expect(JSON.parse(response.body)['org_id']).to eq(org_id)
+    end
+
+    it 'ignores org_id in params and uses token org_id' do
+      other_org = SecureRandom.uuid
+      post '/api/feature_flags', params: { key: 'module.feature', org_id: other_org }.to_json, headers: headers
+      expect(response).to have_http_status(:created)
+      expect(JSON.parse(response.body)['org_id']).to eq(org_id)
     end
 
     it 'returns 422 for duplicate key' do
@@ -30,7 +42,7 @@ RSpec.describe 'Feature Flags API', type: :request do
     end
 
     it 'returns 201 without metadata.hypothesis' do
-      post '/api/feature_flags', params: { key: 'module.no_hypothesis', org_id: org_id }.to_json, headers: headers
+      post '/api/feature_flags', params: { key: 'module.no_hypothesis' }.to_json, headers: headers
       expect(response).to have_http_status(:created)
     end
 
