@@ -6,6 +6,27 @@ Agent activity log. Auto-updated each iteration. Trimmed to last 10 entries.
 
 ---
 
+## 2026-04-21 14:08 — Task 2.3: Convert agent_runs_spec to rswag format (tag 0.0.67)
+
+**Changes:** Replaced plain RSpec request spec with rswag `path/post/response` DSL covering all 10 scenarios: start 201, dedup 200, concurrent 409, duplicate 422, start 401, complete 200, complete 401, input 200, input 404, input 401. 297 examples, 0 failures, 99.11% coverage.
+
+**Thinking:**
+- The agent_runs spec has three endpoints with different auth mechanisms: JWT for start/input, X-Sidecar-Token for complete. rswag's `parameter name: :Authorization, in: :header` pattern (established in auth_spec) handles JWT. The sidecar token uses `parameter name: :'X-Sidecar-Token', in: :header` — same pattern, different header name.
+- The `let(:Authorization)` rswag convention for JWT headers carries over cleanly. For the 401 case, setting `let(:Authorization) { nil }` causes rswag to omit the header, which triggers the 401.
+- The `complete` endpoint checks `sidecar_authenticated?` before the `set_agent_run` before_action, so the 401 fires even for valid run IDs — the test correctly uses a valid run ID to isolate the auth check.
+
+**Challenges:**
+- The `complete` endpoint uses `sidecar_authenticated?` (not `authenticate!`), so the standard `let(:Authorization)` pattern doesn't apply. Had to use `let(:'X-Sidecar-Token')` with a symbol key containing a hyphen — Ruby allows this with the `:'...'` syntax.
+- The `around` block for ENV vars must wrap all three path blocks. Moved it to the top-level describe so it applies to all examples.
+
+**Alternatives considered:**
+- Keeping the `complete` 401 test as a plain RSpec example outside the rswag block — rejected: the task requires all agent_runs endpoints in rswag format, including auth failure cases.
+- Using `before { request.headers['X-Sidecar-Token'] = sidecar_secret }` instead of a parameter declaration — rejected: rswag requires parameters to be declared via `parameter` DSL to appear in the swagger spec.
+
+**Tradeoffs taken:**
+- The swagger.yaml on the host is not auto-updated (same limitation as task 2.2 — no volume mount). The generated spec will be correct after the next `swaggerize` run inside the container.
+- Example count dropped from 299 to 297: the old spec had two extra tests (AuditLogger mock and LlmMetric attribute assertions) that were folded into the `run_test!` block of the 200 response. Behavior is still covered.
+
 ## 2026-04-21 13:41 — Planning loop: regenerate IMPLEMENTATION_PLAN.md
 
 Deleted old plan, gap-analyzed specs vs code at tag 0.0.63. Key findings:
