@@ -6,6 +6,28 @@ Agent activity log. Auto-updated each iteration. Trimmed to last 10 entries.
 
 ---
 
+## 2026-04-21 14:14 — Task 2.4: Convert analytics metrics_spec to rswag format (tag 0.0.68)
+
+**Changes:** Replaced plain RSpec request spec with rswag `path/get/response` DSL covering all 5 analytics endpoints: llm, loops, summary, events, flags/:key. Each endpoint has 200 and 401 responses; llm has 3 × 200 variants (base, from-filter, to-filter) and events has 5 × 200 variants (base, event_name, from, to, paginate). swagger.yaml updated via volume-mounted swaggerize run. 297 examples, 0 failures, 99.11% coverage.
+
+**Thinking:**
+- The metrics spec has no write operations — all GET endpoints. The rswag pattern is simpler than agent_runs: no request body, just query params and path params.
+- The `flags/:key` endpoint has a path param with a constraint (`/[^\/]+/`) allowing dots in the key. rswag uses `{key}` in the path string and `parameter name: :key, in: :path` — the constraint is a Rails routing concern, not an OpenAPI concern.
+- Multiple 200 responses for the same endpoint (e.g., llm with different filters) are valid in rswag — each `response '200', 'description'` block generates a separate example but only the last description wins in the swagger spec. This is a known rswag limitation; the tests still run and assert correctly.
+- Used a volume mount (`-v "$(pwd)/web/swagger:/app/swagger"`) to write the generated swagger.yaml directly to the host, eliminating the manual cat-and-write step from task 2.2.
+
+**Challenges:**
+- The `flags/:key` endpoint shares `before` setup with multiple `response` blocks. Moved the `before` and `let` declarations to the `path` block scope so all response examples share the same fixture data — this is the correct rswag pattern for shared setup.
+- The `Authorization: nil` pattern for 401 tests requires `let(:key)` to also be defined in the 401 block (path param is required). Added `let(:key) { 'experiment.new_ui' }` inside the 401 response block.
+
+**Alternatives considered:**
+- One `response '200'` per endpoint with all filter assertions in a single `run_test!` block — rejected: the task requires separate test cases for each filter variant to match the original spec's coverage.
+- Keeping the `before` block inside each `response` block (duplicating fixture setup) — rejected: DRY; the shared `before` at path scope is cleaner and matches the rswag convention.
+
+**Tradeoffs taken:**
+- Multiple `response '200'` blocks for the same endpoint means the swagger spec only records the last description for that status code. The OpenAPI spec loses some granularity, but the test coverage is complete. Acceptable for Phase 0 — the swagger spec is documentation, not the source of truth for behavior.
+- The volume-mount approach for swaggerize (`-v "$(pwd)/web/swagger:/app/swagger"`) is now the established pattern. Worth documenting in AGENTS.md if it becomes a recurring step.
+
 ## 2026-04-21 14:08 — Task 2.3: Convert agent_runs_spec to rswag format (tag 0.0.67)
 
 **Changes:** Replaced plain RSpec request spec with rswag `path/post/response` DSL covering all 10 scenarios: start 201, dedup 200, concurrent 409, duplicate 422, start 401, complete 200, complete 401, input 200, input 404, input 401. 297 examples, 0 failures, 99.11% coverage.
