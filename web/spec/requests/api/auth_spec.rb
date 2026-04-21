@@ -1,35 +1,41 @@
 # frozen_string_literal: true
 
-require 'rails_helper'
+require 'swagger_helper'
 
 RSpec.describe 'POST /api/auth/token', type: :request do
-  let(:secret) { 'test-secret' }
+  path '/api/auth/token' do
+    post 'Issue a JWT token' do
+      tags 'Auth'
+      consumes 'application/json'
+      produces 'application/json'
+      parameter name: :body, in: :body, schema: {
+        type: :object,
+        properties: {
+          secret: { type: :string }
+        },
+        required: ['secret']
+      }
 
-  around do |example|
-    original = ENV.fetch('AUTH_SECRET', nil)
-    ENV['AUTH_SECRET'] = secret
-    example.run
-    ENV['AUTH_SECRET'] = original
-  end
+      around do |example|
+        original = ENV.fetch('AUTH_SECRET', nil)
+        ENV['AUTH_SECRET'] = 'test-secret'
+        example.run
+        ENV['AUTH_SECRET'] = original
+      end
 
-  context 'with valid secret' do
-    it 'returns 201 with a token' do
-      post '/api/auth/token', params: { secret: secret }, as: :json
-      expect(response).to have_http_status(:created)
-    end
+      response '201', 'token issued' do
+        let(:body) { { secret: 'test-secret' } }
+        run_test! do
+          token = JSON.parse(response.body)['token']
+          payload = AuthToken.decode(token)
+          expect(payload[:org_id]).to eq('default')
+        end
+      end
 
-    it 'returns a decodable JWT' do
-      post '/api/auth/token', params: { secret: secret }, as: :json
-      token = JSON.parse(response.body)['token']
-      payload = AuthToken.decode(token)
-      expect(payload[:org_id]).to eq('default')
-    end
-  end
-
-  context 'with invalid secret' do
-    it 'returns 401' do
-      post '/api/auth/token', params: { secret: 'wrong' }, as: :json
-      expect(response).to have_http_status(:unauthorized)
+      response '401', 'invalid secret' do
+        let(:body) { { secret: 'wrong' } }
+        run_test!
+      end
     end
   end
 end

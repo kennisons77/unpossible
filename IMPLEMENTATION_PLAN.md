@@ -50,7 +50,7 @@ rswag is not installed. No swagger/OpenAPI docs exist. The spec requires every e
 - [x] 2.1 — Install rswag gems and configure Swagger UI at /api/docs (`web/Gemfile`, `web/Gemfile.lock`, `web/vendor/cache/`, `web/config/initializers/rswag.rb`, `web/spec/swagger_helper.rb`, `web/swagger/v1/swagger.yaml`)
   Required tests: `GET /api/docs` returns 200 without authentication, `rake rswag:specs:swaggerize` exits 0
 
-- [ ] 2.2 — Convert `spec/requests/api/auth_spec.rb` to rswag format (`web/spec/requests/api/auth_spec.rb`)
+- [x] 2.2 — Convert `spec/requests/api/auth_spec.rb` to rswag format (`web/spec/requests/api/auth_spec.rb`)
   Required tests: happy path 201, invalid secret 401, generated swagger includes POST /api/auth/token
 
 - [ ] 2.3 — Convert `spec/requests/agents/agent_runs_spec.rb` to rswag format (`web/spec/requests/agents/agent_runs_spec.rb`)

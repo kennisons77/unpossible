@@ -3,6 +3,33 @@ openapi: 3.0.1
 info:
   title: Unpossible API
   version: v1
-paths: {}
 servers:
-  - url: http://localhost:3000
+- url: http://localhost:3000
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+paths:
+  "/api/auth/token":
+    post:
+      summary: Issue a JWT token
+      tags:
+      - Auth
+      parameters: []
+      responses:
+        '201':
+          description: token issued
+        '401':
+          description: invalid secret
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                secret:
+                  type: string
+              required:
+              - secret
