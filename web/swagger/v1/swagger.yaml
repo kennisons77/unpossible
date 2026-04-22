@@ -12,6 +12,16 @@ components:
       scheme: bearer
       bearerFormat: JWT
 paths:
+  "/health":
+    get:
+      summary: Health check
+      tags:
+      - Health
+      responses:
+        '200':
+          description: database reachable
+        '503':
+          description: database unreachable
   "/api/agent_runs/start":
     post:
       summary: Start an agent run
