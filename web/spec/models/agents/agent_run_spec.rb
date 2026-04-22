@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe Agents::AgentRun, type: :model do
+RSpec.describe Agents::AgentRun, type: :model, spec: "specifications/system/agent-runner/concept.md#agent-run" do
   describe 'validations' do
     it 'is valid with all required fields' do
       run = build(:agents_agent_run)

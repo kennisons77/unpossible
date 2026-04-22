@@ -3,7 +3,7 @@
 require "rails_helper"
 require "net/http"
 
-RSpec.describe "call_provider" do
+RSpec.describe "call_provider", spec: "specifications/system/agent-runner/concept.md#provider-adapter" do
   def with_env(vars)
     old = vars.transform_keys(&:to_s).transform_values { |_| ENV[_] }
     vars.each { |k, v| ENV[k.to_s] = v }

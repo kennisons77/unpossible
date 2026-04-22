@@ -2,7 +2,7 @@
 
 require "rails_helper"
 
-RSpec.describe MarkdownHelper, type: :helper do
+RSpec.describe MarkdownHelper, type: :helper, spec: "specifications/system/infrastructure/concept.md#markdown-helper" do
   describe "#render_markdown" do
     it "returns empty string for blank input" do
       expect(helper.render_markdown(nil)).to eq("")

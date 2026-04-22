@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe BatchRequestMiddleware do
+RSpec.describe BatchRequestMiddleware, spec: "specifications/system/batch-requests.md#batch-request-middleware" do
   let(:inner_app) do
     lambda do |env|
       path = env['PATH_INFO']

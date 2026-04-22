@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe Analytics::AuditLogger do
+RSpec.describe Analytics::AuditLogger, spec: "specifications/system/analytics/concept.md#audit-logger" do
   describe '.log' do
     let(:org_id) { SecureRandom.uuid }
 

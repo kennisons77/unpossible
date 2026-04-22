@@ -2,7 +2,7 @@
 
 require 'swagger_helper'
 
-RSpec.describe 'Analytics Metrics API', type: :request do
+RSpec.describe 'Analytics Metrics API', type: :request, spec: "specifications/system/analytics/concept.md#metrics-api" do
   let(:org_id) { SecureRandom.uuid }
   let(:token) { AuthToken.encode(org_id: org_id, user_id: 'user-1') }
   let(:Authorization) { "Bearer #{token}" }

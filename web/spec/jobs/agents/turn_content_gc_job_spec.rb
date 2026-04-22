@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe Agents::TurnContentGcJob, type: :job do
+RSpec.describe Agents::TurnContentGcJob, type: :job, spec: "specifications/system/agent-runner/concept.md#turn-content-gc" do
   let(:org_id) { SecureRandom.uuid }
 
   it 'is enqueued on the agents queue' do

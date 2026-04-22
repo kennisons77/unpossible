@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe Analytics::AuditEvent, type: :model do
+RSpec.describe Analytics::AuditEvent, type: :model, spec: "specifications/system/analytics/concept.md#audit-event" do
   describe 'validations' do
     it 'is valid with required fields' do
       expect(build(:analytics_audit_event)).to be_valid

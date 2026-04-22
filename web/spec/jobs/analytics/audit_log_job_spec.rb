@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe Analytics::AuditLogJob, type: :job do
+RSpec.describe Analytics::AuditLogJob, type: :job, spec: "specifications/system/analytics/concept.md#audit-log-job" do
   let(:org_id) { SecureRandom.uuid }
 
   it 'is enqueued on the analytics queue' do

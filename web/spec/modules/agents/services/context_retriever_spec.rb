@@ -2,7 +2,7 @@
 
 require "rails_helper"
 
-RSpec.describe Agents::ContextRetriever do
+RSpec.describe Agents::ContextRetriever, spec: "specifications/system/agent-runner/concept.md#context-retrieval" do
   let(:tmp_dir) { Dir.mktmpdir }
 
   before do

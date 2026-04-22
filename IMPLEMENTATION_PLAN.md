@@ -86,7 +86,7 @@ Spec: `specifications/system/reference-graph/concept.md` § Spec Reference Tags 
 
 No `spec:` metadata tags exist in any RSpec files. This is a convention — no code changes needed beyond adding tags to existing specs. Blocked by the Go reference parser (which reads these tags).
 
-- [ ] 6.1 Add `spec:` metadata tags to existing RSpec files linking tests to spec sections (`web/spec/**/*_spec.rb`)
+- [x] 6.1 Add `spec:` metadata tags to existing RSpec files linking tests to spec sections (`web/spec/**/*_spec.rb`)
   Required tests: N/A — this is a convention change. Verify tags parse correctly once the reference parser exists.
   Depends on: 5.1 (parser must exist to validate tags)
 

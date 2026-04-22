@@ -2,7 +2,7 @@
 
 require "rails_helper"
 
-RSpec.describe Agents::ProviderAdapter do
+RSpec.describe Agents::ProviderAdapter, spec: "specifications/system/agent-runner/concept.md#provider-adapter" do
   describe ".for" do
     it "returns ClaudeAdapter for 'claude'" do
       adapter = described_class.for("claude")

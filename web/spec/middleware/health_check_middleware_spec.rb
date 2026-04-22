@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe HealthCheckMiddleware do
+RSpec.describe HealthCheckMiddleware, spec: "specifications/system/infrastructure/concept.md#health-check" do
   let(:app) { ->(env) { [200, {}, ['ok']] } }
   let(:middleware) { described_class.new(app) }
 

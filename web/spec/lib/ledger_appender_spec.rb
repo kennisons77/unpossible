@@ -3,7 +3,7 @@
 require 'rails_helper'
 require 'tmpdir'
 
-RSpec.describe LedgerAppender do
+RSpec.describe LedgerAppender, spec: "specifications/system/reference-graph/concept.md#ledger-jsonl" do
   let(:ledger_path) { File.join(Dir.mktmpdir, 'LEDGER.jsonl') }
 
   let(:status_event) do

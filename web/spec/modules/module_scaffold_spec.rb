@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe 'Module scaffold' do
+RSpec.describe 'Module scaffold', spec: "specifications/system/infrastructure/concept.md#module-scaffold" do
   MODULES = %w[Agents Sandbox Analytics].freeze
 
   describe 'namespace resolution' do

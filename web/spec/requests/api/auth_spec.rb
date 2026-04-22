@@ -2,7 +2,7 @@
 
 require 'swagger_helper'
 
-RSpec.describe 'POST /api/auth/token', type: :request do
+RSpec.describe 'POST /api/auth/token', type: :request, spec: "specifications/system/auth/concept.md#token-issuance" do
   path '/api/auth/token' do
     post 'Issue a JWT token' do
       tags 'Auth'
@@ -40,7 +40,7 @@ RSpec.describe 'POST /api/auth/token', type: :request do
   end
 end
 
-RSpec.describe 'authenticate!', type: :request do
+RSpec.describe 'authenticate!', type: :request, spec: "specifications/system/auth/concept.md#authentication" do
   let(:auth_secret) { 'test-secret' }
   let(:sidecar_secret) { 'sidecar-secret' }
   let(:valid_token) { AuthToken.encode(org_id: 'org-1', user_id: 'user-1') }

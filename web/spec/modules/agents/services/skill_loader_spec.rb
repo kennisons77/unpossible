@@ -2,7 +2,7 @@
 
 require "rails_helper"
 
-RSpec.describe Agents::SkillLoader do
+RSpec.describe Agents::SkillLoader, spec: "specifications/system/agent-runner/concept.md#skill-loader" do
   let(:tmp_dir) { Dir.mktmpdir }
 
   after { FileUtils.remove_entry(tmp_dir) }

@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe Agents::AgentRunTurn, type: :model do
+RSpec.describe Agents::AgentRunTurn, type: :model, spec: "specifications/system/agent-runner/concept.md#agent-run-turn" do
   describe 'validations' do
     it 'is valid with all required fields' do
       turn = build(:agents_agent_run_turn)

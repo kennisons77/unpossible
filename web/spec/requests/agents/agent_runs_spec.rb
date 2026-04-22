@@ -2,7 +2,7 @@
 
 require 'swagger_helper'
 
-RSpec.describe 'Agent Runs API', type: :request do
+RSpec.describe 'Agent Runs API', type: :request, spec: "specifications/system/agent-runner/concept.md#api" do
   let(:org_id) { SecureRandom.uuid }
   let(:token) { AuthToken.encode(org_id: org_id, user_id: 'user-1') }
   let(:Authorization) { "Bearer #{token}" }

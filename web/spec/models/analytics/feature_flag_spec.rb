@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe Analytics::FeatureFlag, type: :model do
+RSpec.describe Analytics::FeatureFlag, type: :model, spec: "specifications/system/feature-flags/concept.md#feature-flag" do
   let(:org_id) { SecureRandom.uuid }
 
   describe '.enabled?' do

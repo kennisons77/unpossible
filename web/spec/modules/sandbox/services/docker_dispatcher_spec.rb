@@ -2,7 +2,7 @@
 
 require "rails_helper"
 
-RSpec.describe Sandbox::DockerDispatcher, type: :service do
+RSpec.describe Sandbox::DockerDispatcher, type: :service, spec: "specifications/system/sandbox/concept.md#docker-dispatcher" do
   let(:dispatcher) { described_class.new(timeout: 5) }
   let(:org_id) { SecureRandom.uuid }
 

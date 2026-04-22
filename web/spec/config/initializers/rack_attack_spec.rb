@@ -2,7 +2,7 @@
 
 require "rails_helper"
 
-RSpec.describe Rack::Attack, type: :request do
+RSpec.describe Rack::Attack, type: :request, spec: "specifications/system/api/concept.md#rate-limiting" do
   before { Rack::Attack.reset! }
   after  { Rack::Attack.reset! }
 

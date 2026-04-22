@@ -2,7 +2,7 @@
 
 require 'swagger_helper'
 
-RSpec.describe 'GET /health', type: :request do
+RSpec.describe 'GET /health', type: :request, spec: "specifications/system/infrastructure/concept.md#health-check" do
   path '/health' do
     get 'Health check' do
       tags 'Health'

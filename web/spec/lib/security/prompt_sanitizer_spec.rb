@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe Security::PromptSanitizer do
+RSpec.describe Security::PromptSanitizer, spec: "specifications/system/api/concept.md#prompt-sanitization" do
   describe '.sanitize' do
     it 'redacts an email address' do
       expect(described_class.sanitize('contact user@example.com please')).to include('[EMAIL]')

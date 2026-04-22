@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe Security::LogRedactor do
+RSpec.describe Security::LogRedactor, spec: "specifications/system/api/concept.md#log-redaction" do
   describe '.scrub' do
     it 'redacts a JWT token' do
       line = 'Authorization: eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoxfQ.abc123'

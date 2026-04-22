@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe Agents::AgentRunJob, type: :job do
+RSpec.describe Agents::AgentRunJob, type: :job, spec: "specifications/system/agent-runner/concept.md#agent-run-job" do
   include ActiveJob::TestHelper
 
   let(:org_id) { SecureRandom.uuid }

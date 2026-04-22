@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe Analytics::LlmMetric, type: :model do
+RSpec.describe Analytics::LlmMetric, type: :model, spec: "specifications/system/analytics/concept.md#llm-metric" do
   describe 'validations' do
     it 'is valid with required fields' do
       expect(build(:analytics_llm_metric)).to be_valid

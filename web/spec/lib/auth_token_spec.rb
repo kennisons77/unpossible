@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe AuthToken do
+RSpec.describe AuthToken, spec: "specifications/system/auth/concept.md#auth-token" do
   let(:org_id) { 'org-123' }
   let(:user_id) { 'user-456' }
 

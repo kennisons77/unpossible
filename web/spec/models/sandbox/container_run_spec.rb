@@ -2,7 +2,7 @@
 
 require "rails_helper"
 
-RSpec.describe Sandbox::ContainerRun, type: :model do
+RSpec.describe Sandbox::ContainerRun, type: :model, spec: "specifications/system/sandbox/concept.md#container-run" do
   describe "validations" do
     it "is valid with all required fields" do
       run = build(:sandbox_container_run)

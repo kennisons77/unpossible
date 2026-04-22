@@ -9,7 +9,7 @@ class TestQueueJob < ApplicationJob
   def perform; end
 end
 
-RSpec.describe "Solid Queue configuration" do
+RSpec.describe "Solid Queue configuration", spec: "specifications/system/infrastructure/concept.md#solid-queue" do
   it "uses solid_queue as the queue adapter in non-test environments" do
     # application.rb sets solid_queue; test.rb overrides to :test for have_enqueued_job matchers.
     # Verify the base config (application.rb) declares solid_queue.

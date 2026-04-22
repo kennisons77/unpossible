@@ -2,7 +2,7 @@
 
 require "rails_helper"
 
-RSpec.describe Agents::EnrichmentRunner do
+RSpec.describe Agents::EnrichmentRunner, spec: "specifications/system/agent-runner/concept.md#enrichment" do
   let(:run) { create(:agents_agent_run, status: "running") }
 
   describe ".call" do

@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe Agents::PromptDeduplicator do
+RSpec.describe Agents::PromptDeduplicator, spec: "specifications/system/agent-runner/concept.md#prompt-deduplication" do
   let(:sha) { SecureRandom.hex(32) }
   let(:mode) { 'build' }
 

@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe Secret do
+RSpec.describe Secret, spec: "specifications/system/auth/concept.md#secret" do
   subject(:secret) { described_class.new('sk-supersecret') }
 
   describe '#inspect' do
