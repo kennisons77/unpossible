@@ -11,6 +11,9 @@ Rails.application.routes.draw do
   namespace :api do
     # Auth
     post 'auth/token', to: 'auth#create'
+    # Batch — handled by BatchRequestMiddleware before reaching Rails router.
+    # Route declared here so rswag can document it.
+    post 'batch', to: proc { [404, {}, []] }
   end
 
   # Agent runs — Agents::AgentRunsController (JSON API)
