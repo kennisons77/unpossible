@@ -78,7 +78,7 @@ requires assembling prompts from skill files, context chunks, and principles.
   Required tests: loads skill file content from disk, parses frontmatter correctly, returns
   instruction body, handles missing file gracefully, handles malformed frontmatter.
 
-- [ ] 2.2 — Implement context chunk retrieval (`web/app/modules/agents/services/context_retriever.rb`)
+- [x] 2.2 — Implement context chunk retrieval (`web/app/modules/agents/services/context_retriever.rb`)
   Load practices files declared in skill frontmatter (per `specifications/system/practices.md`
   loading strategy). Return as context chunks for prompt assembly.
   Required tests: loads declared practices files, respects mode-based loading rules,
