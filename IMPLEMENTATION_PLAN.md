@@ -66,8 +66,9 @@ Spec: `specifications/system/reference-graph/concept.md` § Controlled Commit Sk
 
 `LedgerAppender` exists and handles LEDGER.jsonl appending. The controlled commit skill (atomic git commit + LEDGER.jsonl + IMPLEMENTATION_PLAN.md update) is not implemented.
 
-- [ ] [SPIKE] 4.1 Research controlled commit skill — run `./loop.sh research reference-graph-commit-skill` (see specifications/skills/tools/research.md)
+- [x] [SPIKE] 4.1 Research controlled commit skill — run `./loop.sh research reference-graph-commit-skill` (see specifications/skills/tools/research.md)
   Open questions: How should the skill be invoked from the build loop? Should it be a Ruby service, a shell script, or a standalone CLI? How to handle IMPLEMENTATION_PLAN.md checkbox updates atomically with git commit?
+  Findings: `specifications/research/reference-graph-commit-skill.md` — skill file is the deliverable, `LedgerAppender` handles idempotent append, two-event pattern records SHA post-commit
 
 ### Section 5 — Reference Graph: Go Reference Parser
 

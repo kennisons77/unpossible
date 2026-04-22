@@ -40,6 +40,8 @@ Primitives. Each does one thing. Loops and workflows call them.
 | [interview](tools/interview.md) | Ask questions until shared understanding is reached |
 | [research](tools/research.md) | Collect sources and findings for a topic |
 | [analyse](tools/analyse.md) | Compare a node against its outputs or codebase, report gaps |
+| [commit](tools/commit.md) | Atomically commit code, append LEDGER.jsonl, and update IMPLEMENTATION_PLAN.md |
+| [pr](tools/pr.md) | Create a pull request with graph-linked metadata |
 
 ## Workflows (`workflows/`)
 
