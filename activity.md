@@ -6,6 +6,31 @@ Agent activity log. Auto-updated each iteration. Trimmed to last 10 entries.
 
 ---
 
+## 2026-04-22 16:07 — Bootstrap go/ directory (task 8.2, tag 0.0.80)
+
+**Changes:** Created `go/go.mod`, `go/cmd/analytics/main.go`, `go/cmd/runner/main.go`, `go/cmd/parser/main.go` stubs, `go/internal/pgclient/pgclient.go` (Postgres pool + retry), `go/internal/piifilter/piifilter.go` (regex PII redaction). `go build ./...` and `go test ./...` pass. 351 Rails specs still green.
+
+**Thinking:**
+- Bootstrap task: establish the Go module structure so subsequent tasks (8.3 analytics, 8.6 runner) have a stable foundation to build on.
+- Kept stubs minimal — `log.Fatal("not yet implemented")` — so they compile without any external deps. External deps (`lib/pq`, `prometheus/client_golang`) are added in 8.3 and 8.6 when the actual implementations are written.
+- Created `internal/pgclient` and `internal/piifilter` now because both are shared across multiple binaries and their interfaces are clear from the research. Deferring them to 8.3 would mean duplicating the design decision.
+- `pgclient` uses `sql.Open("postgres", ...)` which requires `lib/pq` at runtime but compiles fine without it. The driver import will be added as a side-effect in the consuming binary's `main.go` in task 8.3.
+
+**Challenges:**
+- The piifilter regex for API keys initially didn't match JSON format (`"api_key": "sk-abc123xyz"`) because the original pattern used `[:=]` without accounting for quoted JSON values. Fixed by adding optional quote characters around the separator and value: `["']?\s*[:=]\s*["']?\S+["']?`.
+- `pgclient_test.go` initially tried to call `Open` with an unreachable DSN, but `sql.Open("postgres", ...)` would fail with "unknown driver postgres" (not a connection error) since `lib/pq` isn't imported yet. Replaced with a compile-check test; integration tests deferred to 8.3.
+
+**Alternatives considered:**
+- Including `lib/pq` in `go.mod` now — rejected because it requires `go.sum` entries and network access to download. The bootstrap should be zero-dependency so it works in the offline Docker build environment.
+- Putting `pgclient` and `piifilter` in `cmd/analytics/` — rejected because both will be used by the parser too. `internal/` enforces the Go visibility rule and prevents accidental cross-binary coupling.
+- Using `pgx` instead of `database/sql` + `lib/pq` — deferred to 8.3 decision; `pgclient` wraps the interface so the driver can be swapped without changing callers.
+
+**Tradeoffs taken:**
+- Stubs log.Fatal on startup — they won't run usefully until implemented, but they compile and the binary exists. This is intentional: the bootstrap proves the module structure is correct before any real code is written.
+- `pgclient_test.go` is a compile-check only — no behavioral coverage until 8.3 adds the `lib/pq` driver and a test Postgres connection. Known gap, documented in the test file.
+
+---
+
 ## 2026-04-22 15:58 — Spike: Go sidecar architecture research (task 8.1)
 
 **Changes:** Wrote research findings to `specifications/research/go-sidecars.md`. Marked task 8.1 complete in IMPLEMENTATION_PLAN.md.
