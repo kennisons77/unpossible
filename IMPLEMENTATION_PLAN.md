@@ -76,8 +76,9 @@ Spec: `specifications/system/reference-graph/concept.md` § Go Reference Parser 
 
 No `go/` directory exists. The parser is a standalone Go binary that walks files + git + LEDGER.jsonl to produce a JSON graph.
 
-- [ ] [SPIKE] 5.1 Research Go reference parser — run `./loop.sh research reference-graph-parser` (see specifications/skills/tools/research.md)
+- [x] [SPIKE] 5.1 Research Go reference parser — run `./loop.sh research reference-graph-parser` (see specifications/skills/tools/research.md)
   Open questions: tree-sitter Go bindings for Ruby parsing, LEDGER.jsonl event schema stability, graph output format for web UI consumption, how to bootstrap go.mod and the Go build in the monorepo.
+  Findings: `specifications/research/reference-graph-parser.md` — tree-sitter not needed for Phase 0 (regex sufficient for spec: tags), stdlib-only Go, output is `{"nodes":[...],"edges":[...]}` JSON, depends on 8.2 (Go bootstrap)
 
 ### Section 6 — Reference Graph: Spec Reference Tags in Tests
 
