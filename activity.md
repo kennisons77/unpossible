@@ -6,6 +6,33 @@ Agent activity log. Auto-updated each iteration. Trimmed to last 10 entries.
 
 ---
 
+## 2026-04-22 16:11 — Implement Go analytics ingest sidecar (task 8.3, tag 0.0.81)
+
+**Changes:** Replaced `go/cmd/analytics/main.go` stub with full implementation: `POST /capture` (single event or batch array, 202 immediate), `GET /healthz` (200), in-memory queue, batch flush every 5s or 100 events, PII redaction via `piifilter`, UUID validation on `distinct_id`, fail-open buffering on Postgres unavailability with background reconnect. Added `go/cmd/analytics/main_test.go` (7 unit tests). Added `github.com/lib/pq v1.10.9` to `go.mod`/`go.sum`. `go test ./...` passes. 351 Rails specs still green at 98.67% coverage.
+
+**Thinking:**
+- The sidecar is a single-responsibility HTTP server: accept events, queue them, flush to Postgres. No business logic, no query endpoints.
+- Fail-open is the right default for an analytics ingest path — dropping events is worse than buffering them. The flush loop re-buffers on any Postgres error and triggers a background reconnect attempt.
+- Extracted `insertBatch` from `flush` to keep `flush` readable and to make the transaction boundary explicit. Each flush is one transaction — all-or-nothing per batch.
+- `tryReconnect` is a no-op if already connected (checked under lock), so it's safe to call on every flush failure without spawning unbounded goroutines.
+- UUID validation on `distinct_id` is enforced before enqueue, not at flush time — cheaper to reject early and the spec is explicit about it.
+
+**Challenges:**
+- The `events[:0]` filter-in-place pattern reuses the slice backing array, which is fine here since we own the slice. Avoids an allocation for the common case where all events are valid.
+- `NULLIF($4,'')` in the INSERT handles the optional `node_id` field — empty string from JSON becomes NULL in Postgres without needing a Go nil pointer.
+- The `reconnect` function in the first draft took a `context.Context` parameter that was never threaded through from `main`. Removed the context param and wired `dsn` into the server struct instead — simpler and correct.
+
+**Alternatives considered:**
+- Channel-based queue instead of mutex + slice — rejected for Phase 0. A buffered channel has a fixed capacity; a slice grows unboundedly, which is what we want for "buffer on Postgres unavailability." A channel would drop events when full.
+- Separate reconnect ticker goroutine — rejected. `tryReconnect` spawns a one-shot goroutine on flush failure. A persistent reconnect ticker would run even when connected, wasting goroutines. The one-shot approach is simpler and sufficient.
+- Rejecting events with non-UUID `distinct_id` at HTTP level (400) — rejected. The spec says "rejected before storage" not "rejected at HTTP level." Returning 202 and silently dropping invalid events is consistent with fire-and-forget ingest semantics.
+
+**Tradeoffs taken:**
+- No integration test against a live Postgres — unit tests cover all HTTP and queue behavior; the flush-to-Postgres path is covered by the existing `pgclient` package. Adding a live-DB integration test would require a Postgres container in the Go test environment, which is not set up yet.
+- Background reconnect is best-effort — if the goroutine fails, the next flush failure spawns another. This could theoretically pile up goroutines during a long Postgres outage, but each goroutine exits after one attempt (success or failure), so the pile-up is bounded by flush frequency.
+
+---
+
 ## 2026-04-22 16:07 — Bootstrap go/ directory (task 8.2, tag 0.0.80)
 
 **Changes:** Created `go/go.mod`, `go/cmd/analytics/main.go`, `go/cmd/runner/main.go`, `go/cmd/parser/main.go` stubs, `go/internal/pgclient/pgclient.go` (Postgres pool + retry), `go/internal/piifilter/piifilter.go` (regex PII redaction). `go build ./...` and `go test ./...` pass. 351 Rails specs still green.
@@ -194,13 +221,3 @@ Agent activity log. Auto-updated each iteration. Trimmed to last 10 entries.
 
 **Tradeoffs taken:**
 - Hand-crafted schema.rb may have minor formatting differences from what Rails would auto-generate. Cosmetic only.
-
----
-
-## 2026-04-22 11:32 — Planning loop: regenerate IMPLEMENTATION_PLAN.md
-
-**Changes:** Deleted old IMPLEMENTATION_PLAN.md and regenerated from scratch. Full gap analysis of `specifications/` vs `web/` and `go/`.
-
-**Key findings:** All Rails modules implemented and tested. `go/` directory does not exist. Batch middleware unimplemented. Skill assembly pipeline is a stub. `db/schema.rb` not committed. Spec contradiction flagged for FeatureFlag hypothesis.
-
-**Plan structure:** 12 task groups, ~28 tasks. 6 spike tasks for Go domains.
