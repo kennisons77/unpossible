@@ -84,7 +84,7 @@ requires assembling prompts from skill files, context chunks, and principles.
   Required tests: loads declared practices files, respects mode-based loading rules,
   handles missing files without raising, returns empty array when no files declared.
 
-- [ ] 2.3 — Implement enrichment tool execution (`web/app/modules/agents/services/enrichment_runner.rb`)
+- [x] 2.3 — Implement enrichment tool execution (`web/app/modules/agents/services/enrichment_runner.rb`)
   Run `tools.enrich` tools before the first LLM call. Append results as `tool_result` turns.
   Skip when `agent_override: true`.
   Required tests: runs enrich tools and appends tool_result turns, skips when agent_override
