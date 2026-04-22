@@ -2,7 +2,7 @@
 
 Agent activity log. Auto-updated each iteration. Trimmed to last 10 entries.
 
-[Prior entries summarised: 100+ iterations — initial planning through 0.0.81. Key milestones: Rails skeleton + test infra, security (Secret, LogRedactor, PromptSanitizer, rack-attack), JWT auth, Agents module (AgentRun, AgentRunTurn, ProviderAdapter, PromptDeduplicator, AgentRunsController, AgentRunJob, TurnContentGcJob), Sandbox module (ContainerRun, DockerDispatcher), Analytics module (FeatureFlag, AnalyticsEvent, AuditEvent, LlmMetric, AuditLogger, AuditLogJob, MetricsController, FeatureFlag auto-fire), HealthCheckMiddleware, Ledger+Knowledge removal, org_id migrations, provider adapter build_prompt with pinned+sliding trimming, LedgerAppender, controlled-commit.sh, parse_response normalised to hash, LlmMetric on completion, rswag install, FeatureFlagsController org_id fix, all rswag spec conversions, db/schema.rb, EnrichmentRunner, SkillLoader wiring, hypothesis validation, batch middleware (3.1, 3.2), controlled commit spike (4.1), Go reference parser spike (5.1), spec: metadata tags (6.1), Go sidecar spike (8.1), Go bootstrap (8.2), Go analytics sidecar (8.3). Tasks through 8.3 complete.]
+[Prior entries summarised: 100+ iterations — initial planning through 0.0.82. Key milestones: Rails skeleton + test infra, security (Secret, LogRedactor, PromptSanitizer, rack-attack), JWT auth, Agents module (AgentRun, AgentRunTurn, ProviderAdapter, PromptDeduplicator, AgentRunsController, AgentRunJob, TurnContentGcJob), Sandbox module (ContainerRun, DockerDispatcher), Analytics module (FeatureFlag, AnalyticsEvent, AuditEvent, LlmMetric, AuditLogger, AuditLogJob, MetricsController, FeatureFlag auto-fire), HealthCheckMiddleware, Ledger+Knowledge removal, org_id migrations, provider adapter build_prompt with pinned+sliding trimming, LedgerAppender, controlled-commit.sh, parse_response normalised to hash, LlmMetric on completion, rswag install, FeatureFlagsController org_id fix, all rswag spec conversions, db/schema.rb, EnrichmentRunner, SkillLoader wiring, hypothesis validation, batch middleware (3.1, 3.2), controlled commit spike (4.1), Go reference parser spike (5.1), spec: metadata tags (6.1), Go sidecar spike (8.1), Go bootstrap (8.2), Go analytics sidecar (8.3), Dockerfile.go (8.4). Tasks through 8.4 complete.]
 
 ---
 
@@ -43,25 +43,6 @@ Agent activity log. Auto-updated each iteration. Trimmed to last 10 entries.
 
 **Tradeoffs taken:**
 - Integration tests stub ContextRetriever rather than using real practices files — avoids path resolution issues in the test container.
-
----
-
-## 2026-04-22 13:07 — Implement EnrichmentRunner (task 2.3, tag 0.0.74)
-
-**Changes:** Added `EnrichmentRunner` service and 13-example spec. 330 examples, 0 failures, 98.7% coverage.
-
-**Thinking:**
-- Tool registry as a constant hash (`TOOLS`) keeps the mapping explicit and testable.
-- Fail-open on both unknown tools and tool execution errors — enrichment is a pipeline invisible step.
-
-**Challenges:**
-- Position assignment: `run.turns.maximum(:position)` returns nil when no turns exist — guarded with `|| 0`.
-
-**Alternatives considered:**
-- Instance-based registry — rejected as over-engineering for a single-level dispatch table.
-
-**Tradeoffs taken:**
-- TOOLS registry is a constant — adding a new tool requires a code change. Intentional for Phase 0.
 
 ---
 
@@ -217,3 +198,24 @@ Agent activity log. Auto-updated each iteration. Trimmed to last 10 entries.
 **Tradeoffs taken:**
 - `go/vendor/` is now committed to git. This is intentional for an offline-build monorepo — consistent with `web/vendor/cache/` for Ruby gems.
 - Builder stage compiles all three binaries in one `RUN` layer. If only one binary changes, the entire build step re-runs. Acceptable for Phase 0 where build speed is not a priority.
+
+---
+
+## 2026-04-22 16:25 — Uncomment analytics sidecar in docker-compose.yml (task 8.5, tag 0.0.83)
+
+**Changes:** Uncommented `analytics` service in `infra/docker-compose.yml`. Added `DATABASE_URL` env var pointing to the postgres service. Added `depends_on: postgres` with health check condition. Left runner commented with updated note referencing task 8.6. 351 examples, 0 failures, 98.67% coverage.
+
+**Thinking:**
+- Task 8.5 depends on 8.3 (analytics sidecar) and 8.4 (Dockerfile.go) — both done. The runner (8.6) is not a dependency of 8.5.
+- Uncommenting only the analytics service is correct: the runner stub calls `log.Fatal` and would crash immediately, making `docker compose up` fail.
+- `depends_on: postgres` with `condition: service_healthy` ensures the sidecar doesn't start before Postgres is ready — matches the Rails service pattern.
+
+**Challenges:**
+- The original comment grouped runner and analytics together. Splitting them required updating the comment to reference task 8.6 explicitly so the intent is clear.
+
+**Alternatives considered:**
+- Uncommenting both services with `restart: on-failure` for the runner — rejected. A crashing service in the dev stack is noise; better to leave it commented until it's implemented.
+- Adding `ANALYTICS_URL` to the Rails service env — deferred to task 13.1 (FeatureFlag exposure via sidecar), which is the only Rails code that calls the sidecar.
+
+**Tradeoffs taken:**
+- The analytics sidecar is now part of `docker compose up` but the runner is not. The dev stack is asymmetric until 8.6 is done. Acceptable — the runner has no callers yet.
