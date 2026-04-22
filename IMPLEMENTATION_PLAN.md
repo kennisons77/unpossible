@@ -117,7 +117,7 @@ No `go/` directory exists. The Go sidecars are required for the full Phase 0 sta
   Depends on: 8.1
   Required tests: `go build ./...` succeeds, `go test ./...` passes
 
-- [ ] 8.3 Implement Go analytics ingest sidecar (`go/cmd/analytics/`) — `POST /capture`, in-memory queue, batch flush to Postgres
+- [x] 8.3 Implement Go analytics ingest sidecar (`go/cmd/analytics/`) — `POST /capture`, in-memory queue, batch flush to Postgres
   Depends on: 8.2
   Required tests: POST /capture returns 202, events flushed within 5s or 100 events, events buffered on Postgres unavailability, internal-only (not publicly reachable)
 
