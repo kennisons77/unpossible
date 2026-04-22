@@ -6,6 +6,30 @@ Agent activity log. Auto-updated each iteration. Trimmed to last 10 entries.
 
 ---
 
+## 2026-04-22 14:24 — Spike: controlled commit skill research (task 4.1, tag 0.0.78)
+
+**Changes:** Wrote research findings to `specifications/research/reference-graph-commit-skill.md`. Created `specifications/skills/tools/commit.md` (the skill file deliverable). Updated skills README and research README. Marked task 4.1 complete.
+
+**Thinking:**
+- The spike had three open questions. All were answerable from the existing codebase without external research: `loop.sh` shows the agent already has bash tool access; `LedgerAppender` already exists and is idempotent; git's atomicity (all staged files land in one commit) solves the IMPLEMENTATION_PLAN.md update problem.
+- The skill file is the right deliverable — not a Ruby service or shell script. The agent is the executor; the skill is the instruction. Adding a wrapper process would add indirection without benefit.
+- The two-event pattern (one `done` event before commit with `sha: null`, one after with the real SHA via amend) preserves append-only semantics while still recording the SHA in the ledger.
+
+**Challenges:**
+- The SHA recording problem: you can't know the commit SHA before committing, but the ledger entry should reference it. The amend approach (append SHA entry, `git add`, `git commit --amend --no-edit`) folds both into one commit cleanly. This only works before push — the skill explicitly notes it must run before `loop.sh` pushes.
+- Distinguishing "skill file" from "code" — this task produces no application code, only documentation. The verification step (no tests to run) is correct for a spike.
+
+**Alternatives considered:**
+- Shell script wrapper (`scripts/controlled-commit.sh`) — rejected because it duplicates what the agent already does with bash tools. A script would need to be maintained separately and couldn't use `LedgerAppender`'s idempotency without a Rails runner call anyway.
+- Ruby service invoked via `rails runner` for the entire commit sequence — rejected because git operations from Ruby add complexity (ruby-git gem or shell-out) with no benefit over the agent running git directly.
+- Single LEDGER.jsonl event with SHA (append after commit, then amend) — this is what the skill does. The "two events" framing in the research doc is accurate but the amend collapses them into one commit.
+
+**Tradeoffs taken:**
+- The amend approach requires the commit to not yet be pushed. This is safe because `loop.sh` pushes only after `RALPH_COMPLETE`. If the agent crashes between commit and amend, the SHA entry is missing from the ledger — the reference parser is documented to tolerate this (resolves SHA from git log by task ref).
+- No test coverage for the skill file itself — skills are instructions, not code. The `LedgerAppender` unit tests cover the append logic.
+
+---
+
 ## 2026-04-22 13:32 — Add metadata.hypothesis validation to FeatureFlag on create (task 2.1, tag 0.0.76)
 
 **Changes:** Added `on: :create` validation for `metadata.hypothesis` in `Analytics::FeatureFlag`. Updated factory to include hypothesis by default. Updated model spec (3 new tests replacing 1 wrong test). Updated request spec (new 422 test, updated 201 tests to include hypothesis). 337 examples, 0 failures, 98.72% coverage.
