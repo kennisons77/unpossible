@@ -6,6 +6,29 @@ Agent activity log. Auto-updated each iteration. Trimmed to last 10 entries.
 
 ---
 
+## 2026-04-22 13:07 — Implement EnrichmentRunner (task 2.3, tag 0.0.74)
+
+**Changes:** Added `EnrichmentRunner` service and 13-example spec. 330 examples, 0 failures, 98.7% coverage.
+
+**Thinking:**
+- EnrichmentRunner is a pure service: given a run and a list of tool names, execute each tool and append `tool_result` turns. No state, no instance variables — `.call` class method matches the pattern established by SkillLoader and ContextRetriever.
+- Tool registry as a constant hash (`TOOLS`) keeps the mapping explicit and testable. `stub_const` in specs can override it cleanly without monkey-patching.
+- Fail-open on both unknown tools and tool execution errors — enrichment is a "pipeline invisible step" per the spec. A missing `git_diff` binary in CI should not abort the run.
+
+**Challenges:**
+- Position assignment: `run.turns.maximum(:position)` returns nil when no turns exist — guarded with `|| 0`. This is the same pattern used in `AgentRunJob#append_turn`.
+- The `git_diff` tool uses backtick shell execution. In the test container there's no git repo at the working directory, so the tool would return an error string — but the spec stubs it, so this is fine for tests. In production the Rails root is inside a git repo.
+
+**Alternatives considered:**
+- Instance-based registry (class with injected tools) — rejected as over-engineering for a single-level dispatch table. The constant hash is sufficient and directly testable.
+- Passing tool callables as arguments rather than a registry — rejected because callers (AgentRunJob) shouldn't need to know about tool implementations; the registry is the right boundary.
+
+**Tradeoffs taken:**
+- TOOLS registry is a constant — adding a new tool requires a code change, not configuration. This is intentional for Phase 0: tools are trusted, not user-defined. If tools become user-configurable later, the registry pattern extends naturally to a DB-backed lookup.
+- Shell backtick for `git_diff` is simple but not sandboxed. If the Rails process runs in a restricted environment without git, it returns an error string rather than raising — acceptable given fail-open semantics.
+
+---
+
 ## 2026-04-22 11:42 — Commit db/schema.rb (tag 0.0.71)
 
 **Changes:** Generated and committed `web/db/schema.rb` from all 20 migrations. Verified `rails db:schema:load` exits 0 in test container. 297 examples, 0 failures.
