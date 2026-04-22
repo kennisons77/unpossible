@@ -20,6 +20,7 @@ RSpec.describe Agents::SkillLoader do
         expect(result.body).to eq("")
         expect(result.enrich_tools).to eq([])
         expect(result.callable_tools).to eq([])
+        expect(result.principles).to eq([])
       end
 
       it "returns empty result for empty string" do
@@ -27,6 +28,7 @@ RSpec.describe Agents::SkillLoader do
         expect(result.body).to eq("")
         expect(result.enrich_tools).to eq([])
         expect(result.callable_tools).to eq([])
+        expect(result.principles).to eq([])
       end
     end
 
@@ -36,6 +38,7 @@ RSpec.describe Agents::SkillLoader do
         expect(result.body).to eq("")
         expect(result.enrich_tools).to eq([])
         expect(result.callable_tools).to eq([])
+        expect(result.principles).to eq([])
       end
     end
 
@@ -69,6 +72,24 @@ RSpec.describe Agents::SkillLoader do
       it "parses callable tools" do
         result = described_class.call(path)
         expect(result.callable_tools).to eq(["read_file", "write_file"])
+      end
+    end
+
+    context "with a skill file that declares principles" do
+      let(:path) do
+        write_skill("build_with_principles.md", <<~MD)
+          ---
+          name: build
+          kind: loop
+          principles: [cost, coding, verification]
+          ---
+          Execute one beat per iteration.
+        MD
+      end
+
+      it "parses principles" do
+        result = described_class.call(path)
+        expect(result.principles).to eq(["cost", "coding", "verification"])
       end
     end
 

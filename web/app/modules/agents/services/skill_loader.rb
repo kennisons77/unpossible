@@ -7,7 +7,7 @@ module Agents
   # Skill files live anywhere on disk — source_ref is an absolute or Rails-root-relative
   # path. Missing files and malformed frontmatter are handled gracefully (fail open).
   class SkillLoader
-    Result = Data.define(:body, :enrich_tools, :callable_tools)
+    Result = Data.define(:body, :enrich_tools, :callable_tools, :principles)
 
     FRONTMATTER_PATTERN = /\A---\n(.*?)\n---\n?(.*)\z/m
 
@@ -26,7 +26,7 @@ module Agents
     end
 
     def self.empty_result
-      Result.new(body: "", enrich_tools: [], callable_tools: [])
+      Result.new(body: "", enrich_tools: [], callable_tools: [], principles: [])
     end
 
     def self.resolve_path(source_ref)
@@ -38,7 +38,7 @@ module Agents
       match = FRONTMATTER_PATTERN.match(raw)
       unless match
         # No frontmatter — entire file is the body
-        return Result.new(body: raw.strip, enrich_tools: [], callable_tools: [])
+        return Result.new(body: raw.strip, enrich_tools: [], callable_tools: [], principles: [])
       end
 
       frontmatter = YAML.safe_load(match[1]) || {}
@@ -47,11 +47,12 @@ module Agents
       tools = frontmatter["tools"] || {}
       enrich = Array(tools.is_a?(Hash) ? tools["enrich"] : nil)
       callable = Array(tools.is_a?(Hash) ? tools["callable"] : nil)
+      principles = Array(frontmatter["principles"])
 
-      Result.new(body: body, enrich_tools: enrich, callable_tools: callable)
+      Result.new(body: body, enrich_tools: enrich, callable_tools: callable, principles: principles)
     rescue Psych::Exception
       # Malformed YAML frontmatter — return body-only with empty tools
-      Result.new(body: raw.strip, enrich_tools: [], callable_tools: [])
+      Result.new(body: raw.strip, enrich_tools: [], callable_tools: [], principles: [])
     end
 
     private_class_method :empty_result, :resolve_path, :parse
