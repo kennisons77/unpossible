@@ -195,6 +195,69 @@ RSpec.describe Agents::AgentRunJob, type: :job do
         job.perform(run.id)
       end
     end
+
+    context 'skill assembly integration (load_enrichment wiring)' do
+      let(:tmp_dir) { Dir.mktmpdir }
+      let(:skill_path) do
+        path = File.join(tmp_dir, 'build.md')
+        File.write(path, <<~MD)
+          ---
+          name: build
+          kind: loop
+          principles: [cost]
+          tools:
+            enrich:
+              - git_diff
+          ---
+          Execute one beat per iteration.
+        MD
+        path
+      end
+      let(:run) do
+        create(:agents_agent_run, org_id: org_id, status: 'running',
+               agent_override: false, source_ref: skill_path)
+      end
+
+      after { FileUtils.remove_entry(tmp_dir) }
+
+      before do
+        allow(adapter).to receive(:call_provider).and_return({})
+        allow(adapter).to receive(:parse_response).and_return(
+          { text: 'done', input_tokens: 5, output_tokens: 2, stop_reason: 'end_turn' }
+        )
+      end
+
+      it 'passes context_chunks from ContextRetriever to build_prompt' do
+        allow(Agents::ContextRetriever).to receive(:call).with(['cost']).and_return(['cost content'])
+        expect(adapter).to receive(:build_prompt).with(
+          hash_including(context_chunks: ['cost content'])
+        ).and_return(built_prompt)
+        described_class.perform_now(run.id)
+      end
+
+      it 'passes principles from skill frontmatter to build_prompt' do
+        allow(Agents::ContextRetriever).to receive(:call).and_return([])
+        expect(adapter).to receive(:build_prompt).with(
+          hash_including(principles: ['cost'])
+        ).and_return(built_prompt)
+        described_class.perform_now(run.id)
+      end
+
+      it 'runs enrichment tools and appends tool_result turns' do
+        allow(Agents::ContextRetriever).to receive(:call).and_return([])
+        allow(Agents::EnrichmentRunner).to receive(:call).with(run, ['git_diff']) do
+          run.turns.create!(position: 1, kind: 'tool_result', content: 'git_diff: output')
+        end
+        expect { described_class.perform_now(run.id) }
+          .to change { run.turns.where(kind: 'tool_result').count }.by(1)
+      end
+
+      it 'completes the run after skill assembly' do
+        allow(Agents::ContextRetriever).to receive(:call).and_return([])
+        described_class.perform_now(run.id)
+        expect(run.reload.status).to eq('completed')
+      end
+    end
   end
 
   describe 'enqueuing from RunStorageService' do

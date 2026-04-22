@@ -90,7 +90,7 @@ requires assembling prompts from skill files, context chunks, and principles.
   Required tests: runs enrich tools and appends tool_result turns, skips when agent_override
   is true, handles tool failure gracefully (fail open per pipeline invisible step rules).
 
-- [ ] 2.4 — Wire skill assembly into `AgentRunJob#load_enrichment` (`web/app/modules/agents/jobs/agent_run_job.rb`)
+- [x] 2.4 — Wire skill assembly into `AgentRunJob#load_enrichment` (`web/app/modules/agents/jobs/agent_run_job.rb`)
   Replace stub with calls to SkillLoader, ContextRetriever, and EnrichmentRunner.
   Required tests: full integration — job loads skill, retrieves context, runs enrichment,
   passes all to `build_prompt`. Existing agent_run_job_spec tests still pass.
