@@ -70,7 +70,7 @@ RSpec.describe 'Feature Flags API', type: :request do
       }
 
       response '201', 'creates flag with org_id from token' do
-        let(:body) { { key: 'module.new_feature' } }
+        let(:body) { { key: 'module.new_feature', metadata: { hypothesis: 'Will increase signups' } } }
         run_test! do
           parsed = JSON.parse(response.body)
           expect(parsed['key']).to eq('module.new_feature')
@@ -80,7 +80,7 @@ RSpec.describe 'Feature Flags API', type: :request do
 
       response '201', 'ignores org_id in params and uses token org_id' do
         let(:other_org) { SecureRandom.uuid }
-        let(:body) { { key: 'module.another_feature', org_id: other_org } }
+        let(:body) { { key: 'module.another_feature', org_id: other_org, metadata: { hypothesis: 'Test hypothesis' } } }
         run_test! do
           parsed = JSON.parse(response.body)
           expect(parsed['org_id']).to eq(org_id)
@@ -88,9 +88,17 @@ RSpec.describe 'Feature Flags API', type: :request do
         end
       end
 
+      response '422', 'missing metadata.hypothesis returns unprocessable entity' do
+        let(:body) { { key: 'module.no_hypothesis' } }
+        run_test! do
+          parsed = JSON.parse(response.body)
+          expect(parsed['errors']).to be_present
+        end
+      end
+
       response '422', 'duplicate key returns unprocessable entity' do
         before { create(:analytics_feature_flag, key: 'module.existing', org_id: org_id) }
-        let(:body) { { key: 'module.existing' } }
+        let(:body) { { key: 'module.existing', metadata: { hypothesis: 'Some hypothesis' } } }
         run_test! do
           parsed = JSON.parse(response.body)
           expect(parsed['errors']).to be_present

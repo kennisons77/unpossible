@@ -9,6 +9,7 @@ module Analytics
     validates :key, presence: true, uniqueness: { scope: :org_id }
     validates :status, presence: true, inclusion: { in: STATUSES }
     validates :org_id, presence: true
+    validate :hypothesis_present, on: :create
 
     def self.enabled?(org_id:, key:)
       flag = find_by(org_id: org_id, key: key)
@@ -32,5 +33,12 @@ module Analytics
       Rails.logger.warn("FeatureFlag: failed to fire $feature_flag_called for #{key}: #{e.message}")
     end
     private_class_method :fire_flag_called_event
+
+    private
+
+    def hypothesis_present
+      # metadata.hypothesis required on creation per platform override
+      errors.add(:metadata, "must include a hypothesis") if metadata.blank? || metadata['hypothesis'].blank?
+    end
   end
 end
