@@ -129,7 +129,7 @@ No `go/` directory exists. The Go sidecars are required for the full Phase 0 sta
   Depends on: 8.3, 8.4
   Required tests: `docker compose up` starts all services including Go sidecars
 
-- [ ] 8.6 Implement Go runner sidecar (`go/cmd/runner/`) — minimal Phase 0 runner
+- [x] 8.6 Implement Go runner sidecar (`go/cmd/runner/`) — minimal Phase 0 runner
   Depends on: 8.2
   Required tests: health endpoint responds, basic request/response cycle
 
