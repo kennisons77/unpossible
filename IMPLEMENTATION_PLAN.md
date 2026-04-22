@@ -113,7 +113,7 @@ No `go/` directory exists. The Go sidecars are required for the full Phase 0 sta
   Open questions: Should the analytics ingest sidecar be built before the runner sidecar? What is the minimal viable runner sidecar for Phase 0? How to structure go.mod for a monorepo with multiple binaries?
   Findings: `specifications/research/go-sidecars.md` — analytics before runner, minimal runner = full spec, single go.mod at go/go.mod with internal/ shared packages, two external deps (lib/pq, prometheus/client_golang)
 
-- [ ] 8.2 Bootstrap `go/` directory with `go.mod`, `go/cmd/runner/main.go`, `go/cmd/analytics/main.go` stubs
+- [x] 8.2 Bootstrap `go/` directory with `go.mod`, `go/cmd/runner/main.go`, `go/cmd/analytics/main.go` stubs
   Depends on: 8.1
   Required tests: `go build ./...` succeeds, `go test ./...` passes
 
