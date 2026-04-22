@@ -62,7 +62,7 @@ rswag is not installed. No swagger/OpenAPI docs exist. The spec requires every e
 - [x] 2.5 — Convert `spec/requests/analytics/feature_flags_spec.rb` to rswag format (`web/spec/requests/analytics/feature_flags_spec.rb`)
   Required tests: index 200, index 401, create 201, create 422, update 200, update 404, generated swagger includes all feature_flags endpoints
 
-- [ ] 2.6 — Add rswag request spec for GET /health (`web/spec/requests/health_spec.rb`)
+- [x] 2.6 — Add rswag request spec for GET /health (`web/spec/requests/health_spec.rb`)
   Required tests: 200 when DB up, 503 when DB down, generated swagger includes GET /health
 
 ### Section 3 — Batch Request Middleware (spec: `system/batch-requests.md`)
