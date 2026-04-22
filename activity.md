@@ -6,6 +6,27 @@ Agent activity log. Auto-updated each iteration. Trimmed to last 10 entries.
 
 ---
 
+## 2026-04-22 13:11 — Wire skill assembly into AgentRunJob#load_enrichment (task 2.4, tag 0.0.75)
+
+**Changes:** Replaced stub `load_enrichment` with real calls to SkillLoader, ContextRetriever, and EnrichmentRunner. Added 4 integration tests. 334 examples, 0 failures, 98.71% coverage.
+
+**Thinking:**
+- The three services (SkillLoader, ContextRetriever, EnrichmentRunner) were already implemented and tested independently. Task 2.4 is purely wiring — call them in sequence and return `[context_chunks, principles]` to match the existing `build_prompt` call signature.
+- `principles` is returned as the second element (not `skill.principles` renamed) because `build_prompt` already accepts a `principles:` keyword — no interface change needed.
+- EnrichmentRunner is called for its side effect (appending turns) before the return; its return value is discarded since `load_enrichment` only needs to return context data.
+
+**Challenges:**
+- The existing `agent_override is false` test used `and_call_original` on `load_enrichment`, which now calls the real services. The integration test context uses a real temp file and stubs `ContextRetriever` to avoid filesystem dependency on the practices directory inside the container.
+- The `build_prompt` stub in the outer `before` block uses `and_return(built_prompt)` — the integration tests need to override this with `expect(adapter).to receive(:build_prompt).with(hash_including(...))`, which works because RSpec message expectations take precedence over stubs.
+
+**Alternatives considered:**
+- Passing `skill` object directly to `build_prompt` instead of unpacking — rejected because `build_prompt` interface is already defined and tested across three adapters; changing it would require updating all adapter specs.
+- Calling `EnrichmentRunner` inside `ContextRetriever` — rejected as wrong layer; enrichment appends turns (a side effect), context retrieval is pure. They must stay separate.
+
+**Tradeoffs taken:**
+- Integration tests stub `ContextRetriever` rather than using real practices files — this avoids path resolution issues in the test container where `specifications/practices/` may not be at the expected relative path. The unit tests for ContextRetriever cover the real file loading.
+- No test for the case where `source_ref` is nil (SkillLoader returns empty result, enrichment is skipped) — this is covered by the existing `agent_override is false` test which calls `and_call_original` and the SkillLoader nil-handling spec.
+
 ## 2026-04-22 13:07 — Implement EnrichmentRunner (task 2.3, tag 0.0.74)
 
 **Changes:** Added `EnrichmentRunner` service and 13-example spec. 330 examples, 0 failures, 98.7% coverage.
