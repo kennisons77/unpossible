@@ -61,8 +61,20 @@ RSpec.describe Analytics::FeatureFlag, type: :model do
   end
 
   describe 'validations' do
-    it 'is valid without metadata.hypothesis' do
+    it 'is invalid on create without metadata.hypothesis' do
       flag = build(:analytics_feature_flag, metadata: {})
+      expect(flag).not_to be_valid
+      expect(flag.errors[:metadata]).to be_present
+    end
+
+    it 'is valid on create with metadata.hypothesis' do
+      flag = build(:analytics_feature_flag, metadata: { 'hypothesis' => 'This will increase signups' })
+      expect(flag).to be_valid
+    end
+
+    it 'does not require hypothesis on update' do
+      flag = create(:analytics_feature_flag, metadata: { 'hypothesis' => 'Initial hypothesis' })
+      flag.metadata = {}
       expect(flag).to be_valid
     end
   end
