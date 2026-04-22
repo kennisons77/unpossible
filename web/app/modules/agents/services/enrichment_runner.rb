@@ -31,7 +31,8 @@ module Agents
         end
 
         result = tool.call
-        next_position = (run.turns.maximum(:position) || 0) + 1
+        # Query maximum position directly to avoid stale association cache.
+        next_position = (AgentRunTurn.where(agent_run_id: run.id).maximum(:position) || 0) + 1
         run.turns.create!(position: next_position, kind: "tool_result", content: "#{name}:\n#{result}")
       rescue StandardError => e
         # Fail open — log and continue; enrichment failure must not abort the run

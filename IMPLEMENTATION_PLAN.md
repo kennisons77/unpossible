@@ -55,9 +55,9 @@ Spec: `specifications/system/batch-requests.md` — Rack middleware for `POST /a
 
 No implementation exists. No code references batch requests anywhere.
 
-- [ ] 3.1 Implement `BatchRequestMiddleware` (`web/app/middleware/batch_request_middleware.rb`, `web/config/application.rb`, `web/spec/middleware/batch_request_middleware_spec.rb`)
+- [x] 3.1 Implement `BatchRequestMiddleware` (`web/app/middleware/batch_request_middleware.rb`, `web/config/application.rb`, `web/spec/middleware/batch_request_middleware_spec.rb`)
   Required tests: fans out sub-requests and returns aggregated responses, preserves response ordering, individual sub-request failures don't fail the batch, max batch size exceeded returns 422, malformed JSON returns 422, inherits auth context from outer request, each sub-request runs through full Rack stack
-- [ ] 3.2 Add rswag request spec for `POST /api/batch` (`web/spec/requests/batch_spec.rb`, `web/config/routes.rb`)
+- [x] 3.2 Add rswag request spec for `POST /api/batch` (`web/spec/requests/batch_spec.rb`, `web/config/routes.rb`)
   Required tests: happy path 200, auth failure 401, validation failure 422 (malformed JSON, exceeds max size)
 
 ### Section 4 — Reference Graph: Controlled Commit Skill

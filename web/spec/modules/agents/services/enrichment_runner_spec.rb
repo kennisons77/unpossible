@@ -30,7 +30,8 @@ RSpec.describe Agents::EnrichmentRunner do
       it "assigns sequential positions after existing turns" do
         run.turns.create!(position: 3, kind: "llm_response", content: "prior")
         described_class.call(run, ["git_diff"])
-        expect(run.turns.last.position).to eq(4)
+        tool_turn = Agents::AgentRunTurn.where(agent_run_id: run.id, kind: "tool_result").first
+        expect(tool_turn.position).to eq(4)
       end
     end
 
