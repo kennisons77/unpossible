@@ -2,7 +2,31 @@
 
 Agent activity log. Auto-updated each iteration. Trimmed to last 10 entries.
 
-[Prior entries summarised: 100+ iterations — initial planning through 0.0.82. Key milestones: Rails skeleton + test infra, security (Secret, LogRedactor, PromptSanitizer, rack-attack), JWT auth, Agents module (AgentRun, AgentRunTurn, ProviderAdapter, PromptDeduplicator, AgentRunsController, AgentRunJob, TurnContentGcJob), Sandbox module (ContainerRun, DockerDispatcher), Analytics module (FeatureFlag, AnalyticsEvent, AuditEvent, LlmMetric, AuditLogger, AuditLogJob, MetricsController, FeatureFlag auto-fire), HealthCheckMiddleware, Ledger+Knowledge removal, org_id migrations, provider adapter build_prompt with pinned+sliding trimming, LedgerAppender, controlled-commit.sh, parse_response normalised to hash, LlmMetric on completion, rswag install, FeatureFlagsController org_id fix, all rswag spec conversions, db/schema.rb, EnrichmentRunner, SkillLoader wiring, hypothesis validation, batch middleware (3.1, 3.2), controlled commit spike (4.1), Go reference parser spike (5.1), spec: metadata tags (6.1), Go sidecar spike (8.1), Go bootstrap (8.2), Go analytics sidecar (8.3), Dockerfile.go (8.4). Tasks through 8.4 complete.]
+[Prior entries summarised: 100+ iterations — initial planning through 0.0.83. Key milestones: Rails skeleton + test infra, security (Secret, LogRedactor, PromptSanitizer, rack-attack), JWT auth, Agents module (AgentRun, AgentRunTurn, ProviderAdapter, PromptDeduplicator, AgentRunsController, AgentRunJob, TurnContentGcJob), Sandbox module (ContainerRun, DockerDispatcher), Analytics module (FeatureFlag, AnalyticsEvent, AuditEvent, LlmMetric, AuditLogger, AuditLogJob, MetricsController, FeatureFlag auto-fire), HealthCheckMiddleware, Ledger+Knowledge removal, org_id migrations, provider adapter build_prompt with pinned+sliding trimming, LedgerAppender, controlled-commit.sh, parse_response normalised to hash, LlmMetric on completion, rswag install, FeatureFlagsController org_id fix, all rswag spec conversions, db/schema.rb, EnrichmentRunner, SkillLoader wiring, hypothesis validation (2.1), batch middleware (3.1, 3.2), controlled commit spike (4.1), Go reference parser spike (5.1), spec: metadata tags (6.1), Go sidecar spike (8.1), Go bootstrap (8.2), Go analytics sidecar (8.3), Dockerfile.go (8.4), uncomment analytics compose (8.5). Tasks through 8.5 complete.]
+
+---
+
+## 2026-04-22 16:28 — Implement Go runner sidecar (task 8.6, tag 0.0.84)
+
+**Changes:** Replaced `go/cmd/runner/main.go` stub with full implementation: `POST /run` (Basic Auth, mutex, exec.CommandContext, token parsing, Rails complete callback), `GET /healthz`, `GET /ready`, `GET /metrics` (Prometheus). Added `prometheus/client_golang v1.23.2`. 10 unit tests. `go test ./...` passes. 351 Rails specs still green at 98.67% coverage.
+
+**Thinking:**
+- The spec says "minimal viable = full spec" — token parsing and Prometheus metrics are required, not optional.
+- `exec.CommandContext` with a 2-hour timeout is the right primitive: it handles cancellation cleanly and the timeout prevents zombie runs.
+- `callComplete` is a fire-and-forget HTTP call in the goroutine — failure is logged but doesn't affect the run result.
+
+**Challenges:**
+- Prometheus `DefaultRegisterer` panics on duplicate metric registration across tests. Fixed by introducing `newRunnerWithRegistry` that accepts a `prometheus.Registerer`, and passing `prometheus.NewRegistry()` in tests.
+- Token parsing: Claude stream-json emits `message_start` with input tokens and `message_delta` with output tokens. Taking the last seen values of each gives the final totals.
+
+**Alternatives considered:**
+- Streaming stdout line-by-line during execution — rejected. `cmd.Output()` is simpler and sufficient; token counts are only needed after the run completes.
+- Separate Prometheus registry per runner in production — rejected. `DefaultRegisterer` is correct for production; isolated registry is test-only.
+- `context.WithCancel` instead of `WithTimeout` — rejected. A timeout is a safety net against runaway loops; cancel-only has no upper bound.
+
+**Tradeoffs taken:**
+- `cmd.Output()` buffers all stdout in memory. For very long runs this could be large. Acceptable for Phase 0 — if memory becomes an issue, switch to streaming with a ring buffer.
+- The complete callback has a 10s timeout. If Rails is slow, the goroutine blocks for up to 10s after the run. Acceptable — the mutex is released before the callback, so new runs aren't blocked.
 
 ---
 
@@ -24,25 +48,6 @@ Agent activity log. Auto-updated each iteration. Trimmed to last 10 entries.
 
 **Tradeoffs taken:**
 - Factory default hypothesis string is generic. Tests that care about the value should set it explicitly.
-
----
-
-## 2026-04-22 13:11 — Wire skill assembly into AgentRunJob#load_enrichment (task 2.4, tag 0.0.75)
-
-**Changes:** Replaced stub `load_enrichment` with real calls to SkillLoader, ContextRetriever, and EnrichmentRunner. Added 4 integration tests. 334 examples, 0 failures, 98.71% coverage.
-
-**Thinking:**
-- The three services were already implemented and tested independently. Task 2.4 is purely wiring.
-- EnrichmentRunner is called for its side effect (appending turns); its return value is discarded.
-
-**Challenges:**
-- Integration tests stub `ContextRetriever` to avoid filesystem dependency on the practices directory inside the container.
-
-**Alternatives considered:**
-- Passing `skill` object directly to `build_prompt` — rejected (interface already defined across three adapters).
-
-**Tradeoffs taken:**
-- Integration tests stub ContextRetriever rather than using real practices files — avoids path resolution issues in the test container.
 
 ---
 
