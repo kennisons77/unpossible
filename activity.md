@@ -6,6 +6,29 @@ Agent activity log. Auto-updated each iteration. Trimmed to last 10 entries.
 
 ---
 
+## 2026-04-22 13:32 — Add metadata.hypothesis validation to FeatureFlag on create (task 2.1, tag 0.0.76)
+
+**Changes:** Added `on: :create` validation for `metadata.hypothesis` in `Analytics::FeatureFlag`. Updated factory to include hypothesis by default. Updated model spec (3 new tests replacing 1 wrong test). Updated request spec (new 422 test, updated 201 tests to include hypothesis). 337 examples, 0 failures, 98.72% coverage.
+
+**Thinking:**
+- The platform override (`specifications/platform/rails/product/analytics.md`) is unambiguous: "hypothesis field required on creation → 422 if missing." The base concept spec says optional in Phase 0, but the platform override is authoritative for Rails implementation per the plan.
+- `validate :hypothesis_present, on: :create` is the minimal Rails idiom — no custom validator class needed, no duplication. The `on: :create` constraint means updates are unaffected without any extra logic.
+- Factory needed `metadata: { 'hypothesis' => '...' }` as default to avoid breaking all existing tests that call `create(:analytics_feature_flag)` without metadata.
+
+**Challenges:**
+- The existing model spec had a test asserting the opposite of what the spec requires ("is valid without metadata.hypothesis"). This had to be replaced, not just supplemented — leaving it would cause a contradiction in the test suite.
+- The request spec's existing 201 tests sent no `metadata` — they would have started failing after the validation was added. Updated both to include `metadata: { hypothesis: '...' }`.
+
+**Alternatives considered:**
+- JSON Schema validation on the `metadata` column — rejected as over-engineering. A simple custom validator is sufficient and more readable.
+- Validating at the controller level instead of the model — rejected because model-level validation is the single source of truth; controller-level would allow invalid records to be created via other paths (console, seeds, jobs).
+
+**Tradeoffs taken:**
+- The factory default hypothesis string is generic ("Default test hypothesis") — tests that care about the hypothesis value should set it explicitly. This is a minor coupling risk if tests accidentally rely on the default string, but it's the standard FactoryBot pattern.
+- No migration needed — `metadata` column already exists as `jsonb default: {}`. The validation is purely application-level.
+
+---
+
 ## 2026-04-22 13:11 — Wire skill assembly into AgentRunJob#load_enrichment (task 2.4, tag 0.0.75)
 
 **Changes:** Replaced stub `load_enrichment` with real calls to SkillLoader, ContextRetriever, and EnrichmentRunner. Added 4 integration tests. 334 examples, 0 failures, 98.71% coverage.
