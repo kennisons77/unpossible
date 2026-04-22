@@ -60,10 +60,12 @@ module Agents
     private
 
     # Enrichment loads context and principles from skill files.
-    # Returns [context_chunks, principles]. Currently returns empty arrays
-    # until skill assembly (task 2.6) is implemented.
-    def load_enrichment(_run)
-      [[], []]
+    # Returns [context_chunks, principles].
+    def load_enrichment(run)
+      skill = SkillLoader.call(run.source_ref)
+      context_chunks = ContextRetriever.call(skill.principles)
+      EnrichmentRunner.call(run, skill.enrich_tools)
+      [context_chunks, skill.principles]
     end
 
     # Reconstruct conversation history from persisted turns as hashes for build_prompt.

@@ -1,12 +1,19 @@
 # frozen_string_literal: true
 
 Rails.application.routes.draw do
+  # Swagger UI — unauthenticated
+  mount Rswag::Ui::Engine => '/api/docs'
+  mount Rswag::Api::Engine => '/api-docs'
+
   # Health check — Rails 8 default, unauthenticated
   get 'up' => 'rails/health#show', as: :rails_health_check
 
   namespace :api do
     # Auth
     post 'auth/token', to: 'auth#create'
+    # Batch — handled by BatchRequestMiddleware before reaching Rails router.
+    # Route declared here so rswag can document it.
+    post 'batch', to: proc { [404, {}, []] }
   end
 
   # Agent runs — Agents::AgentRunsController (JSON API)

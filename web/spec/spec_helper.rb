@@ -10,12 +10,12 @@ SimpleCov.start 'rails' do
   add_filter '/app/models/application_record.rb'
   add_filter '/app/controllers/application_controller.rb'
   track_files '{app,lib}/**/*.rb'
-  # Skip coverage check when there are no non-trivial examples
+  # Skip coverage check when there are no non-trivial examples or running in dry-run mode
   at_exit do
     SimpleCov.result.format!
     tracked = SimpleCov.result.files.reject { |f| f.lines.count.zero? }
     if tracked.any? && SimpleCov.result.covered_percent < SimpleCov.minimum_coverage[:line] &&
-       RSpec.world.example_count > 0
+       RSpec.world.example_count > 0 && !RSpec.configuration.dry_run?
       warn "Line coverage (#{SimpleCov.result.covered_percent.round(2)}%) is below the expected minimum coverage (#{SimpleCov.minimum_coverage[:line]}%)."
       exit 2
     end

@@ -1,0 +1,298 @@
+---
+openapi: 3.0.1
+info:
+  title: Unpossible API
+  version: v1
+servers:
+- url: http://localhost:3000
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+paths:
+  "/health":
+    get:
+      summary: Health check
+      tags:
+      - Health
+      responses:
+        '200':
+          description: database reachable
+        '503':
+          description: database unreachable
+  "/api/agent_runs/start":
+    post:
+      summary: Start an agent run
+      tags:
+      - Agent Runs
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: true
+        schema:
+          type: string
+      responses:
+        '201':
+          description: run started
+        '200':
+          description: dedup hit — cached run returned
+        '409':
+          description: concurrent run already active for this source_ref
+        '422':
+          description: duplicate run_id
+        '401':
+          description: missing or invalid token
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                run_id:
+                  type: string
+                  format: uuid
+                source_ref:
+                  type: string
+                mode:
+                  type: string
+                provider:
+                  type: string
+                model:
+                  type: string
+                prompt_sha256:
+                  type: string
+              required:
+              - run_id
+              - source_ref
+              - mode
+              - provider
+              - model
+  "/api/agent_runs/{id}/complete":
+    post:
+      summary: Complete an agent run (sidecar only)
+      tags:
+      - Agent Runs
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+      - name: X-Sidecar-Token
+        in: header
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: run completed
+        '401':
+          description: missing or invalid sidecar token
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                input_tokens:
+                  type: integer
+                output_tokens:
+                  type: integer
+                cost_estimate_usd:
+                  type: number
+                duration_ms:
+                  type: integer
+  "/api/agent_runs/{id}/input":
+    post:
+      summary: Submit human input to a waiting run
+      tags:
+      - Agent Runs
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+      - name: Authorization
+        in: header
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: input recorded, run resumed
+        '404':
+          description: run not found or belongs to different org
+        '401':
+          description: missing or invalid token
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                content:
+                  type: string
+              required:
+              - content
+  "/api/analytics/llm":
+    get:
+      summary: LLM cost aggregated by provider and model
+      tags:
+      - Analytics
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: from
+        in: query
+        required: false
+        description: Start date (YYYY-MM-DD)
+        schema:
+          type: string
+      - name: to
+        in: query
+        required: false
+        description: End date (YYYY-MM-DD)
+        schema:
+          type: string
+      responses:
+        '200':
+          description: filters by to date — returns empty when all records are recent
+        '401':
+          description: missing or invalid token
+  "/api/analytics/loops":
+    get:
+      summary: Run counts and failure rates by mode
+      tags:
+      - Analytics
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: run counts and failure rates by mode
+        '401':
+          description: missing or invalid token
+  "/api/analytics/summary":
+    get:
+      summary: 'Weekly totals: cost, runs, error rate'
+      tags:
+      - Analytics
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: weekly totals
+        '401':
+          description: missing or invalid token
+  "/api/analytics/events":
+    get:
+      summary: Paginated analytics events
+      tags:
+      - Analytics
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: event_name
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: from
+        in: query
+        required: false
+        description: ISO8601 timestamp
+        schema:
+          type: string
+      - name: to
+        in: query
+        required: false
+        description: ISO8601 timestamp
+        schema:
+          type: string
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+      - name: per_page
+        in: query
+        required: false
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: paginates results
+        '401':
+          description: missing or invalid token
+  "/api/analytics/flags/{key}":
+    get:
+      summary: Feature flag exposure counts and conversion rates per variant
+      tags:
+      - Analytics
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: key
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: conversion rates per variant
+        '401':
+          description: missing or invalid token
+  "/api/auth/token":
+    post:
+      summary: Issue a JWT token
+      tags:
+      - Auth
+      parameters: []
+      responses:
+        '201':
+          description: token issued
+        '401':
+          description: invalid secret
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                secret:
+                  type: string
+              required:
+              - secret

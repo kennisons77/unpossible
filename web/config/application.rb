@@ -43,6 +43,10 @@ module Unpossible2
     require_relative '../app/middleware/health_check_middleware'
     config.middleware.insert_before(0, HealthCheckMiddleware)
 
+    # Batch request middleware — fans out POST /api/batch sub-requests through the full Rack stack.
+    require_relative '../app/middleware/batch_request_middleware'
+    config.middleware.use BatchRequestMiddleware
+
     # Background jobs via Solid Queue (Postgres-backed, no Redis)
     config.active_job.queue_adapter = :solid_queue
   end

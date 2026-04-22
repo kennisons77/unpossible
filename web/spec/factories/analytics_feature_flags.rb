@@ -6,5 +6,6 @@ FactoryBot.define do
     enabled { false }
     status { 'active' }
     org_id { SecureRandom.uuid }
+    metadata { { 'hypothesis' => 'Default test hypothesis' } }
   end
 end

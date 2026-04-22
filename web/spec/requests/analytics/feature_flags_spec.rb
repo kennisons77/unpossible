@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
-require 'rails_helper'
+require 'swagger_helper'
 
 RSpec.describe 'Feature Flags API', type: :request do
   let(:org_id) { SecureRandom.uuid }
   let(:token) { AuthToken.encode(org_id: org_id, user_id: 'user-1') }
-  let(:headers) { { 'Authorization' => "Bearer #{token}", 'Content-Type' => 'application/json' } }
+  let(:Authorization) { "Bearer #{token}" }
 
   around do |example|
     original = ENV.fetch('AUTH_SECRET', nil)
@@ -14,77 +14,141 @@ RSpec.describe 'Feature Flags API', type: :request do
     ENV['AUTH_SECRET'] = original
   end
 
-  describe 'POST /api/feature_flags' do
-    let(:valid_params) { { key: 'module.feature', org_id: org_id } }
+  path '/api/feature_flags' do
+    get 'List feature flags' do
+      tags 'Feature Flags'
+      produces 'application/json'
+      security [{ bearerAuth: [] }]
+      parameter name: :Authorization, in: :header, type: :string, required: true
+      parameter name: :status, in: :query, type: :string, required: false,
+                description: 'Filter by status (omit for active only, "archived" for all)'
 
-    it 'creates flag and returns 201' do
-      post '/api/feature_flags', params: valid_params.to_json, headers: headers
-      expect(response).to have_http_status(:created)
-      expect(JSON.parse(response.body)['key']).to eq('module.feature')
+      response '200', 'returns active flags by default' do
+        before do
+          create(:analytics_feature_flag, org_id: org_id, status: 'active')
+          create(:analytics_feature_flag, org_id: org_id, status: 'archived')
+          # different org — must not appear
+          create(:analytics_feature_flag, status: 'active')
+        end
+        run_test! do
+          body = JSON.parse(response.body)
+          expect(body.size).to eq(1)
+          expect(body.first['org_id']).to eq(org_id)
+        end
+      end
+
+      response '200', 'includes archived flags when status=archived' do
+        before do
+          create(:analytics_feature_flag, org_id: org_id, status: 'active')
+          create(:analytics_feature_flag, org_id: org_id, status: 'archived')
+        end
+        let(:status) { 'archived' }
+        run_test! do
+          body = JSON.parse(response.body)
+          expect(body.size).to eq(2)
+        end
+      end
+
+      response '401', 'missing or invalid token' do
+        let(:Authorization) { nil }
+        run_test!
+      end
     end
 
-    it 'returns 422 for duplicate key' do
-      create(:analytics_feature_flag, key: 'module.feature', org_id: org_id)
-      post '/api/feature_flags', params: valid_params.to_json, headers: headers
-      expect(response).to have_http_status(:unprocessable_entity)
-    end
+    post 'Create a feature flag' do
+      tags 'Feature Flags'
+      consumes 'application/json'
+      produces 'application/json'
+      security [{ bearerAuth: [] }]
+      parameter name: :Authorization, in: :header, type: :string, required: true
+      parameter name: :body, in: :body, schema: {
+        type: :object,
+        properties: {
+          key: { type: :string }
+        },
+        required: ['key']
+      }
 
-    it 'returns 201 without metadata.hypothesis' do
-      post '/api/feature_flags', params: { key: 'module.no_hypothesis', org_id: org_id }.to_json, headers: headers
-      expect(response).to have_http_status(:created)
-    end
+      response '201', 'creates flag with org_id from token' do
+        let(:body) { { key: 'module.new_feature', metadata: { hypothesis: 'Will increase signups' } } }
+        run_test! do
+          parsed = JSON.parse(response.body)
+          expect(parsed['key']).to eq('module.new_feature')
+          expect(parsed['org_id']).to eq(org_id)
+        end
+      end
 
-    it 'returns 401 without auth' do
-      post '/api/feature_flags', params: valid_params.to_json,
-           headers: { 'Content-Type' => 'application/json' }
-      expect(response).to have_http_status(:unauthorized)
+      response '201', 'ignores org_id in params and uses token org_id' do
+        let(:other_org) { SecureRandom.uuid }
+        let(:body) { { key: 'module.another_feature', org_id: other_org, metadata: { hypothesis: 'Test hypothesis' } } }
+        run_test! do
+          parsed = JSON.parse(response.body)
+          expect(parsed['org_id']).to eq(org_id)
+          expect(parsed['org_id']).not_to eq(other_org)
+        end
+      end
+
+      response '422', 'missing metadata.hypothesis returns unprocessable entity' do
+        let(:body) { { key: 'module.no_hypothesis' } }
+        run_test! do
+          parsed = JSON.parse(response.body)
+          expect(parsed['errors']).to be_present
+        end
+      end
+
+      response '422', 'duplicate key returns unprocessable entity' do
+        before { create(:analytics_feature_flag, key: 'module.existing', org_id: org_id) }
+        let(:body) { { key: 'module.existing', metadata: { hypothesis: 'Some hypothesis' } } }
+        run_test! do
+          parsed = JSON.parse(response.body)
+          expect(parsed['errors']).to be_present
+        end
+      end
+
+      response '401', 'missing or invalid token' do
+        let(:Authorization) { nil }
+        let(:body) { { key: 'module.feature' } }
+        run_test!
+      end
     end
   end
 
-  describe 'PATCH /api/feature_flags/:key' do
-    let!(:flag) { create(:analytics_feature_flag, key: 'module.toggle', org_id: org_id, enabled: false) }
+  path '/api/feature_flags/{key}' do
+    patch 'Update a feature flag' do
+      tags 'Feature Flags'
+      consumes 'application/json'
+      produces 'application/json'
+      security [{ bearerAuth: [] }]
+      parameter name: :Authorization, in: :header, type: :string, required: true
+      parameter name: :key, in: :path, type: :string, required: true
+      parameter name: :body, in: :body, schema: {
+        type: :object,
+        properties: {
+          enabled: { type: :boolean }
+        }
+      }
 
-    it 'updates enabled and returns 200' do
-      patch '/api/feature_flags/module.toggle', params: { enabled: true }.to_json, headers: headers
-      expect(response).to have_http_status(:ok)
-      expect(flag.reload.enabled).to be true
-    end
+      response '200', 'updates enabled flag' do
+        before { create(:analytics_feature_flag, key: 'module.toggle', org_id: org_id, enabled: false) }
+        let(:key) { 'module.toggle' }
+        let(:body) { { enabled: true } }
+        run_test! do
+          expect(Analytics::FeatureFlag.find_by(key: 'module.toggle', org_id: org_id).enabled).to be true
+        end
+      end
 
-    it 'returns 404 for unknown key' do
-      patch '/api/feature_flags/module.missing', params: { enabled: true }.to_json, headers: headers
-      expect(response).to have_http_status(:not_found)
-    end
+      response '404', 'unknown key returns not found' do
+        let(:key) { 'module.missing' }
+        let(:body) { { enabled: true } }
+        run_test!
+      end
 
-    it 'returns 401 without auth' do
-      patch '/api/feature_flags/module.toggle', params: { enabled: true }.to_json,
-            headers: { 'Content-Type' => 'application/json' }
-      expect(response).to have_http_status(:unauthorized)
-    end
-  end
-
-  describe 'GET /api/feature_flags' do
-    let!(:active_flag)   { create(:analytics_feature_flag, org_id: org_id, status: 'active') }
-    let!(:archived_flag) { create(:analytics_feature_flag, org_id: org_id, status: 'archived') }
-
-    it 'returns active flags and excludes archived by default' do
-      get '/api/feature_flags', headers: headers
-      expect(response).to have_http_status(:ok)
-      keys = JSON.parse(response.body).map { |f| f['key'] }
-      expect(keys).to include(active_flag.key)
-      expect(keys).not_to include(archived_flag.key)
-    end
-
-    it 'includes archived flags with ?status=archived' do
-      get '/api/feature_flags?status=archived', headers: headers
-      expect(response).to have_http_status(:ok)
-      keys = JSON.parse(response.body).map { |f| f['key'] }
-      expect(keys).to include(active_flag.key)
-      expect(keys).to include(archived_flag.key)
-    end
-
-    it 'returns 401 without auth' do
-      get '/api/feature_flags', headers: { 'Content-Type' => 'application/json' }
-      expect(response).to have_http_status(:unauthorized)
+      response '401', 'missing or invalid token' do
+        let(:Authorization) { nil }
+        let(:key) { 'module.toggle' }
+        let(:body) { { enabled: true } }
+        run_test!
+      end
     end
   end
 end
