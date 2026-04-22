@@ -72,7 +72,7 @@ The following is implemented and tested (297 examples, 0 failures, 99.11% covera
 The `AgentRunJob#load_enrichment` method returns empty arrays — it's a stub. The spec
 requires assembling prompts from skill files, context chunks, and principles.
 
-- [ ] 2.1 — Implement skill file loading in `AgentRunJob` (`web/app/modules/agents/jobs/agent_run_job.rb`, `web/app/modules/agents/services/skill_loader.rb`)
+- [x] 2.1 — Implement skill file loading in `AgentRunJob` (`web/app/modules/agents/jobs/agent_run_job.rb`, `web/app/modules/agents/services/skill_loader.rb`)
   Load the instruction body from the skill file referenced by `source_ref`. Parse YAML
   frontmatter for `tools.enrich` and `tools.callable` declarations.
   Required tests: loads skill file content from disk, parses frontmatter correctly, returns
