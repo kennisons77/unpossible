@@ -31,8 +31,23 @@ services:
     networks:
       - unpossible
 
-  # Phase 0: Go sidecars not yet built — go/ directory does not exist.
-  # Uncomment when go/cmd/runner and go/cmd/analytics are implemented (tasks 8.2, 8.6).
+  analytics:
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile.go
+      target: analytics
+    image: unpossible-analytics:${GIT_SHA:-dev}
+    environment:
+      DATABASE_URL: postgres://unpossible:unpossible@postgres:5432/unpossible_development?sslmode=disable
+    ports:
+      - "9100:9100"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - unpossible
+
+  # go_runner: uncomment when task 8.6 (runner sidecar implementation) is complete.
   # go_runner:
   #   build:
   #     context: ..
@@ -41,17 +56,6 @@ services:
   #   image: unpossible-runner:${GIT_SHA:-dev}
   #   ports:
   #     - "8080:8080"
-  #   networks:
-  #     - unpossible
-
-  # analytics:
-  #   build:
-  #     context: ..
-  #     dockerfile: infra/Dockerfile.go
-  #     target: analytics
-  #   image: unpossible-analytics:${GIT_SHA:-dev}
-  #   ports:
-  #     - "9100:9100"
   #   networks:
   #     - unpossible
 

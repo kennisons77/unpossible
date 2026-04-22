@@ -125,7 +125,7 @@ No `go/` directory exists. The Go sidecars are required for the full Phase 0 sta
   Depends on: 8.2
   Required tests: `docker build` succeeds for both runner and analytics targets
 
-- [ ] 8.5 Uncomment Go sidecar services in `infra/docker-compose.yml`
+- [x] 8.5 Uncomment Go sidecar services in `infra/docker-compose.yml` *(done — tag 0.0.74)*
   Depends on: 8.3, 8.4
   Required tests: `docker compose up` starts all services including Go sidecars
 
