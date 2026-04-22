@@ -6,6 +6,31 @@ Agent activity log. Auto-updated each iteration. Trimmed to last 10 entries.
 
 ---
 
+## 2026-04-22 15:28 — Spike: Go reference parser research (task 5.1)
+
+**Changes:** Wrote research findings to `specifications/research/reference-graph-parser.md`. Marked task 5.1 complete in IMPLEMENTATION_PLAN.md.
+
+**Thinking:**
+- The four open questions were answerable from the existing specs without external research: the reference-graph concept spec defines the parser's inputs/outputs; the repo-map concept spec names `smacker/go-tree-sitter` and clarifies it's for the repo-map, not the parser; the Go platform spec defines the `go/` monorepo structure.
+- The key insight: tree-sitter is the repo-map's concern, not the reference parser's. The parser extracts `spec:` tags from RSpec files — a fixed-format string literal that regex handles cleanly. Full AST parsing would add a CGo dependency (tree-sitter is a C library) with no benefit for Phase 0.
+- Stdlib-only Go for Phase 0 is the right call: `os`, `bufio`, `encoding/json`, `regexp`, `os/exec` cover all parser inputs. No module proxy or vendor cache issues in the air-gapped Docker build.
+
+**Challenges:**
+- The IMPLEMENTATION_PLAN.md item for 5.1 had a stale "Findings" line copied from task 4.1 (the controlled commit spike). Had to search for the exact text to do the str_replace correctly.
+- Distinguishing what belongs to the parser vs the repo-map: both live in `go/cmd/` and both process Ruby files. The boundary is: parser extracts graph edges (traceability), repo-map extracts signatures (navigation). They share the monorepo but have different dependency profiles.
+
+**Alternatives considered:**
+- Using tree-sitter for `spec:` tag extraction — rejected because the tag format is a fixed string literal in a known position (`RSpec.describe "...", spec: "..."`) — regex is sufficient and avoids CGo.
+- Separate `go.mod` per binary — rejected per the Go platform spec which explicitly defines a single `go.mod` for all binaries. Standard Go monorepo pattern.
+- Caching parser output in Postgres — rejected per the concept spec's core design decision: "No disk↔DB sync. The graph is derived from files at query time, never maintained as a separate stateful system."
+
+**Tradeoffs taken:**
+- Phase 0 parser uses regex for `spec:` tag extraction. If the tag format becomes more complex (nested metadata, multi-line), regex will need to be replaced with tree-sitter. The concept spec's fixed format makes this unlikely in the near term.
+- Parser implementation is deferred until after task 8.2 (Go bootstrap). The spike establishes the design; the implementation follows the bootstrap. This means the reference graph web UI (Priority 5) remains blocked until both 8.2 and the parser task are done.
+- PR nodes and review nodes are deferred from the Phase 0 parser scope — no PR skill exists yet to emit `pr_opened` events. The parser will skip unknown event types, so adding PR support later is additive.
+
+---
+
 ## 2026-04-22 14:24 — Spike: controlled commit skill research (task 4.1, tag 0.0.78)
 
 **Changes:** Wrote research findings to `specifications/research/reference-graph-commit-skill.md`. Created `specifications/skills/tools/commit.md` (the skill file deliverable). Updated skills README and research README. Marked task 4.1 complete.
