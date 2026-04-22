@@ -121,7 +121,7 @@ No `go/` directory exists. The Go sidecars are required for the full Phase 0 sta
   Depends on: 8.2
   Required tests: POST /capture returns 202, events flushed within 5s or 100 events, events buffered on Postgres unavailability, internal-only (not publicly reachable)
 
-- [ ] 8.4 Add `infra/Dockerfile.go` for Go sidecar builds
+- [x] 8.4 Add `infra/Dockerfile.go` for Go sidecar builds *(done — tag 0.0.73)*
   Depends on: 8.2
   Required tests: `docker build` succeeds for both runner and analytics targets
 
