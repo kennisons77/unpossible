@@ -207,3 +207,13 @@ The map is gitignored — it's a derived artifact, not source of truth.
 | Should the map include database schema (db/schema.rb)? | Useful for agents writing migrations. Try including table + column names, measure token cost. |
 | Relevance ranking weights | Start with git recency only. Add plan-reference weighting after measuring baseline. |
 | Map freshness vs generation cost | Generation should be <1s for our codebase size. If it grows, add file-hash caching. |
+
+## Research
+
+See `specifications/research/repo-map.md` for full findings.
+
+Key sources:
+- Repo-map concept spec (this file) → informs acceptance criteria and output shape
+- `specifications/research/agentic-context-management.md` → Aider repo map as dominant prior art
+- `specifications/research/reference-graph-parser.md` → Go monorepo bootstrap pattern
+- `smacker/go-tree-sitter` → Go binding with bundled Ruby/Go/Markdown grammars

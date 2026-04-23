@@ -139,8 +139,9 @@ Spec: `specifications/system/repo-map/concept.md` — Go CLI binary for AST-base
 
 No implementation exists. Depends on Go bootstrap.
 
-- [ ] [SPIKE] 9.1 Research repo map implementation — run `./loop.sh research repo-map` (see specifications/skills/tools/research.md)
+- [x] [SPIKE] 9.1 Research repo map implementation — run `./loop.sh research repo-map` (see specifications/skills/tools/research.md)
   Open questions: tree-sitter Go bindings (`smacker/go-tree-sitter`) maturity for Ruby grammar, token budget estimation approach, relevance ranking weights.
+  Findings: `specifications/research/repo-map.md` — use smacker/go-tree-sitter (cgo, repo-map binary only), char÷4 token heuristic, git-recency-only ranking for Phase 0
   Depends on: 8.2 (Go bootstrap)
 
 ### Section 10 — Analytics Dashboard UI
