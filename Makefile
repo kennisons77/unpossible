@@ -155,21 +155,23 @@ start:
 	rm -f "$$TMPFILE"
 	@echo ""
 	@echo "==> Running plan (1 iteration) — review beats before running make plan or make build..."
-	@cd $(PROJECT_DIR) && $(LOOP) plan 1
+	@$(AGENT_RUN) ./loop.sh plan 1
 
-# --- Loop targets ---
+# --- Loop targets (run inside Docker agent sandbox) ---
+AGENT_RUN = $(COMPOSE) run --rm -e AGENT=$(AGENT) -e MODEL=$(MODEL) agent
+
 build:
-	@cd $(ROOT_DIR) && AGENT=$(AGENT) MODEL=$(MODEL) $(LOOP)
+	@$(AGENT_RUN) ./loop.sh
 
 plan:
-	@cd $(ROOT_DIR) && AGENT=$(AGENT) MODEL=$(MODEL) $(LOOP) plan
+	@$(AGENT_RUN) ./loop.sh plan
 
 build1:
-	@cd $(ROOT_DIR) && AGENT=$(AGENT) MODEL=$(MODEL) $(LOOP) 1
+	@$(AGENT_RUN) ./loop.sh 1
 
 research:
 	@if [ -n "$(ID)" ]; then \
-		cd $(ROOT_DIR) && AGENT=$(AGENT) MODEL=$(MODEL) $(LOOP) research $(ID); \
+		$(AGENT_RUN) ./loop.sh research $(ID); \
 	else \
 		SPIKE_IDS=$$(grep -E '^\- \[ \] [0-9].*\[SPIKE\]' $(ROOT_DIR)IMPLEMENTATION_PLAN.md \
 			| sed 's/^- \[ \] \([0-9][0-9.]*\).*/\1/'); \
@@ -179,14 +181,14 @@ research:
 		echo "Pending spikes: $$SPIKE_IDS"; \
 		for id in $$SPIKE_IDS; do \
 			echo "==> Researching spike $$id..."; \
-			cd $(ROOT_DIR) && AGENT=$(AGENT) MODEL=$(MODEL) $(LOOP) research $$id || true; \
+			$(AGENT_RUN) ./loop.sh research $$id || true; \
 		done; \
 	fi
 	@echo "==> Re-planning to integrate research findings..."
-	@cd $(ROOT_DIR) && AGENT=$(AGENT) MODEL=$(MODEL) $(LOOP) plan
+	@$(AGENT_RUN) ./loop.sh plan
 
 review:
-	@cd $(ROOT_DIR) && AGENT=$(AGENT) MODEL=$(MODEL) $(LOOP) review
+	@$(AGENT_RUN) ./loop.sh review
 
 # --- Skill targets ---
 requirements:

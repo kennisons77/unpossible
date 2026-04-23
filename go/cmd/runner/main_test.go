@@ -164,3 +164,67 @@ func TestRunMethodNotAllowed(t *testing.T) {
 		t.Errorf("expected 405, got %d", w.Code)
 	}
 }
+
+func TestTestRequiresBasicAuth(t *testing.T) {
+	r := newTestRunner("http://localhost")
+	req := httptest.NewRequest(http.MethodPost, "/test", nil)
+	w := httptest.NewRecorder()
+	r.handleTest(w, req)
+	if w.Code != http.StatusUnauthorized {
+		t.Errorf("expected 401 without auth, got %d", w.Code)
+	}
+}
+
+func TestTestRejectsWrongCredentials(t *testing.T) {
+	r := newTestRunner("http://localhost")
+	req := httptest.NewRequest(http.MethodPost, "/test", nil)
+	req.SetBasicAuth("testuser", "wrongpass")
+	w := httptest.NewRecorder()
+	r.handleTest(w, req)
+	if w.Code != http.StatusUnauthorized {
+		t.Errorf("expected 401 with wrong password, got %d", w.Code)
+	}
+}
+
+func TestTestMethodNotAllowed(t *testing.T) {
+	r := newTestRunner("http://localhost")
+	req := httptest.NewRequest(http.MethodGet, "/test", nil)
+	w := httptest.NewRecorder()
+	r.handleTest(w, req)
+	if w.Code != http.StatusMethodNotAllowed {
+		t.Errorf("expected 405, got %d", w.Code)
+	}
+}
+
+func TestTestRejectsInvalidJSON(t *testing.T) {
+	r := newTestRunner("http://localhost")
+	req := httptest.NewRequest(http.MethodPost, "/test", bytes.NewReader([]byte("{bad")))
+	req.SetBasicAuth("testuser", "testpass")
+	w := httptest.NewRecorder()
+	r.handleTest(w, req)
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("expected 400 for invalid JSON, got %d", w.Code)
+	}
+}
+
+func TestTestAcceptsEmptyBody(t *testing.T) {
+	// Empty body is valid — runs full test suite.
+	// This will fail because docker isn't available in test, but it should
+	// return a JSON response with a non-zero exit code, not an HTTP error.
+	r := newTestRunner("http://localhost")
+	req := httptest.NewRequest(http.MethodPost, "/test", bytes.NewReader([]byte("{}")))
+	req.SetBasicAuth("testuser", "testpass")
+	w := httptest.NewRecorder()
+	r.handleTest(w, req)
+	if w.Code != http.StatusOK {
+		t.Errorf("expected 200 (with non-zero exit_code), got %d", w.Code)
+	}
+	var resp testResponse
+	if err := json.NewDecoder(w.Body).Decode(&resp); err != nil {
+		t.Fatalf("failed to decode response: %v", err)
+	}
+	// docker compose won't be available in test env, so exit code should be non-zero
+	if resp.ExitCode == 0 {
+		t.Log("docker compose succeeded unexpectedly — test env has Docker available")
+	}
+}

@@ -1,0 +1,31 @@
+# syntax=docker/dockerfile:1
+
+# Agent loop sandbox — runs claude or kiro-cli inside an isolated container.
+# The project directory is bind-mounted at /workspace.
+# Tests are delegated to the host-side runner sidecar via HTTP.
+#
+# Build:
+#   docker compose -f infra/docker-compose.yml build agent
+
+FROM node:22-trixie-slim
+
+# Install git, curl, jq and dependencies from pre-downloaded debs (no outbound network)
+COPY infra/debs-debian/ /tmp/debs/
+RUN dpkg --force-overwrite --force-depends -i /tmp/debs/*.deb 2>&1 || true && \
+    dpkg --force-overwrite --force-depends -i /tmp/debs/*.deb 2>&1 || true && \
+    rm -rf /tmp/debs
+
+# Install claude CLI from pre-downloaded tarball (no outbound network needed)
+COPY infra/npm-cache/ /tmp/npm-cache/
+RUN npm install -g /tmp/npm-cache/anthropic-ai-claude-code-*.tgz && rm -rf /tmp/npm-cache
+
+RUN groupadd --gid 1001 agent && useradd --uid 1001 --gid agent --create-home agent
+
+WORKDIR /workspace
+
+COPY infra/run-tests.sh /usr/local/bin/run-tests
+RUN chmod +x /usr/local/bin/run-tests
+
+USER agent
+
+ENTRYPOINT ["/bin/bash"]

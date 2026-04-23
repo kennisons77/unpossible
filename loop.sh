@@ -27,10 +27,12 @@ trap cleanup EXIT
 AGENT=${AGENT:-claude}
 case "$AGENT" in
     claude)
+        command -v claude &>/dev/null || { echo "Error: 'claude' CLI not found. Install with: npm install -g @anthropic-ai/claude-code"; exit 1; }
         MODEL=${MODEL:-opus}
         AGENT_CMD="claude -p --dangerously-skip-permissions --output-format=stream-json --model $MODEL --verbose"
         ;;
     kiro)
+        command -v kiro-cli &>/dev/null || { echo "Error: 'kiro-cli' not found. Install from: https://kiro.dev"; exit 1; }
         # kiro reads prompt as positional arg, not stdin; -- prevents flag interpretation
         # --agent is set per-mode after MODE is parsed (see below)
         # Only pass --model if explicitly set — otherwise let the agent config decide
@@ -160,6 +162,39 @@ if [ -n "$GH_TOKEN" ]; then
     git config --global credential.helper '!f() { echo "username=x-token"; echo "password=$GH_TOKEN"; }; f'
 fi
 
+# --- Sandbox detection ---
+# When running inside the agent container, inject test instructions into the prompt.
+SANDBOX=0
+if [ -f "/.dockerenv" ] || [ -n "$RUNNER_URL" ]; then
+    SANDBOX=1
+    command -v run-tests &>/dev/null || { echo "Error: run-tests not found — are you inside the agent container?"; exit 1; }
+fi
+
+# --- Sandbox prompt injection ---
+if [ "$SANDBOX" -eq 1 ]; then
+    {
+        cat "$PROMPT_FILE"
+        cat <<'SANDBOX_EOF'
+
+## Sandbox Environment
+
+You are running inside a sandboxed container. You do NOT have access to Docker.
+To run tests, use the `run-tests` command instead of `docker compose`:
+
+```bash
+# Run full test suite
+run-tests
+
+# Run a specific spec
+run-tests spec/path/to/spec.rb
+```
+
+Do NOT run `docker compose` commands — they will fail.
+SANDBOX_EOF
+    } > "/tmp/prompt_sandbox_$$.md"
+    PROMPT_FILE="/tmp/prompt_sandbox_$$.md"
+fi
+
 # --- Git / branch setup ---
 GIT_DIR="$PROJECT_DIR"
 CURRENT_BRANCH=$(git -C "$GIT_DIR" branch --show-current)
@@ -176,6 +211,7 @@ echo "Model:  ${MODEL:-(agent default)}"
 echo "Mode:   $MODE"
 echo "Prompt: $PROMPT_FILE"
 echo "Branch: $CURRENT_BRANCH"
+[ "$SANDBOX" -eq 1 ] && echo "Sandbox: yes (tests via runner sidecar)"
 [ "$MAX_ITERATIONS" -gt 0 ] && echo "Max:    $MAX_ITERATIONS iterations"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 

@@ -29,6 +29,17 @@ type runRequest struct {
 	Script     string `json:"script"` // path to loop.sh, defaults to ./loop.sh
 }
 
+// testRequest is the JSON body for POST /test.
+type testRequest struct {
+	Spec string `json:"spec"` // optional: specific spec file to run
+}
+
+// testResponse is the JSON body returned by POST /test.
+type testResponse struct {
+	ExitCode int    `json:"exit_code"`
+	Output   string `json:"output"`
+}
+
 // completePayload is sent to Rails POST /api/agent_runs/:id/complete.
 type completePayload struct {
 	ExitCode     int `json:"exit_code"`
@@ -237,6 +248,53 @@ func (r *runner) handleReady(w http.ResponseWriter, _ *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
+const testTimeout = 10 * time.Minute
+
+func (r *runner) handleTest(w http.ResponseWriter, req *http.Request) {
+	if req.Method != http.MethodPost {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	u, p, ok := req.BasicAuth()
+	if !ok || u != r.username || p != r.password {
+		w.Header().Set("WWW-Authenticate", `Basic realm="runner"`)
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	var body testRequest
+	if err := json.NewDecoder(req.Body).Decode(&body); err != nil && err.Error() != "EOF" {
+		http.Error(w, "invalid JSON", http.StatusBadRequest)
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(req.Context(), testTimeout)
+	defer cancel()
+
+	args := []string{"compose", "-f", "infra/docker-compose.test.yml", "run", "--rm", "test"}
+	if body.Spec != "" {
+		args = append(args, "bundle", "exec", "rspec", body.Spec)
+	}
+
+	cmd := exec.CommandContext(ctx, "docker", args...)
+	out, err := cmd.CombinedOutput()
+
+	exitCode := 0
+	if err != nil {
+		exitCode = 1
+		if exitErr, ok := err.(*exec.ExitError); ok {
+			exitCode = exitErr.ExitCode()
+		}
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(testResponse{
+		ExitCode: exitCode,
+		Output:   string(out),
+	})
+}
+
 func main() {
 	railsURL := os.Getenv("RAILS_URL")
 	if railsURL == "" {
@@ -255,6 +313,7 @@ func main() {
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/run", r.handleRun)
+	mux.HandleFunc("/test", r.handleTest)
 	mux.HandleFunc("/healthz", r.handleHealthz)
 	mux.HandleFunc("/ready", r.handleReady)
 	mux.Handle("/metrics", promhttp.Handler())
