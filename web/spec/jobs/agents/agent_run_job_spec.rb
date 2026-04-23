@@ -8,11 +8,11 @@ RSpec.describe Agents::AgentRunJob, type: :job do
   let(:org_id) { SecureRandom.uuid }
   let(:run) { create(:agents_agent_run, org_id: org_id, status: 'running') }
   let(:adapter) { instance_double(Agents::ClaudeAdapter) }
-  let(:built_prompt) { { model: "claude-sonnet-4-20250514", system: "", messages: [] } }
+  let(:built_prompt) { { model: "claude-sonnet-4-20250514", system: [], messages: [] } }
 
   before do
     allow(Agents::ProviderAdapter).to receive(:for).with(run.provider).and_return(adapter)
-    allow(adapter).to receive(:max_context_tokens).and_return(200_000)
+    allow(adapter).to receive(:max_context_tokens).and_return(150_000)
     allow(adapter).to receive(:build_prompt).and_return(built_prompt)
   end
 
