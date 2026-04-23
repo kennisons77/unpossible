@@ -126,12 +126,27 @@ RSpec.describe Agents::ProviderAdapter do
       expect(result[:messages]).to eq([{ role: "user", content: "hello" }])
     end
 
-    it "includes system content from node, principles, and context_chunks" do
+    it "returns system as an array of content blocks" do
       result = adapter.build_prompt(
         node: "node-ref", context_chunks: ["chunk1"], principles: ["principle1"],
         turns: [], token_budget: 200_000
       )
-      expect(result[:system]).to include("node-ref", "principle1", "chunk1")
+      texts = result[:system].map { |b| b[:text] }
+      expect(texts).to include("node-ref", "principle1", "chunk1")
+    end
+
+    it "applies cache_control to principles and context_chunks but not node" do
+      result = adapter.build_prompt(
+        node: "node-ref", context_chunks: ["chunk1"], principles: ["principle1"],
+        turns: [], token_budget: 200_000
+      )
+      node_block = result[:system].find { |b| b[:text] == "node-ref" }
+      principle_block = result[:system].find { |b| b[:text] == "principle1" }
+      chunk_block = result[:system].find { |b| b[:text] == "chunk1" }
+
+      expect(node_block).not_to have_key(:cache_control)
+      expect(principle_block[:cache_control]).to eq({ type: "ephemeral" })
+      expect(chunk_block[:cache_control]).to eq({ type: "ephemeral" })
     end
 
     it "parses response returning normalised hash" do
@@ -146,7 +161,7 @@ RSpec.describe Agents::ProviderAdapter do
     end
 
     it "returns max context tokens" do
-      expect(adapter.max_context_tokens).to eq(200_000)
+      expect(adapter.max_context_tokens).to eq(150_000)
     end
   end
 

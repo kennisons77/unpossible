@@ -6,7 +6,33 @@ Agent activity log. Auto-updated each iteration. Trimmed to last 10 entries.
 
 ---
 
-## 2026-04-22 13:32 — Add metadata.hypothesis validation to FeatureFlag on create (task 2.1, tag 0.0.76)
+## 2026-04-23 17:59 — Analytics dashboard UI (task 10.1, tag 0.0.86)
+
+**Changes:** Finalised the server-rendered analytics dashboard. `Analytics::DashboardController` with `index` (summary cards, cost-by-provider/model, 20 most recent runs) and `llm` (date-filterable cost/token table). ERB views under `web/app/views/analytics/dashboard/` plus a shared `layouts/application.html.erb` (nav + inline CSS). Routes registered for `GET /analytics` and `GET /analytics/llm`. Request spec covers summary formatting, cost table, 20-run cap, org scoping, date filtering, and 401 paths.
+
+**Thinking:**
+- The spec ties view output to byte-exact strings (`$0.1500`, `data-testid="total-runs">2</div>`, `class="status-completed"` × 20). The right call is to make the ERB produce those strings directly via `format('%.4f', …)` and explicit `data-testid` attributes rather than leaning on helpers — the test is the contract.
+- One shared layout with inline `<style>` is the right weight for two pages. No Propshaft assets, no partials for the cards, no JS. The concept spec says "server-rendered HTML (ERB), no JS framework"; under-building matches that.
+- `Analytics::DashboardController < ApplicationController` reuses `authenticate!` and `current_org_id` so HTML requests get the same JWT check as JSON endpoints. The existing rescue renders JSON on 401 even for HTML — acceptable because the status code (what the spec asserts) is correct and a browser never sees this path without a token.
+
+**Challenges:**
+- The Go runner sidecar (`go_runner:8080`) is not resolvable from the sandbox in this session, so `run-tests` fails before invoking rspec. Per the user's "skip go tests for now" direction I relied on structured code review: walked each spec expectation to the corresponding line of view/controller output. This is weaker than a green run — logged as a known gap below.
+- The dashboard scaffold existed as untracked files from an earlier iteration. Verifying rather than rewriting was the right move; rewriting would have churned tests that were already aligned with the spec.
+
+**Alternatives considered:**
+- Extracting a `_cards.html.erb` partial for the three summary cards — rejected. Three divs repeated once are not a pattern; abstracting them would be premature.
+- Moving inline CSS to `app/assets/stylesheets/` — rejected. Activating Propshaft for ~35 lines of CSS adds build surface for no benefit at this scope.
+- Computing `failure_rate` as a percentage (50.0) in the controller — rejected. Keeping it as a ratio (0.5) in the model/controller and formatting to `%` in the view keeps the boundary clean.
+- Using Rails `number_to_currency` — rejected. `$0.1500` (4 decimals) is what the spec asserts; the helper rounds to 2.
+
+**Tradeoffs taken:**
+- Static verification without a green rspec run is an acceptance hole. If the Go runner comes back and a spec fails, the fix goes in the next iteration — the implementation is narrow enough that any failure will be local to the view/controller just landed.
+- Inline CSS in `application.html.erb` will need extraction when a third page lands or when any styling needs to vary per view. Trigger: adding any page that isn't a table-on-white-card.
+- JSON-body 401 for HTML requests is inherited from `ApplicationController`. Fine for the API surface; a login redirect flow would be a separate, larger change when browser UX matters.
+
+---
+
+## 2026-04-23 10:00 — Spike: repo map implementation research (task 9.1, tag 0.0.85)
 
 **Changes:** Added `on: :create` validation for `metadata.hypothesis` in `Analytics::FeatureFlag`. Updated factory to include hypothesis by default. Updated model spec (3 new tests replacing 1 wrong test). Updated request spec (new 422 test, updated 201 tests to include hypothesis). 337 examples, 0 failures, 98.72% coverage.
 
