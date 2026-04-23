@@ -1,0 +1,37 @@
+<% content_for :title, 'LLM Metrics' %>
+<h1>LLM Metrics</h1>
+
+<form class="filter" method="get" action="/analytics/llm">
+  <label>From: <input type="date" name="from" value="<%= @from %>"></label>
+  <label>To: <input type="date" name="to" value="<%= @to %>"></label>
+  <button type="submit">Filter</button>
+</form>
+
+<div class="section">
+  <h2>Cost &amp; Tokens by Provider / Model</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Provider</th>
+        <th>Model</th>
+        <th>Input Tokens</th>
+        <th>Output Tokens</th>
+        <th>Total Cost (USD)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @rows.each do |row| %>
+        <tr>
+          <td><%= row.provider %></td>
+          <td><%= row.model %></td>
+          <td><%= row.total_input_tokens %></td>
+          <td><%= row.total_output_tokens %></td>
+          <td>$<%= format('%.4f', row.total_cost_usd.to_f) %></td>
+        </tr>
+      <% end %>
+      <% if @rows.empty? %>
+        <tr><td colspan="5" class="empty">No data</td></tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

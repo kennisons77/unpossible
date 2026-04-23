@@ -34,4 +34,8 @@ Rails.application.routes.draw do
   get '/api/analytics/events',       to: 'analytics/metrics#events'
   get '/api/analytics/flags/:key',   to: 'analytics/metrics#flag_stats', as: :api_analytics_flag_stats,
       constraints: { key: /[^\/]+/ }
+
+  # Analytics dashboard — Analytics::DashboardController (server-rendered HTML)
+  get '/analytics',     to: 'analytics/dashboard#index', as: :analytics_dashboard
+  get '/analytics/llm', to: 'analytics/dashboard#llm',   as: :analytics_dashboard_llm
 end

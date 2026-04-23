@@ -1,0 +1,75 @@
+<% content_for :title, 'Analytics Dashboard' %>
+<h1>Analytics Dashboard</h1>
+
+<div class="cards">
+  <div class="card">
+    <h3>Total Cost This Week</h3>
+    <div class="value" data-testid="total-cost">$<%= format('%.4f', @total_cost_this_week) %></div>
+  </div>
+  <div class="card">
+    <h3>Total Runs This Week</h3>
+    <div class="value" data-testid="total-runs"><%= @total_runs %></div>
+  </div>
+  <div class="card">
+    <h3>Failure Rate</h3>
+    <div class="value" data-testid="failure-rate"><%= (@failure_rate * 100).round(1) %>%</div>
+  </div>
+</div>
+
+<div class="section">
+  <h2>Cost by Provider / Model</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Provider</th>
+        <th>Model</th>
+        <th>Input Tokens</th>
+        <th>Output Tokens</th>
+        <th>Total Cost (USD)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @cost_by_provider_model.each do |row| %>
+        <tr>
+          <td><%= row.provider %></td>
+          <td><%= row.model %></td>
+          <td><%= row.total_input_tokens %></td>
+          <td><%= row.total_output_tokens %></td>
+          <td>$<%= format('%.4f', row.total_cost_usd.to_f) %></td>
+        </tr>
+      <% end %>
+      <% if @cost_by_provider_model.empty? %>
+        <tr><td colspan="5" class="empty">No data</td></tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
+
+<div class="section">
+  <h2>Recent Runs</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Mode</th>
+        <th>Provider</th>
+        <th>Model</th>
+        <th>Status</th>
+        <th>Started</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @recent_runs.each do |run| %>
+        <tr>
+          <td><%= run.mode %></td>
+          <td><%= run.provider %></td>
+          <td><%= run.model %></td>
+          <td class="status-<%= run.status %>"><%= run.status %></td>
+          <td><%= run.created_at.iso8601 %></td>
+        </tr>
+      <% end %>
+      <% if @recent_runs.empty? %>
+        <tr><td colspan="5" class="empty">No runs yet</td></tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

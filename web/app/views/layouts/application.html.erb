@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title><%= content_for?(:title) ? yield(:title) : 'Unpossible' %></title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    body { font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 0; background: #f5f5f5; color: #222; }
+    nav { background: #1a1a1a; color: #fff; padding: 1rem 2rem; display: flex; gap: 1.5rem; }
+    nav a { color: #fff; text-decoration: none; font-weight: 500; }
+    nav a:hover { text-decoration: underline; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+    h1 { margin-top: 0; }
+    h2 { margin-bottom: 0.75rem; }
+    .cards { display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap; }
+    .card { background: #fff; border-radius: 4px; padding: 1.5rem; flex: 1 1 200px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+    .card h3 { margin: 0 0 0.5rem 0; color: #666; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    .card .value { font-size: 2rem; font-weight: 700; }
+    table { width: 100%; background: #fff; border-collapse: collapse; border-radius: 4px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+    th, td { padding: 0.75rem 1rem; text-align: left; border-bottom: 1px solid #eee; }
+    th { background: #fafafa; font-weight: 600; color: #444; font-size: 0.875rem; }
+    tr:last-child td { border-bottom: none; }
+    .status-completed { color: #2a7a2a; font-weight: 500; }
+    .status-failed { color: #b02020; font-weight: 500; }
+    .status-running { color: #1060c0; font-weight: 500; }
+    .status-waiting_for_input { color: #b0761a; font-weight: 500; }
+    .section { margin-top: 2rem; }
+    form.filter { margin-bottom: 1rem; display: flex; gap: 0.75rem; align-items: center; }
+    form.filter input { padding: 0.4rem 0.5rem; border: 1px solid #ccc; border-radius: 3px; }
+    form.filter button { padding: 0.45rem 1rem; background: #1a1a1a; color: #fff; border: 0; border-radius: 3px; cursor: pointer; }
+    .empty { text-align: center; color: #888; padding: 1rem; }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="/analytics">Dashboard</a>
+    <a href="/analytics/llm">LLM Metrics</a>
+  </nav>
+  <div class="container">
+    <%= yield %>
+  </div>
+</body>
+</html>

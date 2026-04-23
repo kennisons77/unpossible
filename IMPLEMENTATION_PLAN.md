@@ -150,7 +150,7 @@ Spec: `specifications/system/analytics-dashboard-ui.md` (status: proposed).
 
 No views exist. The spec requires server-rendered HTML (ERB).
 
-- [ ] 10.1 Implement analytics dashboard views — `GET /analytics` summary, `GET /analytics/llm` breakdown (`web/app/views/analytics/`, `web/app/modules/analytics/controllers/dashboard_controller.rb`, `web/config/routes.rb`, `web/spec/requests/analytics/dashboard_spec.rb`)
+- [x] 10.1 Implement analytics dashboard views — `GET /analytics` summary, `GET /analytics/llm` breakdown (`web/app/views/analytics/`, `web/app/modules/analytics/controllers/dashboard_controller.rb`, `web/config/routes.rb`, `web/spec/requests/analytics/dashboard_spec.rb`)
   Required tests: GET /analytics returns 200 with summary cards, GET /analytics/llm returns 200 with cost breakdown, auth required (401 without token)
 
 ### Section 11 — Agent Runs UI
