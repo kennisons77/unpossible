@@ -12,7 +12,6 @@ ACTIVE_PROJECT_FILE := $(ROOT_DIR)ACTIVE_PROJECT
 ENV_FILE := $(ROOT_DIR).env
 AGENT ?= kiro
 MODEL ?=
-SKILL = @cd $(PROJECT_DIR) && $(AGENT) -- "$(shell cat $(PROJECT_DIR)
 
 .PHONY: help \
         docker-build up down restart logs console shell \
@@ -31,7 +30,7 @@ help:
 	@echo "  make config          Show runner config (agent, model, env vars)"
 	@echo "  make config AGENT=claude MODEL=opus   Set agent and model for this session"
 	@echo "  make test            Run test suite via docker compose"
-	@echo "  make sandbox         Launch Kiro CLI in a Docker sandbox"
+	@echo "  make sandbox         Launch agent CLI in a Docker sandbox"
 	@echo ""
 	@echo "Rails server:"
 	@echo "  make up              Start rails + postgres (detached)"
@@ -99,7 +98,7 @@ test:
 	$(COMPOSE_TEST) run --rm test
 
 sandbox:
-	docker sandbox run $(AGENT)
+	@sbx run $(SANDBOX) -- $(shell scripts/sandbox-args.sh $(AGENT) run)
 
 # --- Rails server ---
 docker-build:
@@ -148,7 +147,12 @@ start:
 	@cat $(PROJECT_DIR)AGENTS.md
 	@echo ""
 	@echo "==> Checking for prior research and gap-filling concept..."
-	@cd $(PROJECT_DIR) && $(AGENT) -- "$(shell cat $(PROJECT_DIR)specifications/skills/tools/research.md)\n\n$(shell cat $(PROJECT_DIR)specifications/skills/workflows/concept.md)"
+	@TMPFILE=$$(mktemp); \
+	cat $(PROJECT_DIR)specifications/skills/tools/research.md > "$$TMPFILE"; \
+	echo "" >> "$$TMPFILE"; \
+	cat $(PROJECT_DIR)specifications/skills/workflows/concept.md >> "$$TMPFILE"; \
+	cd $(PROJECT_DIR) && scripts/run-skill.sh $(AGENT) "$$TMPFILE" $(MODEL); \
+	rm -f "$$TMPFILE"
 	@echo ""
 	@echo "==> Running plan (1 iteration) — review beats before running make plan or make build..."
 	@cd $(PROJECT_DIR) && $(LOOP) plan 1
@@ -186,13 +190,13 @@ review:
 
 # --- Skill targets ---
 requirements:
-	@cd $(PROJECT_DIR) && $(AGENT) -- "$(shell cat $(PROJECT_DIR)specifications/skills/workflows/requirements.md)"
+	@cd $(PROJECT_DIR) && scripts/run-skill.sh $(AGENT) specifications/skills/workflows/requirements.md $(MODEL)
 
 concept:
-	@cd $(PROJECT_DIR) && $(AGENT) -- "$(shell cat $(PROJECT_DIR)specifications/skills/workflows/concept.md)"
+	@cd $(PROJECT_DIR) && scripts/run-skill.sh $(AGENT) specifications/skills/workflows/concept.md $(MODEL)
 
 server-ops:
-	@cd $(PROJECT_DIR) && $(AGENT) -- "$(shell cat $(PROJECT_DIR)specifications/skills/workflows/server-ops.md)"
+	@cd $(PROJECT_DIR) && scripts/run-skill.sh $(AGENT) specifications/skills/workflows/server-ops.md $(MODEL)
 
 
 # --- Sandbox Commands ---

@@ -20,6 +20,14 @@ case "$AGENT" in
       *)         echo "Unknown mode for kiro: $MODE" >&2; exit 1 ;;
     esac
     ;;
+  claude)
+    case "$MODE" in
+      run)       echo "--dangerously-skip-permissions" ;;
+      interview) echo "--dangerously-skip-permissions" ;;
+      review)    echo "--dangerously-skip-permissions" ;;
+      *)         echo "Unknown mode for claude: $MODE" >&2; exit 1 ;;
+    esac
+    ;;
   *)
     echo "Unknown agent: $AGENT — add a case in scripts/sandbox-args.sh" >&2
     exit 1
