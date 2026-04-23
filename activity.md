@@ -2,7 +2,33 @@
 
 Agent activity log. Auto-updated each iteration. Trimmed to last 10 entries.
 
-[Prior entries summarised: 100+ iterations — initial planning through 0.0.83. Key milestones: Rails skeleton + test infra, security (Secret, LogRedactor, PromptSanitizer, rack-attack), JWT auth, Agents module (AgentRun, AgentRunTurn, ProviderAdapter, PromptDeduplicator, AgentRunsController, AgentRunJob, TurnContentGcJob), Sandbox module (ContainerRun, DockerDispatcher), Analytics module (FeatureFlag, AnalyticsEvent, AuditEvent, LlmMetric, AuditLogger, AuditLogJob, MetricsController, FeatureFlag auto-fire), HealthCheckMiddleware, Ledger+Knowledge removal, org_id migrations, provider adapter build_prompt with pinned+sliding trimming, LedgerAppender, controlled-commit.sh, parse_response normalised to hash, LlmMetric on completion, rswag install, FeatureFlagsController org_id fix, all rswag spec conversions, db/schema.rb, EnrichmentRunner, SkillLoader wiring, hypothesis validation (2.1), batch middleware (3.1, 3.2), controlled commit spike (4.1), Go reference parser spike (5.1), spec: metadata tags (6.1), Go sidecar spike (8.1), Go bootstrap (8.2), Go analytics sidecar (8.3), Dockerfile.go (8.4), uncomment analytics compose (8.5). Tasks through 8.5 complete.]
+[Prior entries summarised: 100+ iterations — initial planning through 0.0.84. Key milestones: Rails skeleton + test infra, security (Secret, LogRedactor, PromptSanitizer, rack-attack), JWT auth, Agents module (AgentRun, AgentRunTurn, ProviderAdapter, PromptDeduplicator, AgentRunsController, AgentRunJob, TurnContentGcJob), Sandbox module (ContainerRun, DockerDispatcher), Analytics module (FeatureFlag, AnalyticsEvent, AuditEvent, LlmMetric, AuditLogger, AuditLogJob, MetricsController, FeatureFlag auto-fire), HealthCheckMiddleware, Ledger+Knowledge removal, org_id migrations, provider adapter build_prompt with pinned+sliding trimming, LedgerAppender, controlled-commit.sh, parse_response normalised to hash, LlmMetric on completion, rswag install, FeatureFlagsController org_id fix, all rswag spec conversions, db/schema.rb, EnrichmentRunner, SkillLoader wiring, hypothesis validation (2.1), batch middleware (3.1, 3.2), controlled commit spike (4.1), Go reference parser spike (5.1), spec: metadata tags (6.1), Go sidecar spike (8.1), Go bootstrap (8.2), Go analytics sidecar (8.3), Dockerfile.go (8.4), uncomment analytics compose (8.5), Go runner sidecar (8.6). Tasks through 8.6 complete.]
+
+---
+
+## 2026-04-23 10:00 — Spike: repo map implementation research (task 9.1, tag 0.0.85)
+
+**Changes:** Wrote research findings to `specifications/research/repo-map.md` answering three open questions (tree-sitter maturity for Ruby, token budget estimation, relevance ranking weights). Added `## Research` back-reference in `specifications/system/repo-map/concept.md`. Marked task 9.1 complete in IMPLEMENTATION_PLAN.md. No code changes (spike is docs-only per `specifications/skills/tools/research.md`).
+
+**Thinking:**
+- The repo-map and reference-parser binaries share a monorepo but have very different parsing needs. The reference parser extracts fixed-format `spec:` string literals; regex is right. The repo map extracts structured Ruby/Go AST with nesting; regex false-positives in heredocs and `%w[]` literals would be a constant papercut. AST is worth the cgo cost for the repo-map specifically.
+- Tokens don't need to be counted exactly — they need to be estimated well enough to stay under a 1 KB budget with a known degradation cascade. Character÷4 is accurate to ~±10%, which is invisible at this resolution.
+- Relevance ranking is where feature creep usually starts. The concept spec explicitly says "start with git recency only; measure before adding." Honouring that saves a week of premature optimisation on a feature that isn't even implemented yet.
+
+**Challenges:**
+- The key decision was cgo isolation: if we flip the whole `go/` monorepo to cgo because of the repo-map, the sidecars lose static linking. Resolved by keeping `CGO_ENABLED=0` for `cmd/runner` and `cmd/analytics` builds, and `CGO_ENABLED=1` for `cmd/repo-map` only. Two-track cgo policy inside one `go.mod`.
+- Phase 0 scope containment: the concept spec has a full integration story (agent-config resources, gitignored derived file, pre-loop hook). Easy to scope-creep the spike into "design the full thing." Kept the spike narrowly scoped to the three questions IMPLEMENTATION_PLAN.md asked.
+
+**Alternatives considered:**
+- Regex-only Ruby extraction (like the reference parser) — rejected. Different problem shape: the parser wants tags, the map wants structure. Regex correctness falls off a cliff for Ruby structure.
+- Shelling out to the `tree-sitter` CLI — rejected. Adds a Node install, parse latency per file, and stdout-as-API coupling. In-process Go binding is cleaner.
+- `tiktoken-go` for exact token counting — rejected. Claude's tokenizer isn't published; tiktoken is an approximation anyway. +3 MB BPE tables for no accuracy gain at this budget.
+- Calling Anthropic's `count_tokens` endpoint — rejected. Network + API key for a build-time artifact that regenerates frequently is wrong.
+
+**Tradeoffs taken:**
+- cgo for `cmd/repo-map` only: adds build-base to the Dockerfile.go builder stage and ~25–40 MB to the repo-map binary. Contained — sidecars stay static. If a future phase needs the repo-map as a sidecar (not a CLI), revisit.
+- Git-recency-only ranking will miss files the agent needs when they haven't been touched recently but are referenced in the plan. Acceptable for Phase 0: measure first, then add plan-reference weighting when there's evidence it matters. Trigger: build-agent repeatedly grepping for a file the map omitted.
+- Character÷4 token estimate will be ~10% off on code-dense blocks. Acceptable because the degradation cascade has four steps — a 10% miscount shifts which step triggers, not whether we respect the budget.
 
 ---
 
@@ -27,27 +53,6 @@ Agent activity log. Auto-updated each iteration. Trimmed to last 10 entries.
 **Tradeoffs taken:**
 - `cmd.Output()` buffers all stdout in memory. For very long runs this could be large. Acceptable for Phase 0 — if memory becomes an issue, switch to streaming with a ring buffer.
 - The complete callback has a 10s timeout. If Rails is slow, the goroutine blocks for up to 10s after the run. Acceptable — the mutex is released before the callback, so new runs aren't blocked.
-
----
-
-## 2026-04-22 13:32 — Add metadata.hypothesis validation to FeatureFlag on create (task 2.1, tag 0.0.76)
-
-**Changes:** Added `on: :create` validation for `metadata.hypothesis` in `Analytics::FeatureFlag`. Updated factory, model spec, and request spec. 337 examples, 0 failures, 98.72% coverage.
-
-**Thinking:**
-- Platform override is unambiguous: "hypothesis field required on creation → 422 if missing." Platform override is authoritative for Rails implementation.
-- `validate :hypothesis_present, on: :create` is the minimal Rails idiom.
-
-**Challenges:**
-- Existing model spec had a test asserting the opposite — had to replace it, not supplement it.
-- Existing request spec 201 tests sent no `metadata` — updated both to include hypothesis.
-
-**Alternatives considered:**
-- JSON Schema validation — rejected as over-engineering.
-- Controller-level validation — rejected (model is single source of truth).
-
-**Tradeoffs taken:**
-- Factory default hypothesis string is generic. Tests that care about the value should set it explicitly.
 
 ---
 
