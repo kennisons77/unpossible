@@ -9,8 +9,7 @@ loaded_by: [plan, review]
 # Structural Vocabulary — Extended
 
 Coordination, data flow, and lifecycle patterns. Loaded on demand alongside
-`structural-vocabulary.md`. For an overview of the full system see
-`structural-vocabulary-README.md`.
+`core.md`. For an overview of the full system see `README.md`.
 
 Every entry has a concrete example from unpossible's own design. The same format
 applies as in the core file: Name, Shape, Reach for it when, Gotchas, Example.

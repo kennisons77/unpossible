@@ -16,8 +16,7 @@
     "file://specifications/practices/cost.md",
     "file://specifications/practices/changeability.md",
     "file://specifications/practices/coding.md",
-    "file://specifications/practices/structural-vocabulary.md",
-    "file://specifications/practices/structural-vocabulary-extended.md",
+    "file://specifications/practices/structural-vocabulary/core.md",
     "skill://specifications/skills/**/*.md"
   ],
   "model": null

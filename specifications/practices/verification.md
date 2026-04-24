@@ -41,6 +41,7 @@ actual progress. Every skipped test or suppressed error is a hole in that pressu
    cases. Preferred when the domain has clear invariants (parsers, serializers, state
    machines). Not required when unit + integration tests cover the behavior adequately.
    Each property test must include a comment explaining the invariant it verifies.
+   See `structural-vocabulary/verification.md` § Property-Based Testing for technique details.
 4. **Linters** — run every iteration. Enforce code style and catch static errors early.
 5. **Playwright** (optional) — enabled by declaring `UI: true` in `specifications/project-requirements.md`.
 
@@ -82,6 +83,12 @@ For criteria that can't be expressed as a traditional test (tone, visual layout,
 subjective quality), write an LLM-as-judge check: a prompt that evaluates output
 against the spec and returns pass/fail. Treat it as a first-class test — it must pass
 before committing.
+
+## Verification Techniques
+
+For deeper coverage of verification techniques — property-based testing, fault
+injection, deterministic simulation, and oracles — see
+`structural-vocabulary/verification.md`.
 
 ## Before Running Tests
 

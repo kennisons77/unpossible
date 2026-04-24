@@ -12,7 +12,7 @@ Canonical term definitions for the Unpossible project. Each entry defines a tag 
 that can be used to connect artifacts across the system — concepts, requirements, plan
 items, tests, LEDGER.jsonl entries, and commits.
 
-Lives alongside `structural-vocabulary.md`. The glossary defines **what things are
+Lives alongside `structural-vocabulary/core.md`. The glossary defines **what things are
 called** (terms). The structural vocabulary defines **how things are shaped** (patterns).
 The structural vocabulary can reference glossary terms; the glossary does not reference
 patterns.
@@ -62,7 +62,7 @@ The glossary is not just a dictionary. It is connective tissue:
 
 | Loop | Loaded |
 |---|---|
-| Plan | ✓ (same as structural-vocabulary.md) |
+| Plan | ✓ (same as structural-vocabulary/core.md) |
 | Review | ✓ |
 | Build | on demand |
 | Research | no |

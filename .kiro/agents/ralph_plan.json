@@ -27,8 +27,7 @@
     "file://specifications/practices/planning.md",
     "file://specifications/practices/verification.md",
     "file://specifications/practices/changeability.md",
-    "file://specifications/practices/structural-vocabulary.md",
-    "file://specifications/practices/structural-vocabulary-extended.md",
+    "file://specifications/practices/structural-vocabulary/core.md",
     "skill://specifications/skills/**/*.md"
   ],
   "hooks": {
