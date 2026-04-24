@@ -58,9 +58,9 @@ Quick reference for recurring patterns in this codebase.
 
 | Term | Location | Notes |
 |---|---|---|
-| Structural vocabulary | `specifications/practices/structural-vocabulary.md` | Named abstractions for plan/review shorthand |
-| Pattern lifecycle | `specifications/practices/structural-vocabulary.md` | proposed → adopted → merged/split/retired |
-| Anti-patterns | `specifications/practices/structural-vocabulary.md` | Structural smells section |
+| Structural vocabulary | `specifications/practices/structural-vocabulary/` | Named abstractions for plan/review shorthand |
+| Pattern lifecycle | `specifications/practices/structural-vocabulary/README.md` | proposed → adopted → merged/split/retired |
+| Anti-patterns | `specifications/practices/structural-vocabulary/core.md` | Structural smells section |
 | Retry strategy | `specifications/practices/retry.md` | Exponential backoff, jitter, retryable error classification |
 
 ## Decision Journal

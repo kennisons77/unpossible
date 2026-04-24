@@ -36,6 +36,25 @@ system/reference-graph/
 Apply this to any subject as it matures from a concept-only file into a fully specified
 module.
 
+## Structural Patterns Convention
+
+Requirements files may include a `## Structural Patterns` section placed after
+`## Intent` and before `## Personas`.
+
+Each entry names a pattern from `structural-vocabulary/core.md` or
+`structural-vocabulary/extended.md` and describes in one sentence how it manifests
+in this specific module:
+
+```
+- **PatternName** — one sentence describing the specific instance in this module
+```
+
+Rules:
+- Descriptive, not prescriptive — names what the design is, not what it must be
+- Pattern names must match entries in the structural vocabulary files
+- Include this section when the module's shape is clear; omit it for thin modules where no pattern is dominant
+- Agents writing new requirements files should populate this section during the planning loop
+
 ## Frontmatter
 
 Every spec file has YAML frontmatter. The schema varies by kind.

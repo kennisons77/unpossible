@@ -8,8 +8,8 @@ loaded_by: human
 
 # Structural Vocabulary — Overview
 
-Human reference. Never loaded by agents. For the vocabulary itself, see
-`structural-vocabulary.md` (core) and `structural-vocabulary-extended.md` (extended).
+Human reference. Never loaded by agents. For the vocabulary itself, see the files
+in this directory.
 
 ## What It Is
 
@@ -25,21 +25,33 @@ further description needed.
 Influences: Sandi Metz, Martin Fowler — practical pattern thinkers who prioritize
 communicability over formalism.
 
+## The Files
+
+| File | Contents | Loaded by |
+|---|---|---|
+| `core.md` | Object and function-level patterns | plan, review, build (always) |
+| `extended.md` | Coordination, data flow, lifecycle patterns | plan, review (on demand) |
+| `guarantees.md` | Consistency & coordination guarantees | plan, review (on demand) |
+| `faults.md` | Fault taxonomy | plan, review (on demand) |
+| `verification.md` | Testing and verification techniques | plan, build (on demand) |
+
 ## The Taxonomy
 
-The vocabulary is organized into four levels. Each level describes a different aspect
+The vocabulary is organized into levels. Each level describes a different aspect
 of a design.
 
 | Level | Question | File |
 |---|---|---|
-| **Object-level** | How are individual pieces shaped? | `structural-vocabulary.md` |
-| **Coordination** | How do components work together over time? | `structural-vocabulary-extended.md` |
-| **Data flow** | How does information move and transform? | `structural-vocabulary-extended.md` |
-| **Lifecycle** | How are things born, transition, and die? | `structural-vocabulary-extended.md` |
+| **Object-level** | How are individual pieces shaped? | `core.md` |
+| **Coordination** | How do components work together over time? | `extended.md` |
+| **Data flow** | How does information move and transform? | `extended.md` |
+| **Lifecycle** | How are things born, transition, and die? | `extended.md` |
+| **Guarantees** | What does the system promise about concurrent operations? | `guarantees.md` |
+| **Faults** | What can go wrong and how do we classify it? | `faults.md` |
+| **Verification** | How do we test that the system behaves correctly? | `verification.md` |
 
 Object-level patterns are the most frequently referenced — they're always loaded by
-plan and review agents. Coordination, data flow, and lifecycle patterns are loaded on
-demand.
+plan and review agents. All others are loaded on demand.
 
 ## How to Decompose a Design
 
@@ -61,18 +73,11 @@ To describe a design using the vocabulary:
 | Turn content GC (`purged_at`) | Lifecycle | Tombstone |
 | Context window trimming (pinned turns vs sliding turns) | Lifecycle | Pinned + Sliding Window |
 | `AgentRunTurn` records — appended, never modified | Data flow | Append-Only Log |
+| Postgres consistency guarantee | Guarantees | Serializability |
+| Container crash handling | Faults | Crash-Recover |
 
 The output of a decomposition is a list like this — not a diagram, not a document.
 Short enough to fit in a plan comment or a review note.
-
-## The Two Files
-
-**`structural-vocabulary.md`** — object and function-level patterns. Always loaded by
-plan and review agents. Keep this file focused; it's in every agent's context window.
-
-**`structural-vocabulary-extended.md`** — coordination, data flow, and lifecycle
-patterns. Loaded on demand. Patterns here are drawn from unpossible's own design —
-every entry has a concrete example from the codebase.
 
 ## Pattern Lifecycle
 

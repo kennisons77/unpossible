@@ -62,9 +62,12 @@ reference material — the schema drives loading and drift detection.
 | [retry.md](retry.md)                       | Retry strategy  | build                          |
 | [multi-tenancy.md](multi-tenancy.md)       | Multi-tenancy   | plan, build                    |
 | [entrypoint-dispatch.md](entrypoint-dispatch.md) | Containers | build                          |
-| [structural-vocabulary.md](structural-vocabulary.md) | Structural vocabulary | plan, review, build            |
-| [structural-vocabulary-extended.md](structural-vocabulary-extended.md) | Structural vocabulary (extended) | plan, review (on demand) |
-| [structural-vocabulary-README.md](structural-vocabulary-README.md) | Structural vocabulary overview | human |
+| [structural-vocabulary/core.md](structural-vocabulary/core.md) | Structural vocabulary (core) | plan, review, build |
+| [structural-vocabulary/extended.md](structural-vocabulary/extended.md) | Structural vocabulary (extended) | plan, review (on demand) |
+| [structural-vocabulary/guarantees.md](structural-vocabulary/guarantees.md) | Consistency & coordination guarantees | plan, review (on demand) |
+| [structural-vocabulary/faults.md](structural-vocabulary/faults.md) | Fault taxonomy | plan, review (on demand) |
+| [structural-vocabulary/verification.md](structural-vocabulary/verification.md) | Verification techniques | plan, build (on demand) |
+| [structural-vocabulary/README.md](structural-vocabulary/README.md) | Structural vocabulary overview | human |
 | [glossary.md](glossary.md)                 | Glossary        | plan, review, build            |
 | [decision-journal.md](decision-journal.md) | Decision journal | build                          |
 | [LOOKUP.md](LOOKUP.md)                     | Reference       | all                            |

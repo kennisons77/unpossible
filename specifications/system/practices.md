@@ -46,10 +46,12 @@ at this stage.
 
 **Plan loop** — `planning.md`, `verification.md`, and `changeability.md` are loaded
 to shape beat titles, ensure AC maps to tests, and evaluate structural decisions.
-`structural-vocabulary.md`, `structural-vocabulary-extended.md`, and `glossary.md`
-are loaded to provide named abstractions and canonical terms for describing planned
-work. `cost.md` is always present. Platform practices are layered on top of the base
-concept.
+`structural-vocabulary/core.md` and `glossary.md` are loaded to provide named
+abstractions and canonical terms for describing planned work. The extended vocabulary
+files (`extended.md`, `guarantees.md`, `faults.md`, `verification.md`) are retrieved
+on demand when the plan touches distributed systems, fault tolerance, or testing
+strategy. `cost.md` is always present. Platform practices are layered on top of the
+base concept.
 
 **Build loop** — `cost.md` and `version-control.md` are always present. All others
 are retrieved on demand by file path when the agent encounters an issue or
@@ -59,10 +61,10 @@ active stack.
 **Research loop** — `cost.md` only. Research is about collecting information, not
 applying coding discipline.
 
-**Review loop** — `changeability.md`, `coding.md`, `structural-vocabulary.md`, and
-`structural-vocabulary-extended.md` are loaded. `cost.md` is always present. The
-review loop evaluates accumulated changes against structural and refactoring
-principles.
+**Review loop** — `changeability.md`, `coding.md`, and `structural-vocabulary/core.md`
+are loaded. `cost.md` is always present. The extended vocabulary files are retrieved
+on demand when reviewing distributed system code or fault handling. The review loop
+evaluates accumulated changes against structural and refactoring principles.
 
 ## File Map
 
@@ -79,9 +81,12 @@ principles.
 | `automation.md`      |        |      | on demand |        |          |
 | `lookup-tables.md`   |        |      | on demand |        |          |
 | `retry.md`           |        |      | on demand |        |          |
-| `structural-vocabulary.md` |  | ✓    | on demand | ✓      |          |
-| `structural-vocabulary-extended.md` |  | on demand | on demand | on demand |  |
-| `structural-vocabulary-README.md` |  |      |           |        |          |
+| `structural-vocabulary/core.md`         |  | ✓    | on demand | ✓      |          |
+| `structural-vocabulary/extended.md`     |  | on demand | on demand | on demand |  |
+| `structural-vocabulary/guarantees.md`   |  | on demand | on demand | on demand |  |
+| `structural-vocabulary/faults.md`       |  | on demand | on demand | on demand |  |
+| `structural-vocabulary/verification.md` |  | on demand | on demand |        |  |
+| `structural-vocabulary/README.md`       |  |      |           |        |          |
 | `glossary.md`        |        | ✓    | on demand | ✓      |          |
 | `zed.md`             |        |      |           |        |          |
 

@@ -15,6 +15,15 @@ prompts, manages multi-turn conversations including human input pauses, records 
 and deduplicates repeated calls. There is no sidecar — provider calls are made directly
 from Rails via HTTP.
 
+## Structural Patterns
+
+- **Pipeline** — skill body → context chunks → principles → prompt assembly; each step independently testable and replaceable
+- **Interchangeable Implementation** — provider adapters share a contract (`build_prompt`, `parse_response`, `max_context_tokens`); callers never reference a concrete adapter
+- **Idempotent Receiver** — prompt dedup via `prompt_sha256`; same input + mode within 24h returns cached run without a provider call
+- **State Machine** — run lifecycle: `pending → running → waiting_for_input → completed | failed`; invalid transitions rejected
+- **Tombstone** — turn content GC sets `purged_at` and clears content; turn skeleton retained permanently for audit
+- **Pinned + Sliding Window** — context window trimming: `agent_question` and `human_input` turns pinned; `llm_response` and `tool_result` trimmed oldest-first
+
 ## Personas
 
 - **Loop:** needs to execute a beat and get a result back without managing provider

@@ -15,6 +15,12 @@ isolated execution environment — separate from the application stack — with 
 tools the agent needs. The threat model is preventing a malicious agent from escaping
 the container.
 
+## Structural Patterns
+
+- **Ephemeral Worker** — `docker run --rm`; each dispatch creates a fresh container destroyed on completion; no state persists between runs
+- **Gateway** — `DockerDispatcher` isolates the rest of the system from Docker's CLI interface; callers never shell out directly
+- **Boundary Guard** — env vars containing secrets are filtered before logging; commands passed as argument lists, never shell-interpolated
+
 ## Personas
 
 - **Agent runner:** needs to dispatch a container, get a result back (exit code, output),

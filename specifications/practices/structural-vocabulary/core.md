@@ -1,16 +1,16 @@
 ---
-name: structural-vocabulary
+name: structural-vocabulary-core
 kind: practice
 domain: Structural vocabulary
 description: Named abstractions for describing code shape — patterns, not prescriptions
 loaded_by: [plan, review, build]
 ---
 
-# Structural Vocabulary
+# Structural Vocabulary — Core
 
 Object and function-level patterns. For coordination, data flow, and lifecycle
-patterns see `structural-vocabulary-extended.md`. For an overview of the full system
-see `structural-vocabulary-README.md`.
+patterns see `extended.md`. For guarantees, faults, and verification see the other
+files in this directory. For an overview see `README.md`.
 
 A shared index of named abstractions for describing the shape of code above the
 implementation level. These are shortcuts — not gospel. They exist to accelerate
@@ -218,8 +218,8 @@ and usually signal that the module boundaries are wrong. In planning, a cycle
 means two tasks each depend on the other, which is a spec problem, not an
 implementation problem.
 
-Example: Module dependency graph — analytics depends
-on agents, but no module depends on itself through any chain.
+Example: Module dependency graph — analytics depends on agents, but no module
+depends on itself through any chain.
 
 #### Workflow
 
@@ -253,11 +253,6 @@ duplicate tasks. Due date calculation relative to events (start date, publicatio
 date) requires the target entity to exist and have the relevant date populated.
 Closing a workflow must close all open tasks — orphaned open tasks are a data
 integrity bug.
-
-Relevance to the reference graph: a collection of planning and implementation specs forms a
-dependency graph. A bug can be traced back through the graph to the planning or
-implementation decision that caused it — `depends_on` refs in `IMPLEMENTATION_PLAN.md`
-are the same structural concept as task dependencies in a workflow.
 
 #### Graph (with cycles)
 
@@ -455,7 +450,7 @@ speculative.
 
 ## Pattern Lifecycle and Process for Changes
 
-See `structural-vocabulary-README.md` for the pattern lifecycle table and process for changes.
+See `README.md` for the pattern lifecycle table and process for changes.
 
 ### Registry (dispatch) — `status: merged` → Interchangeable Implementation
 Registry-as-dispatch is a wiring mechanism for the interchangeable implementation

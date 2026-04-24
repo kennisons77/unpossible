@@ -17,6 +17,14 @@ is doing and why it costs what it costs, so experiments can be measured against
 hypotheses, and so future agents can diagnose failures by joining analytics events to
 reference graph state.
 
+## Structural Patterns
+
+- **Fire-and-Forget** — `POST /capture` returns 202 immediately; caller has no visibility into flush outcome
+- **Buffered Queue** — in-memory event queue, flushed every 5s or 100 events; decouples ingest rate from Postgres write rate
+- **Append-Only Log** — `analytics_events` rows are never modified or deleted; raw events are the source of truth; projections are derived on read
+- **Projection** — query endpoints (`/api/analytics/llm`, `/api/analytics/loops`, etc.) reshape raw events for specific consumers without altering the store
+- **Gateway** — ingest sidecar (Go) isolates Rails from the Postgres write path; Rails never writes analytics events directly
+
 ## Personas
 
 - **Developer (primary):** running loops manually, watching costs, debugging failures.
