@@ -31,6 +31,35 @@ curl -sf -o web/vendor/cache/<name>-<version>.gem \
 
 Then update `web/Gemfile` and `web/Gemfile.lock`, and rebuild the image.
 
+## Adding / Updating Agent CLIs
+
+The agent container has no outbound internet. Both `claude` and `kiro-cli` are pre-downloaded and baked into the image at build time.
+
+**Claude CLI** — download the npm tarball:
+
+```bash
+npm pack @anthropic-ai/claude-code --pack-destination infra/npm-cache/
+```
+
+**Kiro CLI** — create a tarball from your local install (`~/.local/bin/kiro-cli*` + `~/.local/share/kiro-cli/`):
+
+```bash
+mkdir -p /tmp/kiro-pkg/bin /tmp/kiro-pkg/share/kiro-cli
+cp ~/.local/bin/kiro-cli ~/.local/bin/kiro-cli-chat ~/.local/bin/kiro-cli-term /tmp/kiro-pkg/bin/
+cp -r ~/.local/share/kiro-cli/shell /tmp/kiro-pkg/share/kiro-cli/
+cp ~/.local/share/kiro-cli/bun ~/.local/share/kiro-cli/tui.js /tmp/kiro-pkg/share/kiro-cli/
+cp ~/.local/share/kiro-cli/bun.sha256 ~/.local/share/kiro-cli/tui.js.sha256 /tmp/kiro-pkg/share/kiro-cli/
+(cd /tmp/kiro-pkg && tar czf kiro-cli.tar.gz bin/ share/)
+mv /tmp/kiro-pkg/kiro-cli.tar.gz infra/kiro-cli.tar.gz
+rm -rf /tmp/kiro-pkg
+```
+
+After updating either CLI, rebuild the agent image:
+
+```bash
+docker compose -f infra/docker-compose.yml build agent
+```
+
 ## Codebase Patterns
 
 | Concept | Location | Notes |

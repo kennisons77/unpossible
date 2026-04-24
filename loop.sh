@@ -19,7 +19,7 @@
 TEMP_PROMPT=""
 AGENT_OUTPUT_FILE=""
 cleanup() {
-    rm -f "$TEMP_PROMPT" "$AGENT_OUTPUT_FILE" "$RESOLVED_PROMPT"
+    rm -f "$TEMP_PROMPT" "$AGENT_OUTPUT_FILE" "$RESOLVED_PROMPT" "$PRESTEP_PROMPT" "/tmp/prompt_iteration_$$.md"
 }
 trap cleanup EXIT
 
@@ -139,6 +139,24 @@ sed -e "s|projects/<name>/|${PROJECT_DIR}/|g" \
     "$PROMPT_FILE" > "$RESOLVED_PROMPT"
 PROMPT_FILE="$RESOLVED_PROMPT"
 
+# --- Haiku pre-step prompt (build mode, claude agent only) ---
+PRESTEP_PROMPT=""
+if [ "$MODE" = "build" ] && [ "$AGENT" = "claude" ]; then
+    PRESTEP_BASENAME="PROMPT_build_prestep.md"
+    if [ -f "$PROJECT_DIR/$PRESTEP_BASENAME" ]; then
+        PRESTEP_SRC="$PROJECT_DIR/$PRESTEP_BASENAME"
+    elif [ -f "$PRESTEP_BASENAME" ]; then
+        PRESTEP_SRC="$PRESTEP_BASENAME"
+    fi
+    if [ -n "$PRESTEP_SRC" ]; then
+        PRESTEP_PROMPT="/tmp/prompt_prestep_$$.md"
+        sed -e "s|projects/<name>/|${PROJECT_DIR}/|g" \
+            -e "s|projects/<name>|${PROJECT_DIR}|g" \
+            -e "s|<name>|${PROJECT_NAME}|g" \
+            "$PRESTEP_SRC" > "$PRESTEP_PROMPT"
+    fi
+fi
+
 # --- Research mode: inject beat content into prompt ---
 if [ "$MODE" = "research" ]; then
     PLAN_FILE="$PROJECT_DIR/IMPLEMENTATION_PLAN.md"
@@ -195,12 +213,24 @@ while true; do
         exit 2
     fi
 
+    # Run Haiku pre-step for cheap reading/planning (build mode, claude only)
+    ITERATION_PROMPT="$PROMPT_FILE"
+    if [ -n "$PRESTEP_PROMPT" ]; then
+        echo "── Haiku pre-step: reading and planning ──"
+        PRESTEP_OUTPUT=$( cat "$PRESTEP_PROMPT" | claude -p --dangerously-skip-permissions --output-format=text --model haiku 2>/dev/null ) || true
+        if [ -n "$PRESTEP_OUTPUT" ]; then
+            ITERATION_PROMPT="/tmp/prompt_iteration_$$.md"
+            { cat "$PROMPT_FILE"; echo ""; echo "## Pre-step context (from planning read)"; echo "$PRESTEP_OUTPUT"; } > "$ITERATION_PROMPT"
+        fi
+        echo "── Haiku pre-step complete ──"
+    fi
+
     # Run agent — stream live, capture for RALPH_ signal checks
     AGENT_OUTPUT_FILE="/tmp/ralph_output_$$.txt"
     if [ "$AGENT" = "kiro" ]; then
-        $AGENT_CMD "$(cat "$PROMPT_FILE")" 2>&1 | tee "$AGENT_OUTPUT_FILE"
+        $AGENT_CMD "$(cat "$ITERATION_PROMPT")" 2>&1 | tee "$AGENT_OUTPUT_FILE"
     else
-        cat "$PROMPT_FILE" | $AGENT_CMD 2>&1 | tee "$AGENT_OUTPUT_FILE"
+        cat "$ITERATION_PROMPT" | $AGENT_CMD 2>&1 | tee "$AGENT_OUTPUT_FILE"
     fi
     AGENT_OUTPUT=$(cat "$AGENT_OUTPUT_FILE")
     rm -f "$AGENT_OUTPUT_FILE"

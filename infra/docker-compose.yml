@@ -44,16 +44,57 @@ services:
   #   networks:
   #     - unpossible
 
-  # analytics:
-  #   build:
-  #     context: ..
-  #     dockerfile: infra/Dockerfile.go
-  #     target: analytics
-  #   image: unpossible-analytics:${GIT_SHA:-dev}
-  #   ports:
-  #     - "9100:9100"
-  #   networks:
-  #     - unpossible
+  go_runner:
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile.go
+      target: runner
+    image: unpossible-runner:${GIT_SHA:-dev}
+    env_file:
+      - ../.env
+    environment:
+      RAILS_URL: http://rails:3000
+      ANALYTICS_URL: http://analytics:9100
+      RUNNER_USERNAME: ${RUNNER_USERNAME:-runner}
+      RUNNER_PASSWORD: ${RUNNER_PASSWORD:-}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ..:/workspace
+    working_dir: /workspace
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - unpossible
+
+  agent:
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile.agent
+    image: unpossible-agent:${GIT_SHA:-dev}
+    env_file:
+      - ../.env
+    environment:
+      AGENT: ${AGENT:-claude}
+      MODEL: ${MODEL:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      GH_TOKEN: ${GH_TOKEN:-}
+      RUNNER_URL: http://go_runner:8080
+      RUNNER_USERNAME: ${RUNNER_USERNAME:-runner}
+      RUNNER_PASSWORD: ${RUNNER_PASSWORD:-}
+    volumes:
+      - ..:/workspace
+      - ${HOME}/.local/bin/kiro-cli:/usr/local/bin/kiro-cli
+      - ${HOME}/.local/bin/kiro-cli-chat:/usr/local/bin/kiro-cli-chat
+      - ${HOME}/.local/bin/kiro-cli-term:/usr/local/bin/kiro-cli-term
+      - ${HOME}/.local/share/kiro-cli:/home/agent/.local/share/kiro-cli
+    working_dir: /workspace
+    depends_on:
+      - go_runner
+    networks:
+      - unpossible
 
   postgres:
     container_name: postgres
@@ -69,16 +110,6 @@ services:
       retries: 5
     networks:
       - unpossible
-
-  # redis:
-  #   image: redis:7-alpine
-  #   healthcheck:
-  #     test: ["CMD", "redis-cli", "ping"]
-  #     interval: 5s
-  #     timeout: 5s
-  #     retries: 5
-  #   networks:
-  #     - unpossible
 
 networks:
   unpossible:

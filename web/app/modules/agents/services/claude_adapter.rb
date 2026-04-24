@@ -5,19 +5,19 @@ require "json"
 
 module Agents
   class ClaudeAdapter < ProviderAdapter
-    MAX_CONTEXT_TOKENS = 200_000
+    MAX_CONTEXT_TOKENS = 150_000
     API_URL = URI("https://api.anthropic.com/v1/messages").freeze
     API_VERSION = "2023-06-01"
 
     def build_prompt(node:, context_chunks:, principles:, turns:, token_budget:)
-      system_content = assemble_system(node, context_chunks, principles)
-      system_cost = estimate_tokens(system_content)
+      system_blocks = assemble_system_blocks(node, context_chunks, principles)
+      system_cost = estimate_tokens(system_blocks.sum { |b| b[:text].to_s.length })
       remaining = token_budget - system_cost
 
       trimmed_turns = apply_turn_budget(turns, remaining)
       messages = trimmed_turns.map { |t| { role: turn_role(t[:kind]), content: t[:content] } }
 
-      { model: "claude-sonnet-4-20250514", system: system_content, messages: messages }
+      { model: "claude-sonnet-4-20250514", system: system_blocks, messages: messages }
     end
 
     def call_provider(prompt)
@@ -54,12 +54,16 @@ module Agents
 
     private
 
-    def assemble_system(node, context_chunks, principles)
-      parts = []
-      parts << node.to_s if node.present?
-      parts.concat(Array(principles))
-      parts.concat(Array(context_chunks))
-      parts.join("\n\n")
+    CACHE_CONTROL = { type: "ephemeral" }.freeze
+
+    def assemble_system_blocks(node, context_chunks, principles)
+      blocks = []
+      # Volatile — node/task description changes per iteration, no caching
+      blocks << { type: "text", text: node.to_s } if node.present?
+      # Stable — principles and context are the same across iterations, cache them
+      Array(principles).each { |p| blocks << { type: "text", text: p, cache_control: CACHE_CONTROL } }
+      Array(context_chunks).each { |c| blocks << { type: "text", text: c, cache_control: CACHE_CONTROL } }
+      blocks
     end
 
     def turn_role(kind)
