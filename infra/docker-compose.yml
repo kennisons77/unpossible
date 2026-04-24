@@ -33,7 +33,7 @@ services:
 
   # Phase 0: Go sidecars not yet built — go/ directory does not exist.
   # Uncomment when go/cmd/runner and go/cmd/analytics are implemented (tasks 8.2, 8.6).
-  # go_runner:
+  # go_runner:f
   #   build:
   #     context: ..
   #     dockerfile: infra/Dockerfile.go

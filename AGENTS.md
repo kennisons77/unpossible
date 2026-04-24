@@ -82,11 +82,11 @@ in the same commit.
 | Agent            | Config                              | Resources                                                          | Model          |
 |------------------|-------------------------------------|--------------------------------------------------------------------|----------------|
 | `ralph_build`    | `.kiro/agents/ralph_build.json`     | AGENTS.md, cost.md, version-control.md, skills/**/*.md             | sonnet-4.6     |
-| `ralph_plan`     | `.kiro/agents/ralph_plan.json`      | AGENTS.md, cost.md, planning.md, verification.md, changeability.md, structural-vocabulary.md, skills/**/*.md | auto           |
+| `ralph_plan`     | `.kiro/agents/ralph_plan.json`      | AGENTS.md, cost.md, planning.md, verification.md, changeability.md, structural-vocabulary.md, structural-vocabulary-extended.md, skills/**/*.md | auto           |
 | `ralph_research` | `.kiro/agents/ralph_research.json`  | AGENTS.md, cost.md, skills/**/*.md                                 | auto           |
-| `ralph_review`   | `.kiro/agents/ralph_review.json`    | AGENTS.md, cost.md, changeability.md, coding.md, structural-vocabulary.md, skills/**/*.md | auto           |
+| `ralph_review`   | `.kiro/agents/ralph_review.json`    | AGENTS.md, cost.md, changeability.md, coding.md, structural-vocabulary.md, structural-vocabulary-extended.md, skills/**/*.md | auto           |
 | `interview`      | `.kiro/agents/interview.json`       | specifications/README.md, AGENTS.md, cost.md, skills/**/*.md                | auto           |
-| `review`         | `.kiro/agents/review.json`          | specifications/README.md, AGENTS.md, cost.md, changeability.md, coding.md, structural-vocabulary.md, skills/**/*.md | auto |
+| `review`         | `.kiro/agents/review.json`          | specifications/README.md, AGENTS.md, cost.md, changeability.md, coding.md, structural-vocabulary.md, structural-vocabulary-extended.md, skills/**/*.md | auto |
 
 ## Server Operations
 
