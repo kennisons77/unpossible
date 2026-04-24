@@ -38,7 +38,7 @@ Go sidecars (runner, analytics) are correctly commented out with a note: "Phase 
 
 ### Section 1 — Infra & Schema Gaps
 
-- [x] 1.1 Commit db/schema.rb — canonical schema reference *(done — tag 0.0.72)*
+- [ ] 1.1 Commit db/schema.rb — canonical schema reference *(done — tag 0.0.72)*
 
 ### Section 2 — Feature Flag `metadata.hypothesis` Validation
 
