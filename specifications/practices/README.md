@@ -63,6 +63,8 @@ reference material — the schema drives loading and drift detection.
 | [multi-tenancy.md](multi-tenancy.md)       | Multi-tenancy   | plan, build                    |
 | [entrypoint-dispatch.md](entrypoint-dispatch.md) | Containers | build                          |
 | [structural-vocabulary.md](structural-vocabulary.md) | Structural vocabulary | plan, review, build            |
+| [structural-vocabulary-extended.md](structural-vocabulary-extended.md) | Structural vocabulary (extended) | plan, review (on demand) |
+| [structural-vocabulary-README.md](structural-vocabulary-README.md) | Structural vocabulary overview | human |
 | [glossary.md](glossary.md)                 | Glossary        | plan, review, build            |
 | [decision-journal.md](decision-journal.md) | Decision journal | build                          |
 | [LOOKUP.md](LOOKUP.md)                     | Reference       | all                            |

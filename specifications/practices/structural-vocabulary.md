@@ -8,16 +8,13 @@ loaded_by: [plan, review, build]
 
 # Structural Vocabulary
 
+Object and function-level patterns. For coordination, data flow, and lifecycle
+patterns see `structural-vocabulary-extended.md`. For an overview of the full system
+see `structural-vocabulary-README.md`.
+
 A shared index of named abstractions for describing the shape of code above the
 implementation level. These are shortcuts — not gospel. They exist to accelerate
 communication between human and agent during planning, review, and build.
-
-Origin: the idea that proficient musicians talk about chord progressions, not
-individual notes. A shared structural vocabulary lets us describe what code *does*
-at a level that's portable across paradigms and languages.
-
-Influences: Sandi Metz, Martin Fowler — practical pattern thinkers who prioritize
-communicability over formalism.
 
 ## Goals
 
@@ -456,19 +453,9 @@ arrives next week and the abstraction pays off. The test: can you name the concr
 future scenario, or are you abstracting "just in case"? If you can't name it, it's
 speculative.
 
-## Pattern Lifecycle
+## Pattern Lifecycle and Process for Changes
 
-Each entry has a status. The status tracks how battle-tested the pattern is.
-
-| Status | Meaning |
-|---|---|
-| `proposed` | Noticed during work, named and defined, not yet used in a real cycle |
-| `adopted` | Used in at least one plan or review cycle and held up |
-| `merged` | Absorbed into another pattern — entry kept with a pointer to the new home |
-| `split` | Broken into more specific patterns — entry kept with pointers to the children |
-| `retired` | Removed from active use — entry kept with a note on why |
-
-All current entries above are `adopted` unless marked otherwise.
+See `structural-vocabulary-README.md` for the pattern lifecycle table and process for changes.
 
 ### Registry (dispatch) — `status: merged` → Interchangeable Implementation
 Registry-as-dispatch is a wiring mechanism for the interchangeable implementation
@@ -505,46 +492,6 @@ registry; they never know registration was automatic.
 Retired, merged, and split entries stay in the file with their status and a note.
 This prevents re-proposing something we already tried, and gives agents context when
 they encounter references to old pattern names in committed code.
-
-## Process for Changes
-
-### Proposing a New Pattern
-
-Either human or agent can propose. During planning or review, if a recurring
-structural concept doesn't have a name in this vocabulary:
-
-1. Name it
-2. Write the shape, reach-for-it-when, and a terse example
-3. Add it with `status: proposed`
-4. Use it in the current cycle
-
-### Adopting
-
-After a proposed pattern has been used in at least one real plan or review cycle
-and both human and agent found it useful, change status to `adopted`.
-
-### Altering
-
-If a pattern's definition needs refinement based on use, update it in place. The
-commit message should note what changed and why.
-
-### Merging / Splitting
-
-If two patterns turn out to describe the same thing, merge them: keep both entries,
-mark one `merged`, and point it at the survivor. If a pattern is too broad, split it:
-mark the original `split` and point it at the children.
-
-### Retiring
-
-If a pattern isn't pulling its weight — confusing, redundant, or never referenced —
-mark it `retired` with a one-line reason. Don't delete it.
-
-### Agent Responsibility
-
-When an agent encounters a pattern reference in code or a plan that points to a
-`merged`, `split`, or `retired` entry, it should update the reference to the current
-pattern name as part of the work it's already doing. This is housekeeping, not a
-separate task.
 
 ## Code References
 

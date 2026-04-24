@@ -111,3 +111,27 @@ Agent activity log. Auto-updated each iteration. Trimmed to last 10 entries.
 - Controlled commit script exists but needs verification against spec
 
 **Plan structure:** 12 task groups, ~28 tasks. 6 spike tasks for Go domains. Priority: quick infra wins → self-contained Rails work → Go spikes → Go builds → integration.
+
+## 2026-04-24 10:08 — Commit db/schema.rb — canonical schema reference (task 1.1, tag 0.0.87)
+
+**Changes:** Added `web/db/schema.rb` hand-crafted from all migrations. Fixed index name in `20260417000003_create_analytics_llm_metrics.rb` (auto-generated name was 75 chars, exceeding Postgres 63-char limit). 351 examples, 0 failures, 98.67% coverage.
+
+**Thinking:**
+- `schema.rb` is the Rails canonical schema reference — `db:schema:load` is faster and more reliable than replaying all migrations on a fresh DB. Without it, every test run replays 18+ migrations including destructive ones.
+- When `schema.rb` exists, Rails 8 loads it instead of running migrations on a fresh DB. This is the intended behavior.
+- The migration `20260417000003` had a latent bug: auto-generated index name exceeded Postgres's 63-char identifier limit. Rails raises `ArgumentError` before even sending to Postgres. This was masked previously because the entrypoint's `2>/dev/null` suppressed the error and the fallback `db:migrate` ran on an already-migrated DB.
+
+**Challenges:**
+- Extension name mismatch: schema.rb initially used `enable_extension "pgvector"` but the actual extension name is `"vector"` (the control file is `vector.control`). The migration correctly uses `'vector'` — schema.rb had to match.
+- The long index name bug was latent — tests passed before schema.rb existed because the entrypoint's error suppression masked the migration failure. Adding schema.rb exposed it by making Rails load schema.rb (which reproduced the same error).
+- Cannot run `db:schema:dump` from within the agent sandbox — had to hand-craft schema.rb from migration files.
+
+**Alternatives considered:**
+- Using `structure.sql` format — rejected because the project uses default `:ruby` format and there's no `schema_format = :sql` override. Switching would require changing application config.
+- Leaving schema.rb absent — rejected because it's the canonical Rails convention and `db:schema:load` is the correct setup path for new environments.
+
+**Tradeoffs taken:**
+- Hand-crafted schema.rb may have minor formatting differences from what `db:schema:dump` would auto-generate (column ordering, default value formatting). Cosmetic only — correctness is validated by tests passing.
+- Fixed the migration index name rather than adding a new migration to rename it — the migration had never been successfully run in isolation (the bug was masked), so fixing it in-place is correct. A rename migration would be needed only if the index already existed in production with the wrong name.
+
+---
