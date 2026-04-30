@@ -2,7 +2,7 @@
 
 Raw ideas. Promote to a spec with `make promote <id>` when ready.
 
-## [1] Custom code index tool
+## [1] Custom code index service
 
 - **Status:** parked
 - **Created:** 2026-04-13
@@ -21,3 +21,11 @@ Could also index LOOKUP.md files and spec cross-references, making the validate-
 check available as a live query rather than a batch script.
 
 Defer until ruby-lsp proves insufficient for agent navigation needs.
+
+## [2] Mac/unix Native voice recognition and recital 
+
+- **Status:** parked
+- **Created:** 2026-04-29
+- **Promoted:**
+
+A mac or linux naitvie app that provides a variable resolution voice capture and text recital.
