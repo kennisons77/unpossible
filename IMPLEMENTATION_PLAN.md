@@ -88,7 +88,7 @@
   - `docker compose -f infra/docker-compose.yml build go_runner` exits 0
   - `docker compose -f infra/docker-compose.yml build analytics` exits 0 (after analytics service added)
 
-- [ ] 3.2 — Fix `docker-compose.yml`: remove commented-out stub (`go_runner:f` typo), add `analytics` service (port 9100), set `RUNNER_PASSWORD` env var, wire `analytics` service to postgres (`infra/docker-compose.yml`) [blocked by 3.1, 2.2]
+- [x] 3.2 — Fix `docker-compose.yml`: remove commented-out stub (`go_runner:f` typo), add `analytics` service (port 9100), set `RUNNER_PASSWORD` env var, wire `analytics` service to postgres (`infra/docker-compose.yml`) [blocked by 3.1, 2.2]
   Required tests:
   - `docker compose -f infra/docker-compose.yml config` exits 0 (no YAML errors)
   - `docker compose -f infra/docker-compose.yml up` starts all services; rails responds on port 3000
