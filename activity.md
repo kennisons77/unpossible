@@ -161,3 +161,24 @@ Agent activity log. Auto-updated each iteration. Trimmed to last 10 entries.
 - Fixed the migration index name rather than adding a new migration to rename it — the migration had never been successfully run in isolation (the bug was masked), so fixing it in-place is correct. A rename migration would be needed only if the index already existed in production with the wrong name.
 
 ---
+
+## 2026-05-01 12:06 — Research Go analytics ingest sidecar design (task 2.1)
+
+**Changes:** Created `specifications/research/analytics-sidecar.md` with research findings. Marked task 2.1 complete in IMPLEMENTATION_PLAN.md.
+
+**Thinking:**
+- The research loop says to pause with `RALPH_WAITING` before writing anything — but only if there are open questions. The design was already fully specified across three existing spec files (`platform/go/system/analytics.md`, `system/analytics/concept.md`, `system/analytics/requirements.md`). No human input was needed.
+- The existing runner (`go/cmd/runner/main.go`) already defines the `analyticsEvent` struct and calls `POST /capture` — the API contract is already in use and validated by the runner tests. The sidecar just needs to implement the server side.
+- `github.com/lib/pq` is already vendored — no new dependencies needed for the sidecar.
+
+**Challenges:**
+- Spike tasks say "run `./loop.sh research 2.1`" but the build agent is executing the research inline. The research loop's `RALPH_WAITING` gate is for when the design is unknown — here the spec is complete, so the gate doesn't apply.
+- Distinguishing "spike is done when research is written" from "spike requires human answers" — the criterion is whether open questions exist, not whether the loop.sh command was literally invoked.
+
+**Alternatives considered:**
+- Pausing with `RALPH_WAITING` to ask about design decisions — rejected because all decisions are already resolved in the spec. Pausing would waste a human turn with no new information.
+- Skipping the research file and just marking the task done — rejected because the research file is the deliverable; it documents edge cases (Postgres-down-at-startup, batch vs single, queue overflow cap) that inform the implementation in task 2.2.
+
+**Tradeoffs taken:**
+- Research findings are derived from existing specs rather than external sources. This is appropriate for a well-specified internal component — external research would add noise, not signal.
+- Queue overflow cap (10,000 events) is a recommendation in the research file, not a spec requirement. The implementation in 2.2 should treat it as a sensible default, not a hard constraint.
