@@ -2,7 +2,31 @@
 
 Agent activity log. Auto-updated each iteration. Trimmed to last 10 entries.
 
-[Prior entries summarised: 91 iterations — initial planning through 0.0.63, then tasks 1.1–2.6, analytics dashboard UI (0.0.86). Key milestones: Rails skeleton + test infra, security (Secret, LogRedactor, PromptSanitizer, rack-attack), JWT auth, Agents module (AgentRun, AgentRunTurn, ProviderAdapter, PromptDeduplicator, AgentRunsController, AgentRunJob, TurnContentGcJob), Sandbox module (ContainerRun, DockerDispatcher), Analytics module (FeatureFlag, AnalyticsEvent, AuditEvent, LlmMetric, AuditLogger, AuditLogJob, MetricsController, FeatureFlag auto-fire, DashboardController), HealthCheckMiddleware, Ledger+Knowledge removal, org_id migrations, provider adapter build_prompt with pinned+sliding trimming, LedgerAppender, controlled-commit.sh, parse_response normalised to hash, LlmMetric on completion, rswag install, FeatureFlagsController org_id fix, all rswag spec conversions (auth, agent_runs, metrics, feature_flags, health).]
+[Prior entries summarised: 92 iterations — initial planning through 0.0.63, then tasks 1.1–2.6, analytics dashboard UI (0.0.86), db/schema.rb (0.0.87). Key milestones: Rails skeleton + test infra, security (Secret, LogRedactor, PromptSanitizer, rack-attack), JWT auth, Agents module (AgentRun, AgentRunTurn, ProviderAdapter, PromptDeduplicator, AgentRunsController, AgentRunJob, TurnContentGcJob), Sandbox module (ContainerRun, DockerDispatcher), Analytics module (FeatureFlag, AnalyticsEvent, AuditEvent, LlmMetric, AuditLogger, AuditLogJob, MetricsController, FeatureFlag auto-fire, DashboardController), HealthCheckMiddleware, Ledger+Knowledge removal, org_id migrations, provider adapter build_prompt with pinned+sliding trimming, LedgerAppender, controlled-commit.sh, parse_response normalised to hash, LlmMetric on completion, rswag install, FeatureFlagsController org_id fix, all rswag spec conversions (auth, agent_runs, metrics, feature_flags, health), db/schema.rb hand-crafted from migrations.]
+
+---
+
+## 2026-05-01 12:33 — Add infra/Dockerfile.go multi-stage build (task 3.1, tag 0.0.90)
+
+**Changes:** Created `infra/Dockerfile.go` with three stages: `builder` (golang:1.23-bookworm, compiles both binaries from vendored deps), `runner` (debian:bookworm-slim, port 8080), `analytics` (debian:bookworm-slim, port 9100). `docker compose build go_runner` exits 0; analytics target builds exits 0. 352 Rails specs, 0 failures, 98.67% coverage.
+
+**Thinking:**
+- The Go vendor directory, go.mod, and go.sum were already in place from task 1.1. The Dockerfile is a straightforward multi-stage build: one builder stage compiles both binaries, two final stages copy one binary each.
+- `CGO_ENABLED=0` produces static binaries that run on `debian:bookworm-slim` without needing libc or other shared libraries. This is the standard Go container pattern.
+- `GOFLAGS=-mod=vendor` ensures the build uses the vendored dependencies and fails fast if the vendor directory is inconsistent — no network access needed.
+- Separate final stages for runner and analytics allow `docker compose` to build only the needed target without pulling the other binary into the image.
+
+**Challenges:**
+- None. The vendor directory was already consistent (validated in task 1.1), so the build succeeded on the first attempt.
+
+**Alternatives considered:**
+- Single final stage with both binaries — rejected because it couples the runner and analytics images, making them larger than necessary and preventing independent deployment.
+- `golang:1.23-alpine` as builder — rejected in favour of `bookworm` to match the Debian-based final stages and avoid musl/glibc compatibility issues with CGO (even though CGO is disabled, consistency reduces surprises).
+- `scratch` as final stage — rejected because `debian:bookworm-slim` provides a shell for debugging and is the project's established base for slim images.
+
+**Tradeoffs taken:**
+- Builder stage uses `golang:1.23-bookworm` (full Debian) — larger builder image but cached after first pull. Final images are slim.
+- Non-root user (`runner`/`analytics`, uid 1001) created in each final stage — matches the Rails image pattern (uid 1001 for `rails` user).
 
 ---
 
@@ -72,28 +96,6 @@ Agent activity log. Auto-updated each iteration. Trimmed to last 10 entries.
 **Tradeoffs taken:**
 - TOOLS registry is a constant — adding a new tool requires a code change, not configuration. This is intentional for Phase 0: tools are trusted, not user-defined. If tools become user-configurable later, the registry pattern extends naturally to a DB-backed lookup.
 - Shell backtick for `git_diff` is simple but not sandboxed. If the Rails process runs in a restricted environment without git, it returns an error string rather than raising — acceptable given fail-open semantics.
-
----
-
-## 2026-04-22 11:42 — Commit db/schema.rb (tag 0.0.71)
-
-**Changes:** Generated and committed `web/db/schema.rb` from all 20 migrations. Verified `rails db:schema:load` exits 0 in test container. 297 examples, 0 failures.
-
-**Thinking:**
-- Schema.rb is the canonical schema reference for `db:schema:load` in fresh environments — without it, a new dev environment must replay all migrations, which is slower and fragile if old migrations reference dropped tables or application code that no longer exists.
-- Hand-constructed from migrations rather than running `db:schema:dump` because Docker can't be invoked from within the agent. Traced all 20 migrations in chronological order to derive the final table state.
-
-**Challenges:**
-- Several migrations are destructive (drop ledger tables, remove FK columns) — had to carefully track which tables survive vs get dropped. The ledger_* and knowledge_library_items tables are all dropped by 20260416000002.
-- The `content` column on `agents_agent_run_turns` starts `null: false` then becomes nullable in 20260417000004 — easy to miss.
-- `cost_estimate_usd` default on `analytics_llm_metrics` renders as `"0"` (string) in schema.rb because Rails serializes decimal defaults as strings.
-
-**Alternatives considered:**
-- Running `db:schema:dump` via a one-off container command — not possible from within the agent sandbox.
-- Using `structure.sql` instead of `schema.rb` — rejected because the project uses the default `:ruby` format and there's no `config.active_record.schema_format = :sql` override.
-
-**Tradeoffs taken:**
-- Hand-crafted schema.rb may have minor formatting differences from what Rails would auto-generate (e.g. column ordering within a table). This is cosmetic — `db:schema:load` validates correctness. If the format diverges visibly, running `db:schema:dump` on the host after migrations will normalize it.
 
 ---
 
