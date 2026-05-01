@@ -72,7 +72,7 @@
 - [x] 2.1 — [SPIKE] Research Go analytics ingest sidecar design — run `./loop.sh research 2.1` (see specifications/skills/tools/research.md)
   Covers: `go/cmd/analytics/main.go` design, in-memory queue, batch flush, PII filtering, UUID validation, Postgres write path. Blocks 2.2.
 
-- [ ] 2.2 — Implement `go/cmd/analytics/main.go` — analytics ingest sidecar (`go/cmd/analytics/main.go`) [blocked by 2.1]
+- [x] 2.2 — Implement `go/cmd/analytics/main.go` — analytics ingest sidecar (`go/cmd/analytics/main.go`) [blocked by 2.1]
   Required tests (from `specifications/platform/go/system/analytics.md`):
   - `go test ./...` exits 0
   - `POST /capture` returns 202 immediately
