@@ -83,7 +83,7 @@
 
 ### Section 3 — Go Dockerfile and Compose Wiring (blocks full stack)
 
-- [ ] 3.1 — Create `infra/Dockerfile.go` multi-stage build for runner and analytics binaries (`infra/Dockerfile.go`) [blocked by 1.1]
+- [x] 3.1 — Create `infra/Dockerfile.go` multi-stage build for runner and analytics binaries (`infra/Dockerfile.go`) [blocked by 1.1]
   Required tests:
   - `docker compose -f infra/docker-compose.yml build go_runner` exits 0
   - `docker compose -f infra/docker-compose.yml build analytics` exits 0 (after analytics service added)
