@@ -6,6 +6,29 @@ Agent activity log. Auto-updated each iteration. Trimmed to last 10 entries.
 
 ---
 
+## 2026-05-01 12:40 — Fix docker-compose.yml: analytics service, clean stub, RUNNER_PASSWORD (task 3.2, tag 0.0.91)
+
+**Changes:** Removed commented-out `go_runner:f` stub (typo artifact). Added `analytics` service on port 9100 with postgres health dependency and correct env vars (`DB_HOST`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`). Set `RUNNER_PASSWORD` default (`dev-runner-password`) in both `go_runner` and `agent` services. `docker compose config` exits 0. 352 Rails specs, 0 failures, 98.67% coverage.
+
+**Thinking:**
+- The analytics sidecar reads DB connection from `DB_HOST`/`POSTGRES_USER`/`POSTGRES_PASSWORD`/`POSTGRES_DB` env vars (confirmed from `go/cmd/analytics/main.go`). These match the pattern used by the Rails service — consistent across services.
+- `RUNNER_PASSWORD` had no default in the original file, meaning the env var would be empty string unless `.env` was present. A dev default (`dev-runner-password`) makes the stack startable without a `.env` file, matching the pattern used by `AUTH_SECRET` and `SIDECAR_TOKEN`.
+- The `analytics` service depends on `postgres` with `condition: service_healthy` — same pattern as `rails` and `go_runner`. This prevents the sidecar from starting before Postgres is ready, avoiding connection errors at boot.
+- Port 9100 is the port the analytics binary listens on (hardcoded in `main.go` as `:9100`).
+
+**Challenges:**
+- None. The changes were mechanical: remove dead YAML, add a new service block, add a default value.
+
+**Alternatives considered:**
+- Binding `RUNNER_PASSWORD` to a required env var with no default — rejected because the dev stack should start without a `.env` file. The default is clearly a dev-only value.
+- Using `env_file: ../.env` for the analytics service — rejected because the analytics sidecar only needs DB credentials, which are already set inline. Adding `env_file` would pull in unrelated secrets unnecessarily.
+
+**Tradeoffs taken:**
+- `RUNNER_PASSWORD` default is a plaintext string in the compose file — acceptable for dev. Production must override via `.env` or secrets management. The existing `AUTH_SECRET` default follows the same pattern.
+- Postgres is not bound to `0.0.0.0` (no `ports:` on the postgres service) — this was already correct and preserved.
+
+---
+
 ## 2026-05-01 12:33 — Add infra/Dockerfile.go multi-stage build (task 3.1, tag 0.0.90)
 
 **Changes:** Created `infra/Dockerfile.go` with three stages: `builder` (golang:1.23-bookworm, compiles both binaries from vendored deps), `runner` (debian:bookworm-slim, port 8080), `analytics` (debian:bookworm-slim, port 9100). `docker compose build go_runner` exits 0; analytics target builds exits 0. 352 Rails specs, 0 failures, 98.67% coverage.
