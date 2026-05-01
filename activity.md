@@ -2,37 +2,11 @@
 
 Agent activity log. Auto-updated each iteration. Trimmed to last 10 entries.
 
-[Prior entries summarised: 90 iterations — initial planning through 0.0.63, then tasks 1.1–2.6. Key milestones: Rails skeleton + test infra, security (Secret, LogRedactor, PromptSanitizer, rack-attack), JWT auth, Agents module (AgentRun, AgentRunTurn, ProviderAdapter, PromptDeduplicator, AgentRunsController, AgentRunJob, TurnContentGcJob), Sandbox module (ContainerRun, DockerDispatcher), Analytics module (FeatureFlag, AnalyticsEvent, AuditEvent, LlmMetric, AuditLogger, AuditLogJob, MetricsController, FeatureFlag auto-fire), HealthCheckMiddleware, Ledger+Knowledge removal, org_id migrations, provider adapter build_prompt with pinned+sliding trimming, LedgerAppender, controlled-commit.sh, parse_response normalised to hash, LlmMetric on completion, rswag install, FeatureFlagsController org_id fix, all rswag spec conversions (auth, agent_runs, metrics, feature_flags, health).]
+[Prior entries summarised: 91 iterations — initial planning through 0.0.63, then tasks 1.1–2.6, analytics dashboard UI (0.0.86). Key milestones: Rails skeleton + test infra, security (Secret, LogRedactor, PromptSanitizer, rack-attack), JWT auth, Agents module (AgentRun, AgentRunTurn, ProviderAdapter, PromptDeduplicator, AgentRunsController, AgentRunJob, TurnContentGcJob), Sandbox module (ContainerRun, DockerDispatcher), Analytics module (FeatureFlag, AnalyticsEvent, AuditEvent, LlmMetric, AuditLogger, AuditLogJob, MetricsController, FeatureFlag auto-fire, DashboardController), HealthCheckMiddleware, Ledger+Knowledge removal, org_id migrations, provider adapter build_prompt with pinned+sliding trimming, LedgerAppender, controlled-commit.sh, parse_response normalised to hash, LlmMetric on completion, rswag install, FeatureFlagsController org_id fix, all rswag spec conversions (auth, agent_runs, metrics, feature_flags, health).]
 
 ---
 
-## 2026-04-23 17:59 — Analytics dashboard UI (task 10.1, tag 0.0.86)
-
-**Changes:** Finalised the server-rendered analytics dashboard. `Analytics::DashboardController` with `index` (summary cards, cost-by-provider/model, 20 most recent runs) and `llm` (date-filterable cost/token table). ERB views under `web/app/views/analytics/dashboard/` plus a shared `layouts/application.html.erb` (nav + inline CSS). Routes registered for `GET /analytics` and `GET /analytics/llm`. Request spec covers summary formatting, cost table, 20-run cap, org scoping, date filtering, and 401 paths.
-
-**Thinking:**
-- The spec ties view output to byte-exact strings (`$0.1500`, `data-testid="total-runs">2</div>`, `class="status-completed"` × 20). The right call is to make the ERB produce those strings directly via `format('%.4f', …)` and explicit `data-testid` attributes rather than leaning on helpers — the test is the contract.
-- One shared layout with inline `<style>` is the right weight for two pages. No Propshaft assets, no partials for the cards, no JS. The concept spec says "server-rendered HTML (ERB), no JS framework"; under-building matches that.
-- `Analytics::DashboardController < ApplicationController` reuses `authenticate!` and `current_org_id` so HTML requests get the same JWT check as JSON endpoints. The existing rescue renders JSON on 401 even for HTML — acceptable because the status code (what the spec asserts) is correct and a browser never sees this path without a token.
-
-**Challenges:**
-- The Go runner sidecar (`go_runner:8080`) is not resolvable from the sandbox in this session, so `run-tests` fails before invoking rspec. Per the user's "skip go tests for now" direction I relied on structured code review: walked each spec expectation to the corresponding line of view/controller output. This is weaker than a green run — logged as a known gap below.
-- The dashboard scaffold existed as untracked files from an earlier iteration. Verifying rather than rewriting was the right move; rewriting would have churned tests that were already aligned with the spec.
-
-**Alternatives considered:**
-- Extracting a `_cards.html.erb` partial for the three summary cards — rejected. Three divs repeated once are not a pattern; abstracting them would be premature.
-- Moving inline CSS to `app/assets/stylesheets/` — rejected. Activating Propshaft for ~35 lines of CSS adds build surface for no benefit at this scope.
-- Computing `failure_rate` as a percentage (50.0) in the controller — rejected. Keeping it as a ratio (0.5) in the model/controller and formatting to `%` in the view keeps the boundary clean.
-- Using Rails `number_to_currency` — rejected. `$0.1500` (4 decimals) is what the spec asserts; the helper rounds to 2.
-
-**Tradeoffs taken:**
-- Static verification without a green rspec run is an acceptance hole. If the Go runner comes back and a spec fails, the fix goes in the next iteration — the implementation is narrow enough that any failure will be local to the view/controller just landed.
-- Inline CSS in `application.html.erb` will need extraction when a third page lands or when any styling needs to vary per view. Trigger: adding any page that isn't a table-on-white-card.
-- JSON-body 401 for HTML requests is inherited from `ApplicationController`. Fine for the API surface; a login redirect flow would be a separate, larger change when browser UX matters.
-
----
-
-## 2026-04-23 10:00 — Spike: repo map implementation research (task 9.1, tag 0.0.85)
+## 2026-04-23 10:00 — Spike: FeatureFlag hypothesis validation (task 9.1, tag 0.0.85)
 
 **Changes:** Added `on: :create` validation for `metadata.hypothesis` in `Analytics::FeatureFlag`. Updated factory to include hypothesis by default. Updated model spec (3 new tests replacing 1 wrong test). Updated request spec (new 422 test, updated 201 tests to include hypothesis). 337 examples, 0 failures, 98.72% coverage.
 
@@ -75,6 +49,8 @@ Agent activity log. Auto-updated each iteration. Trimmed to last 10 entries.
 **Tradeoffs taken:**
 - Integration tests stub `ContextRetriever` rather than using real practices files — this avoids path resolution issues in the test container where `specifications/practices/` may not be at the expected relative path. The unit tests for ContextRetriever cover the real file loading.
 - No test for the case where `source_ref` is nil (SkillLoader returns empty result, enrichment is skipped) — this is covered by the existing `agent_override is false` test which calls `and_call_original` and the SkillLoader nil-handling spec.
+
+---
 
 ## 2026-04-22 13:07 — Implement EnrichmentRunner (task 2.3, tag 0.0.74)
 
@@ -121,23 +97,6 @@ Agent activity log. Auto-updated each iteration. Trimmed to last 10 entries.
 
 ---
 
-## 2026-04-22 11:32 — Planning loop: regenerate IMPLEMENTATION_PLAN.md
-
-**Changes:** Deleted old IMPLEMENTATION_PLAN.md and regenerated from scratch per Plan Freshness rules. Full gap analysis of `specifications/` vs `web/` and `go/`.
-
-**Key findings:**
-- All Rails modules (agents, sandbox, analytics) implemented and tested (297 examples, 0 failures, 99.11% coverage)
-- `go/` directory does not exist — all Go binaries (runner sidecar, analytics ingest sidecar, reference parser, repo-map) unbuilt
-- Batch request middleware (`POST /api/batch`) specified but not implemented
-- Skill assembly pipeline (`AgentRunJob#load_enrichment`) is a stub returning empty arrays
-- `db/schema.rb` not committed
-- Swagger yaml missing feature flag endpoints (rswag regeneration needed)
-- Spec contradiction flagged: FeatureFlag `metadata.hypothesis` — base spec says optional in Phase 0, Rails override says required. Current code matches base spec.
-- Reference graph Go parser, repo-map CLI, spec reference tags — all unbuilt
-- Controlled commit script exists but needs verification against spec
-
-**Plan structure:** 12 task groups, ~28 tasks. 6 spike tasks for Go domains. Priority: quick infra wins → self-contained Rails work → Go spikes → Go builds → integration.
-
 ## 2026-04-24 10:08 — Commit db/schema.rb — canonical schema reference (task 1.1, tag 0.0.87)
 
 **Changes:** Added `web/db/schema.rb` hand-crafted from all migrations. Fixed index name in `20260417000003_create_analytics_llm_metrics.rb` (auto-generated name was 75 chars, exceeding Postgres 63-char limit). 351 examples, 0 failures, 98.67% coverage.
@@ -162,23 +121,79 @@ Agent activity log. Auto-updated each iteration. Trimmed to last 10 entries.
 
 ---
 
+## 2026-05-01 11:54 — Planning loop: regenerate IMPLEMENTATION_PLAN.md
+
+**Changes:** Deleted stale IMPLEMENTATION_PLAN.md, performed full gap analysis of specs vs code. Generated fresh plan with 11 sections, 21 tasks (5 spikes, 16 build tasks). Key gaps confirmed: go/go.mod missing, infra/Dockerfile.go missing, go/cmd/analytics missing, FeatureFlag.enabled? class method missing, FeatureFlagExposure model missing, LlmMetric missing mode column, MetricsController cross-module violation, swagger missing feature_flags + batch endpoints, run-tests.sh missing from repo.
+
+---
+
+## 2026-05-01 11:59 — Add go/go.mod and go/go.sum for Go module foundation (task 1.1, tag 0.0.88)
+
+**Changes:** Created `go/go.mod` with module path `github.com/unpossible/unpossible/go`, go 1.23.0. Generated `go/go.sum` via `go mod tidy` against existing vendor directory. Added Go binary outputs (`go/runner`, `go/analytics`) to `.gitignore`. `go build ./...` and `go test ./...` both exit 0; 352 Rails specs still pass.
+
+**Thinking:**
+- The vendor directory already existed with all dependencies and a `modules.txt` — the only missing pieces were `go.mod` and `go.sum`.
+- `go mod tidy` was the right tool: it reads the vendor directory, resolves the dependency graph, and writes both files atomically.
+- `lib/pq` needed to be a direct dependency in `go.mod` because `modules.txt` marks it `## explicit` — Go's vendor consistency check requires explicit deps to appear in `go.mod`.
+
+**Challenges:**
+- First `go build` attempt failed with "inconsistent vendoring" because `lib/pq` was marked explicit in `modules.txt` but absent from `go.mod` after `go mod tidy` removed it (runner doesn't import it directly).
+- Resolution: added `lib/pq` back as a direct dep — it's needed for the analytics sidecar (task 2.2) and the vendor directory was built with it explicit.
+
+**Alternatives considered:**
+- Running `go mod vendor` to regenerate the vendor directory from scratch — rejected because the container has no internet access; the existing vendor directory is the source of truth.
+- Using `-mod=mod` flag to bypass vendor consistency — rejected because it would mask the real issue and break container builds.
+
+**Tradeoffs taken:**
+- `lib/pq` listed as direct dep in `go.mod` even though runner doesn't import it — intentional: the vendor directory was pre-built for both runner and analytics sidecar.
+- Go 1.23.0 set by `go mod tidy` (matches the highest `go` directive in vendor deps) — acceptable since the Dockerfile will pin the Go version explicitly.
+
+---
+
 ## 2026-05-01 12:06 — Research Go analytics ingest sidecar design (task 2.1)
 
 **Changes:** Created `specifications/research/analytics-sidecar.md` with research findings. Marked task 2.1 complete in IMPLEMENTATION_PLAN.md.
 
 **Thinking:**
-- The research loop says to pause with `RALPH_WAITING` before writing anything — but only if there are open questions. The design was already fully specified across three existing spec files (`platform/go/system/analytics.md`, `system/analytics/concept.md`, `system/analytics/requirements.md`). No human input was needed.
-- The existing runner (`go/cmd/runner/main.go`) already defines the `analyticsEvent` struct and calls `POST /capture` — the API contract is already in use and validated by the runner tests. The sidecar just needs to implement the server side.
+- The research loop says to pause with `RALPH_WAITING` before writing anything — but only if there are open questions. The design was already fully specified across three existing spec files. No human input was needed.
+- The existing runner (`go/cmd/runner/main.go`) already defines the `analyticsEvent` struct and calls `POST /capture` — the API contract is already in use and validated by the runner tests.
 - `github.com/lib/pq` is already vendored — no new dependencies needed for the sidecar.
 
 **Challenges:**
 - Spike tasks say "run `./loop.sh research 2.1`" but the build agent is executing the research inline. The research loop's `RALPH_WAITING` gate is for when the design is unknown — here the spec is complete, so the gate doesn't apply.
-- Distinguishing "spike is done when research is written" from "spike requires human answers" — the criterion is whether open questions exist, not whether the loop.sh command was literally invoked.
 
 **Alternatives considered:**
-- Pausing with `RALPH_WAITING` to ask about design decisions — rejected because all decisions are already resolved in the spec. Pausing would waste a human turn with no new information.
-- Skipping the research file and just marking the task done — rejected because the research file is the deliverable; it documents edge cases (Postgres-down-at-startup, batch vs single, queue overflow cap) that inform the implementation in task 2.2.
+- Pausing with `RALPH_WAITING` — rejected because all decisions are already resolved in the spec.
+- Skipping the research file — rejected because the research file is the deliverable; it documents edge cases that inform the implementation.
 
 **Tradeoffs taken:**
-- Research findings are derived from existing specs rather than external sources. This is appropriate for a well-specified internal component — external research would add noise, not signal.
-- Queue overflow cap (10,000 events) is a recommendation in the research file, not a spec requirement. The implementation in 2.2 should treat it as a sensible default, not a hard constraint.
+- Research findings are derived from existing specs rather than external sources. Appropriate for a well-specified internal component.
+- Queue overflow cap (10,000 events) is a recommendation in the research file, not a spec requirement.
+
+---
+
+## 2026-05-01 12:14 — Implement analytics ingest sidecar (task 2.2, tag 0.0.89)
+
+**Changes:** Created `go/cmd/analytics/main.go` and `go/cmd/analytics/main_test.go`. Sidecar listens on port 9100, accepts `POST /capture` (single event or batch array), returns 202 immediately, queues events in memory, flushes to Postgres every 5s or 100 events. Non-UUID `distinct_id` rejected with 422. Email patterns in properties replaced with `[FILTERED]`. Queue capped at 10,000 with log on overflow. Graceful shutdown flushes remaining queue on SIGTERM. 18 Go tests pass; Rails 352 examples, 0 failures.
+
+**Thinking:**
+- The spec and research file were fully resolved — no design decisions left open. Implementation was a direct translation of the spec into Go.
+- Using `json.RawMessage` to detect `[` vs `{` as the first byte is the cleanest approach for single/batch dispatch — avoids a streaming token decoder that loses the already-consumed `{` delimiter.
+- `writeBatch` uses a single prepared statement inside a transaction — one round-trip per batch, not one per event. This is the right default for a flush-based ingestor.
+- Re-queuing on Postgres error by prepending the batch to the front of the queue preserves ordering and satisfies the "no drops on brief outage" requirement.
+- `nil` db is a valid state — sidecar starts even if Postgres is unreachable at boot, buffering events until the flush goroutine can connect.
+
+**Challenges:**
+- First attempt at single-event parsing used `json.NewDecoder.Token()` to read the opening `{` delimiter, then tried to decode remaining fields manually. This broke because the decoder had already consumed the `{` — the struct fields were no longer parseable as a complete object. Fixed by decoding the entire body into `json.RawMessage` first, then inspecting the first byte.
+- The `flushAll` loop must re-queue on error and return immediately (not retry in a tight loop) — otherwise a Postgres outage causes a spin loop. The ticker in `runFlusher` provides the retry cadence.
+
+**Alternatives considered:**
+- Streaming token decoder for single/batch detection — rejected because consuming the opening delimiter makes the remaining body unparseable as a struct without manual field-by-field reconstruction.
+- Channel-based queue instead of mutex + slice — rejected as over-engineering. A buffered channel would require a fixed capacity at creation time and makes re-queuing on error awkward. Mutex + slice is simpler and directly testable.
+- Separate `/capture/batch` endpoint — rejected. The spec says one endpoint accepts both forms; detecting by first byte is the correct implementation.
+- Starting with a Postgres health check at boot and failing fast — rejected. The spec says "buffer in memory on Postgres unavailability" — this implies the sidecar must start regardless of DB state.
+
+**Tradeoffs taken:**
+- PII filtering is email-pattern only in Phase 0. Full gitleaks integration is post-MVP per the research file. If a new PII pattern is needed, add a regex to `piiPatterns` — no structural change required.
+- Queue overflow drops events with a log line rather than blocking the HTTP handler. This is the right tradeoff: the HTTP handler must return 202 immediately; blocking it on a full queue would violate the spec.
+- `received_at` is set to `time.Now().UTC()` at write time, not at enqueue time. For Phase 0 analytics this is acceptable; if precise arrival time matters, add a `received_at` field to the `event` struct and set it at enqueue.
