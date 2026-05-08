@@ -126,6 +126,8 @@ fi
 PROMPT_BASENAME="PROMPT_${MODE}.md"
 if [ -f "$PROJECT_DIR/$PROMPT_BASENAME" ]; then
     PROMPT_FILE="$PROJECT_DIR/$PROMPT_BASENAME"
+elif [ -f "$(dirname "$PROJECT_DIR")/$PROMPT_BASENAME" ]; then
+    PROMPT_FILE="$(dirname "$PROJECT_DIR")/$PROMPT_BASENAME"
 else
     PROMPT_FILE="$PROMPT_BASENAME"
 fi
@@ -145,6 +147,8 @@ if [ "$MODE" = "build" ] && [ "$AGENT" = "claude" ]; then
     PRESTEP_BASENAME="PROMPT_build_prestep.md"
     if [ -f "$PROJECT_DIR/$PRESTEP_BASENAME" ]; then
         PRESTEP_SRC="$PROJECT_DIR/$PRESTEP_BASENAME"
+    elif [ -f "$(dirname "$PROJECT_DIR")/$PRESTEP_BASENAME" ]; then
+        PRESTEP_SRC="$(dirname "$PROJECT_DIR")/$PRESTEP_BASENAME"
     elif [ -f "$PRESTEP_BASENAME" ]; then
         PRESTEP_SRC="$PRESTEP_BASENAME"
     fi

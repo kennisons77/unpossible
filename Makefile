@@ -12,6 +12,10 @@ ACTIVE_PROJECT_FILE := $(ROOT_DIR)ACTIVE_PROJECT
 ENV_FILE := $(ROOT_DIR).env
 AGENT ?= kiro
 MODEL ?=
+# Override active project for any target: make plan PROJECT=relationships/kid-alex
+ifdef PROJECT
+$(shell echo '$(PROJECT)' > $(ACTIVE_PROJECT_FILE))
+endif
 SKILL = @cd $(PROJECT_DIR) && $(AGENT) -- "$(shell cat $(PROJECT_DIR)
 
 .PHONY: help \
@@ -28,6 +32,7 @@ help:
 	@echo "Config & runner:"
 	@echo "  make status          Show active project, agent, model, env"
 	@echo "  make activate        Set this project as ACTIVE_PROJECT"
+	@echo "  make activate PROJECT=relationships/kid-alex   Switch to another project"
 	@echo "  make config          Show runner config (agent, model, env vars)"
 	@echo "  make config AGENT=claude MODEL=opus   Set agent and model for this session"
 	@echo "  make test            Run test suite via docker compose"
@@ -80,8 +85,8 @@ status:
 	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
 activate:
-	@echo "unpossible" > "$(ACTIVE_PROJECT_FILE)"
-	@echo "ACTIVE_PROJECT set to unpossible"
+	@echo "$(or $(PROJECT),unpossible)" > "$(ACTIVE_PROJECT_FILE)"
+	@echo "ACTIVE_PROJECT set to $(or $(PROJECT),unpossible)"
 
 config:
 	@echo "━━━ Runner Config ━━━"

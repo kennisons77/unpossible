@@ -2,7 +2,7 @@
 vendor/
 
 # Generated projects
-projects/*/
+projects/
 
 # Secrets
 .env
@@ -17,3 +17,7 @@ projects/*/
 # Linux libraries
 infra/debs/*
 infra/debs-debian/*
+
+# Go binaries
+go/runner
+go/analytics
