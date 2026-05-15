@@ -33,3 +33,27 @@
 - Most Phase 0 work is complete — remaining gaps are swagger coverage, minor schema additions, and research spikes for proposed/draft specs
 - Spec contradictions documented: `iteration` column (stale platform spec), `FeatureFlagExposure` model (superseded by analytics_events approach)
 - Trimmed activity.md to last 10 entries
+
+## 2026-05-15 12:22 — Add mode column to analytics_llm_metrics (tag 0.0.93)
+
+**Changes:**
+- Migration `20260515000001_add_mode_to_analytics_llm_metrics.rb` adds `mode` string column
+- `LlmMetric` validates presence of `mode`
+- `RunStorageService.complete` passes `run.mode` when creating `LlmMetric`
+- `MetricsController#llm` supports `?mode=` filter param
+- Factory, model spec, and request specs updated; 354 examples, 0 failures, 98.68% coverage
+
+**Thinking:**
+- The analytics concept spec requires `mode` on LLM metrics so cost can be broken down by agent run mode (plan/build/review/reflect/research). Without it, the `llm` endpoint can only aggregate by provider/model — you can't answer "how much did build loops cost vs plan loops?"
+- Adding `mode` to `LlmMetric` directly (rather than joining to `AgentRun`) keeps the metrics table self-contained and the query simple. The `MetricsController#llm` filter is a single `.where(mode:)` clause.
+
+**Challenges:**
+- `git add -A` swept up untracked files (polyai-questions.html, unpossible-city/) that were in the working directory. Caught before push and removed via `git rm --cached` + `--amend`. Lesson: stage specific files or check `git status` before committing.
+
+**Alternatives considered:**
+- Join `analytics_llm_metrics` to `agents_agent_runs` on `agent_run_id` to get mode at query time — rejected because it couples the metrics query to the agents table, adds a join to every aggregation, and breaks if `agent_run_id` is null.
+- Add `mode` as a nullable column with no validation — rejected because a metric without a mode is useless for the breakdown query. Fail-closed: require it.
+
+**Tradeoffs taken:**
+- `mode` is a plain string, not an enum at the DB level. Consistent with how `mode` is stored on `agents_agent_runs`. If mode values diverge in the future, a DB-level enum would enforce consistency — acceptable debt for Phase 0.
+- Existing `LlmMetric` rows (if any) will have `mode = NULL`, which fails the new validation on create but doesn't affect existing records. Migration is additive; no backfill needed for Phase 0 (no production data).
