@@ -2,7 +2,35 @@
 
 Agent activity log. Auto-updated each iteration. Trimmed to last 10 entries.
 
-[Prior entries summarised: 93 iterations — initial planning through 0.0.63, then tasks 1.1–2.6, analytics dashboard UI (0.0.86), db/schema.rb (0.0.87), FeatureFlag hypothesis validation (0.0.85). Key milestones: Rails skeleton + test infra, security (Secret, LogRedactor, PromptSanitizer, rack-attack), JWT auth, Agents module (AgentRun, AgentRunTurn, ProviderAdapter, PromptDeduplicator, AgentRunsController, AgentRunJob, TurnContentGcJob), Sandbox module (ContainerRun, DockerDispatcher), Analytics module (FeatureFlag, AnalyticsEvent, AuditEvent, LlmMetric, AuditLogger, AuditLogJob, MetricsController, FeatureFlag auto-fire, DashboardController), HealthCheckMiddleware, Ledger+Knowledge removal, org_id migrations, provider adapter build_prompt with pinned+sliding trimming, LedgerAppender, controlled-commit.sh, parse_response normalised to hash, LlmMetric on completion, rswag install, FeatureFlagsController org_id fix, all rswag spec conversions (auth, agent_runs, metrics, feature_flags, health), db/schema.rb hand-crafted from migrations.]
+[Prior entries summarised: 94 iterations — initial planning through 0.0.63, then tasks 1.1–2.6, analytics dashboard UI (0.0.86), db/schema.rb (0.0.87), FeatureFlag hypothesis validation (0.0.85), analytics ingest sidecar (0.0.89). Key milestones: Rails skeleton + test infra, security (Secret, LogRedactor, PromptSanitizer, rack-attack), JWT auth, Agents module (AgentRun, AgentRunTurn, ProviderAdapter, PromptDeduplicator, AgentRunsController, AgentRunJob, TurnContentGcJob), Sandbox module (ContainerRun, DockerDispatcher), Analytics module (FeatureFlag, AnalyticsEvent, AuditEvent, LlmMetric, AuditLogger, AuditLogJob, MetricsController, FeatureFlag auto-fire, DashboardController), HealthCheckMiddleware, Ledger+Knowledge removal, org_id migrations, provider adapter build_prompt with pinned+sliding trimming, LedgerAppender, controlled-commit.sh, parse_response normalised to hash, LlmMetric on completion, rswag install, FeatureFlagsController org_id fix, all rswag spec conversions (auth, agent_runs, metrics, feature_flags, health), db/schema.rb hand-crafted from migrations, Go analytics sidecar (POST /capture, PII filter, batch flush, graceful shutdown).]
+
+---
+
+## 2026-05-15 13:01 — Research Go reference parser design (spike 5.1, tag 0.0.96)
+
+**Changes:** Created `specifications/research/reference-graph-parser.md` with finalized design decisions. Added build tasks 5.2–5.5 to IMPLEMENTATION_PLAN.md. Marked 5.1 complete.
+
+**Thinking:**
+- This is a pure research spike — no code, no tests. The deliverable is a design document that unblocks 5.2 (the actual parser implementation).
+- The key decision was regex over tree-sitter: all patterns the parser needs (frontmatter, plan item checkboxes, `spec:` tags in RSpec, LEDGER.jsonl) are line-oriented. Tree-sitter adds CGo and build complexity for no benefit at Phase 0 scale.
+- Git integration via shelling out to `git` is the right call — the runner sidecar already uses `exec.CommandContext` for this pattern. libgit2/go-git would add ~5MB and CGo.
+- Output as a single JSON object to stdout is the Unix-native pattern. The caller pipes or redirects. JSONL was considered but rejected — harder to consume as a complete graph.
+- Node IDs are derived deterministically from source artifacts (path, ref, SHA) so the parser is stateless and deterministic: same inputs → same output.
+
+**Challenges:**
+- Plan item renumbering is inherently heuristic — numeric IDs in LEDGER.jsonl are stable labels but the plan can be renumbered. Title-based matching is best-effort. Acceptable for Phase 0 (solo dev, infrequent renumbering).
+- The concept spec defines node types conceptually but not as a concrete schema. The research document formalizes the schema (id derivation rules, metadata fields) so the implementation has a precise target.
+
+**Alternatives considered:**
+- Tree-sitter for Ruby/Go parsing — rejected. All required patterns are line-oriented; tree-sitter adds CGo and build complexity with no benefit for Phase 0.
+- libgit2 (go-git) for git integration — rejected. Shelling out to `git` is simpler, has no deps, and is fast enough. The runner sidecar already uses this pattern.
+- JSONL output (one node/edge per line) — rejected. A single JSON object is easier to consume from a web handler or `jq`; no benefit to JSONL at Phase 0 scale.
+- Storing the graph in Postgres — rejected by the concept spec itself. The whole point of the reference graph is to eliminate the disk↔DB sync problem.
+
+**Tradeoffs taken:**
+- Title-based renaming detection is heuristic — if two beats share the same title intentionally, the parser will incorrectly emit a `renamed_from` edge. Acceptable for Phase 0; can be made opt-in via a LEDGER.jsonl `renamed` event later.
+- Fail-open on missing/malformed inputs — the parser never exits non-zero for bad data. This means a corrupted LEDGER.jsonl produces a partial graph silently. The tradeoff is correct: the parser is a read-only reporting tool, not a gatekeeper.
+- No tree-sitter means no deep code→spec tracing (e.g. linking a specific method to a spec section). This is Priority 3+ work; regex handles everything needed for Priority 2.
 
 ---
 
@@ -196,49 +224,3 @@ Agent activity log. Auto-updated each iteration. Trimmed to last 10 entries.
 ---
 
 ## 2026-05-01 12:06 — Research Go analytics ingest sidecar design (task 2.1)
-
-**Changes:** Created `specifications/research/analytics-sidecar.md` with research findings. Marked task 2.1 complete in IMPLEMENTATION_PLAN.md.
-
-**Thinking:**
-- The research loop says to pause with `RALPH_WAITING` before writing anything — but only if there are open questions. The design was already fully specified across three existing spec files. No human input was needed.
-- The existing runner (`go/cmd/runner/main.go`) already defines the `analyticsEvent` struct and calls `POST /capture` — the API contract is already in use and validated by the runner tests.
-- `github.com/lib/pq` is already vendored — no new dependencies needed for the sidecar.
-
-**Challenges:**
-- Spike tasks say "run `./loop.sh research 2.1`" but the build agent is executing the research inline. The research loop's `RALPH_WAITING` gate is for when the design is unknown — here the spec is complete, so the gate doesn't apply.
-
-**Alternatives considered:**
-- Pausing with `RALPH_WAITING` — rejected because all decisions are already resolved in the spec.
-- Skipping the research file — rejected because the research file is the deliverable; it documents edge cases that inform the implementation.
-
-**Tradeoffs taken:**
-- Research findings are derived from existing specs rather than external sources. Appropriate for a well-specified internal component.
-- Queue overflow cap (10,000 events) is a recommendation in the research file, not a spec requirement.
-
----
-
-## 2026-05-01 12:14 — Implement analytics ingest sidecar (task 2.2, tag 0.0.89)
-
-**Changes:** Created `go/cmd/analytics/main.go` and `go/cmd/analytics/main_test.go`. Sidecar listens on port 9100, accepts `POST /capture` (single event or batch array), returns 202 immediately, queues events in memory, flushes to Postgres every 5s or 100 events. Non-UUID `distinct_id` rejected with 422. Email patterns in properties replaced with `[FILTERED]`. Queue capped at 10,000 with log on overflow. Graceful shutdown flushes remaining queue on SIGTERM. 18 Go tests pass; Rails 352 examples, 0 failures.
-
-**Thinking:**
-- The spec and research file were fully resolved — no design decisions left open. Implementation was a direct translation of the spec into Go.
-- Using `json.RawMessage` to detect `[` vs `{` as the first byte is the cleanest approach for single/batch dispatch — avoids a streaming token decoder that loses the already-consumed `{` delimiter.
-- `writeBatch` uses a single prepared statement inside a transaction — one round-trip per batch, not one per event. This is the right default for a flush-based ingestor.
-- Re-queuing on Postgres error by prepending the batch to the front of the queue preserves ordering and satisfies the "no drops on brief outage" requirement.
-- `nil` db is a valid state — sidecar starts even if Postgres is unreachable at boot, buffering events until the flush goroutine can connect.
-
-**Challenges:**
-- First attempt at single-event parsing used `json.NewDecoder.Token()` to read the opening `{` delimiter, then tried to decode remaining fields manually. This broke because the decoder had already consumed the `{` — the struct fields were no longer parseable as a complete object. Fixed by decoding the entire body into `json.RawMessage` first, then inspecting the first byte.
-- The `flushAll` loop must re-queue on error and return immediately (not retry in a tight loop) — otherwise a Postgres outage causes a spin loop. The ticker in `runFlusher` provides the retry cadence.
-
-**Alternatives considered:**
-- Streaming token decoder for single/batch detection — rejected because consuming the opening delimiter makes the remaining body unparseable as a struct without manual field-by-field reconstruction.
-- Channel-based queue instead of mutex + slice — rejected as over-engineering. A buffered channel would require a fixed capacity at creation time and makes re-queuing on error awkward. Mutex + slice is simpler and directly testable.
-- Separate `/capture/batch` endpoint — rejected. The spec says one endpoint accepts both forms; detecting by first byte is the correct implementation.
-- Starting with a Postgres health check at boot and failing fast — rejected. The spec says "buffer in memory on Postgres unavailability" — this implies the sidecar must start regardless of DB state.
-
-**Tradeoffs taken:**
-- PII filtering is email-pattern only in Phase 0. Full gitleaks integration is post-MVP per the research file. If a new PII pattern is needed, add a regex to `piiPatterns` — no structural change required.
-- Queue overflow drops events with a log line rather than blocking the HTTP handler. This is the right tradeoff: the HTTP handler must return 202 immediately; blocking it on a full queue would violate the spec.
-- `received_at` is set to `time.Now().UTC()` at write time, not at enqueue time. For Phase 0 analytics this is acceptable; if precise arrival time matters, add a `received_at` field to the `event` struct and set it at enqueue.
