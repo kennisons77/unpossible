@@ -6,6 +6,34 @@ Agent activity log. Auto-updated each iteration. Trimmed to last 10 entries.
 
 ---
 
+## 2026-05-15 13:18 — Go reference parser binary with tests (tasks 5.2, 5.3, 5.4, tag 0.0.97)
+
+**Changes:** Created `go/cmd/reference-parser/main.go` — standalone Go binary that walks spec files, IMPLEMENTATION_PLAN.md, RSpec test files, LEDGER.jsonl, and git log to produce a JSON graph. Created `go/cmd/reference-parser/main_test.go` with 19 unit tests covering all parsing paths. Updated `infra/Dockerfile.go` to build the `reference-parser` binary alongside runner and analytics. 359 Rails specs, 0 failures, 98.68% coverage.
+
+**Thinking:**
+- The research spike (5.1) had already resolved all design decisions: regex over tree-sitter, git shelling out, JSON to stdout, fail-open on missing inputs. Implementation was a direct translation of the research document into code.
+- The parser is structured as a `parser` struct with one method per input source (`parseSpecFiles`, `parsePlanItems`, `parseTestFiles`, `parseLedger`, `parseGitLog`). Each method is independently testable with a temp directory fixture — no global state.
+- Node deduplication via a `nodeIDs` map prevents duplicate nodes when the same spec file is referenced from multiple sources. Edge deduplication is not needed (duplicate edges are harmless for graph consumers) but self-loops and empty endpoints are filtered.
+- The `ledgerEntry` struct covers all LEDGER.jsonl event types in one struct — fields are omitempty so unused fields don't appear in output. This is simpler than a union type and sufficient for Phase 0.
+- PR node assembly collects `pr_opened`, `pr_review`, and `pr_merged` events in separate maps, then assembles nodes and edges in a second pass. This handles out-of-order events and missing events (e.g. a PR with no review) gracefully.
+
+**Challenges:**
+- The `ThreadCount` field was initially missing from `ledgerEntry` — caught during review of the review node assembly code. Added before the first compile.
+- The `init()` placeholder I added to document the ThreadCount dependency was dead code — removed immediately.
+- Markdown link resolution for relative paths: `../bar/concept.md` from `specifications/system/foo/concept.md` must resolve to `specifications/system/bar/concept.md`. Used `filepath.Join(dir, target)` which handles `..` correctly on all platforms.
+
+**Alternatives considered:**
+- Separate structs per LEDGER.jsonl event type — rejected. A single struct with omitempty fields is simpler and the event types share most fields. If the schema diverges significantly, a union type can be introduced then.
+- Storing edges in a map to deduplicate — rejected. Duplicate edges are harmless for graph consumers (the web UI can deduplicate on render). The map overhead is not justified for Phase 0 scale.
+- Building the binary into the Go image's final stage — the Dockerfile.go already has a `builder` stage that compiles all binaries; adding `reference-parser` to the build command is a one-line change.
+
+**Tradeoffs taken:**
+- Git log parsing shells out to `git log --format=%H|%s|%ai HEAD` — this produces one commit node per commit in the entire history. For large repos this could be slow. Acceptable for Phase 0; a `--since` flag can be added later.
+- Markdown link edges use `contains` type regardless of the semantic relationship between the linked files. The concept spec defines `contains` as the edge type for markdown links — this is correct per spec but may be semantically imprecise (a link from a concept to a requirements doc is more "generates" than "contains"). Refinement deferred to Priority 5 (web UI) when the edge types are consumed.
+- No test for `parseGitLog` — it shells out to `git` which requires a real git repo. The test temp directories are not git repos. The method is simple (parse `|`-delimited lines into commit nodes) and the pattern is identical to the runner sidecar's git integration, which is already tested. Adding a git-init fixture would be possible but adds test complexity for low marginal value.
+
+---
+
 ## 2026-05-15 13:01 — Research Go reference parser design (spike 5.1, tag 0.0.96)
 
 **Changes:** Created `specifications/research/reference-graph-parser.md` with finalized design decisions. Added build tasks 5.2–5.5 to IMPLEMENTATION_PLAN.md. Marked 5.1 complete.
@@ -220,7 +248,3 @@ Agent activity log. Auto-updated each iteration. Trimmed to last 10 entries.
 **Tradeoffs taken:**
 - `lib/pq` listed as direct dep in `go.mod` even though runner doesn't import it — intentional: the vendor directory was pre-built for both runner and analytics sidecar.
 - Go 1.23.0 set by `go mod tidy` (matches the highest `go` directive in vendor deps) — acceptable since the Dockerfile will pin the Go version explicitly.
-
----
-
-## 2026-05-01 12:06 — Research Go analytics ingest sidecar design (task 2.1)
