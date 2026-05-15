@@ -73,8 +73,22 @@ The infrastructure concept spec lists Redis in the Phase 0 compose stack. The cu
 
 ## 5. Reference Graph — Go Reference Parser (Priority 2)
 
-- [ ] [SPIKE] 5.1 — Research Go reference parser design — run `./loop.sh research reference-graph-parser`
-  **Rationale:** The reference parser is a standalone Go binary that walks files, git history, and LEDGER.jsonl to produce a JSON graph. No implementation exists in `go/`. Requires design decisions on: output format, node/edge types, how to handle plan item renumbering, tree-sitter vs regex for Ruby/Go parsing. Blocked by 4.1 (needs LEDGER.jsonl format stabilized).
+- [x] [SPIKE] 5.1 — Research Go reference parser design — run `./loop.sh research reference-graph-parser`
+  **Findings:** `specifications/research/reference-graph-parser.md`. Output: JSON to stdout (single object). Node/edge types derived from file conventions per concept spec. Regex over tree-sitter (all patterns are line-oriented; no CGo needed). Git integration via shelling out to `git` (established pattern from runner sidecar). Plan item renumbering handled via title-based stable refs. Build tasks derived: 5.2, 5.3, 5.4, 5.5.
+
+- [ ] 5.2 — `go/cmd/reference-parser/main.go` — parser binary (walk files, parse LEDGER.jsonl, shell out to git, emit JSON graph)
+  **Spec:** `specifications/system/reference-graph/concept.md` § Go Reference Parser
+  **Acceptance:** Binary runs standalone, emits valid JSON graph, deterministic output, degrades gracefully on missing inputs
+
+- [ ] 5.3 — `go/cmd/reference-parser/main_test.go` — unit tests with fixture files
+  **Spec:** `specifications/system/reference-graph/concept.md` § Go Reference Parser
+  **Acceptance:** Tests cover: LEDGER.jsonl parsing, plan item parsing, spec: tag extraction, edge derivation, empty/malformed input handling
+
+- [ ] 5.4 — Update `infra/Dockerfile.go` to build `reference-parser` binary alongside runner and analytics
+  **Acceptance:** `docker compose build` produces `reference-parser` binary in the Go image
+
+- [ ] 5.5 — Update `specifications/system/reference-graph/concept.md` with finalized node/edge schema from research
+  **Acceptance:** Concept spec reflects the node ID derivation rules and edge types decided in 5.1
 
 ---
 
