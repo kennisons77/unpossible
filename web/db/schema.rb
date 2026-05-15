@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into version control.
 
-ActiveRecord::Schema[8.0].define(version: 2026_04_18_000001) do
+ActiveRecord::Schema[8.0].define(version: 2026_05_15_000001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
   enable_extension "vector"
@@ -94,6 +94,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_18_000001) do
     t.integer "input_tokens", null: false, default: 0
     t.integer "output_tokens", null: false, default: 0
     t.decimal "cost_estimate_usd", precision: 10, scale: 6, null: false, default: "0.0"
+    t.string "mode"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["org_id", "provider", "model", "created_at"], name: "idx_llm_metrics_org_provider_model"

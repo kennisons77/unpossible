@@ -1,25 +1,4 @@
-[Prior entries summarised: ~72 iterations across auth, agents, sandbox, analytics, infra, rswag setup. Key outcomes: full Phase 0 Rails stack implemented with 34 spec files, all modules (agents/sandbox/analytics) operational, rswag API docs, health check middleware, ledger/knowledge tables dropped per reference-graph spec.]
-
-## 2026-04-22 11:58 — Implement SkillLoader for skill file loading (tag 0.0.72)
-
-**Changes:**
-- Added `Agents::SkillLoader` service (`web/app/modules/agents/services/skill_loader.rb`)
-- Added 11 RSpec examples covering all acceptance criteria
-
-## 2026-04-22 12:49 — Implement ContextRetriever and extend SkillLoader with principles (tag 0.0.73)
-
-**Changes:**
-- Added `Agents::ContextRetriever` service (`web/app/modules/agents/services/context_retriever.rb`)
-- Extended `SkillLoader::Result` with `principles` field parsed from frontmatter
-- Added 7 RSpec examples for `ContextRetriever`; updated `SkillLoader` spec to cover `principles`
-
-## 2026-04-22 13:19 — Planning loop: regenerate IMPLEMENTATION_PLAN.md
-
-**Changes:**
-- Deleted stale IMPLEMENTATION_PLAN.md, performed full gap analysis of specs vs code
-- Generated fresh plan with 16 sections, 20 tasks (6 spikes, 14 build tasks)
-- Key gaps found: batch request middleware (unimplemented), Go sidecars (no go/ dir), reference graph components (spike needed), analytics/agent-runs UI (no views), FeatureFlag hypothesis validation (spec contradiction), cross-module access in MetricsController
-- Trimmed activity.md to last 10 entries
+[Prior entries summarised: ~76 iterations across auth, agents, sandbox, analytics, infra, rswag setup, Go sidecars, skill loader, context retriever, enrichment runner. Key outcomes: full Phase 0 Rails stack implemented with 34+ spec files, all modules (agents/sandbox/analytics) operational, rswag API docs, health check middleware, batch request middleware, ledger/knowledge tables dropped per reference-graph spec, Go runner and analytics sidecars built with tests, LedgerAppender implemented.]
 
 ## 2026-05-01 11:54 — Planning loop: regenerate IMPLEMENTATION_PLAN.md
 
@@ -38,19 +17,19 @@
 - Added Go binary outputs (`go/runner`, `go/analytics`) to `.gitignore`
 - `go build ./...` and `go test ./...` both exit 0; 352 Rails specs still pass
 
-**Thinking:**
-- The vendor directory already existed with all dependencies and a `modules.txt` — the only missing pieces were `go.mod` and `go.sum`
-- `go mod tidy` was the right tool: it reads the vendor directory, resolves the dependency graph, and writes both files atomically
-- `lib/pq` needed to be a direct dependency in `go.mod` because `modules.txt` marks it `## explicit` — Go's vendor consistency check requires explicit deps to appear in `go.mod`
+## 2026-05-08 — Go analytics sidecar and Dockerfile.go implemented
 
-**Challenges:**
-- First `go build` attempt failed with "inconsistent vendoring" because `lib/pq` was marked explicit in `modules.txt` but absent from `go.mod` after `go mod tidy` removed it (runner doesn't import it directly)
-- Resolution: added `lib/pq` back as a direct dep — it's needed for the analytics sidecar (task 2.2) and the vendor directory was built with it explicit
+**Changes:**
+- `go/cmd/analytics/main.go` — full ingest sidecar with POST /capture, in-memory queue, batch flush, PII filtering
+- `go/cmd/analytics/main_test.go` — test coverage for ingest, PII, UUID validation
+- `infra/Dockerfile.go` — multi-stage build for runner and analytics targets
+- `infra/docker-compose.yml` updated with analytics service on port 9100
 
-**Alternatives considered:**
-- Running `go mod vendor` to regenerate the vendor directory from scratch — rejected because the container has no internet access; the existing vendor directory is the source of truth
-- Using `-mod=mod` flag to bypass vendor consistency — rejected because it would mask the real issue and break container builds
+## 2026-05-15 12:00 — Planning loop: regenerate IMPLEMENTATION_PLAN.md
 
-**Tradeoffs taken:**
-- `lib/pq` listed as direct dep in `go.mod` even though runner doesn't import it — this is intentional: the vendor directory was pre-built for both runner and analytics sidecar; keeping it explicit avoids a future "inconsistent vendoring" failure when analytics is added
-- Go 1.23.0 set by `go mod tidy` (matches the highest `go` directive in vendor deps) — acceptable since the Dockerfile will pin the Go version explicitly
+**Changes:**
+- Performed full gap analysis comparing specs vs code in `web/` and `go/`
+- Generated fresh plan: 5 build tasks (swagger gaps, LlmMetric mode/duration columns) + 6 spikes (reference graph, dashboard UI, agent runs UI, repo map, log tail relay)
+- Most Phase 0 work is complete — remaining gaps are swagger coverage, minor schema additions, and research spikes for proposed/draft specs
+- Spec contradictions documented: `iteration` column (stale platform spec), `FeatureFlagExposure` model (superseded by analytics_events approach)
+- Trimmed activity.md to last 10 entries

@@ -45,7 +45,7 @@ The infrastructure concept spec lists Redis in the Phase 0 compose stack. The cu
 
 ## 3. Analytics Module Gaps
 
-- [ ] 3.1 — Add `mode` column to `analytics_llm_metrics` table (`web/db/migrate/`, `web/app/modules/analytics/models/llm_metric.rb`, `web/app/modules/agents/services/run_storage_service.rb`)
+- [x] 3.1 — Add `mode` column to `analytics_llm_metrics` table (`web/db/migrate/`, `web/app/modules/analytics/models/llm_metric.rb`, `web/app/modules/agents/services/run_storage_service.rb`)
   Required tests: LlmMetric created with mode from AgentRun, MetricsController#llm can filter by mode
   **Rationale:** The analytics concept spec says LLM metrics include `mode`. The `RunStorageService.complete` creates LlmMetric but doesn't store mode. The `MetricsController#llm` endpoint cannot filter by mode from LlmMetric alone (it would need to join AgentRun). Adding `mode` to LlmMetric is the clean fix.
 

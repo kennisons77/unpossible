@@ -10,6 +10,7 @@ module Analytics
       scope = LlmMetric.where(org_id: current_org_id)
       scope = scope.where('created_at >= ?', Date.parse(params[:from])) if params[:from].present?
       scope = scope.where('created_at <= ?', Date.parse(params[:to]).end_of_day) if params[:to].present?
+      scope = scope.where(mode: params[:mode]) if params[:mode].present?
 
       rows = scope
         .group(:provider, :model)

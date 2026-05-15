@@ -20,6 +20,10 @@ RSpec.describe Analytics::LlmMetric, type: :model do
       expect(build(:analytics_llm_metric, model: nil)).not_to be_valid
     end
 
+    it 'requires mode' do
+      expect(build(:analytics_llm_metric, mode: nil)).not_to be_valid
+    end
+
     it 'requires cost_estimate_usd' do
       expect(build(:analytics_llm_metric, cost_estimate_usd: nil)).not_to be_valid
     end

@@ -7,6 +7,7 @@ module Analytics
     validates :org_id, presence: true
     validates :provider, presence: true
     validates :model, presence: true
+    validates :mode, presence: true
     validates :cost_estimate_usd, presence: true
 
     def update(*)

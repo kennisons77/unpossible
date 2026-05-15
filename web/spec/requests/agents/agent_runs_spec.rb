@@ -140,12 +140,14 @@ RSpec.describe 'Agent Runs API', type: :request do
       }
 
       response '200', 'run completed' do
-        let(:agent_run) { create(:agents_agent_run, status: 'running', org_id: org_id) }
+        let(:agent_run) { create(:agents_agent_run, status: 'running', org_id: org_id, mode: 'build') }
         let(:id) { agent_run.id }
         let(:'X-Sidecar-Token') { sidecar_secret }
         let(:body) { { input_tokens: 100, output_tokens: 50, cost_estimate_usd: 0.001, duration_ms: 500 } }
         run_test! do
           expect(agent_run.reload.status).to eq('completed')
+          metric = Analytics::LlmMetric.find_by(agent_run_id: agent_run.id)
+          expect(metric.mode).to eq('build')
         end
       end
 

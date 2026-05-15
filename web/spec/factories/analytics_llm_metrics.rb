@@ -5,6 +5,7 @@ FactoryBot.define do
     org_id { SecureRandom.uuid }
     sequence(:provider) { |n| "provider_#{n}" }
     sequence(:model) { |n| "model_#{n}" }
+    mode { 'build' }
     input_tokens { 100 }
     output_tokens { 50 }
     cost_estimate_usd { 0.001234 }
