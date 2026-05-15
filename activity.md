@@ -2,11 +2,39 @@
 
 Agent activity log. Auto-updated each iteration. Trimmed to last 10 entries.
 
-[Prior entries summarised: 94 iterations — initial planning through 0.0.63, then tasks 1.1–2.6, analytics dashboard UI (0.0.86), db/schema.rb (0.0.87), FeatureFlag hypothesis validation (0.0.85), analytics ingest sidecar (0.0.89). Key milestones: Rails skeleton + test infra, security (Secret, LogRedactor, PromptSanitizer, rack-attack), JWT auth, Agents module (AgentRun, AgentRunTurn, ProviderAdapter, PromptDeduplicator, AgentRunsController, AgentRunJob, TurnContentGcJob), Sandbox module (ContainerRun, DockerDispatcher), Analytics module (FeatureFlag, AnalyticsEvent, AuditEvent, LlmMetric, AuditLogger, AuditLogJob, MetricsController, FeatureFlag auto-fire, DashboardController), HealthCheckMiddleware, Ledger+Knowledge removal, org_id migrations, provider adapter build_prompt with pinned+sliding trimming, LedgerAppender, controlled-commit.sh, parse_response normalised to hash, LlmMetric on completion, rswag install, FeatureFlagsController org_id fix, all rswag spec conversions (auth, agent_runs, metrics, feature_flags, health), db/schema.rb hand-crafted from migrations, Go analytics sidecar (POST /capture, PII filter, batch flush, graceful shutdown).]
+[Prior entries summarised: 97 iterations — initial planning through 0.0.63, then tasks 1.1–2.6, analytics dashboard UI (0.0.86), db/schema.rb (0.0.87), FeatureFlag hypothesis validation (0.0.85), analytics ingest sidecar (0.0.89), Go reference parser research spike (0.0.96), Go reference parser binary (0.0.97). Key milestones: Rails skeleton + test infra, security (Secret, LogRedactor, PromptSanitizer, rack-attack), JWT auth, Agents module (AgentRun, AgentRunTurn, ProviderAdapter, PromptDeduplicator, AgentRunsController, AgentRunJob, TurnContentGcJob), Sandbox module (ContainerRun, DockerDispatcher), Analytics module (FeatureFlag, AnalyticsEvent, AuditEvent, LlmMetric, AuditLogger, AuditLogJob, MetricsController, FeatureFlag auto-fire, DashboardController), HealthCheckMiddleware, Ledger+Knowledge removal, org_id migrations, provider adapter build_prompt with pinned+sliding trimming, LedgerAppender, controlled-commit.sh, parse_response normalised to hash, LlmMetric on completion, rswag install, FeatureFlagsController org_id fix, all rswag spec conversions (auth, agent_runs, metrics, feature_flags, health), db/schema.rb hand-crafted from migrations, Go analytics sidecar (POST /capture, PII filter, batch flush, graceful shutdown), Go reference parser (spec files, plan items, RSpec tags, LEDGER.jsonl PR nodes, git log).]
 
 ---
 
-## 2026-05-15 13:18 — Go reference parser binary with tests (tasks 5.2, 5.3, 5.4, tag 0.0.97)
+## 2026-05-15 15:14 — PR skill script (tasks 2.1, 2.2, 3.1–3.3, 4.1, 4.2, tag 0.0.98)
+
+**Changes:** Marked infra tasks 2.1 and 2.2 complete (already correct — no code changes needed). Completed spike 3.1 (reference parser completeness research — PR nodes, spec: tags, blocked-by all already implemented; git notes gap documented). Marked 3.2 and 3.3 complete (code already satisfies acceptance criteria). Completed spike 4.1 (PR skill design). Implemented `scripts/pr.sh` and `scripts/test-pr.sh` (15 tests, all passing). 359 Rails specs, 0 failures, 98.68% coverage.
+
+**Thinking:**
+- Tasks 2.1, 2.2, 3.2, 3.3 were already done — the plan had them unchecked but the notes said ✅ DONE. Verified by reading the actual files before marking complete.
+- The PR skill is a bash script following the same pattern as `controlled-commit.sh`: argument parsing, preconditions, side effects (gh pr create + LEDGER.jsonl append + git commit), exit codes.
+- Task ID extraction from LEDGER.jsonl: match `status` entries whose `sha` appears in the branch's commit range. This is the natural join between git history and the ledger — no additional metadata needed.
+- Spec ref extraction from IMPLEMENTATION_PLAN.md: look for `spec: path` in HTML comments on the plan item line. This is the same comment format used for `blocked-by` — consistent with the existing plan item schema.
+- `--repo` flag added so git operations use the correct repo root when `--ledger`/`--plan` override the file paths. Without it, `git -C "$PROJECT_ROOT"` would always use the script's own project root, breaking tests.
+- `--no-push` flag added for testing — avoids needing a real remote. The flag is documented but not advertised as a user-facing feature.
+
+**Challenges:**
+- macOS `grep` doesn't support `-P` (Perl regex) — used `-oE` + `sed` instead. This is a recurring macOS portability issue; the coding practices file should note it.
+- Bash `set -u` with empty arrays: `${ARRAY[@]}` fails when the array is empty. Used `${ARRAY[@]+"${ARRAY[@]}"}` pattern throughout. This is a well-known bash gotcha.
+- `run_pr` test helper: `rm -rf "$stub_dir"` after the subshell masked the subshell's non-zero exit code (with `set +e` active, `rm -rf` exits 0 and becomes the function's return value). Fixed by capturing `rc=$?` before cleanup.
+- `git checkout -q -b main` in test setup silently failed (main already existed as the default branch on this system). Fixed by using `git checkout -q main` (no `-b`).
+
+**Alternatives considered:**
+- Python script instead of bash — rejected. The existing `controlled-commit.sh` is bash; consistency matters more than language preference. The script is simple enough that bash is not a liability.
+- Extracting task IDs from commit messages instead of LEDGER.jsonl — rejected. Commit messages are free-form; LEDGER.jsonl is the authoritative structured record. Parsing commit messages would be fragile.
+- Storing spec refs in LEDGER.jsonl `status` entries — rejected. The plan item comment is the right place (it's already there for `blocked-by`); duplicating it in LEDGER would create two sources of truth.
+
+**Tradeoffs taken:**
+- `python3` used for JSON array serialization in bash — avoids hand-rolling JSON escaping. Requires python3 in PATH (standard on macOS and the agent container). If python3 is absent, the script falls back to `[]` (empty array) — acceptable degradation.
+- Git notes gap (reference parser doesn't read `git notes show {sha}`) documented but not fixed — no consumer of git notes data exists yet. Will be addressed when the web UI needs it.
+- `--no-push` is a testing escape hatch, not a documented user feature. If the push fails in production (no remote, auth error), the LEDGER.jsonl entry is already committed locally — the user can push manually. This is acceptable for Phase 0.
+
+---
 
 **Changes:** Created `go/cmd/reference-parser/main.go` — standalone Go binary that walks spec files, IMPLEMENTATION_PLAN.md, RSpec test files, LEDGER.jsonl, and git log to produce a JSON graph. Created `go/cmd/reference-parser/main_test.go` with 19 unit tests covering all parsing paths. Updated `infra/Dockerfile.go` to build the `reference-parser` binary alongside runner and analytics. 359 Rails specs, 0 failures, 98.68% coverage.
 
