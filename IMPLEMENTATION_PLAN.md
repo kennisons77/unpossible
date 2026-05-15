@@ -57,8 +57,17 @@ The infrastructure concept spec lists Redis in the Phase 0 compose stack. The cu
 
 ## 4. Reference Graph — Controlled Commit Skill (Priority 1)
 
-- [ ] [SPIKE] 4.1 — Research reference graph controlled commit skill — run `./loop.sh research reference-graph-commit`
-  **Rationale:** The reference-graph concept defines a multi-component system (controlled commit skill, Go reference parser, spec tags, CI drift detection, web UI, ledger removal). Priority 1 is the controlled commit skill. Open questions: git notes merge conflicts, LEDGER.jsonl growth, plan item renumbering. The `LedgerAppender` class exists but the full "controlled commit skill" (atomic code + LEDGER.jsonl + IMPLEMENTATION_PLAN.md update in one commit) is not implemented as a skill file.
+- [x] [SPIKE] 4.1 — Research reference graph controlled commit skill
+  **Findings:** `specifications/research/reference-graph-commit.md`. `LedgerAppender` already exists with no Rails deps. Skill is a markdown procedure file + thin CLI wrapper. No blocking open questions. Build tasks derived: 4.2, 4.3, 4.4.
+
+- [x] 4.2 — Write `specifications/skills/tools/commit.md` — atomic commit skill (stage code, append LEDGER.jsonl status event, update IMPLEMENTATION_PLAN.md checkbox, git commit)
+  **Note:** `scripts/controlled-commit.sh` already existed with full implementation. Skill file written to document the procedure and reference the script.
+
+- [x] 4.3 — `scripts/controlled-commit.sh` — standalone shell script wrapping LEDGER.jsonl append + IMPLEMENTATION_PLAN.md update + git commit
+  **Note:** Already existed. `scripts/test-controlled-commit.sh` also existed with 20 passing tests.
+
+- [x] 4.4 — Update `specifications/skills/loops/build.md` step 9 to reference the commit skill
+  **Note:** Updated step 9 to reference `commit.md` and `scripts/controlled-commit.sh`.
 
 ---
 

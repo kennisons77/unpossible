@@ -24,7 +24,7 @@ verdict is accepted.
 6. **Refactor** — clean up without changing behaviour. Run tests again. Still green.
 7. **Typecheck + lint** — fix any errors before continuing.
 8. **Repeat** steps 4–7 for each acceptance criterion until all are green.
-9. Commit. Mark the beat complete in `IMPLEMENTATION_PLAN.md`.
+9. Commit using the `commit` skill (`specifications/skills/tools/commit.md`). Never run raw `git commit` for beat completions — always go through `scripts/controlled-commit.sh`.
 10. Log to `specifications/activity.md`.
 11. Output `RALPH_COMPLETE` when no open unblocked beats remain.
 
