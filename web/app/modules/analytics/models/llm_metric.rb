@@ -9,6 +9,7 @@ module Analytics
     validates :model, presence: true
     validates :mode, presence: true
     validates :cost_estimate_usd, presence: true
+    validates :duration_ms, numericality: { only_integer: true, greater_than_or_equal_to: 0 }, allow_nil: true
 
     def update(*)
       raise NotImplementedError, 'LlmMetric is append-only'

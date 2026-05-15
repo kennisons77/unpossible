@@ -28,6 +28,19 @@ RSpec.describe Analytics::LlmMetric, type: :model do
       expect(build(:analytics_llm_metric, cost_estimate_usd: nil)).not_to be_valid
     end
 
+    it 'stores duration_ms when provided' do
+      metric = create(:analytics_llm_metric, duration_ms: 1500)
+      expect(metric.reload.duration_ms).to eq(1500)
+    end
+
+    it 'allows nil duration_ms' do
+      expect(build(:analytics_llm_metric, duration_ms: nil)).to be_valid
+    end
+
+    it 'rejects negative duration_ms' do
+      expect(build(:analytics_llm_metric, duration_ms: -1)).not_to be_valid
+    end
+
     it 'stores cost_estimate_usd as decimal with 6 decimal places' do
       metric = create(:analytics_llm_metric, cost_estimate_usd: 0.123456)
       expect(metric.reload.cost_estimate_usd).to eq(BigDecimal('0.123456'))
