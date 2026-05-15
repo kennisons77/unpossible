@@ -105,7 +105,29 @@ environment variables) must be checked against the Makefile. If the change affec
 services start, build, or run, update the corresponding Makefile target. The Makefile is
 the developer's primary interface — if it's out of sync, the workflow is broken.
 
-## Context Window Management (load-bearing decision)
+## Shell Script Portability (macOS)
+
+macOS ships BSD versions of core utilities that differ from GNU:
+
+- `grep -P` (Perl regex) is not available — use `grep -E` (extended regex) + `sed` instead
+- `sed -i` requires an extension argument on macOS: `sed -i '' 's/foo/bar/' file`
+- `date -d` is not available — use `date -u +"%Y-%m-%dT%H:%M:%SZ"` for UTC timestamps
+- `sort -V` (version sort) is not available on older macOS — use `sort -t. -k1,1n -k2,2n -k3,3n` for semver
+
+When writing bash scripts that run on both macOS and Linux, test on macOS first — Linux
+GNU tools are more permissive and will accept BSD-incompatible flags silently.
+
+## Bash Empty Array Gotcha
+
+With `set -u`, `${ARRAY[@]}` fails when the array is empty. Use the safe expansion:
+
+```bash
+for item in "${ARRAY[@]+"${ARRAY[@]}"}"; do ...
+```
+
+Or check length first: `if [ ${#ARRAY[@]} -gt 0 ]; then ...`
+
+This applies to `printf '%s\n' "${ARRAY[@]}"` and similar constructs.
 
 When passing turn history to a provider, use the **pinned + sliding** strategy:
 
