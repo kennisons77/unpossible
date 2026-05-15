@@ -24,6 +24,8 @@ RSpec.describe 'Analytics Metrics API', type: :request do
                 description: 'Start date (YYYY-MM-DD)'
       parameter name: :to, in: :query, type: :string, required: false,
                 description: 'End date (YYYY-MM-DD)'
+      parameter name: :mode, in: :query, type: :string, required: false,
+                description: 'Filter by agent run mode (plan, build, review, reflect, research)'
 
       response '200', 'cost aggregated by provider and model' do
         before do
@@ -73,6 +75,21 @@ RSpec.describe 'Analytics Metrics API', type: :request do
         run_test! do
           body = JSON.parse(response.body)
           expect(body).to be_empty
+        end
+      end
+
+      response '200', 'filters by mode' do
+        before do
+          create(:analytics_llm_metric, org_id: org_id, provider: 'anthropic', model: 'claude-3',
+                 mode: 'build', cost_estimate_usd: 0.001, input_tokens: 100, output_tokens: 50)
+          create(:analytics_llm_metric, org_id: org_id, provider: 'anthropic', model: 'claude-3',
+                 mode: 'plan', cost_estimate_usd: 0.002, input_tokens: 200, output_tokens: 100)
+        end
+        let(:mode) { 'build' }
+        run_test! do
+          body = JSON.parse(response.body)
+          expect(body.size).to eq(1)
+          expect(body.first['total_cost_usd']).to be_within(0.0001).of(0.001)
         end
       end
 

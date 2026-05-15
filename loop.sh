@@ -40,6 +40,27 @@ case "$AGENT" in
         fi
         KIRO_BASE_CMD="kiro-cli chat --no-interactive --trust-all-tools $KIRO_MODEL_FLAG"
         AGENT_CMD="" # set after MODE is known
+
+        # Show current Kiro auth and offer re-login if wrong account
+        CURRENT_USER=$(kiro-cli user whoami 2>&1 | grep "Email:" | awk '{print $2}')
+        echo "Kiro auth: $CURRENT_USER"
+        echo -n "Continue with this account? [Y/n/d(ashboard)] "
+        read -r KIRO_AUTH_CONFIRM
+        case "$KIRO_AUTH_CONFIRM" in
+            n|N)
+                kiro-cli user logout
+                kiro-cli user login --license free --use-device-flow
+                ;;
+            d|D)
+                kiro-cli dashboard
+                echo -n "Continue? [Y/n] "
+                read -r KIRO_DASH_CONFIRM
+                if [ "$KIRO_DASH_CONFIRM" = "n" ] || [ "$KIRO_DASH_CONFIRM" = "N" ]; then
+                    kiro-cli user logout
+                    kiro-cli user login --license free --use-device-flow
+                fi
+                ;;
+        esac
         ;;
     *)
         AGENT_CMD="$AGENT"

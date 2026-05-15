@@ -1,257 +1,154 @@
-# IMPLEMENTATION PLAN — Unpossible
+# IMPLEMENTATION_PLAN.md
 
-**Phase:** 0 (Local — Docker Compose only)
-**Generated:** 2026-05-01
-**Scope:** Phase 0 only. No CI, no staging, no k8s.
+Generated: 2026-05-15T13:21 — Phase 0 only (Docker Compose, no CI, no k8s, no staging)
 
----
+## Scope
 
-## Gap Analysis Summary
+Phase 0 — Local development. `docker compose up` starts the stack, `docker compose -f infra/docker-compose.test.yml run --rm test` runs the full suite. All specs in `specifications/system/` with `status: active` are in scope. Specs with `status: proposed` or `status: draft` that describe Phase 2+ features are out of scope. Draft specs that describe Phase 0 MVP features are in scope.
 
-**What exists (confirmed from code):**
-- Rails 8 app with full module structure (agents, sandbox, analytics)
-- Auth: JWT (`AuthToken`), `Secret` value object, `ApplicationController#authenticate!`, sidecar token
-- Agents module: `AgentRun`, `AgentRunTurn`, `AgentRunJob`, `RunStorageService`, `PromptDeduplicator`, `ProviderAdapter` + all three adapters (Claude, Kiro, OpenAI), `SkillLoader`, `ContextRetriever`, `EnrichmentRunner`, `TurnContentGcJob`
-- Sandbox module: `ContainerRun`, `DockerDispatcher`
-- Analytics module: `AnalyticsEvent`, `AuditEvent`, `LlmMetric`, `FeatureFlag`, `AuditLogger`, `AuditLogJob`, `MetricsController`, `FeatureFlagsController`
-- Middleware: `HealthCheckMiddleware`, `BatchRequestMiddleware`
-- rswag: `swagger/v1/swagger.yaml`, request specs for all controllers
-- Go runner sidecar: `go/cmd/runner/main.go` + tests (no `go.mod` at root, no `go/cmd/analytics`)
-- Infra: `infra/Dockerfile`, `infra/Dockerfile.test`, `infra/Dockerfile.agent`, `infra/docker-compose.yml`, `infra/docker-compose.test.yml`
-- `loop.sh`, `Makefile`, `LEDGER.jsonl`, `PROMPT_*.md` files
+## Spec Contradictions
 
-**Key gaps found:**
-1. `go/go.mod` and `go/go.sum` missing — Go runner cannot build
-2. `infra/Dockerfile.go` missing — Go sidecars cannot be containerised
-3. `go/cmd/analytics/main.go` missing — analytics ingest sidecar not implemented
-4. `docker-compose.yml` references `infra/Dockerfile.go` for `go_runner` — build will fail
-5. `analytics_events` table missing `received_at` default; `distinct_id` UUID validation not enforced in Rails
-6. `FeatureFlag.enabled?` class method not implemented (spec requires it; only instance method exists)
-7. `FeatureFlag` `metadata.hypothesis` validation: spec says required on creation → 422 (platform/rails/product/analytics.md); feature-flags concept says optional in Phase 0 — **contradiction flagged below**
-8. `MetricsController` crosses module boundary: reads `Agents::AgentRun` directly — violates cross-module access rule
-9. `AgentRun` missing unique index on `(run_id, iteration)` — spec requires it; schema has unique on `run_id` only (no `iteration` column)
-10. `run_id` unique index exists but spec says `(run_id, iteration)` — schema has no `iteration` column; spec may be stale (concept says `run_id` UUID, no iteration)
-11. `swagger/v1/swagger.yaml` missing `/api/feature_flags` endpoints (GET, POST, PATCH)
-12. `swagger/v1/swagger.yaml` missing `/api/batch` endpoint
-13. `swagger/v1/swagger.yaml` missing `/health` endpoint (present but not in swagger)
-14. `run-tests.sh` referenced in `Dockerfile.agent` but not found in repo
-15. `RUNNER_PASSWORD` required by runner but not set in `docker-compose.yml` env (only in `.env`)
-16. `go_runner` in `docker-compose.yml` has both a commented-out stub and a real definition — the commented stub has a typo (`go_runner:f`) and should be cleaned up
-17. `analytics` service missing from `docker-compose.yml` (analytics sidecar not yet built)
-18. `AgentRunTurn` unique index on `(agent_run_id, position)` exists in schema ✓
-19. `FeatureFlagExposure` model/table missing (spec: `analytics_feature_flag_exposures`)
-20. `LlmMetric` missing `mode` column (spec: `GET /api/analytics/llm` filterable by mode)
-21. `run_tests.sh` script missing from repo (referenced in `Dockerfile.agent`)
+- **`iteration` column on AgentRun**: Platform override (`specifications/platform/rails/system/agents.md`) references a unique index on `(run_id, iteration)` but the schema uses `run_id` alone (unique). The concept spec does not mention `iteration`. The schema is authoritative — `iteration` is stale in the platform override.
+- **`FeatureFlagExposure` model**: Platform override (`specifications/platform/rails/product/analytics.md`) references this model, but the implementation fires `$feature_flag_called` as an `AnalyticsEvent` directly (no separate model). The implementation matches the concept spec's acceptance criteria. The platform override reference is stale.
+- **`metadata.hypothesis` required vs optional**: Platform override says required on creation (422 if missing). Feature flags requirements spec says optional in Phase 0. The implementation enforces it on create. Keeping the implementation as-is (stricter is safer).
 
-**Spec contradiction:**
-- `specifications/system/feature-flags/requirements.md` § Features Out: "metadata.hypothesis enforcement (optional, not required)"
-- `specifications/platform/rails/product/analytics.md` § Rails-specific Acceptance Criteria: "FeatureFlag with missing metadata.hypothesis → 422"
-- **Resolution:** The platform override is more specific and more recent. Treat hypothesis as required on creation per the Rails platform spec. Flag for human review.
+## Completed Work (confirmed from code)
 
----
+- [x] Infrastructure: `infra/Dockerfile`, `infra/Dockerfile.test`, `infra/Dockerfile.go`, `infra/Dockerfile.agent`
+- [x] Infrastructure: `infra/docker-compose.yml` (rails, go_runner, analytics, agent, postgres)
+- [x] Infrastructure: `infra/docker-compose.test.yml` (test + postgres with tmpfs)
+- [x] Agents module: `AgentRun` model with all fields, validations, unique index on `run_id`
+- [x] Agents module: `AgentRunTurn` model with position, kind, content, purged_at
+- [x] Agents module: `AgentRunsController` (start, complete, input endpoints)
+- [x] Agents module: `RunStorageService` (start with dedup, complete with LlmMetric, record_input with re-enqueue)
+- [x] Agents module: `ProviderAdapter` base class with pinned+sliding trimming
+- [x] Agents module: `ClaudeAdapter`, `KiroAdapter`, `OpenAiAdapter`
+- [x] Agents module: `PromptDeduplicator`
+- [x] Agents module: `AgentRunJob` with concurrency control, enrichment, pause/resume
+- [x] Agents module: `TurnContentGcJob`
+- [x] Agents module: `SkillLoader`, `ContextRetriever`, `EnrichmentRunner`
+- [x] Sandbox module: `ContainerRun` model with status enum, duration_ms
+- [x] Sandbox module: `DockerDispatcher` service
+- [x] Analytics module: `AnalyticsEvent` model (append-only)
+- [x] Analytics module: `AuditEvent` model (append-only, severity enum)
+- [x] Analytics module: `LlmMetric` model (append-only, mode column)
+- [x] Analytics module: `FeatureFlag` model with `enabled?` class method, auto-fires `$feature_flag_called`
+- [x] Analytics module: `FeatureFlagsController` (index, create, update)
+- [x] Analytics module: `MetricsController` (llm, loops, summary, events, flag_stats)
+- [x] Analytics module: `AuditLogger` + `AuditLogJob`
+- [x] Auth: `AuthToken` (encode/decode JWT), `Secret` value object
+- [x] Auth: `ApplicationController#authenticate!` with JWT + sidecar token + dev bypass
+- [x] Auth: `Api::AuthController#create` (POST /api/auth/token)
+- [x] Middleware: `HealthCheckMiddleware` at position 0
+- [x] Middleware: `BatchRequestMiddleware`
+- [x] API docs: rswag setup, Swagger UI at `/api/docs`
+- [x] Swagger: all endpoints documented in `swagger/v1/swagger.yaml`
+- [x] Go: runner sidecar (`go/cmd/runner`) with POST /run, metrics, Basic Auth
+- [x] Go: analytics ingest sidecar (`go/cmd/analytics`) with POST /capture, batch flush, PII filtering
+- [x] Go: reference parser (`go/cmd/reference-parser`) — walks files, git, LEDGER.jsonl, produces JSON graph
+- [x] Reference graph: `LedgerAppender` (append-only, idempotent)
+- [x] Reference graph: `scripts/controlled-commit.sh` (atomic commit + LEDGER + plan update)
+- [x] Reference graph: `specifications/skills/tools/commit.md` skill file
+- [x] Security: `Security::PromptSanitizer`, `Security::LogRedactor`
+- [x] Config: lograge, rack_attack, solid_queue recurring tasks
+- [x] Tests: comprehensive spec coverage (354+ examples, 98%+ coverage)
 
-## Open Questions
+## Section 1 — Pending Migration
 
-| # | Question | Impact |
-|---|---|---|
-| 1 | `FeatureFlag.metadata.hypothesis` required or optional? Platform spec says required (422), system spec says optional. | Blocks task 4.1 |
-| 2 | `AgentRun` schema: spec says unique on `(run_id, iteration)` but no `iteration` column exists. Is `iteration` a planned column or a spec artifact? | Informational — schema looks correct as-is |
-| 3 | `run-tests.sh` referenced in `Dockerfile.agent` — what should it contain? | Blocks task 6.1 |
+- [x] 1.1 — Apply `duration_ms` migration to `analytics_llm_metrics` (`web/db/migrate/20260515000002_add_duration_ms_to_analytics_llm_metrics.rb`)
+  Required tests: `LlmMetric` stores `duration_ms` when provided, allows nil `duration_ms`, validates integer >= 0
+  Note: Migration file exists, model validates it, specs test it. Schema.rb needs regeneration (run `db:migrate` in test container). If tests already pass with this migration applied, mark done.
 
----
+## Section 2 — Infra Hardening
 
-## Tasks
+- [ ] 2.1 — Postgres port binding: verify Postgres is not bound to `0.0.0.0` in compose files (`infra/docker-compose.yml`, `infra/docker-compose.test.yml`)
+  Required tests: no `ports:` directive on postgres service in either compose file (manual inspection — no exposed ports means internal-only on bridge network)
+  Note: Current compose files do NOT expose postgres ports — this is already correct. ✅ DONE.
 
-### Section 1 — Go Module Foundation (blocks all Go tasks)
+- [ ] 2.2 — Image tags use git SHA in compose files (`infra/docker-compose.yml`)
+  Required tests: `image:` directives use `${GIT_SHA:-dev}` variable, never `latest`
+  Note: Current compose file uses `${GIT_SHA:-dev}` for all custom images. pgvector uses `pgvector/pgvector:pg16` (pinned tag, not `latest`). ✅ DONE.
 
-- [x] 1.1 — Add `go/go.mod` and `go/go.sum` for the Go module (`go/cmd/runner`, `go/cmd/analytics`) (`go/go.mod`, `go/go.sum`)
-  Required tests: `go build ./...` exits 0; `go test ./...` exits 0 for runner
+## Section 3 — Reference Graph: Go Parser Enhancements
 
-### Section 2 — Go Analytics Sidecar (blocks docker-compose.yml analytics service)
+The reference parser exists and produces a JSON graph from specs, LEDGER.jsonl, and git. The concept spec has additional acceptance criteria around PR nodes, git notes, and spec tags that may not be fully implemented.
 
-- [x] 2.1 — [SPIKE] Research Go analytics ingest sidecar design — run `./loop.sh research 2.1` (see specifications/skills/tools/research.md)
-  Covers: `go/cmd/analytics/main.go` design, in-memory queue, batch flush, PII filtering, UUID validation, Postgres write path. Blocks 2.2.
+- [ ] [SPIKE] 3.1 — Research reference graph parser completeness — run `./loop.sh research reference-graph-parser`
+  Determine: Does the parser handle `pr_opened`/`pr_review`/`pr_merged` events? Does it resolve git notes on merge commits? Does it parse `spec:` tags in RSpec files? Does it handle `blocked-by` in plan items?
+  Blocks: 3.2, 3.3
 
-- [x] 2.2 — Implement `go/cmd/analytics/main.go` — analytics ingest sidecar (`go/cmd/analytics/main.go`) [blocked by 2.1]
-  Required tests (from `specifications/platform/go/system/analytics.md`):
-  - `go test ./...` exits 0
-  - `POST /capture` returns 202 immediately
-  - Events flushed within 5s or 100 events (whichever first)
-  - Events buffered in memory on Postgres unavailability — no events dropped
-  - `GET /healthz` returns 200
-  - Non-UUID `distinct_id` rejected before storage
+- [ ] 3.2 — Add PR node support to reference parser if missing (`go/cmd/reference-parser/main.go`)
+  Required tests: parser emits PR nodes from `pr_opened` events, links commits via `sha_first`/`sha_last`, attaches review data from `pr_review` events, marks merged from `pr_merged` events
+  Blocked by: 3.1
 
-### Section 3 — Go Dockerfile and Compose Wiring (blocks full stack)
+- [ ] 3.3 — Add `spec:` tag parsing from RSpec files to reference parser if missing (`go/cmd/reference-parser/main.go`)
+  Required tests: parser finds `spec:` metadata in RSpec describe blocks, emits `refs` edges from test node to spec section node
+  Blocked by: 3.1
 
-- [x] 3.1 — Create `infra/Dockerfile.go` multi-stage build for runner and analytics binaries (`infra/Dockerfile.go`) [blocked by 1.1]
-  Required tests:
-  - `docker compose -f infra/docker-compose.yml build go_runner` exits 0
-  - `docker compose -f infra/docker-compose.yml build analytics` exits 0 (after analytics service added)
+## Section 4 — Reference Graph: PR Skill
 
-- [x] 3.2 — Fix `docker-compose.yml`: remove commented-out stub (`go_runner:f` typo), add `analytics` service (port 9100), set `RUNNER_PASSWORD` env var, wire `analytics` service to postgres (`infra/docker-compose.yml`) [blocked by 3.1, 2.2]
-  Required tests:
-  - `docker compose -f infra/docker-compose.yml config` exits 0 (no YAML errors)
-  - `docker compose -f infra/docker-compose.yml up` starts all services; rails responds on port 3000
-  - Postgres not bound to 0.0.0.0
-  - Image tags use git SHA, not `latest`
+- [ ] [SPIKE] 4.1 — Research PR skill implementation — review `specifications/skills/tools/pr.md` and determine what's needed
+  Determine: What does the PR skill need to do? Is `gh pr create` sufficient? What metadata goes into LEDGER.jsonl? How does it link to task IDs and spec refs?
+  Blocks: 4.2
 
-### Section 4 — Analytics Module Gaps
+- [ ] 4.2 — Implement PR skill script (`scripts/pr.sh` or equivalent)
+  Required tests: creates PR via `gh pr create`, appends `pr_opened` event to LEDGER.jsonl with task_ids/spec_refs/sha_first/sha_last, exits 0 on success
+  Blocked by: 4.1
 
-- [ ] 4.1 — Implement `FeatureFlag.enabled?(org_id:, key:)` class method; resolve hypothesis validation contradiction (`web/app/modules/analytics/models/feature_flag.rb`, `web/spec/models/analytics/feature_flag_spec.rb`)
-  Required tests (from `specifications/system/feature-flags/concept.md` + `specifications/platform/rails/product/analytics.md`):
-  - `FeatureFlag.enabled?` returns `false` for unknown flag without raising
-  - `FeatureFlag.enabled?` returns `false` for archived flag without raising
-  - `FeatureFlag.enabled?` returns `true` for active enabled flag
-  - `FeatureFlag` with missing `metadata.hypothesis` → 422 on creation (per Rails platform spec)
-  - Archived `FeatureFlag` returns false from `enabled?` without raising
-  - `distinct_id` in API responses is UUID, never email
+## Section 5 — Repo Map (Draft Spec)
 
-- [ ] 4.2 — Add `FeatureFlagExposure` model and migration (`web/app/modules/analytics/models/feature_flag_exposure.rb`, `web/db/migrate/YYYYMMDD_create_analytics_feature_flag_exposures.rb`)
-  Required tests (from `specifications/platform/rails/product/analytics.md`):
-  - `feature_flag_exposures` table has index on `(org_id, flag_key, distinct_id)`
-  - Model validates presence of `org_id`, `flag_key`, `distinct_id`
+- [ ] [SPIKE] 5.1 — Research repo map implementation — run `./loop.sh research repo-map`
+  Determine: Which tree-sitter Go bindings to use? Token budget strategy? Integration with agent configs? Is `smacker/go-tree-sitter` still maintained and suitable?
+  Blocks: 5.2
 
-- [ ] 4.3 — Add `mode` column to `analytics_llm_metrics` table; update `LlmMetric` model and `RunStorageService#complete` to populate it (`web/db/migrate/YYYYMMDD_add_mode_to_analytics_llm_metrics.rb`, `web/app/modules/analytics/models/llm_metric.rb`, `web/app/modules/agents/services/run_storage_service.rb`)
-  Required tests:
-  - `LlmMetric` records include `mode` from the associated `AgentRun`
-  - `GET /api/analytics/llm?mode=build` filters by mode
+- [ ] 5.2 — Implement `go/cmd/repo-map` CLI binary (`go/cmd/repo-map/main.go`)
+  Required tests: produces markdown summary of Ruby classes/Go types/spec headings, respects `--budget` flag, `--focus` limits to directory, `--output` writes to file, deterministic output, excludes test/vendor files
+  Blocked by: 5.1
 
-- [ ] 4.4 — Fix cross-module boundary violation: `MetricsController#loops` reads `Agents::AgentRun` directly; extract a public service interface or query object in the agents module (`web/app/modules/agents/services/loop_stats_query.rb`, `web/app/modules/analytics/controllers/metrics_controller.rb`)
-  Required tests:
-  - `MetricsController` does not reference `Agents::AgentRun` directly
-  - `GET /api/analytics/loops` still returns correct data
+## Section 6 — UI (Proposed Specs — Phase 0 Scope TBD)
 
-### Section 5 — API Documentation Gaps
+These specs have `status: proposed`. They describe server-rendered HTML views that would be useful for Phase 0 local development but are not required by any active spec's acceptance criteria.
 
-- [ ] 5.1 — Add rswag request specs and swagger entries for `FeatureFlagsController` (GET index, POST create, PATCH update) (`web/spec/requests/analytics/feature_flags_spec.rb`, `web/swagger/v1/swagger.yaml`)
-  Required tests (from `specifications/platform/rails/system/api-standards.md`):
-  - `GET /api/feature_flags` returns 200 with active flags; 401 unauthenticated
-  - `POST /api/feature_flags` returns 201 on success; 422 on duplicate key; 422 on missing hypothesis; 401 unauthenticated
-  - `PATCH /api/feature_flags/:key` returns 200 on success; 404 not found; 401 unauthenticated
-  - `rake rswag:specs:swaggerize` exits 0 after changes
+- [ ] [SPIKE] 6.1 — Research agent runs UI feasibility — review `specifications/system/agent-runs-ui.md`
+  Determine: Is this in Phase 0 scope? What layout/styling patterns exist? Does the app have any existing views to follow?
+  Blocks: 6.2
 
-- [ ] 5.2 — Add rswag entry for `POST /api/batch` to `swagger/v1/swagger.yaml` (`web/spec/requests/batch_spec.rb`, `web/swagger/v1/swagger.yaml`)
-  Required tests:
-  - `GET /api/docs` lists `/api/batch` endpoint
-  - `rake rswag:specs:swaggerize` exits 0
+- [ ] 6.2 — Implement agent runs UI (`web/app/modules/agents/controllers/agent_runs_html_controller.rb`, views)
+  Required tests: GET /agent_runs returns 200 with paginated list, GET /agent_runs/:id returns 200 with turn list, auth required
+  Blocked by: 6.1
 
-### Section 6 — Agent Dockerfile Fix
+- [ ] [SPIKE] 6.3 — Research analytics dashboard UI feasibility — review `specifications/system/analytics-dashboard-ui.md`
+  Determine: Is this in Phase 0 scope? Dependencies on existing data?
+  Blocks: 6.4
 
-- [ ] 6.1 — Create `infra/run-tests.sh` script (referenced in `Dockerfile.agent` but missing from repo) (`infra/run-tests.sh`)
-  Required tests:
-  - `docker compose -f infra/docker-compose.yml build agent` exits 0
-  - `run-tests` script delegates to runner sidecar `POST /test` endpoint
+- [ ] 6.4 — Implement analytics dashboard UI (`web/app/modules/analytics/controllers/dashboard_controller.rb`, views)
+  Required tests: GET /analytics returns 200 with summary cards, GET /analytics/llm returns 200 with cost breakdown, auth required
+  Blocked by: 6.3
 
-### Section 7 — Infra Acceptance Criteria Verification
+## Section 7 — Log Tail Relay (Proposed)
 
-- [ ] 7.1 — Verify Phase 0 infra acceptance criteria: `docker compose up` starts all services; rails responds on port 3000; test suite passes in container (`infra/docker-compose.yml`, `infra/docker-compose.test.yml`)
-  Required tests (from `specifications/system/infrastructure/concept.md`):
-  - `docker compose -f infra/docker-compose.yml up` → rails responds on port 3000
-  - `docker compose -f infra/docker-compose.test.yml run --rm test` → `bundle exec rspec` exits 0
-  - Postgres not bound to 0.0.0.0
-  - Image tags use git SHA, not `latest`
-  - `infra/k8s/` and `infra/nixos/` do not exist
+- [ ] [SPIKE] 7.1 — Research log tail relay approach — review `specifications/system/log-tail-relay.md`
+  Determine: Which approach (file relay, HTTP endpoint, clipboard/pipe)? Is this needed for Phase 0?
+  Note: Spec status is `proposed`. Low priority — agent sandbox limitation is documented in AGENTS.md as a known constraint.
 
-### Section 8 — Reference Graph (Spike — unfamiliar domain)
+## Section 8 — CI Drift Detection (Reference Graph Priority 4)
 
-- [ ] 8.1 — [SPIKE] Research reference graph implementation — run `./loop.sh research 8.1` (see specifications/skills/tools/research.md)
-  Covers: `specifications/system/reference-graph/concept.md` — controlled commit skill, Go reference parser, LEDGER.jsonl schema, spec reference tags in tests, CI drift detection. Blocks 8.2–8.6.
+Out of scope for Phase 0. Requires CI (Phase 1). Documented here to prevent re-planning.
 
-- [ ] 8.2 — Implement controlled commit skill (shell script or Ruby rake task) that atomically commits code + appends LEDGER.jsonl + updates IMPLEMENTATION_PLAN.md (`scripts/commit.sh` or `lib/tasks/commit.rake`) [blocked by 8.1]
-  Required tests (from `specifications/system/reference-graph/concept.md`):
-  - Controlled commit atomically stages code + LEDGER.jsonl + IMPLEMENTATION_PLAN.md in one git commit
-  - LEDGER.jsonl is append-only — entries never modified or deleted
-  - If commit fails, nothing is recorded
+## Section 9 — Reference Graph Web UI (Priority 5)
 
-- [ ] 8.3 — Implement Go reference parser CLI (`go/cmd/parser/main.go`) [blocked by 8.1, 1.1]
-  Required tests:
-  - `go test ./...` exits 0
-  - Parser produces JSON graph from files + git + LEDGER.jsonl
-  - Parser is deterministic — same inputs always produce same output
-  - Parser runs as standalone binary with no runtime dependencies
-  - `spec:` tags in RSpec files parsed and appear as edges
-  - `blocked-by` references in plan items parsed as dependency edges
-  - PR nodes emitted with edges to commits, tasks, spec sections
+- [ ] [SPIKE] 9.1 — Research reference graph web UI — review `specifications/system/reference-graph/concept.md` § Read-Only Web UI
+  Determine: What views are needed (current, open, condensed)? What data does the parser output? Server-rendered HTML consuming JSON from the Go parser?
+  Blocks: 9.2
 
-- [ ] 8.4 — Add `spec:` metadata tags to existing RSpec files for key spec sections (`web/spec/`) [blocked by 8.1]
-  Required tests:
-  - At least one RSpec file per module has `spec:` tag linking to its spec section
-  - Reference parser resolves these tags as edges in the graph
+- [ ] 9.2 — Implement reference graph web UI (views consuming parser JSON output)
+  Required tests: GET /graph/current returns 200, GET /graph/open returns 200 with filterable plan items, GET /graph/condensed returns 200 with collapsible tree
+  Blocked by: 9.1
 
-- [ ] 8.5 — Implement read-only web UI for reference graph (current/open/condensed views) (`web/app/controllers/`, `web/app/views/`) [blocked by 8.3]
-  Required tests (from `specifications/system/reference-graph/concept.md`):
-  - Current view renders in-progress beat and ancestor chain
-  - Open view lists all non-done plan items, filterable by status
-  - Condensed view renders full project tree with text search
+## Notes
 
-- [ ] 8.6 — CI drift detection step (Phase 0: rake task that compares spec content hashes) (`lib/tasks/drift_check.rake`) [blocked by 8.1]
-  Required tests:
-  - Rake task flags spec sections that changed since linked tests last passed
-  - Does not fail the build — surfaces drift for review
-
-### Section 9 — Agent Runs UI
-
-- [ ] 9.1 — [SPIKE] Research agent-runs UI design — run `./loop.sh research 9.1` (see specifications/skills/tools/research.md)
-  Covers: `specifications/system/agent-runs-ui.md` — what views are needed, Rails view conventions. Blocks 9.2.
-
-- [ ] 9.2 — Implement agent runs UI (server-rendered views) [blocked by 9.1]
-  Required tests (from `specifications/system/agent-runs-ui.md`):
-  - Agent runs list view renders
-  - Agent run detail view shows turns
-  - Human input form submits to `POST /api/agent_runs/:id/input`
-
-### Section 10 — Analytics Dashboard UI
-
-- [ ] 10.1 — [SPIKE] Research analytics dashboard UI design — run `./loop.sh research 10.1` (see specifications/skills/tools/research.md)
-  Covers: `specifications/system/analytics-dashboard-ui.md`. Blocks 10.2.
-
-- [ ] 10.2 — Implement analytics dashboard UI (server-rendered views) [blocked by 10.1]
-  Required tests (from `specifications/system/analytics-dashboard-ui.md`):
-  - Dashboard renders LLM cost summary
-  - Dashboard renders loop run counts and failure rates
-
-### Section 11 — Coverage Floor
-
-- [ ] 11.1 — Verify SimpleCov coverage floor ≥ 85% across all modules (`web/spec/spec_helper.rb` or `web/spec/rails_helper.rb`)
-  Required tests:
-  - `bundle exec rspec` exits 0 with coverage ≥ 85%
-  - Any `# :nocov:` exclusions have explanatory comments
-
----
-
-## Dependency Order
-
-```
-1.1 → 3.1 → 3.2
-1.1 → 8.3
-2.1 → 2.2 → 3.2
-3.1 → 3.2
-4.1 (independent)
-4.2 (independent)
-4.3 (independent)
-4.4 (independent)
-5.1 (independent — spec already exists, needs update)
-5.2 (independent)
-6.1 (independent)
-7.1 → depends on 3.2 for full stack
-8.1 → 8.2, 8.3, 8.4, 8.6
-8.3 → 8.5
-9.1 → 9.2
-10.1 → 10.2
-11.1 (independent — run after all other tasks)
-```
-
-## Recommended Build Order
-
-1. **1.1** — Go module foundation (unblocks everything Go)
-2. **4.1, 4.2, 4.3, 4.4** — Analytics gaps (independent, high value)
-3. **5.1, 5.2** — Swagger gaps (independent, required for API completeness)
-4. **6.1** — run-tests.sh (quick fix, unblocks agent image build)
-5. **2.1** (spike) → **2.2** — Analytics sidecar
-6. **3.1** → **3.2** — Go Dockerfile + compose wiring
-7. **7.1** — Full stack verification
-8. **8.1** (spike) → **8.2, 8.3, 8.4, 8.6** — Reference graph
-9. **9.1** (spike) → **9.2** — Agent runs UI
-10. **10.1** (spike) → **10.2** — Analytics dashboard UI
-11. **8.5** — Reference graph web UI (after parser)
-12. **11.1** — Coverage floor verification
+- **Ledger/Knowledge removal**: Already complete. Tables dropped, models removed, AgentRun uses string `source_ref` instead of FK to ledger nodes.
+- **`infra/k8s/` and `infra/nixos/`**: Must NOT exist until Phase 2 is explicitly planned. Confirmed absent. ✅
+- **Go binaries**: `go/runner` and `go/reference-parser` pre-built binaries exist in repo. `go/cmd/analytics` source exists with tests.
+- **Swagger coverage**: All active API endpoints are documented. `rake rswag:specs:swaggerize` should exit 0.
+- **Test suite**: 354+ examples, 98%+ coverage. All modules have model specs, service specs, request specs, and job specs.

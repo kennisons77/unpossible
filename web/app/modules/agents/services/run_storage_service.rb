@@ -31,10 +31,12 @@ module Agents
         org_id: run.org_id,
         provider: run.provider,
         model: run.model,
+        mode: run.mode,
         agent_run_id: run.id,
         input_tokens: run.input_tokens || 0,
         output_tokens: run.output_tokens || 0,
-        cost_estimate_usd: run.cost_estimate_usd || 0
+        cost_estimate_usd: run.cost_estimate_usd || 0,
+        duration_ms: run.duration_ms
       )
       run
     end

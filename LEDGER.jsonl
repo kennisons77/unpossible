@@ -4,3 +4,4 @@
 {"ts":"2026-04-18T18:35:37Z","type":"spec_removed","path":"specifications/system/ledger/ui.md","reason":"Superseded by specifications/system/reference-graph/concept.md"}
 {"ts":"2026-04-18T18:35:37Z","type":"spec_removed","path":"specifications/system/knowledge/requirements.md","reason":"Knowledge module removed per specifications/system/reference-graph/concept.md"}
 {"ts":"2026-04-18T18:35:37Z","type":"spec_removed","path":"specifications/system/knowledge/concept.md","reason":"Knowledge module removed per specifications/system/reference-graph/concept.md"}
+{"ts":"2026-05-15T17:59:20Z","type":"status","ref":"4.1","from":"todo","to":"done","sha":null,"reason":"research complete, controlled-commit.sh already existed, commit.md skill written, build loop updated"}

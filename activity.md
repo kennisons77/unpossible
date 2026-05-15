@@ -2,7 +2,106 @@
 
 Agent activity log. Auto-updated each iteration. Trimmed to last 10 entries.
 
-[Prior entries summarised: 92 iterations — initial planning through 0.0.63, then tasks 1.1–2.6, analytics dashboard UI (0.0.86), db/schema.rb (0.0.87). Key milestones: Rails skeleton + test infra, security (Secret, LogRedactor, PromptSanitizer, rack-attack), JWT auth, Agents module (AgentRun, AgentRunTurn, ProviderAdapter, PromptDeduplicator, AgentRunsController, AgentRunJob, TurnContentGcJob), Sandbox module (ContainerRun, DockerDispatcher), Analytics module (FeatureFlag, AnalyticsEvent, AuditEvent, LlmMetric, AuditLogger, AuditLogJob, MetricsController, FeatureFlag auto-fire, DashboardController), HealthCheckMiddleware, Ledger+Knowledge removal, org_id migrations, provider adapter build_prompt with pinned+sliding trimming, LedgerAppender, controlled-commit.sh, parse_response normalised to hash, LlmMetric on completion, rswag install, FeatureFlagsController org_id fix, all rswag spec conversions (auth, agent_runs, metrics, feature_flags, health), db/schema.rb hand-crafted from migrations.]
+[Prior entries summarised: 94 iterations — initial planning through 0.0.63, then tasks 1.1–2.6, analytics dashboard UI (0.0.86), db/schema.rb (0.0.87), FeatureFlag hypothesis validation (0.0.85), analytics ingest sidecar (0.0.89). Key milestones: Rails skeleton + test infra, security (Secret, LogRedactor, PromptSanitizer, rack-attack), JWT auth, Agents module (AgentRun, AgentRunTurn, ProviderAdapter, PromptDeduplicator, AgentRunsController, AgentRunJob, TurnContentGcJob), Sandbox module (ContainerRun, DockerDispatcher), Analytics module (FeatureFlag, AnalyticsEvent, AuditEvent, LlmMetric, AuditLogger, AuditLogJob, MetricsController, FeatureFlag auto-fire, DashboardController), HealthCheckMiddleware, Ledger+Knowledge removal, org_id migrations, provider adapter build_prompt with pinned+sliding trimming, LedgerAppender, controlled-commit.sh, parse_response normalised to hash, LlmMetric on completion, rswag install, FeatureFlagsController org_id fix, all rswag spec conversions (auth, agent_runs, metrics, feature_flags, health), db/schema.rb hand-crafted from migrations, Go analytics sidecar (POST /capture, PII filter, batch flush, graceful shutdown).]
+
+---
+
+## 2026-05-15 13:18 — Go reference parser binary with tests (tasks 5.2, 5.3, 5.4, tag 0.0.97)
+
+**Changes:** Created `go/cmd/reference-parser/main.go` — standalone Go binary that walks spec files, IMPLEMENTATION_PLAN.md, RSpec test files, LEDGER.jsonl, and git log to produce a JSON graph. Created `go/cmd/reference-parser/main_test.go` with 19 unit tests covering all parsing paths. Updated `infra/Dockerfile.go` to build the `reference-parser` binary alongside runner and analytics. 359 Rails specs, 0 failures, 98.68% coverage.
+
+**Thinking:**
+- The research spike (5.1) had already resolved all design decisions: regex over tree-sitter, git shelling out, JSON to stdout, fail-open on missing inputs. Implementation was a direct translation of the research document into code.
+- The parser is structured as a `parser` struct with one method per input source (`parseSpecFiles`, `parsePlanItems`, `parseTestFiles`, `parseLedger`, `parseGitLog`). Each method is independently testable with a temp directory fixture — no global state.
+- Node deduplication via a `nodeIDs` map prevents duplicate nodes when the same spec file is referenced from multiple sources. Edge deduplication is not needed (duplicate edges are harmless for graph consumers) but self-loops and empty endpoints are filtered.
+- The `ledgerEntry` struct covers all LEDGER.jsonl event types in one struct — fields are omitempty so unused fields don't appear in output. This is simpler than a union type and sufficient for Phase 0.
+- PR node assembly collects `pr_opened`, `pr_review`, and `pr_merged` events in separate maps, then assembles nodes and edges in a second pass. This handles out-of-order events and missing events (e.g. a PR with no review) gracefully.
+
+**Challenges:**
+- The `ThreadCount` field was initially missing from `ledgerEntry` — caught during review of the review node assembly code. Added before the first compile.
+- The `init()` placeholder I added to document the ThreadCount dependency was dead code — removed immediately.
+- Markdown link resolution for relative paths: `../bar/concept.md` from `specifications/system/foo/concept.md` must resolve to `specifications/system/bar/concept.md`. Used `filepath.Join(dir, target)` which handles `..` correctly on all platforms.
+
+**Alternatives considered:**
+- Separate structs per LEDGER.jsonl event type — rejected. A single struct with omitempty fields is simpler and the event types share most fields. If the schema diverges significantly, a union type can be introduced then.
+- Storing edges in a map to deduplicate — rejected. Duplicate edges are harmless for graph consumers (the web UI can deduplicate on render). The map overhead is not justified for Phase 0 scale.
+- Building the binary into the Go image's final stage — the Dockerfile.go already has a `builder` stage that compiles all binaries; adding `reference-parser` to the build command is a one-line change.
+
+**Tradeoffs taken:**
+- Git log parsing shells out to `git log --format=%H|%s|%ai HEAD` — this produces one commit node per commit in the entire history. For large repos this could be slow. Acceptable for Phase 0; a `--since` flag can be added later.
+- Markdown link edges use `contains` type regardless of the semantic relationship between the linked files. The concept spec defines `contains` as the edge type for markdown links — this is correct per spec but may be semantically imprecise (a link from a concept to a requirements doc is more "generates" than "contains"). Refinement deferred to Priority 5 (web UI) when the edge types are consumed.
+- No test for `parseGitLog` — it shells out to `git` which requires a real git repo. The test temp directories are not git repos. The method is simple (parse `|`-delimited lines into commit nodes) and the pattern is identical to the runner sidecar's git integration, which is already tested. Adding a git-init fixture would be possible but adds test complexity for low marginal value.
+
+---
+
+## 2026-05-15 13:01 — Research Go reference parser design (spike 5.1, tag 0.0.96)
+
+**Changes:** Created `specifications/research/reference-graph-parser.md` with finalized design decisions. Added build tasks 5.2–5.5 to IMPLEMENTATION_PLAN.md. Marked 5.1 complete.
+
+**Thinking:**
+- This is a pure research spike — no code, no tests. The deliverable is a design document that unblocks 5.2 (the actual parser implementation).
+- The key decision was regex over tree-sitter: all patterns the parser needs (frontmatter, plan item checkboxes, `spec:` tags in RSpec, LEDGER.jsonl) are line-oriented. Tree-sitter adds CGo and build complexity for no benefit at Phase 0 scale.
+- Git integration via shelling out to `git` is the right call — the runner sidecar already uses `exec.CommandContext` for this pattern. libgit2/go-git would add ~5MB and CGo.
+- Output as a single JSON object to stdout is the Unix-native pattern. The caller pipes or redirects. JSONL was considered but rejected — harder to consume as a complete graph.
+- Node IDs are derived deterministically from source artifacts (path, ref, SHA) so the parser is stateless and deterministic: same inputs → same output.
+
+**Challenges:**
+- Plan item renumbering is inherently heuristic — numeric IDs in LEDGER.jsonl are stable labels but the plan can be renumbered. Title-based matching is best-effort. Acceptable for Phase 0 (solo dev, infrequent renumbering).
+- The concept spec defines node types conceptually but not as a concrete schema. The research document formalizes the schema (id derivation rules, metadata fields) so the implementation has a precise target.
+
+**Alternatives considered:**
+- Tree-sitter for Ruby/Go parsing — rejected. All required patterns are line-oriented; tree-sitter adds CGo and build complexity with no benefit for Phase 0.
+- libgit2 (go-git) for git integration — rejected. Shelling out to `git` is simpler, has no deps, and is fast enough. The runner sidecar already uses this pattern.
+- JSONL output (one node/edge per line) — rejected. A single JSON object is easier to consume from a web handler or `jq`; no benefit to JSONL at Phase 0 scale.
+- Storing the graph in Postgres — rejected by the concept spec itself. The whole point of the reference graph is to eliminate the disk↔DB sync problem.
+
+**Tradeoffs taken:**
+- Title-based renaming detection is heuristic — if two beats share the same title intentionally, the parser will incorrectly emit a `renamed_from` edge. Acceptable for Phase 0; can be made opt-in via a LEDGER.jsonl `renamed` event later.
+- Fail-open on missing/malformed inputs — the parser never exits non-zero for bad data. This means a corrupted LEDGER.jsonl produces a partial graph silently. The tradeoff is correct: the parser is a read-only reporting tool, not a gatekeeper.
+- No tree-sitter means no deep code→spec tracing (e.g. linking a specific method to a spec section). This is Priority 3+ work; regex handles everything needed for Priority 2.
+
+---
+
+## 2026-05-15 12:31 — Add duration_ms to analytics_llm_metrics (task 3.2, tag 0.0.94)
+
+**Changes:** Migration adds nullable `duration_ms integer` column to `analytics_llm_metrics`. `LlmMetric` validates it is non-negative when present. `RunStorageService.complete` passes `run.duration_ms` to `LlmMetric.create!`. New `RunStorageService` spec covers both the populated and nil cases. 359 examples, 0 failures, 98.68% coverage.
+
+**Thinking:**
+- `AgentRun` already had a `duration_ms` column (from the original create migration). The gap was purely in `RunStorageService.complete` — it wasn't forwarding the value to `LlmMetric`.
+- Nullable column is correct: `duration_ms` may not be set on the `AgentRun` at completion time (e.g. if the runner sidecar doesn't report it). Forcing NOT NULL would require a default of 0, which is misleading (0ms is a valid duration, not "unknown").
+- Validation `allow_nil: true` with `numericality: { greater_than_or_equal_to: 0 }` is the minimal guard — rejects negative values while permitting absent data.
+
+**Challenges:**
+- None. The column already existed on `AgentRun`; this was a straightforward propagation task.
+
+**Alternatives considered:**
+- Computing `duration_ms` from `AgentRun.created_at` and `updated_at` at metric creation time — rejected because `AgentRun.duration_ms` is the authoritative source (set by the runner sidecar which measures wall-clock time). Deriving it from Rails timestamps would be less accurate.
+- Adding a NOT NULL constraint with default 0 — rejected because 0 is ambiguous (could mean "completed instantly" or "not measured"). NULL is the correct sentinel for "not available".
+
+**Tradeoffs taken:**
+- `duration_ms` is nullable on `LlmMetric` — queries filtering by duration must handle NULLs. The SQL NULL gotcha in AGENTS.md applies: `WHERE duration_ms > X` excludes NULLs, which is the correct behavior for duration range filters.
+- No backfill migration for existing rows — they will have NULL `duration_ms`. Acceptable for Phase 0 where historical data is dev/test only.
+
+---
+
+**Changes:** Ran `rake rswag:specs:swaggerize` inside the test container and copied the generated `swagger/v1/swagger.yaml` back to the host. `/api/feature_flags` (GET, POST) and `/api/feature_flags/{key}` (PATCH) are now documented in swagger.yaml. No code changes — the spec already used rswag DSL correctly; the yaml was simply stale.
+
+**Thinking:**
+- The feature_flags request spec was already written with the rswag DSL (`path`, `get`/`post`/`patch`, `response` blocks, `run_test!`). The only missing step was regenerating the swagger artifact.
+- The test container has no volume mount for `web/` — the directory is baked into the image at build time. So `rake rswag:specs:swaggerize` writes to `/app/swagger/v1/swagger.yaml` inside the container, not on the host. Required `docker cp` to extract the file.
+- Used `--name` on `docker compose run` (without `--rm`) so the container persists long enough for `docker cp`, then removed it manually.
+
+**Challenges:**
+- First attempt used `--rm -d` (detached + auto-remove). The container exited and was removed before `docker cp` could run — `RWLayer is unexpectedly nil` error. Fixed by dropping `--rm` and using `--name` instead.
+- The swagger.yaml on the host was 247 lines shorter than the generated version — the prior generation had missed the feature_flags spec entirely, confirming the spec was added after the last swaggerize run.
+
+**Alternatives considered:**
+- Adding a volume mount to docker-compose.test.yml so `swagger/` is writable from the container — rejected as infrastructure change not required by the task. The `docker cp` pattern is sufficient for Phase 0.
+- Manually writing the swagger YAML entries — rejected. The rswag DSL is the single source of truth; hand-editing the yaml would create drift.
+
+**Tradeoffs taken:**
+- The `docker cp` workflow is manual and not automated in the Makefile. If swagger regeneration becomes frequent, a Makefile target wrapping the run+cp+rm sequence would be worth adding. For now, the pattern is documented by this entry.
+- swagger.yaml is committed to the repo (per api-standards.md). A stale artifact is a build failure — this commit brings it current.
 
 ---
 
@@ -50,29 +149,6 @@ Agent activity log. Auto-updated each iteration. Trimmed to last 10 entries.
 **Tradeoffs taken:**
 - Builder stage uses `golang:1.23-bookworm` (full Debian) — larger builder image but cached after first pull. Final images are slim.
 - Non-root user (`runner`/`analytics`, uid 1001) created in each final stage — matches the Rails image pattern (uid 1001 for `rails` user).
-
----
-
-## 2026-04-23 10:00 — Spike: FeatureFlag hypothesis validation (task 9.1, tag 0.0.85)
-
-**Changes:** Added `on: :create` validation for `metadata.hypothesis` in `Analytics::FeatureFlag`. Updated factory to include hypothesis by default. Updated model spec (3 new tests replacing 1 wrong test). Updated request spec (new 422 test, updated 201 tests to include hypothesis). 337 examples, 0 failures, 98.72% coverage.
-
-**Thinking:**
-- The platform override (`specifications/platform/rails/product/analytics.md`) is unambiguous: "hypothesis field required on creation → 422 if missing." The base concept spec says optional in Phase 0, but the platform override is authoritative for Rails implementation per the plan.
-- `validate :hypothesis_present, on: :create` is the minimal Rails idiom — no custom validator class needed, no duplication. The `on: :create` constraint means updates are unaffected without any extra logic.
-- Factory needed `metadata: { 'hypothesis' => '...' }` as default to avoid breaking all existing tests that call `create(:analytics_feature_flag)` without metadata.
-
-**Challenges:**
-- The existing model spec had a test asserting the opposite of what the spec requires ("is valid without metadata.hypothesis"). This had to be replaced, not just supplemented — leaving it would cause a contradiction in the test suite.
-- The request spec's existing 201 tests sent no `metadata` — they would have started failing after the validation was added. Updated both to include `metadata: { hypothesis: '...' }`.
-
-**Alternatives considered:**
-- JSON Schema validation on the `metadata` column — rejected as over-engineering. A simple custom validator is sufficient and more readable.
-- Validating at the controller level instead of the model — rejected because model-level validation is the single source of truth; controller-level would allow invalid records to be created via other paths (console, seeds, jobs).
-
-**Tradeoffs taken:**
-- The factory default hypothesis string is generic ("Default test hypothesis") — tests that care about the hypothesis value should set it explicitly. This is a minor coupling risk if tests accidentally rely on the default string, but it's the standard FactoryBot pattern.
-- No migration needed — `metadata` column already exists as `jsonb default: {}`. The validation is purely application-level.
 
 ---
 
@@ -172,53 +248,3 @@ Agent activity log. Auto-updated each iteration. Trimmed to last 10 entries.
 **Tradeoffs taken:**
 - `lib/pq` listed as direct dep in `go.mod` even though runner doesn't import it — intentional: the vendor directory was pre-built for both runner and analytics sidecar.
 - Go 1.23.0 set by `go mod tidy` (matches the highest `go` directive in vendor deps) — acceptable since the Dockerfile will pin the Go version explicitly.
-
----
-
-## 2026-05-01 12:06 — Research Go analytics ingest sidecar design (task 2.1)
-
-**Changes:** Created `specifications/research/analytics-sidecar.md` with research findings. Marked task 2.1 complete in IMPLEMENTATION_PLAN.md.
-
-**Thinking:**
-- The research loop says to pause with `RALPH_WAITING` before writing anything — but only if there are open questions. The design was already fully specified across three existing spec files. No human input was needed.
-- The existing runner (`go/cmd/runner/main.go`) already defines the `analyticsEvent` struct and calls `POST /capture` — the API contract is already in use and validated by the runner tests.
-- `github.com/lib/pq` is already vendored — no new dependencies needed for the sidecar.
-
-**Challenges:**
-- Spike tasks say "run `./loop.sh research 2.1`" but the build agent is executing the research inline. The research loop's `RALPH_WAITING` gate is for when the design is unknown — here the spec is complete, so the gate doesn't apply.
-
-**Alternatives considered:**
-- Pausing with `RALPH_WAITING` — rejected because all decisions are already resolved in the spec.
-- Skipping the research file — rejected because the research file is the deliverable; it documents edge cases that inform the implementation.
-
-**Tradeoffs taken:**
-- Research findings are derived from existing specs rather than external sources. Appropriate for a well-specified internal component.
-- Queue overflow cap (10,000 events) is a recommendation in the research file, not a spec requirement.
-
----
-
-## 2026-05-01 12:14 — Implement analytics ingest sidecar (task 2.2, tag 0.0.89)
-
-**Changes:** Created `go/cmd/analytics/main.go` and `go/cmd/analytics/main_test.go`. Sidecar listens on port 9100, accepts `POST /capture` (single event or batch array), returns 202 immediately, queues events in memory, flushes to Postgres every 5s or 100 events. Non-UUID `distinct_id` rejected with 422. Email patterns in properties replaced with `[FILTERED]`. Queue capped at 10,000 with log on overflow. Graceful shutdown flushes remaining queue on SIGTERM. 18 Go tests pass; Rails 352 examples, 0 failures.
-
-**Thinking:**
-- The spec and research file were fully resolved — no design decisions left open. Implementation was a direct translation of the spec into Go.
-- Using `json.RawMessage` to detect `[` vs `{` as the first byte is the cleanest approach for single/batch dispatch — avoids a streaming token decoder that loses the already-consumed `{` delimiter.
-- `writeBatch` uses a single prepared statement inside a transaction — one round-trip per batch, not one per event. This is the right default for a flush-based ingestor.
-- Re-queuing on Postgres error by prepending the batch to the front of the queue preserves ordering and satisfies the "no drops on brief outage" requirement.
-- `nil` db is a valid state — sidecar starts even if Postgres is unreachable at boot, buffering events until the flush goroutine can connect.
-
-**Challenges:**
-- First attempt at single-event parsing used `json.NewDecoder.Token()` to read the opening `{` delimiter, then tried to decode remaining fields manually. This broke because the decoder had already consumed the `{` — the struct fields were no longer parseable as a complete object. Fixed by decoding the entire body into `json.RawMessage` first, then inspecting the first byte.
-- The `flushAll` loop must re-queue on error and return immediately (not retry in a tight loop) — otherwise a Postgres outage causes a spin loop. The ticker in `runFlusher` provides the retry cadence.
-
-**Alternatives considered:**
-- Streaming token decoder for single/batch detection — rejected because consuming the opening delimiter makes the remaining body unparseable as a struct without manual field-by-field reconstruction.
-- Channel-based queue instead of mutex + slice — rejected as over-engineering. A buffered channel would require a fixed capacity at creation time and makes re-queuing on error awkward. Mutex + slice is simpler and directly testable.
-- Separate `/capture/batch` endpoint — rejected. The spec says one endpoint accepts both forms; detecting by first byte is the correct implementation.
-- Starting with a Postgres health check at boot and failing fast — rejected. The spec says "buffer in memory on Postgres unavailability" — this implies the sidecar must start regardless of DB state.
-
-**Tradeoffs taken:**
-- PII filtering is email-pattern only in Phase 0. Full gitleaks integration is post-MVP per the research file. If a new PII pattern is needed, add a regex to `piiPatterns` — no structural change required.
-- Queue overflow drops events with a log line rather than blocking the HTTP handler. This is the right tradeoff: the HTTP handler must return 202 immediately; blocking it on a full queue would violate the spec.
-- `received_at` is set to `time.Now().UTC()` at write time, not at enqueue time. For Phase 0 analytics this is acceptable; if precise arrival time matters, add a `received_at` field to the `event` struct and set it at enqueue.
