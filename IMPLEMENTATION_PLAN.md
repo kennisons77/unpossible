@@ -61,11 +61,11 @@ Phase 0 — Local development. `docker compose up` starts the stack, `docker com
 
 ## Section 2 — Infra Hardening
 
-- [ ] 2.1 — Postgres port binding: verify Postgres is not bound to `0.0.0.0` in compose files (`infra/docker-compose.yml`, `infra/docker-compose.test.yml`)
+- [x] 2.1 — Postgres port binding: verify Postgres is not bound to `0.0.0.0` in compose files (`infra/docker-compose.yml`, `infra/docker-compose.test.yml`)
   Required tests: no `ports:` directive on postgres service in either compose file (manual inspection — no exposed ports means internal-only on bridge network)
   Note: Current compose files do NOT expose postgres ports — this is already correct. ✅ DONE.
 
-- [ ] 2.2 — Image tags use git SHA in compose files (`infra/docker-compose.yml`)
+- [x] 2.2 — Image tags use git SHA in compose files (`infra/docker-compose.yml`)
   Required tests: `image:` directives use `${GIT_SHA:-dev}` variable, never `latest`
   Note: Current compose file uses `${GIT_SHA:-dev}` for all custom images. pgvector uses `pgvector/pgvector:pg16` (pinned tag, not `latest`). ✅ DONE.
 
@@ -73,25 +73,25 @@ Phase 0 — Local development. `docker compose up` starts the stack, `docker com
 
 The reference parser exists and produces a JSON graph from specs, LEDGER.jsonl, and git. The concept spec has additional acceptance criteria around PR nodes, git notes, and spec tags that may not be fully implemented.
 
-- [ ] [SPIKE] 3.1 — Research reference graph parser completeness — run `./loop.sh research reference-graph-parser`
-  Determine: Does the parser handle `pr_opened`/`pr_review`/`pr_merged` events? Does it resolve git notes on merge commits? Does it parse `spec:` tags in RSpec files? Does it handle `blocked-by` in plan items?
+- [x] [SPIKE] 3.1 — Research reference graph parser completeness — run `./loop.sh research reference-graph-parser`
+  Findings: PR nodes (pr_opened/pr_review/pr_merged) ✅ fully implemented in parseLedger(). spec: tags in RSpec ✅ fully implemented in parseTestFiles(). blocked-by in plan items ✅ fully implemented in parsePlanItems(). Git notes on merge commits ❌ NOT implemented — parser reads git log but never calls `git notes show {sha}`. This gap is low priority (no consumer of git notes data yet); tracked as a future beat if the web UI needs it.
   Blocks: 3.2, 3.3
 
-- [ ] 3.2 — Add PR node support to reference parser if missing (`go/cmd/reference-parser/main.go`)
-  Required tests: parser emits PR nodes from `pr_opened` events, links commits via `sha_first`/`sha_last`, attaches review data from `pr_review` events, marks merged from `pr_merged` events
+- [x] 3.2 — Add PR node support to reference parser if missing (`go/cmd/reference-parser/main.go`)
+  Note: Already implemented. TestParseLedger_PRNodes covers all required acceptance criteria. ✅ DONE.
   Blocked by: 3.1
 
-- [ ] 3.3 — Add `spec:` tag parsing from RSpec files to reference parser if missing (`go/cmd/reference-parser/main.go`)
-  Required tests: parser finds `spec:` metadata in RSpec describe blocks, emits `refs` edges from test node to spec section node
+- [x] 3.3 — Add `spec:` tag parsing from RSpec files to reference parser if missing (`go/cmd/reference-parser/main.go`)
+  Note: Already implemented. TestParseTestFiles_SpecTagEdge covers all required acceptance criteria. ✅ DONE.
   Blocked by: 3.1
 
 ## Section 4 — Reference Graph: PR Skill
 
-- [ ] [SPIKE] 4.1 — Research PR skill implementation — review `specifications/skills/tools/pr.md` and determine what's needed
-  Determine: What does the PR skill need to do? Is `gh pr create` sufficient? What metadata goes into LEDGER.jsonl? How does it link to task IDs and spec refs?
+- [x] [SPIKE] 4.1 — Research PR skill implementation — review `specifications/skills/tools/pr.md` and determine what's needed
+  Findings: `gh pr create` is sufficient for PR creation. LEDGER.jsonl `pr_opened` event format is already defined in the reference parser (pr_number, branch, task_ids, spec_refs, sha_first, sha_last). Task IDs come from LEDGER.jsonl entries matching commits in the branch range. Spec refs come from IMPLEMENTATION_PLAN.md comment metadata. Script pattern follows `scripts/controlled-commit.sh`. `gh` CLI is the only external dependency.
   Blocks: 4.2
 
-- [ ] 4.2 — Implement PR skill script (`scripts/pr.sh` or equivalent)
+- [x] 4.2 — Implement PR skill script (`scripts/pr.sh` or equivalent)
   Required tests: creates PR via `gh pr create`, appends `pr_opened` event to LEDGER.jsonl with task_ids/spec_refs/sha_first/sha_last, exits 0 on success
   Blocked by: 4.1
 
