@@ -2,7 +2,30 @@
 
 Agent activity log. Auto-updated each iteration. Trimmed to last 10 entries.
 
-[Prior entries summarised: 92 iterations — initial planning through 0.0.63, then tasks 1.1–2.6, analytics dashboard UI (0.0.86), db/schema.rb (0.0.87). Key milestones: Rails skeleton + test infra, security (Secret, LogRedactor, PromptSanitizer, rack-attack), JWT auth, Agents module (AgentRun, AgentRunTurn, ProviderAdapter, PromptDeduplicator, AgentRunsController, AgentRunJob, TurnContentGcJob), Sandbox module (ContainerRun, DockerDispatcher), Analytics module (FeatureFlag, AnalyticsEvent, AuditEvent, LlmMetric, AuditLogger, AuditLogJob, MetricsController, FeatureFlag auto-fire, DashboardController), HealthCheckMiddleware, Ledger+Knowledge removal, org_id migrations, provider adapter build_prompt with pinned+sliding trimming, LedgerAppender, controlled-commit.sh, parse_response normalised to hash, LlmMetric on completion, rswag install, FeatureFlagsController org_id fix, all rswag spec conversions (auth, agent_runs, metrics, feature_flags, health), db/schema.rb hand-crafted from migrations.]
+[Prior entries summarised: 93 iterations — initial planning through 0.0.63, then tasks 1.1–2.6, analytics dashboard UI (0.0.86), db/schema.rb (0.0.87), FeatureFlag hypothesis validation (0.0.85). Key milestones: Rails skeleton + test infra, security (Secret, LogRedactor, PromptSanitizer, rack-attack), JWT auth, Agents module (AgentRun, AgentRunTurn, ProviderAdapter, PromptDeduplicator, AgentRunsController, AgentRunJob, TurnContentGcJob), Sandbox module (ContainerRun, DockerDispatcher), Analytics module (FeatureFlag, AnalyticsEvent, AuditEvent, LlmMetric, AuditLogger, AuditLogJob, MetricsController, FeatureFlag auto-fire, DashboardController), HealthCheckMiddleware, Ledger+Knowledge removal, org_id migrations, provider adapter build_prompt with pinned+sliding trimming, LedgerAppender, controlled-commit.sh, parse_response normalised to hash, LlmMetric on completion, rswag install, FeatureFlagsController org_id fix, all rswag spec conversions (auth, agent_runs, metrics, feature_flags, health), db/schema.rb hand-crafted from migrations.]
+
+---
+
+## 2026-05-15 12:13 — Add feature_flags endpoints to swagger (task 2.2, tag 0.0.92)
+
+**Changes:** Ran `rake rswag:specs:swaggerize` inside the test container and copied the generated `swagger/v1/swagger.yaml` back to the host. `/api/feature_flags` (GET, POST) and `/api/feature_flags/{key}` (PATCH) are now documented in swagger.yaml. No code changes — the spec already used rswag DSL correctly; the yaml was simply stale.
+
+**Thinking:**
+- The feature_flags request spec was already written with the rswag DSL (`path`, `get`/`post`/`patch`, `response` blocks, `run_test!`). The only missing step was regenerating the swagger artifact.
+- The test container has no volume mount for `web/` — the directory is baked into the image at build time. So `rake rswag:specs:swaggerize` writes to `/app/swagger/v1/swagger.yaml` inside the container, not on the host. Required `docker cp` to extract the file.
+- Used `--name` on `docker compose run` (without `--rm`) so the container persists long enough for `docker cp`, then removed it manually.
+
+**Challenges:**
+- First attempt used `--rm -d` (detached + auto-remove). The container exited and was removed before `docker cp` could run — `RWLayer is unexpectedly nil` error. Fixed by dropping `--rm` and using `--name` instead.
+- The swagger.yaml on the host was 247 lines shorter than the generated version — the prior generation had missed the feature_flags spec entirely, confirming the spec was added after the last swaggerize run.
+
+**Alternatives considered:**
+- Adding a volume mount to docker-compose.test.yml so `swagger/` is writable from the container — rejected as infrastructure change not required by the task. The `docker cp` pattern is sufficient for Phase 0.
+- Manually writing the swagger YAML entries — rejected. The rswag DSL is the single source of truth; hand-editing the yaml would create drift.
+
+**Tradeoffs taken:**
+- The `docker cp` workflow is manual and not automated in the Makefile. If swagger regeneration becomes frequent, a Makefile target wrapping the run+cp+rm sequence would be worth adding. For now, the pattern is documented by this entry.
+- swagger.yaml is committed to the repo (per api-standards.md). A stale artifact is a build failure — this commit brings it current.
 
 ---
 
@@ -50,29 +73,6 @@ Agent activity log. Auto-updated each iteration. Trimmed to last 10 entries.
 **Tradeoffs taken:**
 - Builder stage uses `golang:1.23-bookworm` (full Debian) — larger builder image but cached after first pull. Final images are slim.
 - Non-root user (`runner`/`analytics`, uid 1001) created in each final stage — matches the Rails image pattern (uid 1001 for `rails` user).
-
----
-
-## 2026-04-23 10:00 — Spike: FeatureFlag hypothesis validation (task 9.1, tag 0.0.85)
-
-**Changes:** Added `on: :create` validation for `metadata.hypothesis` in `Analytics::FeatureFlag`. Updated factory to include hypothesis by default. Updated model spec (3 new tests replacing 1 wrong test). Updated request spec (new 422 test, updated 201 tests to include hypothesis). 337 examples, 0 failures, 98.72% coverage.
-
-**Thinking:**
-- The platform override (`specifications/platform/rails/product/analytics.md`) is unambiguous: "hypothesis field required on creation → 422 if missing." The base concept spec says optional in Phase 0, but the platform override is authoritative for Rails implementation per the plan.
-- `validate :hypothesis_present, on: :create` is the minimal Rails idiom — no custom validator class needed, no duplication. The `on: :create` constraint means updates are unaffected without any extra logic.
-- Factory needed `metadata: { 'hypothesis' => '...' }` as default to avoid breaking all existing tests that call `create(:analytics_feature_flag)` without metadata.
-
-**Challenges:**
-- The existing model spec had a test asserting the opposite of what the spec requires ("is valid without metadata.hypothesis"). This had to be replaced, not just supplemented — leaving it would cause a contradiction in the test suite.
-- The request spec's existing 201 tests sent no `metadata` — they would have started failing after the validation was added. Updated both to include `metadata: { hypothesis: '...' }`.
-
-**Alternatives considered:**
-- JSON Schema validation on the `metadata` column — rejected as over-engineering. A simple custom validator is sufficient and more readable.
-- Validating at the controller level instead of the model — rejected because model-level validation is the single source of truth; controller-level would allow invalid records to be created via other paths (console, seeds, jobs).
-
-**Tradeoffs taken:**
-- The factory default hypothesis string is generic ("Default test hypothesis") — tests that care about the hypothesis value should set it explicitly. This is a minor coupling risk if tests accidentally rely on the default string, but it's the standard FactoryBot pattern.
-- No migration needed — `metadata` column already exists as `jsonb default: {}`. The validation is purely application-level.
 
 ---
 
