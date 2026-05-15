@@ -12,16 +12,6 @@ components:
       scheme: bearer
       bearerFormat: JWT
 paths:
-  "/health":
-    get:
-      summary: Health check
-      tags:
-      - Health
-      responses:
-        '200':
-          description: database reachable
-        '503':
-          description: database unreachable
   "/api/agent_runs/start":
     post:
       summary: Start an agent run
@@ -141,6 +131,92 @@ paths:
                   type: string
               required:
               - content
+  "/api/feature_flags":
+    get:
+      summary: List feature flags
+      tags:
+      - Feature Flags
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: status
+        in: query
+        required: false
+        description: Filter by status (omit for active only, "archived" for all)
+        schema:
+          type: string
+      responses:
+        '200':
+          description: includes archived flags when status=archived
+        '401':
+          description: missing or invalid token
+    post:
+      summary: Create a feature flag
+      tags:
+      - Feature Flags
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: true
+        schema:
+          type: string
+      responses:
+        '201':
+          description: ignores org_id in params and uses token org_id
+        '422':
+          description: duplicate key returns unprocessable entity
+        '401':
+          description: missing or invalid token
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                key:
+                  type: string
+              required:
+              - key
+  "/api/feature_flags/{key}":
+    patch:
+      summary: Update a feature flag
+      tags:
+      - Feature Flags
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: key
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: updates enabled flag
+        '404':
+          description: unknown key returns not found
+        '401':
+          description: missing or invalid token
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                enabled:
+                  type: boolean
   "/api/analytics/llm":
     get:
       summary: LLM cost aggregated by provider and model
@@ -296,3 +372,55 @@ paths:
                   type: string
               required:
               - secret
+  "/api/batch":
+    post:
+      summary: Fan out sub-requests
+      tags:
+      - Batch
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: returns aggregated responses
+        '401':
+          description: missing or invalid token returns unauthorized
+        '422':
+          description: exceeds max batch size returns unprocessable entity
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                requests:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      method:
+                        type: string
+                      url:
+                        type: string
+                      body:
+                        type: object
+                    required:
+                    - method
+                    - url
+              required:
+              - requests
+  "/health":
+    get:
+      summary: Health check
+      tags:
+      - Health
+      responses:
+        '200':
+          description: database reachable
+        '503':
+          description: database unreachable
