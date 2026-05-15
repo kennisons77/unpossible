@@ -6,7 +6,27 @@ Agent activity log. Auto-updated each iteration. Trimmed to last 10 entries.
 
 ---
 
-## 2026-05-15 12:13 — Add feature_flags endpoints to swagger (task 2.2, tag 0.0.92)
+## 2026-05-15 12:31 — Add duration_ms to analytics_llm_metrics (task 3.2, tag 0.0.94)
+
+**Changes:** Migration adds nullable `duration_ms integer` column to `analytics_llm_metrics`. `LlmMetric` validates it is non-negative when present. `RunStorageService.complete` passes `run.duration_ms` to `LlmMetric.create!`. New `RunStorageService` spec covers both the populated and nil cases. 359 examples, 0 failures, 98.68% coverage.
+
+**Thinking:**
+- `AgentRun` already had a `duration_ms` column (from the original create migration). The gap was purely in `RunStorageService.complete` — it wasn't forwarding the value to `LlmMetric`.
+- Nullable column is correct: `duration_ms` may not be set on the `AgentRun` at completion time (e.g. if the runner sidecar doesn't report it). Forcing NOT NULL would require a default of 0, which is misleading (0ms is a valid duration, not "unknown").
+- Validation `allow_nil: true` with `numericality: { greater_than_or_equal_to: 0 }` is the minimal guard — rejects negative values while permitting absent data.
+
+**Challenges:**
+- None. The column already existed on `AgentRun`; this was a straightforward propagation task.
+
+**Alternatives considered:**
+- Computing `duration_ms` from `AgentRun.created_at` and `updated_at` at metric creation time — rejected because `AgentRun.duration_ms` is the authoritative source (set by the runner sidecar which measures wall-clock time). Deriving it from Rails timestamps would be less accurate.
+- Adding a NOT NULL constraint with default 0 — rejected because 0 is ambiguous (could mean "completed instantly" or "not measured"). NULL is the correct sentinel for "not available".
+
+**Tradeoffs taken:**
+- `duration_ms` is nullable on `LlmMetric` — queries filtering by duration must handle NULLs. The SQL NULL gotcha in AGENTS.md applies: `WHERE duration_ms > X` excludes NULLs, which is the correct behavior for duration range filters.
+- No backfill migration for existing rows — they will have NULL `duration_ms`. Acceptable for Phase 0 where historical data is dev/test only.
+
+---
 
 **Changes:** Ran `rake rswag:specs:swaggerize` inside the test container and copied the generated `swagger/v1/swagger.yaml` back to the host. `/api/feature_flags` (GET, POST) and `/api/feature_flags/{key}` (PATCH) are now documented in swagger.yaml. No code changes — the spec already used rswag DSL correctly; the yaml was simply stale.
 
