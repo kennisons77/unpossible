@@ -6,6 +6,31 @@ Agent activity log. Auto-updated each iteration. Trimmed to last 10 entries.
 
 ---
 
+## 2026-05-20 09:40 — Analytics dashboard UI (tasks 6.3, 6.4, tag 0.0.101)
+
+**Changes:** Implemented `Analytics::DashboardController` with `index` (summary cards: weekly cost/runs/failure rate, cost by provider/model table, recent 20 runs) and `llm` (cost/token breakdown by provider/model with date range filter). Added routes `/analytics` and `/analytics/llm`. Updated nav layout to include Analytics link. 7 new request specs; 374 total, 0 failures, 98.75% coverage.
+
+**Thinking:**
+- The spike (6.3) confirmed all dependencies exist: `LlmMetric`, `AgentRun`, layout CSS, auth pattern. No new gems needed.
+- The `index` action reuses the same aggregation logic as `MetricsController#summary` and `MetricsController#llm` but renders HTML instead of JSON. No duplication — the controller queries directly rather than calling the JSON controller.
+- The `llm` action mirrors `MetricsController#llm` with date range filtering, rendered as a table with a date picker form.
+- Nav link added to the shared layout so both HTML UIs are discoverable from any page.
+
+**Challenges:**
+- Root cause of 503: `HealthCheckMiddleware` has `rescue StandardError` at the method level, which wraps `@app.call(env)`. Any unhandled exception from the Rails app returns 503 instead of propagating as 500. The `@cost_by_provider` query selected `SUM(cost_estimate_usd) AS total_cost_usd` etc. but the view called `row.call_count` — a method that didn't exist on the result objects. This raised `NoMethodError` (a `StandardError`), which the middleware caught and returned 503. Fix: add `COUNT(*) AS call_count` to the SELECT.
+- The 503 was hard to diagnose because the direct Rack test returned 200 (no data in DB, so the `@cost_by_provider` loop never executed). Only when an `LlmMetric` existed did the view iterate and hit the missing method.
+- `git add -A` again swept in unrelated files. Caught and removed via `git rm --cached` + `git commit --amend`.
+
+**Alternatives considered:**
+- Calling `MetricsController` actions internally and rendering the JSON as data — rejected. Adds coupling between controllers and requires parsing JSON in the view layer.
+- Separate `SummaryController` and `LlmController` — rejected. The spec defines two views under `/analytics`; one controller with two actions is the natural Rails mapping.
+
+**Tradeoffs taken:**
+- `HealthCheckMiddleware` rescue behavior is a latent bug: any unhandled exception from the app returns 503 instead of 500. This makes debugging harder. The fix here was to eliminate the exception, not fix the middleware. A future beat should narrow the rescue to only the `SELECT 1` call.
+- The `index` view queries `Agents::AgentRun` directly from the `Analytics` module. This crosses the module boundary (analytics querying agents). Acceptable for Phase 0 — the spec explicitly says "Depends on Analytics::LlmMetric and Agents::AgentRun models." A future beat could introduce a cross-module service interface.
+
+---
+
 ## 2026-05-19 23:06 — Agent runs HTML UI (tasks 6.1, 6.2, tag 0.0.100)
 
 **Changes:** Implemented `AgentRunsHtmlController` with `index` (paginated, filterable by mode/status) and `show` (run metadata + ordered turns). Created `application.html.erb` layout (first HTML views in the project). Turn content rendered via existing `MarkdownHelper`. Routes: `GET /agent_runs`, `GET /agent_runs/:id`. 8 new request specs; 367 total, 0 failures, 98.71% coverage.
