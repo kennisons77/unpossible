@@ -2,7 +2,218 @@
 
 Agent activity log. Auto-updated each iteration. Trimmed to last 10 entries.
 
-[Prior entries summarised: 97 iterations — initial planning through 0.0.63, then tasks 1.1–2.6, analytics dashboard UI (0.0.86), db/schema.rb (0.0.87), FeatureFlag hypothesis validation (0.0.85), analytics ingest sidecar (0.0.89), Go reference parser research spike (0.0.96), Go reference parser binary (0.0.97). Key milestones: Rails skeleton + test infra, security (Secret, LogRedactor, PromptSanitizer, rack-attack), JWT auth, Agents module (AgentRun, AgentRunTurn, ProviderAdapter, PromptDeduplicator, AgentRunsController, AgentRunJob, TurnContentGcJob), Sandbox module (ContainerRun, DockerDispatcher), Analytics module (FeatureFlag, AnalyticsEvent, AuditEvent, LlmMetric, AuditLogger, AuditLogJob, MetricsController, FeatureFlag auto-fire, DashboardController), HealthCheckMiddleware, Ledger+Knowledge removal, org_id migrations, provider adapter build_prompt with pinned+sliding trimming, LedgerAppender, controlled-commit.sh, parse_response normalised to hash, LlmMetric on completion, rswag install, FeatureFlagsController org_id fix, all rswag spec conversions (auth, agent_runs, metrics, feature_flags, health), db/schema.rb hand-crafted from migrations, Go analytics sidecar (POST /capture, PII filter, batch flush, graceful shutdown), Go reference parser (spec files, plan items, RSpec tags, LEDGER.jsonl PR nodes, git log).]
+[Prior entries summarised: 98 iterations — initial planning through 0.0.63, then tasks 1.1–2.6, analytics dashboard UI (0.0.86), db/schema.rb (0.0.87), FeatureFlag hypothesis validation (0.0.85), analytics ingest sidecar (0.0.89), Go reference parser research spike (0.0.96), Go reference parser binary (0.0.97), PR skill script (0.0.98). Key milestones: Rails skeleton + test infra, security (Secret, LogRedactor, PromptSanitizer, rack-attack), JWT auth, Agents module (AgentRun, AgentRunTurn, ProviderAdapter, PromptDeduplicator, AgentRunsController, AgentRunJob, TurnContentGcJob), Sandbox module (ContainerRun, DockerDispatcher), Analytics module (FeatureFlag, AnalyticsEvent, AuditEvent, LlmMetric, AuditLogger, AuditLogJob, MetricsController, FeatureFlag auto-fire, DashboardController), HealthCheckMiddleware, Ledger+Knowledge removal, org_id migrations, provider adapter build_prompt with pinned+sliding trimming, LedgerAppender, controlled-commit.sh, parse_response normalised to hash, LlmMetric on completion, rswag install, FeatureFlagsController org_id fix, all rswag spec conversions (auth, agent_runs, metrics, feature_flags, health), db/schema.rb hand-crafted from migrations, Go analytics sidecar (POST /capture, PII filter, batch flush, graceful shutdown), Go reference parser (spec files, plan items, RSpec tags, LEDGER.jsonl PR nodes, git log), PR skill script (scripts/pr.sh, LEDGER.jsonl pr_opened event).]
+
+---
+
+## 2026-05-19 21:19 — Add repo-map CLI binary (tasks 5.1, 5.2, tag 0.0.99)
+
+**Changes:** Implemented `go/cmd/repo-map/main.go` — regex-based codebase summary generator. Extracts Ruby class/method signatures, Go exported symbols, and markdown spec headings. Token budget with 4-pass degradation. 15 Go tests pass. Updated `infra/Dockerfile.go` to build `repo-map`. Added `go/repo-map` and `REPO_MAP.md` to `.gitignore`. 359 Rails specs, 0 failures, 98.68% coverage.
+
+**Thinking:**
+- The spike (5.1) resolved the key design question immediately: `smacker/go-tree-sitter` requires CGO (`CGO_ENABLED=1`) — incompatible with the vendor-only `CGO_ENABLED=0` build in `Dockerfile.go`. No viable pure-Go tree-sitter alternative exists. Regex is the right approach.
+- Ruby class/method signatures and Go exported symbols are well-structured enough for regex without a full AST. The patterns are line-oriented and unambiguous: `class Foo < Bar`, `def method_name(params)`, `func ExportedName(...)`, `type ExportedType`.
+- Token budget via character-count approximation (4 chars ≈ 1 token) requires no external library and is accurate enough for budget enforcement. The 4-pass degradation follows the concept spec exactly.
+- `REPO_MAP.md` is gitignored — it's a derived artifact regenerated before each loop iteration, not source of truth.
+
+**Challenges:**
+- Go receiver type extraction: the regex `\*?([A-Za-z][A-Za-z0-9_]*)` matched the variable name (`s` in `(s *Server)`) instead of the type name (`Server`). Fixed by requiring the type to start with an uppercase letter: `\*?([A-Z][A-Za-z0-9_]*)`.
+- Test for `stripParams`: the method name `find_by_token` contains `token`, so checking `strings.Contains(result, "token")` was always true even after stripping. Fixed by using a param value (`user_id`) that doesn't appear in the method name.
+- Ruby `private` tracking: the `isPrivate` flag must reset to `false` when a new class/module is encountered (private scope is per-class). The implementation resets it on every class/module match.
+
+**Alternatives considered:**
+- `smacker/go-tree-sitter` — rejected. Requires CGO; incompatible with `CGO_ENABLED=0` vendor-only build.
+- `github.com/nicholasgasior/gsfmt` and similar pure-Go parsers — none are production-ready for Ruby+Go parsing.
+- Vendoring tree-sitter C source and compiling with CGO enabled — rejected. Would require changing `Dockerfile.go` to enable CGO, adding C toolchain to the builder image, and vendoring ~2MB of C source. Disproportionate complexity for the benefit.
+- Separate binary per language (ruby-map, go-map) — rejected. A single binary with language dispatch is simpler to invoke and maintain.
+
+**Tradeoffs taken:**
+- Regex over AST means edge cases in Ruby (heredocs, multi-line method signatures, method_missing) are not handled. Acceptable for Phase 0: the map is a navigation aid, not a complete API reference. Agents can still use tools for precise lookups.
+- Private method tracking is indent-based, not scope-based. A `private` keyword inside a nested class resets the flag for the outer class too. This is a known limitation; the practical impact is minimal (nested classes with mixed visibility are rare in this codebase).
+- Token budget approximation (4 chars ≈ 1 token) underestimates for code-heavy content (identifiers are shorter than prose). The budget may be slightly exceeded in practice. Acceptable — the budget is a soft cap, not a hard limit.
+- `REPO_MAP.md` is not yet wired into `loop.sh` or agent configs — that's a separate integration task. The binary is complete and tested; integration is deferred to when the agent configs are updated.
+
+---
+
+## 2026-05-15 15:14 — PR skill script (tasks 2.1, 2.2, 3.1–3.3, 4.1, 4.2, tag 0.0.98)
+
+**Changes:** Marked infra tasks 2.1 and 2.2 complete (already correct — no code changes needed). Completed spike 3.1 (reference parser completeness research — PR nodes, spec: tags, blocked-by all already implemented; git notes gap documented). Marked 3.2 and 3.3 complete (code already satisfies acceptance criteria). Completed spike 4.1 (PR skill design). Implemented `scripts/pr.sh` and `scripts/test-pr.sh` (15 tests, all passing). 359 Rails specs, 0 failures, 98.68% coverage.
+
+**Thinking:**
+- Tasks 2.1, 2.2, 3.2, 3.3 were already done — the plan had them unchecked but the notes said ✅ DONE. Verified by reading the actual files before marking complete.
+- The PR skill is a bash script following the same pattern as `controlled-commit.sh`: argument parsing, preconditions, side effects (gh pr create + LEDGER.jsonl append + git commit), exit codes.
+- Task ID extraction from LEDGER.jsonl: match `status` entries whose `sha` appears in the branch's commit range. This is the natural join between git history and the ledger — no additional metadata needed.
+- Spec ref extraction from IMPLEMENTATION_PLAN.md: look for `spec: path` in HTML comments on the plan item line. This is the same comment format used for `blocked-by` — consistent with the existing plan item schema.
+
+**Challenges:**
+- macOS `grep` doesn't support `-P` (Perl regex) — used `-oE` + `sed` instead.
+- Bash `set -u` with empty arrays: `${ARRAY[@]}` fails when the array is empty. Used `${ARRAY[@]+"${ARRAY[@]}"}` pattern throughout.
+- `run_pr` test helper: `rm -rf "$stub_dir"` after the subshell masked the subshell's non-zero exit code. Fixed by capturing `rc=$?` before cleanup.
+
+**Alternatives considered:**
+- Python script instead of bash — rejected. Consistency with `controlled-commit.sh` matters more than language preference.
+- Extracting task IDs from commit messages — rejected. LEDGER.jsonl is the authoritative structured record; commit messages are free-form.
+
+**Tradeoffs taken:**
+- `python3` used for JSON array serialization in bash — requires python3 in PATH (standard on macOS and agent container). Falls back to `[]` if absent.
+- Git notes gap documented but not fixed — no consumer of git notes data exists yet.
+
+---
+
+**Changes:** Created `go/cmd/reference-parser/main.go` — standalone Go binary that walks spec files, IMPLEMENTATION_PLAN.md, RSpec test files, LEDGER.jsonl, and git log to produce a JSON graph. Created `go/cmd/reference-parser/main_test.go` with 19 unit tests covering all parsing paths. Updated `infra/Dockerfile.go` to build the `reference-parser` binary alongside runner and analytics. 359 Rails specs, 0 failures, 98.68% coverage.
+
+**Thinking:**
+- The research spike (5.1) had already resolved all design decisions: regex over tree-sitter, git shelling out, JSON to stdout, fail-open on missing inputs. Implementation was a direct translation of the research document into code.
+- The parser is structured as a `parser` struct with one method per input source. Each method is independently testable with a temp directory fixture — no global state.
+- Node deduplication via a `nodeIDs` map prevents duplicate nodes when the same spec file is referenced from multiple sources.
+
+**Challenges:**
+- The `ThreadCount` field was initially missing from `ledgerEntry` — caught during review of the review node assembly code.
+- Markdown link resolution for relative paths: used `filepath.Join(dir, target)` which handles `..` correctly on all platforms.
+
+**Alternatives considered:**
+- Separate structs per LEDGER.jsonl event type — rejected. A single struct with omitempty fields is simpler.
+- Storing edges in a map to deduplicate — rejected. Duplicate edges are harmless for graph consumers.
+
+**Tradeoffs taken:**
+- Git log parsing shells out to `git log` — for large repos this could be slow. Acceptable for Phase 0.
+- No test for `parseGitLog` — it shells out to `git` which requires a real git repo. The method is simple and the pattern is identical to the runner sidecar's git integration.
+
+---
+
+## 2026-05-15 13:01 — Research Go reference parser design (spike 5.1, tag 0.0.96)
+
+**Changes:** Created `specifications/research/reference-graph-parser.md` with finalized design decisions. Added build tasks 5.2–5.5 to IMPLEMENTATION_PLAN.md. Marked 5.1 complete.
+
+**Thinking:**
+- This is a pure research spike — no code, no tests. The deliverable is a design document that unblocks 5.2 (the actual parser implementation).
+- The key decision was regex over tree-sitter: all patterns the parser needs are line-oriented. Tree-sitter adds CGo and build complexity for no benefit at Phase 0 scale.
+- Git integration via shelling out to `git` is the right call — the runner sidecar already uses `exec.CommandContext` for this pattern.
+
+**Challenges:**
+- Plan item renumbering is inherently heuristic — numeric IDs in LEDGER.jsonl are stable labels but the plan can be renumbered. Title-based matching is best-effort.
+
+**Alternatives considered:**
+- Tree-sitter for Ruby/Go parsing — rejected. All required patterns are line-oriented; tree-sitter adds CGo and build complexity with no benefit for Phase 0.
+- libgit2 (go-git) for git integration — rejected. Shelling out to `git` is simpler, has no deps, and is fast enough.
+
+**Tradeoffs taken:**
+- Fail-open on missing/malformed inputs — the parser never exits non-zero for bad data. This means a corrupted LEDGER.jsonl produces a partial graph silently.
+
+---
+
+## 2026-05-15 12:31 — Add duration_ms to analytics_llm_metrics (task 3.2, tag 0.0.94)
+
+**Changes:** Migration adds nullable `duration_ms integer` column to `analytics_llm_metrics`. `LlmMetric` validates it is non-negative when present. `RunStorageService.complete` passes `run.duration_ms` to `LlmMetric.create!`. 359 examples, 0 failures, 98.68% coverage.
+
+**Thinking:**
+- `AgentRun` already had a `duration_ms` column. The gap was purely in `RunStorageService.complete` — it wasn't forwarding the value to `LlmMetric`.
+- Nullable column is correct: `duration_ms` may not be set on the `AgentRun` at completion time. Forcing NOT NULL would require a default of 0, which is misleading.
+
+**Challenges:** None. The column already existed on `AgentRun`; this was a straightforward propagation task.
+
+**Alternatives considered:**
+- Computing `duration_ms` from `AgentRun.created_at` and `updated_at` — rejected because `AgentRun.duration_ms` is the authoritative source (set by the runner sidecar).
+- NOT NULL constraint with default 0 — rejected because 0 is ambiguous (could mean "completed instantly" or "not measured").
+
+**Tradeoffs taken:**
+- `duration_ms` is nullable on `LlmMetric` — queries filtering by duration must handle NULLs.
+- No backfill migration for existing rows — acceptable for Phase 0 where historical data is dev/test only.
+
+---
+
+## 2026-05-01 12:40 — Fix docker-compose.yml: analytics service, clean stub, RUNNER_PASSWORD (task 3.2, tag 0.0.91)
+
+**Changes:** Removed commented-out `go_runner:f` stub. Added `analytics` service on port 9100. Set `RUNNER_PASSWORD` default in both `go_runner` and `agent` services. 352 Rails specs, 0 failures, 98.67% coverage.
+
+**Thinking:**
+- The analytics sidecar reads DB connection from `DB_HOST`/`POSTGRES_USER`/`POSTGRES_PASSWORD`/`POSTGRES_DB` env vars — consistent with the Rails service pattern.
+- `RUNNER_PASSWORD` had no default — a dev default makes the stack startable without a `.env` file.
+
+**Challenges:** None. The changes were mechanical.
+
+**Alternatives considered:**
+- Binding `RUNNER_PASSWORD` to a required env var with no default — rejected because the dev stack should start without a `.env` file.
+
+**Tradeoffs taken:**
+- `RUNNER_PASSWORD` default is a plaintext string in the compose file — acceptable for dev. Production must override via `.env` or secrets management.
+
+---
+
+## 2026-05-01 12:33 — Add infra/Dockerfile.go multi-stage build (task 3.1, tag 0.0.90)
+
+**Changes:** Created `infra/Dockerfile.go` with three stages: `builder` (golang:1.23-bookworm), `runner` (debian:bookworm-slim, port 8080), `analytics` (debian:bookworm-slim, port 9100). 352 Rails specs, 0 failures, 98.67% coverage.
+
+**Thinking:**
+- `CGO_ENABLED=0` produces static binaries that run on `debian:bookworm-slim` without needing libc.
+- `GOFLAGS=-mod=vendor` ensures the build uses vendored dependencies and fails fast if inconsistent.
+- Separate final stages for runner and analytics allow independent deployment.
+
+**Challenges:** None. The vendor directory was already consistent.
+
+**Alternatives considered:**
+- Single final stage with both binaries — rejected because it couples the runner and analytics images.
+- `scratch` as final stage — rejected because `debian:bookworm-slim` provides a shell for debugging.
+
+**Tradeoffs taken:**
+- Builder stage uses `golang:1.23-bookworm` (full Debian) — larger builder image but cached after first pull.
+
+---
+
+## 2026-04-22 13:11 — Wire skill assembly into AgentRunJob#load_enrichment (task 2.4, tag 0.0.75)
+
+**Changes:** Replaced stub `load_enrichment` with real calls to SkillLoader, ContextRetriever, and EnrichmentRunner. Added 4 integration tests. 334 examples, 0 failures, 98.71% coverage.
+
+**Thinking:**
+- The three services were already implemented and tested independently. Task 2.4 is purely wiring — call them in sequence and return `[context_chunks, principles]`.
+- `principles` is returned as the second element because `build_prompt` already accepts a `principles:` keyword — no interface change needed.
+
+**Challenges:**
+- The existing `agent_override is false` test used `and_call_original` on `load_enrichment`, which now calls the real services. Integration tests stub `ContextRetriever` to avoid filesystem dependency.
+
+**Alternatives considered:**
+- Passing `skill` object directly to `build_prompt` — rejected because `build_prompt` interface is already defined and tested across three adapters.
+
+**Tradeoffs taken:**
+- Integration tests stub `ContextRetriever` rather than using real practices files — avoids path resolution issues in the test container.
+
+---
+
+## 2026-04-22 13:07 — Implement EnrichmentRunner (task 2.3, tag 0.0.74)
+
+**Changes:** Added `EnrichmentRunner` service and 13-example spec. 330 examples, 0 failures, 98.7% coverage.
+
+**Thinking:**
+- Tool registry as a constant hash (`TOOLS`) keeps the mapping explicit and testable.
+- Fail-open on both unknown tools and tool execution errors — enrichment is a "pipeline invisible step" per the spec.
+
+**Challenges:**
+- Position assignment: `run.turns.maximum(:position)` returns nil when no turns exist — guarded with `|| 0`.
+
+**Alternatives considered:**
+- Instance-based registry — rejected as over-engineering for a single-level dispatch table.
+
+**Tradeoffs taken:**
+- TOOLS registry is a constant — adding a new tool requires a code change, not configuration. Intentional for Phase 0.
+
+---
+
+## 2026-05-01 11:59 — Add go/go.mod and go/go.sum for Go module foundation (task 1.1, tag 0.0.88)
+
+**Changes:** Created `go/go.mod` with module path `github.com/unpossible/unpossible/go`, go 1.23.0. Generated `go/go.sum` via `go mod tidy`. Added Go binary outputs to `.gitignore`. `go build ./...` and `go test ./...` both exit 0; 352 Rails specs still pass.
+
+**Thinking:**
+- The vendor directory already existed with all dependencies and a `modules.txt` — the only missing pieces were `go.mod` and `go.sum`.
+- `go mod tidy` was the right tool: it reads the vendor directory, resolves the dependency graph, and writes both files atomically.
+
+**Challenges:**
+- First `go build` attempt failed with "inconsistent vendoring" because `lib/pq` was marked explicit in `modules.txt` but absent from `go.mod` after `go mod tidy` removed it.
+
+**Alternatives considered:**
+- Running `go mod vendor` to regenerate the vendor directory from scratch — rejected because the container has no internet access.
+
+**Tradeoffs taken:**
+- `lib/pq` listed as direct dep in `go.mod` even though runner doesn't import it — intentional: the vendor directory was pre-built for both runner and analytics sidecar.
 
 ---
 
