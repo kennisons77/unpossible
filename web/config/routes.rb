@@ -35,6 +35,11 @@ Rails.application.routes.draw do
   get '/analytics',     to: 'analytics/dashboard#index', as: :analytics
   get '/analytics/llm', to: 'analytics/dashboard#llm',   as: :analytics_llm
 
+  # Reference graph — HTML UI
+  get '/graph/current',   to: 'reference_graph/graph#current',   as: :graph_current
+  get '/graph/open',      to: 'reference_graph/graph#open',      as: :graph_open
+  get '/graph/condensed', to: 'reference_graph/graph#condensed', as: :graph_condensed
+
   # Analytics metrics — Analytics::MetricsController (JSON API)
   get '/api/analytics/llm',          to: 'analytics/metrics#llm'
   get '/api/analytics/loops',        to: 'analytics/metrics#loops'

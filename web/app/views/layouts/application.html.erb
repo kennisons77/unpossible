@@ -28,6 +28,9 @@
     .badge-review     { background: #0d7377; color: #fff; }
     .badge-reflect    { background: #5a6e00; color: #fff; }
     .badge-research   { background: #6e3a00; color: #fff; }
+    .badge-todo       { background: #30363d; color: #8b949e; }
+    .badge-blocked    { background: #da3633; color: #fff; }
+    .badge-in_progress { background: #1f6feb; color: #fff; }
     .badge-agent_question { background: #6e40c9; color: #fff; }
     .badge-human_input    { background: #238636; color: #fff; }
     .badge-llm_response   { background: #1f6feb; color: #fff; }
@@ -58,6 +61,7 @@
     <span class="brand">Unpossible</span>
     <%= link_to "Agent Runs", agent_runs_path %>
     <%= link_to "Analytics", analytics_path %>
+    <%= link_to "Graph", graph_current_path %>
   </nav>
   <main>
     <%= yield %>

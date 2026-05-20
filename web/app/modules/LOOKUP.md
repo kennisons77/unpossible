@@ -20,6 +20,11 @@ Cross-module calls go through public service interfaces only — no direct model
 - Purpose: LLM metrics, audit log, feature flags
 - Public interface: `Analytics::AuditLogger`, `Analytics::FeatureFlag`
 
+### reference_graph
+- Path: `app/modules/reference_graph/`
+- Purpose: Read-only web UI over the Go reference parser JSON graph
+- Public interface: `ReferenceGraph::ParserService`
+
 ## Cross-Module Rules
 
 - Never access another module's models directly — call its public service interface

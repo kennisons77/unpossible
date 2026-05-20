@@ -143,11 +143,12 @@ Out of scope for Phase 0. Requires CI (Phase 1). Documented here to prevent re-p
 
 ## Section 9 — Reference Graph Web UI (Priority 5)
 
-- [ ] [SPIKE] 9.1 — Research reference graph web UI — review `specifications/system/reference-graph/concept.md` § Read-Only Web UI
+- [x] [SPIKE] 9.1 — Research reference graph web UI — review `specifications/system/reference-graph/concept.md` § Read-Only Web UI
   Determine: What views are needed (current, open, condensed)? What data does the parser output? Server-rendered HTML consuming JSON from the Go parser?
+  Findings: Three views needed: current (in-progress beat + ancestor chain via refs edges), open (non-done beats filterable by status), condensed (full node tree grouped by type, collapsible, text search). Parser outputs JSON Graph with nodes (id, type, label, path, status, metadata) and edges (from, to, type). Controller shells out to `go/reference-parser` binary via `Open3.capture3`, configurable via `REFERENCE_PARSER_PATH` env var. Fail-open: returns empty graph if binary missing. Same layout/CSS pattern as existing HTML controllers. No new gems needed.
   Blocks: 9.2
 
-- [ ] 9.2 — Implement reference graph web UI (views consuming parser JSON output)
+- [x] 9.2 — Implement reference graph web UI (views consuming parser JSON output)
   Required tests: GET /graph/current returns 200, GET /graph/open returns 200 with filterable plan items, GET /graph/condensed returns 200 with collapsible tree
   Blocked by: 9.1
 

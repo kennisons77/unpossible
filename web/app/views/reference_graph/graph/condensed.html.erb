@@ -1,0 +1,49 @@
+<% content_for :title, "Graph: Condensed — Unpossible" %>
+
+<h1>Reference Graph</h1>
+
+<form class="filters" method="get" action="<%= graph_condensed_path %>">
+  <input type="text" name="q" value="<%= @query %>"
+         placeholder="Search nodes…"
+         style="background:#161b22;border:1px solid #30363d;color:#c9d1d9;padding:4px 8px;border-radius:4px;font-family:inherit;font-size:13px;width:260px;">
+  <button type="submit">Search</button>
+  <% if @query.present? %>
+    <%= link_to "Clear", graph_condensed_path, style: "padding:4px 10px;border:1px solid #30363d;border-radius:4px;" %>
+  <% end %>
+</form>
+
+<% if @nodes_by_type.empty? %>
+  <p class="meta">No nodes found<% if @query.present? %> matching "<%= @query %>"<% end %>.</p>
+<% else %>
+  <% @nodes_by_type.each do |node_type, nodes| %>
+    <details style="margin-bottom:16px;" open="open">
+      <summary style="cursor:pointer;color:#f0f6fc;padding:8px 0;font-size:13px;text-transform:uppercase;letter-spacing:0.05em;">
+        <%= node_type.tr('_', ' ') %> (<%= nodes.size %>)
+      </summary>
+      <table style="margin-top:8px;">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Label</th>
+            <th>Status</th>
+            <th>Path</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% nodes.each do |node| %>
+            <tr>
+              <td class="meta"><%= node['id'] %></td>
+              <td><%= node['label'] %></td>
+              <td>
+                <% if node['status'].present? %>
+                  <span class="badge badge-<%= node['status'] == 'in_progress' ? 'running' : node['status'] %>"><%= node['status'] %></span>
+                <% end %>
+              </td>
+              <td class="meta"><%= node['path'] %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </details>
+  <% end %>
+<% end %>
