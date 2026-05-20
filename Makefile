@@ -19,7 +19,7 @@ endif
 SKILL = @cd $(PROJECT_DIR) && $(AGENT) -- "$(shell cat $(PROJECT_DIR)
 
 .PHONY: help \
-        docker-build up down restart logs console shell \
+        docker-build up down restart logs logs-snapshot console shell \
         db-create db-migrate db-setup db-reset \
         build plan build1 research \
         sb-interview sb-review review requirements concept server-ops \
@@ -43,6 +43,8 @@ help:
 	@echo "  make down            Stop all services"
 	@echo "  make restart         Restart rails service"
 	@echo "  make logs            Tail rails logs"
+	@echo "  make logs-snapshot   Write last 100 lines of rails logs to .data/logs-snapshot.txt"
+	@echo "  make logs-snapshot SERVICE=postgres   Write postgres logs instead"
 	@echo "  make activity        Show git log with activity notes"
 	@echo "  make console         Open rails console"
 	@echo "  make db-create       Create database"
@@ -121,6 +123,11 @@ restart:
 
 logs:
 	$(COMPOSE) logs -f rails
+
+logs-snapshot:
+	@mkdir -p $(ROOT_DIR).data
+	$(COMPOSE) logs --tail=100 $(or $(SERVICE),rails) > $(ROOT_DIR).data/logs-snapshot.txt
+	@echo "Snapshot written to .data/logs-snapshot.txt"
 
 activity:
 	@git log --notes --format='%C(yellow)%h %C(cyan)%ai %C(reset)%s%n%N' | head -100

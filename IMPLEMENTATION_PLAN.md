@@ -133,7 +133,7 @@ These specs have `status: proposed`. They describe server-rendered HTML views th
   Findings: **File relay is the right approach.** The agent container already mounts `..:/workspace` and `../.data:/.data`. A `make logs-snapshot` target on the host runs `docker compose logs --tail=100 <service> > .data/logs-snapshot.txt`; the agent reads `/.data/logs-snapshot.txt`. No new sidecar, no socket exposure, opt-in (developer-triggered), bounded output. HTTP sidecar is overkill for single-user local use. Clipboard/pipe doesn't work in non-interactive agent sessions. `.data/` is already gitignored and has a `snapshots/` subdirectory. Implementation: add `logs-snapshot` Makefile target + document the read path in AGENTS.md.
   Blocks: 7.2
 
-- [ ] 7.2 — Implement log tail relay (`make logs-snapshot` Makefile target + AGENTS.md documentation)
+- [x] 7.2 — Implement log tail relay (`make logs-snapshot` Makefile target + AGENTS.md documentation)
   Required tests: `make logs-snapshot` writes last 100 lines of rails logs to `.data/logs-snapshot.txt`; `make logs-snapshot SERVICE=postgres` writes postgres logs; file is readable by agent at `/.data/logs-snapshot.txt`
   Blocked by: 7.1
 
