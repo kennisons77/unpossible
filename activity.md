@@ -57,3 +57,42 @@ Agent activity log. Auto-updated each iteration. Trimmed to last 10 entries.
 - Parent run lookup in the show view does a DB query per render (`AgentRun.find_by`). For Phase 0 with single-user local use this is fine; would need eager loading if the view were high-traffic.
 
 ---
+
+## 2026-05-20 11:43 — Log tail relay implementation (task 7.2, tag 0.0.102)
+
+**Changes:** Added `logs-snapshot` Makefile target writing last 100 lines of a service's logs to `.data/logs-snapshot.txt`. `SERVICE` variable selects the service (default: rails). Documented the read path in AGENTS.md. No Ruby code changes — infrastructure-only. 374 tests, 0 failures, 98.75% coverage unchanged.
+
+**Thinking:**
+- The spike (7.1) established the approach: file relay via a Makefile target. Implementation is a direct translation of the spike findings.
+- `$(or $(SERVICE),rails)` is the idiomatic Make way to default a variable — avoids a separate `ifdef` block.
+- `@mkdir -p` ensures `.data/` exists even on a fresh clone before the first snapshot.
+- The agent container mounts `..:/workspace`, so the snapshot is at `/workspace/.data/logs-snapshot.txt` in the agent — not `/.data/logs-snapshot.txt` (which is the rails container's mount). AGENTS.md documents the correct agent-container path.
+
+**Challenges:**
+- The spike notes said the agent reads `/.data/logs-snapshot.txt`. That's the rails container's mount path. The agent container mounts the whole repo at `/workspace`, so the correct path is `/workspace/.data/logs-snapshot.txt`. Caught by re-reading the compose file before writing the docs.
+
+**Alternatives considered:**
+- Separate `logs-snapshot-rails` and `logs-snapshot-postgres` targets — rejected. A single target with a `SERVICE` variable is more composable and follows the pattern of other Makefile targets in the project.
+- Writing to `.data/snapshots/logs-snapshot.txt` — rejected. The spike spec says `.data/logs-snapshot.txt` (flat, not nested). Keeping it flat makes the path easier to remember and document.
+
+**Tradeoffs taken:**
+- The snapshot overwrites on each call — no history. Acceptable: the use case is "show me what's happening now," not log archival.
+- `docker compose logs --tail=100` includes ANSI color codes if the service emits them. The agent reads the file as plain text — color codes appear as escape sequences. Acceptable for Phase 0; a `--no-color` flag could be added if it becomes noisy.
+
+**Changes:** Researched three log relay approaches (file relay, HTTP sidecar, clipboard/pipe). Recorded findings in IMPLEMENTATION_PLAN.md, marked 7.1 complete, added 7.2 implementation task.
+
+**Thinking:**
+- The agent container already mounts `../.data:/.data` — any file written to `.data/` on the host is immediately visible to the agent at `/.data/`. No new infrastructure needed.
+- File relay via `make logs-snapshot` is the minimal, correct solution: developer-triggered (opt-in), bounded (tail N lines), no Docker socket exposure, no new sidecar.
+- The `.data/snapshots/` directory already exists, confirming the pattern is established.
+
+**Challenges:**
+- None. The existing volume mount made the answer obvious once confirmed.
+
+**Alternatives considered:**
+- HTTP sidecar with Docker socket access — rejected. Requires a new container, new port, new service in compose. Overkill for a single-user local tool.
+- Clipboard/pipe CLI integration — rejected. Doesn't work in non-interactive agent sessions (the primary use case).
+
+**Tradeoffs taken:**
+- File relay is pull-based (developer must run `make logs-snapshot`). The agent cannot proactively fetch logs. This is intentional — the spec says "opt-in (developer initiates or approves the relay)." If proactive log access is needed later, the HTTP sidecar approach is the upgrade path.
+- Snapshot is a point-in-time file, not a live stream. Sufficient for debugging boot failures and migration errors; not suitable for watching live output.
