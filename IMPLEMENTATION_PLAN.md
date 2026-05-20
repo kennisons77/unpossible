@@ -118,11 +118,12 @@ These specs have `status: proposed`. They describe server-rendered HTML views th
   Required tests: GET /agent_runs returns 200 with paginated list, GET /agent_runs/:id returns 200 with turn list, auth required
   Blocked by: 6.1
 
-- [ ] [SPIKE] 6.3 — Research analytics dashboard UI feasibility — review `specifications/system/analytics-dashboard-ui.md`
+- [x] [SPIKE] 6.3 — Research analytics dashboard UI feasibility — review `specifications/system/analytics-dashboard-ui.md`
   Determine: Is this in Phase 0 scope? Dependencies on existing data?
+  Findings: In Phase 0 scope — spec says "useful for Phase 0 local development." App is full-stack Rails (not API-only). `Analytics::LlmMetric` and `Agents::AgentRun` models exist and are fully implemented. `MetricsController` already has `summary`, `llm`, and `loops` actions with exactly the data needed. Layout already has dark-theme CSS with all needed styles. No new gems needed — same pattern as agent runs HTML controller.
   Blocks: 6.4
 
-- [ ] 6.4 — Implement analytics dashboard UI (`web/app/modules/analytics/controllers/dashboard_controller.rb`, views)
+- [x] 6.4 — Implement analytics dashboard UI (`web/app/modules/analytics/controllers/dashboard_controller.rb`, views)
   Required tests: GET /analytics returns 200 with summary cards, GET /analytics/llm returns 200 with cost breakdown, auth required
   Blocked by: 6.3
 

@@ -31,6 +31,10 @@ Rails.application.routes.draw do
   get '/agent_runs',     to: 'agents/agent_runs_html#index', as: :agent_runs
   get '/agent_runs/:id', to: 'agents/agent_runs_html#show',  as: :agent_run
 
+  # Analytics dashboard — HTML UI
+  get '/analytics',     to: 'analytics/dashboard#index', as: :analytics
+  get '/analytics/llm', to: 'analytics/dashboard#llm',   as: :analytics_llm
+
   # Analytics metrics — Analytics::MetricsController (JSON API)
   get '/api/analytics/llm',          to: 'analytics/metrics#llm'
   get '/api/analytics/loops',        to: 'analytics/metrics#loops'

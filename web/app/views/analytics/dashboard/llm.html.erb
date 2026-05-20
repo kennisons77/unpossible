@@ -1,0 +1,41 @@
+<% content_for :title, "LLM Metrics — Unpossible" %>
+
+<div class="back"><%= link_to "← Analytics", analytics_path %></div>
+<h1>LLM Cost Breakdown</h1>
+
+<form class="filters" method="get" action="<%= analytics_llm_path %>">
+  <input type="date" name="from" value="<%= @from %>"
+         style="background:#161b22;border:1px solid #30363d;color:#c9d1d9;padding:4px 8px;border-radius:4px;font-family:inherit;font-size:13px;">
+  <input type="date" name="to" value="<%= @to %>"
+         style="background:#161b22;border:1px solid #30363d;color:#c9d1d9;padding:4px 8px;border-radius:4px;font-family:inherit;font-size:13px;">
+  <button type="submit">Filter</button>
+</form>
+
+<% if @rows.empty? %>
+  <p class="meta">No LLM metrics for the selected range.</p>
+<% else %>
+  <table>
+    <thead>
+      <tr>
+        <th>Provider</th>
+        <th>Model</th>
+        <th>Calls</th>
+        <th>Input tokens</th>
+        <th>Output tokens</th>
+        <th>Total cost (USD)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @rows.each do |row| %>
+        <tr>
+          <td><%= row.provider %></td>
+          <td class="meta"><%= row.model %></td>
+          <td class="meta"><%= row.call_count %></td>
+          <td class="meta"><%= row.total_input_tokens %></td>
+          <td class="meta"><%= row.total_output_tokens %></td>
+          <td>$<%= "%.6f" % row.total_cost_usd.to_f %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% end %>
