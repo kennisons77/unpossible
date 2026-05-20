@@ -27,6 +27,10 @@ Rails.application.routes.draw do
   patch '/api/feature_flags/:key', to: 'analytics/feature_flags#update', as: :api_feature_flag,
         constraints: { key: /[^\/]+/ }
 
+  # Agent runs — HTML UI
+  get '/agent_runs',     to: 'agents/agent_runs_html#index', as: :agent_runs
+  get '/agent_runs/:id', to: 'agents/agent_runs_html#show',  as: :agent_run
+
   # Analytics metrics — Analytics::MetricsController (JSON API)
   get '/api/analytics/llm',          to: 'analytics/metrics#llm'
   get '/api/analytics/loops',        to: 'analytics/metrics#loops'

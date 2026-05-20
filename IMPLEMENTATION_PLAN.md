@@ -110,11 +110,11 @@ The reference parser exists and produces a JSON graph from specs, LEDGER.jsonl, 
 
 These specs have `status: proposed`. They describe server-rendered HTML views that would be useful for Phase 0 local development but are not required by any active spec's acceptance criteria.
 
-- [ ] [SPIKE] 6.1 — Research agent runs UI feasibility — review `specifications/system/agent-runs-ui.md`
-  Determine: Is this in Phase 0 scope? What layout/styling patterns exist? Does the app have any existing views to follow?
+- [x] [SPIKE] 6.1 — Research agent runs UI feasibility — review `specifications/system/agent-runs-ui.md`
+  Findings: In Phase 0 scope — spec says "useful for Phase 0 local development." App is full-stack Rails (not API-only). No existing views/layout — this is the first HTML controller. `redcarpet` + `rouge` gems already present for markdown rendering. `MarkdownHelper` already exists. No new gems needed. Minimal inline-styled ERB layout appropriate since no CSS framework exists.
   Blocks: 6.2
 
-- [ ] 6.2 — Implement agent runs UI (`web/app/modules/agents/controllers/agent_runs_html_controller.rb`, views)
+- [x] 6.2 — Implement agent runs UI (`web/app/modules/agents/controllers/agent_runs_html_controller.rb`, views)
   Required tests: GET /agent_runs returns 200 with paginated list, GET /agent_runs/:id returns 200 with turn list, auth required
   Blocked by: 6.1
 

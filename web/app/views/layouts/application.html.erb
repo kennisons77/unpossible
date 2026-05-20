@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%= content_for?(:title) ? yield(:title) : "Unpossible" %></title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: ui-monospace, "Cascadia Code", "Source Code Pro", monospace; font-size: 14px; background: #0d1117; color: #c9d1d9; line-height: 1.5; }
+    a { color: #58a6ff; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    nav { background: #161b22; border-bottom: 1px solid #30363d; padding: 12px 24px; display: flex; gap: 24px; align-items: center; }
+    nav .brand { color: #f0f6fc; font-weight: bold; font-size: 16px; }
+    main { padding: 24px; max-width: 1200px; margin: 0 auto; }
+    h1 { font-size: 20px; color: #f0f6fc; margin-bottom: 16px; }
+    h2 { font-size: 16px; color: #f0f6fc; margin-bottom: 12px; }
+    table { width: 100%; border-collapse: collapse; }
+    th { text-align: left; padding: 8px 12px; border-bottom: 1px solid #30363d; color: #8b949e; font-weight: normal; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; }
+    td { padding: 8px 12px; border-bottom: 1px solid #21262d; vertical-align: top; }
+    tr:hover td { background: #161b22; }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; }
+    .badge-running    { background: #1f6feb; color: #fff; }
+    .badge-waiting    { background: #9e6a03; color: #fff; }
+    .badge-completed  { background: #238636; color: #fff; }
+    .badge-failed     { background: #da3633; color: #fff; }
+    .badge-plan       { background: #6e40c9; color: #fff; }
+    .badge-build      { background: #1f6feb; color: #fff; }
+    .badge-review     { background: #0d7377; color: #fff; }
+    .badge-reflect    { background: #5a6e00; color: #fff; }
+    .badge-research   { background: #6e3a00; color: #fff; }
+    .badge-agent_question { background: #6e40c9; color: #fff; }
+    .badge-human_input    { background: #238636; color: #fff; }
+    .badge-llm_response   { background: #1f6feb; color: #fff; }
+    .badge-tool_result    { background: #9e6a03; color: #fff; }
+    .meta { color: #8b949e; font-size: 12px; }
+    .card { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 16px; margin-bottom: 16px; }
+    .card-header { display: flex; gap: 12px; align-items: center; margin-bottom: 8px; flex-wrap: wrap; }
+    .turn-content { background: #0d1117; border: 1px solid #21262d; border-radius: 4px; padding: 12px; margin-top: 8px; overflow-x: auto; }
+    .turn-content p { margin-bottom: 8px; }
+    .turn-content pre { background: #161b22; padding: 12px; border-radius: 4px; overflow-x: auto; }
+    .turn-content code { font-family: inherit; font-size: 13px; }
+    .purged { color: #8b949e; font-style: italic; }
+    .pagination { display: flex; gap: 8px; margin-top: 16px; align-items: center; }
+    .pagination a, .pagination span { padding: 4px 10px; border: 1px solid #30363d; border-radius: 4px; }
+    .pagination .current { background: #1f6feb; border-color: #1f6feb; color: #fff; }
+    .filters { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+    .filters select { background: #161b22; border: 1px solid #30363d; color: #c9d1d9; padding: 4px 8px; border-radius: 4px; font-family: inherit; font-size: 13px; }
+    .filters button { background: #238636; border: none; color: #fff; padding: 4px 12px; border-radius: 4px; cursor: pointer; font-family: inherit; font-size: 13px; }
+    .run-meta { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; margin-bottom: 16px; }
+    .run-meta-item { background: #161b22; border: 1px solid #30363d; border-radius: 4px; padding: 10px; }
+    .run-meta-item .label { color: #8b949e; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; }
+    .run-meta-item .value { color: #f0f6fc; margin-top: 2px; }
+    .back { margin-bottom: 16px; }
+  </style>
+</head>
+<body>
+  <nav>
+    <span class="brand">Unpossible</span>
+    <%= link_to "Agent Runs", agent_runs_path %>
+  </nav>
+  <main>
+    <%= yield %>
+  </main>
+</body>
+</html>
