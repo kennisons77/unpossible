@@ -6,6 +6,33 @@ Agent activity log. Auto-updated each iteration. Trimmed to last 10 entries.
 
 ---
 
+## 2026-05-20 12:09 — Reference graph web UI (tasks 9.1, 9.2, tag 0.0.103)
+
+**Changes:** Implemented `ReferenceGraph::GraphController` with three actions: `current` (in-progress beat + ancestor chain via refs edges), `open` (non-done beats filterable by status), `condensed` (full node tree grouped by type, collapsible `<details>`, text search). Added `ReferenceGraph::ParserService` that shells out to `go/reference-parser` binary via `Open3.capture3`, configurable via `REFERENCE_PARSER_PATH` env var, fail-open (returns empty graph if binary missing). Added routes, nav link, badge CSS for todo/blocked/in_progress. 14 new request specs; 388 total, 0 failures, 96.79% coverage.
+
+**Thinking:**
+- The spike (9.1) was implicit in reading the spec and codebase — the parser output format, node types, and edge types were all defined in the Go source. No separate research loop needed.
+- `ParserService` is a thin shell wrapper. The controller doesn't need to know how the graph is produced — it just needs a hash with `nodes` and `edges`. Fail-open is correct: the UI degrades gracefully (empty state) if the binary isn't available in the container.
+- The `condensed` view uses HTML `<details>` for collapsibility — no JavaScript needed. Native browser behavior, zero dependencies.
+- `GRAPH_TYPE_ORDER` constant (not `TYPE_ORDER`) avoids any potential name collision with other constants in the inheritance chain.
+
+**Challenges:**
+- The `condensed` action returned 503 with empty body. Root cause: a Ruby syntax error in the ERB template. The original template had `\" matching \"#{@query}\"\"` inside an ERB expression — the backslash-escaped quotes inside `<%= %>` caused ERB to generate invalid Ruby. The compiled template had a syntax error that Rails caught and converted to 503 via `ActionDispatch::ShowExceptions`. Diagnosed by patching `ActiveRecord::Migration::CheckPending` to catch and print the exception message.
+- The 503 was hard to diagnose because: (1) `show_exceptions: :none` in test mode still returns a 503 response (not a re-raised exception) when the error is a template syntax error; (2) the `rescue StandardError` I added to the action didn't help because the error occurs during view rendering, not action execution; (3) the Docker image needed a rebuild to pick up view changes — the old template was cached in the image.
+- `git add -A` again swept in unrelated files (`polyai-questions.html`, `unpossible-city/`). Removed via `git rm --cached` + `git commit --amend` before push.
+
+**Alternatives considered:**
+- Caching the parser output in Rails cache — rejected. The graph is cheap to regenerate (file walk + git log), and caching adds invalidation complexity. Phase 0 local dev doesn't need it.
+- Rendering the graph as JSON and using JavaScript to build the UI — rejected. The spec says server-rendered HTML. No JavaScript framework exists in the project.
+- Calling the parser via HTTP (if it were a sidecar) — rejected. The parser is a CLI binary, not a server. Shell out is the right interface.
+
+**Tradeoffs taken:**
+- The `condensed` view calls `nodes.any? { ... }` multiple times per row to decide whether to show status/path columns. This is O(n²) in the number of nodes per type group. Acceptable for Phase 0 local dev with small graphs; would need memoization for large graphs. (Actually simplified to always show both columns to avoid the complexity.)
+- `ParserService` uses `Open3.capture3` which blocks the Rails thread. For a local dev tool with one user, this is fine. A future beat could make it async if the parser becomes slow.
+- The binary path defaults to `../../go/reference-parser` relative to `Rails.root`. This assumes the Rails app is at `web/` inside the project root. If the directory structure changes, the default breaks. The `REFERENCE_PARSER_PATH` env var is the escape hatch.
+
+---
+
 ## 2026-05-20 09:40 — Analytics dashboard UI (tasks 6.3, 6.4, tag 0.0.101)
 
 **Changes:** Implemented `Analytics::DashboardController` with `index` (summary cards: weekly cost/runs/failure rate, cost by provider/model table, recent 20 runs) and `llm` (cost/token breakdown by provider/model with date range filter). Added routes `/analytics` and `/analytics/llm`. Updated nav layout to include Analytics link. 7 new request specs; 374 total, 0 failures, 98.75% coverage.

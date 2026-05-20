@@ -12,6 +12,7 @@ ACTIVE_PROJECT_FILE := $(ROOT_DIR)ACTIVE_PROJECT
 ENV_FILE := $(ROOT_DIR).env
 AGENT ?= kiro
 MODEL ?=
+
 # Override active project for any target: make plan PROJECT=relationships/kid-alex
 ifdef PROJECT
 $(shell echo '$(PROJECT)' > $(ACTIVE_PROJECT_FILE))
