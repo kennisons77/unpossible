@@ -2,249 +2,124 @@
 
 Agent activity log. Auto-updated each iteration. Trimmed to last 10 entries.
 
-[Prior entries summarised: 94 iterations — initial planning through 0.0.63, then tasks 1.1–2.6, analytics dashboard UI (0.0.86), db/schema.rb (0.0.87), FeatureFlag hypothesis validation (0.0.85), analytics ingest sidecar (0.0.89). Key milestones: Rails skeleton + test infra, security (Secret, LogRedactor, PromptSanitizer, rack-attack), JWT auth, Agents module (AgentRun, AgentRunTurn, ProviderAdapter, PromptDeduplicator, AgentRunsController, AgentRunJob, TurnContentGcJob), Sandbox module (ContainerRun, DockerDispatcher), Analytics module (FeatureFlag, AnalyticsEvent, AuditEvent, LlmMetric, AuditLogger, AuditLogJob, MetricsController, FeatureFlag auto-fire, DashboardController), HealthCheckMiddleware, Ledger+Knowledge removal, org_id migrations, provider adapter build_prompt with pinned+sliding trimming, LedgerAppender, controlled-commit.sh, parse_response normalised to hash, LlmMetric on completion, rswag install, FeatureFlagsController org_id fix, all rswag spec conversions (auth, agent_runs, metrics, feature_flags, health), db/schema.rb hand-crafted from migrations, Go analytics sidecar (POST /capture, PII filter, batch flush, graceful shutdown).]
+[Prior entries summarised: 108 iterations — initial planning through 0.0.63, then tasks 1.1–2.6, analytics dashboard UI (0.0.86), db/schema.rb (0.0.87), FeatureFlag hypothesis validation (0.0.85), analytics ingest sidecar (0.0.89), Go reference parser research spike (0.0.96), Go reference parser binary (0.0.97), PR skill script (0.0.98), repo-map CLI (0.0.99). Key milestones: Rails skeleton + test infra, security (Secret, LogRedactor, PromptSanitizer, rack-attack), JWT auth, Agents module (AgentRun, AgentRunTurn, ProviderAdapter, PromptDeduplicator, AgentRunsController, AgentRunJob, TurnContentGcJob), Sandbox module (ContainerRun, DockerDispatcher), Analytics module (FeatureFlag, AnalyticsEvent, AuditEvent, LlmMetric, AuditLogger, AuditLogJob, MetricsController, FeatureFlag auto-fire, DashboardController), HealthCheckMiddleware, Ledger+Knowledge removal, org_id migrations, provider adapter build_prompt with pinned+sliding trimming, LedgerAppender, controlled-commit.sh, parse_response normalised to hash, LlmMetric on completion, rswag install, FeatureFlagsController org_id fix, all rswag spec conversions, db/schema.rb hand-crafted from migrations, Go analytics sidecar, Go reference parser, PR skill script, repo-map CLI binary.]
 
 ---
 
-## 2026-05-15 13:18 — Go reference parser binary with tests (tasks 5.2, 5.3, 5.4, tag 0.0.97)
+## 2026-05-20 12:09 — Reference graph web UI (tasks 9.1, 9.2, tag 0.0.103)
 
-**Changes:** Created `go/cmd/reference-parser/main.go` — standalone Go binary that walks spec files, IMPLEMENTATION_PLAN.md, RSpec test files, LEDGER.jsonl, and git log to produce a JSON graph. Created `go/cmd/reference-parser/main_test.go` with 19 unit tests covering all parsing paths. Updated `infra/Dockerfile.go` to build the `reference-parser` binary alongside runner and analytics. 359 Rails specs, 0 failures, 98.68% coverage.
+**Changes:** Implemented `ReferenceGraph::GraphController` with three actions: `current` (in-progress beat + ancestor chain via refs edges), `open` (non-done beats filterable by status), `condensed` (full node tree grouped by type, collapsible `<details>`, text search). Added `ReferenceGraph::ParserService` that shells out to `go/reference-parser` binary via `Open3.capture3`, configurable via `REFERENCE_PARSER_PATH` env var, fail-open (returns empty graph if binary missing). Added routes, nav link, badge CSS for todo/blocked/in_progress. 14 new request specs; 388 total, 0 failures, 96.79% coverage.
 
 **Thinking:**
-- The research spike (5.1) had already resolved all design decisions: regex over tree-sitter, git shelling out, JSON to stdout, fail-open on missing inputs. Implementation was a direct translation of the research document into code.
-- The parser is structured as a `parser` struct with one method per input source (`parseSpecFiles`, `parsePlanItems`, `parseTestFiles`, `parseLedger`, `parseGitLog`). Each method is independently testable with a temp directory fixture — no global state.
-- Node deduplication via a `nodeIDs` map prevents duplicate nodes when the same spec file is referenced from multiple sources. Edge deduplication is not needed (duplicate edges are harmless for graph consumers) but self-loops and empty endpoints are filtered.
-- The `ledgerEntry` struct covers all LEDGER.jsonl event types in one struct — fields are omitempty so unused fields don't appear in output. This is simpler than a union type and sufficient for Phase 0.
-- PR node assembly collects `pr_opened`, `pr_review`, and `pr_merged` events in separate maps, then assembles nodes and edges in a second pass. This handles out-of-order events and missing events (e.g. a PR with no review) gracefully.
+- The spike (9.1) was implicit in reading the spec and codebase — the parser output format, node types, and edge types were all defined in the Go source. No separate research loop needed.
+- `ParserService` is a thin shell wrapper. The controller doesn't need to know how the graph is produced — it just needs a hash with `nodes` and `edges`. Fail-open is correct: the UI degrades gracefully (empty state) if the binary isn't available in the container.
+- The `condensed` view uses HTML `<details>` for collapsibility — no JavaScript needed. Native browser behavior, zero dependencies.
+- `GRAPH_TYPE_ORDER` constant (not `TYPE_ORDER`) avoids any potential name collision with other constants in the inheritance chain.
 
 **Challenges:**
-- The `ThreadCount` field was initially missing from `ledgerEntry` — caught during review of the review node assembly code. Added before the first compile.
-- The `init()` placeholder I added to document the ThreadCount dependency was dead code — removed immediately.
-- Markdown link resolution for relative paths: `../bar/concept.md` from `specifications/system/foo/concept.md` must resolve to `specifications/system/bar/concept.md`. Used `filepath.Join(dir, target)` which handles `..` correctly on all platforms.
+- The `condensed` action returned 503 with empty body. Root cause: a Ruby syntax error in the ERB template. The original template had `\" matching \"#{@query}\"\"` inside an ERB expression — the backslash-escaped quotes inside `<%= %>` caused ERB to generate invalid Ruby. The compiled template had a syntax error that Rails caught and converted to 503 via `ActionDispatch::ShowExceptions`. Diagnosed by patching `ActiveRecord::Migration::CheckPending` to catch and print the exception message.
+- The 503 was hard to diagnose because: (1) `show_exceptions: :none` in test mode still returns a 503 response (not a re-raised exception) when the error is a template syntax error; (2) the `rescue StandardError` I added to the action didn't help because the error occurs during view rendering, not action execution; (3) the Docker image needed a rebuild to pick up view changes — the old template was cached in the image.
+- `git add -A` again swept in unrelated files (`polyai-questions.html`, `unpossible-city/`). Removed via `git rm --cached` + `git commit --amend` before push.
 
 **Alternatives considered:**
-- Separate structs per LEDGER.jsonl event type — rejected. A single struct with omitempty fields is simpler and the event types share most fields. If the schema diverges significantly, a union type can be introduced then.
-- Storing edges in a map to deduplicate — rejected. Duplicate edges are harmless for graph consumers (the web UI can deduplicate on render). The map overhead is not justified for Phase 0 scale.
-- Building the binary into the Go image's final stage — the Dockerfile.go already has a `builder` stage that compiles all binaries; adding `reference-parser` to the build command is a one-line change.
+- Caching the parser output in Rails cache — rejected. The graph is cheap to regenerate (file walk + git log), and caching adds invalidation complexity. Phase 0 local dev doesn't need it.
+- Rendering the graph as JSON and using JavaScript to build the UI — rejected. The spec says server-rendered HTML. No JavaScript framework exists in the project.
+- Calling the parser via HTTP (if it were a sidecar) — rejected. The parser is a CLI binary, not a server. Shell out is the right interface.
 
 **Tradeoffs taken:**
-- Git log parsing shells out to `git log --format=%H|%s|%ai HEAD` — this produces one commit node per commit in the entire history. For large repos this could be slow. Acceptable for Phase 0; a `--since` flag can be added later.
-- Markdown link edges use `contains` type regardless of the semantic relationship between the linked files. The concept spec defines `contains` as the edge type for markdown links — this is correct per spec but may be semantically imprecise (a link from a concept to a requirements doc is more "generates" than "contains"). Refinement deferred to Priority 5 (web UI) when the edge types are consumed.
-- No test for `parseGitLog` — it shells out to `git` which requires a real git repo. The test temp directories are not git repos. The method is simple (parse `|`-delimited lines into commit nodes) and the pattern is identical to the runner sidecar's git integration, which is already tested. Adding a git-init fixture would be possible but adds test complexity for low marginal value.
+- The `condensed` view calls `nodes.any? { ... }` multiple times per row to decide whether to show status/path columns. This is O(n²) in the number of nodes per type group. Acceptable for Phase 0 local dev with small graphs; would need memoization for large graphs. (Actually simplified to always show both columns to avoid the complexity.)
+- `ParserService` uses `Open3.capture3` which blocks the Rails thread. For a local dev tool with one user, this is fine. A future beat could make it async if the parser becomes slow.
+- The binary path defaults to `../../go/reference-parser` relative to `Rails.root`. This assumes the Rails app is at `web/` inside the project root. If the directory structure changes, the default breaks. The `REFERENCE_PARSER_PATH` env var is the escape hatch.
 
 ---
 
-## 2026-05-15 13:01 — Research Go reference parser design (spike 5.1, tag 0.0.96)
+## 2026-05-20 09:40 — Analytics dashboard UI (tasks 6.3, 6.4, tag 0.0.101)
 
-**Changes:** Created `specifications/research/reference-graph-parser.md` with finalized design decisions. Added build tasks 5.2–5.5 to IMPLEMENTATION_PLAN.md. Marked 5.1 complete.
+**Changes:** Implemented `Analytics::DashboardController` with `index` (summary cards: weekly cost/runs/failure rate, cost by provider/model table, recent 20 runs) and `llm` (cost/token breakdown by provider/model with date range filter). Added routes `/analytics` and `/analytics/llm`. Updated nav layout to include Analytics link. 7 new request specs; 374 total, 0 failures, 98.75% coverage.
 
 **Thinking:**
-- This is a pure research spike — no code, no tests. The deliverable is a design document that unblocks 5.2 (the actual parser implementation).
-- The key decision was regex over tree-sitter: all patterns the parser needs (frontmatter, plan item checkboxes, `spec:` tags in RSpec, LEDGER.jsonl) are line-oriented. Tree-sitter adds CGo and build complexity for no benefit at Phase 0 scale.
-- Git integration via shelling out to `git` is the right call — the runner sidecar already uses `exec.CommandContext` for this pattern. libgit2/go-git would add ~5MB and CGo.
-- Output as a single JSON object to stdout is the Unix-native pattern. The caller pipes or redirects. JSONL was considered but rejected — harder to consume as a complete graph.
-- Node IDs are derived deterministically from source artifacts (path, ref, SHA) so the parser is stateless and deterministic: same inputs → same output.
+- The spike (6.3) confirmed all dependencies exist: `LlmMetric`, `AgentRun`, layout CSS, auth pattern. No new gems needed.
+- The `index` action reuses the same aggregation logic as `MetricsController#summary` and `MetricsController#llm` but renders HTML instead of JSON. No duplication — the controller queries directly rather than calling the JSON controller.
+- The `llm` action mirrors `MetricsController#llm` with date range filtering, rendered as a table with a date picker form.
+- Nav link added to the shared layout so both HTML UIs are discoverable from any page.
 
 **Challenges:**
-- Plan item renumbering is inherently heuristic — numeric IDs in LEDGER.jsonl are stable labels but the plan can be renumbered. Title-based matching is best-effort. Acceptable for Phase 0 (solo dev, infrequent renumbering).
-- The concept spec defines node types conceptually but not as a concrete schema. The research document formalizes the schema (id derivation rules, metadata fields) so the implementation has a precise target.
+- Root cause of 503: `HealthCheckMiddleware` has `rescue StandardError` at the method level, which wraps `@app.call(env)`. Any unhandled exception from the Rails app returns 503 instead of propagating as 500. The `@cost_by_provider` query selected `SUM(cost_estimate_usd) AS total_cost_usd` etc. but the view called `row.call_count` — a method that didn't exist on the result objects. This raised `NoMethodError` (a `StandardError`), which the middleware caught and returned 503. Fix: add `COUNT(*) AS call_count` to the SELECT.
+- The 503 was hard to diagnose because the direct Rack test returned 200 (no data in DB, so the `@cost_by_provider` loop never executed). Only when an `LlmMetric` existed did the view iterate and hit the missing method.
+- `git add -A` again swept in unrelated files. Caught and removed via `git rm --cached` + `git commit --amend`.
 
 **Alternatives considered:**
-- Tree-sitter for Ruby/Go parsing — rejected. All required patterns are line-oriented; tree-sitter adds CGo and build complexity with no benefit for Phase 0.
-- libgit2 (go-git) for git integration — rejected. Shelling out to `git` is simpler, has no deps, and is fast enough. The runner sidecar already uses this pattern.
-- JSONL output (one node/edge per line) — rejected. A single JSON object is easier to consume from a web handler or `jq`; no benefit to JSONL at Phase 0 scale.
-- Storing the graph in Postgres — rejected by the concept spec itself. The whole point of the reference graph is to eliminate the disk↔DB sync problem.
+- Calling `MetricsController` actions internally and rendering the JSON as data — rejected. Adds coupling between controllers and requires parsing JSON in the view layer.
+- Separate `SummaryController` and `LlmController` — rejected. The spec defines two views under `/analytics`; one controller with two actions is the natural Rails mapping.
 
 **Tradeoffs taken:**
-- Title-based renaming detection is heuristic — if two beats share the same title intentionally, the parser will incorrectly emit a `renamed_from` edge. Acceptable for Phase 0; can be made opt-in via a LEDGER.jsonl `renamed` event later.
-- Fail-open on missing/malformed inputs — the parser never exits non-zero for bad data. This means a corrupted LEDGER.jsonl produces a partial graph silently. The tradeoff is correct: the parser is a read-only reporting tool, not a gatekeeper.
-- No tree-sitter means no deep code→spec tracing (e.g. linking a specific method to a spec section). This is Priority 3+ work; regex handles everything needed for Priority 2.
+- `HealthCheckMiddleware` rescue behavior is a latent bug: any unhandled exception from the app returns 503 instead of 500. This makes debugging harder. The fix here was to eliminate the exception, not fix the middleware. A future beat should narrow the rescue to only the `SELECT 1` call.
+- The `index` view queries `Agents::AgentRun` directly from the `Analytics` module. This crosses the module boundary (analytics querying agents). Acceptable for Phase 0 — the spec explicitly says "Depends on Analytics::LlmMetric and Agents::AgentRun models." A future beat could introduce a cross-module service interface.
 
 ---
 
-## 2026-05-15 12:31 — Add duration_ms to analytics_llm_metrics (task 3.2, tag 0.0.94)
+## 2026-05-19 23:06 — Agent runs HTML UI (tasks 6.1, 6.2, tag 0.0.100)
 
-**Changes:** Migration adds nullable `duration_ms integer` column to `analytics_llm_metrics`. `LlmMetric` validates it is non-negative when present. `RunStorageService.complete` passes `run.duration_ms` to `LlmMetric.create!`. New `RunStorageService` spec covers both the populated and nil cases. 359 examples, 0 failures, 98.68% coverage.
+**Changes:** Implemented `AgentRunsHtmlController` with `index` (paginated, filterable by mode/status) and `show` (run metadata + ordered turns). Created `application.html.erb` layout (first HTML views in the project). Turn content rendered via existing `MarkdownHelper`. Routes: `GET /agent_runs`, `GET /agent_runs/:id`. 8 new request specs; 367 total, 0 failures, 98.71% coverage.
 
 **Thinking:**
-- `AgentRun` already had a `duration_ms` column (from the original create migration). The gap was purely in `RunStorageService.complete` — it wasn't forwarding the value to `LlmMetric`.
-- Nullable column is correct: `duration_ms` may not be set on the `AgentRun` at completion time (e.g. if the runner sidecar doesn't report it). Forcing NOT NULL would require a default of 0, which is misleading (0ms is a valid duration, not "unknown").
-- Validation `allow_nil: true` with `numericality: { greater_than_or_equal_to: 0 }` is the minimal guard — rejects negative values while permitting absent data.
+- The spike (6.1) confirmed all needed gems (`redcarpet`, `rouge`) and helpers (`MarkdownHelper`) already existed. No new dependencies needed.
+- Inline CSS in the layout is appropriate here: no asset pipeline, no CSS framework, and this is the only layout in the project. A separate stylesheet would require asset pipeline configuration that doesn't exist yet.
+- The HTML controller sits alongside the JSON `AgentRunsController` — same module, different controller. This keeps the module boundary clean without mixing HTML and JSON concerns in one controller.
+- Auth reuses `ApplicationController#authenticate!` exactly as specified — same JWT + sidecar + DISABLE_AUTH bypass. No new auth logic.
+- Pagination is offset-based with a 25-item page size. Simple and sufficient for Phase 0 local use.
 
 **Challenges:**
-- None. The column already existed on `AgentRun`; this was a straightforward propagation task.
+- `git add -A` swept in untracked files (`polyai-questions.html`, `unpossible-city/`) that were sitting in the repo root. Caught immediately and removed via `git rm --cached` + `git commit --amend`. Lesson: stage specific paths or check `git status` before committing.
+- No existing layout to follow — had to establish the first one. Chose a minimal dark-theme monospace design consistent with a developer tool.
 
 **Alternatives considered:**
-- Computing `duration_ms` from `AgentRun.created_at` and `updated_at` at metric creation time — rejected because `AgentRun.duration_ms` is the authoritative source (set by the runner sidecar which measures wall-clock time). Deriving it from Rails timestamps would be less accurate.
-- Adding a NOT NULL constraint with default 0 — rejected because 0 is ambiguous (could mean "completed instantly" or "not measured"). NULL is the correct sentinel for "not available".
+- Separate stylesheet file — rejected. No asset pipeline configured; inline CSS avoids that complexity entirely for Phase 0.
+- Reusing the JSON controller with `respond_to` format blocks — rejected. Mixing HTML and JSON in one controller violates single responsibility and makes the auth/render logic harder to follow.
+- Tailwind or other CSS framework — rejected. No existing framework in the project; adding one is Phase N+1 scope.
 
 **Tradeoffs taken:**
-- `duration_ms` is nullable on `LlmMetric` — queries filtering by duration must handle NULLs. The SQL NULL gotcha in AGENTS.md applies: `WHERE duration_ms > X` excludes NULLs, which is the correct behavior for duration range filters.
-- No backfill migration for existing rows — they will have NULL `duration_ms`. Acceptable for Phase 0 where historical data is dev/test only.
+- Inline CSS means styling is duplicated if a second layout is ever added. Acceptable for Phase 0 — there's only one layout and the CSS is small (~60 lines).
+- Offset pagination doesn't handle concurrent inserts gracefully (items can shift between pages). Acceptable for a local dev tool with low write volume.
+- Parent run lookup in the show view does a DB query per render (`AgentRun.find_by`). For Phase 0 with single-user local use this is fine; would need eager loading if the view were high-traffic.
 
 ---
 
-**Changes:** Ran `rake rswag:specs:swaggerize` inside the test container and copied the generated `swagger/v1/swagger.yaml` back to the host. `/api/feature_flags` (GET, POST) and `/api/feature_flags/{key}` (PATCH) are now documented in swagger.yaml. No code changes — the spec already used rswag DSL correctly; the yaml was simply stale.
+## 2026-05-20 11:43 — Log tail relay implementation (task 7.2, tag 0.0.102)
+
+**Changes:** Added `logs-snapshot` Makefile target writing last 100 lines of a service's logs to `.data/logs-snapshot.txt`. `SERVICE` variable selects the service (default: rails). Documented the read path in AGENTS.md. No Ruby code changes — infrastructure-only. 374 tests, 0 failures, 98.75% coverage unchanged.
 
 **Thinking:**
-- The feature_flags request spec was already written with the rswag DSL (`path`, `get`/`post`/`patch`, `response` blocks, `run_test!`). The only missing step was regenerating the swagger artifact.
-- The test container has no volume mount for `web/` — the directory is baked into the image at build time. So `rake rswag:specs:swaggerize` writes to `/app/swagger/v1/swagger.yaml` inside the container, not on the host. Required `docker cp` to extract the file.
-- Used `--name` on `docker compose run` (without `--rm`) so the container persists long enough for `docker cp`, then removed it manually.
+- The spike (7.1) established the approach: file relay via a Makefile target. Implementation is a direct translation of the spike findings.
+- `$(or $(SERVICE),rails)` is the idiomatic Make way to default a variable — avoids a separate `ifdef` block.
+- `@mkdir -p` ensures `.data/` exists even on a fresh clone before the first snapshot.
+- The agent container mounts `..:/workspace`, so the snapshot is at `/workspace/.data/logs-snapshot.txt` in the agent — not `/.data/logs-snapshot.txt` (which is the rails container's mount). AGENTS.md documents the correct agent-container path.
 
 **Challenges:**
-- First attempt used `--rm -d` (detached + auto-remove). The container exited and was removed before `docker cp` could run — `RWLayer is unexpectedly nil` error. Fixed by dropping `--rm` and using `--name` instead.
-- The swagger.yaml on the host was 247 lines shorter than the generated version — the prior generation had missed the feature_flags spec entirely, confirming the spec was added after the last swaggerize run.
+- The spike notes said the agent reads `/.data/logs-snapshot.txt`. That's the rails container's mount path. The agent container mounts the whole repo at `/workspace`, so the correct path is `/workspace/.data/logs-snapshot.txt`. Caught by re-reading the compose file before writing the docs.
 
 **Alternatives considered:**
-- Adding a volume mount to docker-compose.test.yml so `swagger/` is writable from the container — rejected as infrastructure change not required by the task. The `docker cp` pattern is sufficient for Phase 0.
-- Manually writing the swagger YAML entries — rejected. The rswag DSL is the single source of truth; hand-editing the yaml would create drift.
+- Separate `logs-snapshot-rails` and `logs-snapshot-postgres` targets — rejected. A single target with a `SERVICE` variable is more composable and follows the pattern of other Makefile targets in the project.
+- Writing to `.data/snapshots/logs-snapshot.txt` — rejected. The spike spec says `.data/logs-snapshot.txt` (flat, not nested). Keeping it flat makes the path easier to remember and document.
 
 **Tradeoffs taken:**
-- The `docker cp` workflow is manual and not automated in the Makefile. If swagger regeneration becomes frequent, a Makefile target wrapping the run+cp+rm sequence would be worth adding. For now, the pattern is documented by this entry.
-- swagger.yaml is committed to the repo (per api-standards.md). A stale artifact is a build failure — this commit brings it current.
+- The snapshot overwrites on each call — no history. Acceptable: the use case is "show me what's happening now," not log archival.
+- `docker compose logs --tail=100` includes ANSI color codes if the service emits them. The agent reads the file as plain text — color codes appear as escape sequences. Acceptable for Phase 0; a `--no-color` flag could be added if it becomes noisy.
 
----
-
-## 2026-05-01 12:40 — Fix docker-compose.yml: analytics service, clean stub, RUNNER_PASSWORD (task 3.2, tag 0.0.91)
-
-**Changes:** Removed commented-out `go_runner:f` stub (typo artifact). Added `analytics` service on port 9100 with postgres health dependency and correct env vars (`DB_HOST`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`). Set `RUNNER_PASSWORD` default (`dev-runner-password`) in both `go_runner` and `agent` services. `docker compose config` exits 0. 352 Rails specs, 0 failures, 98.67% coverage.
+**Changes:** Researched three log relay approaches (file relay, HTTP sidecar, clipboard/pipe). Recorded findings in IMPLEMENTATION_PLAN.md, marked 7.1 complete, added 7.2 implementation task.
 
 **Thinking:**
-- The analytics sidecar reads DB connection from `DB_HOST`/`POSTGRES_USER`/`POSTGRES_PASSWORD`/`POSTGRES_DB` env vars (confirmed from `go/cmd/analytics/main.go`). These match the pattern used by the Rails service — consistent across services.
-- `RUNNER_PASSWORD` had no default in the original file, meaning the env var would be empty string unless `.env` was present. A dev default (`dev-runner-password`) makes the stack startable without a `.env` file, matching the pattern used by `AUTH_SECRET` and `SIDECAR_TOKEN`.
-- The `analytics` service depends on `postgres` with `condition: service_healthy` — same pattern as `rails` and `go_runner`. This prevents the sidecar from starting before Postgres is ready, avoiding connection errors at boot.
-- Port 9100 is the port the analytics binary listens on (hardcoded in `main.go` as `:9100`).
+- The agent container already mounts `../.data:/.data` — any file written to `.data/` on the host is immediately visible to the agent at `/.data/`. No new infrastructure needed.
+- File relay via `make logs-snapshot` is the minimal, correct solution: developer-triggered (opt-in), bounded (tail N lines), no Docker socket exposure, no new sidecar.
+- The `.data/snapshots/` directory already exists, confirming the pattern is established.
 
 **Challenges:**
-- None. The changes were mechanical: remove dead YAML, add a new service block, add a default value.
+- None. The existing volume mount made the answer obvious once confirmed.
 
 **Alternatives considered:**
-- Binding `RUNNER_PASSWORD` to a required env var with no default — rejected because the dev stack should start without a `.env` file. The default is clearly a dev-only value.
-- Using `env_file: ../.env` for the analytics service — rejected because the analytics sidecar only needs DB credentials, which are already set inline. Adding `env_file` would pull in unrelated secrets unnecessarily.
+- HTTP sidecar with Docker socket access — rejected. Requires a new container, new port, new service in compose. Overkill for a single-user local tool.
+- Clipboard/pipe CLI integration — rejected. Doesn't work in non-interactive agent sessions (the primary use case).
 
 **Tradeoffs taken:**
-- `RUNNER_PASSWORD` default is a plaintext string in the compose file — acceptable for dev. Production must override via `.env` or secrets management. The existing `AUTH_SECRET` default follows the same pattern.
-- Postgres is not bound to `0.0.0.0` (no `ports:` on the postgres service) — this was already correct and preserved.
-
----
-
-## 2026-05-01 12:33 — Add infra/Dockerfile.go multi-stage build (task 3.1, tag 0.0.90)
-
-**Changes:** Created `infra/Dockerfile.go` with three stages: `builder` (golang:1.23-bookworm, compiles both binaries from vendored deps), `runner` (debian:bookworm-slim, port 8080), `analytics` (debian:bookworm-slim, port 9100). `docker compose build go_runner` exits 0; analytics target builds exits 0. 352 Rails specs, 0 failures, 98.67% coverage.
-
-**Thinking:**
-- The Go vendor directory, go.mod, and go.sum were already in place from task 1.1. The Dockerfile is a straightforward multi-stage build: one builder stage compiles both binaries, two final stages copy one binary each.
-- `CGO_ENABLED=0` produces static binaries that run on `debian:bookworm-slim` without needing libc or other shared libraries. This is the standard Go container pattern.
-- `GOFLAGS=-mod=vendor` ensures the build uses the vendored dependencies and fails fast if the vendor directory is inconsistent — no network access needed.
-- Separate final stages for runner and analytics allow `docker compose` to build only the needed target without pulling the other binary into the image.
-
-**Challenges:**
-- None. The vendor directory was already consistent (validated in task 1.1), so the build succeeded on the first attempt.
-
-**Alternatives considered:**
-- Single final stage with both binaries — rejected because it couples the runner and analytics images, making them larger than necessary and preventing independent deployment.
-- `golang:1.23-alpine` as builder — rejected in favour of `bookworm` to match the Debian-based final stages and avoid musl/glibc compatibility issues with CGO (even though CGO is disabled, consistency reduces surprises).
-- `scratch` as final stage — rejected because `debian:bookworm-slim` provides a shell for debugging and is the project's established base for slim images.
-
-**Tradeoffs taken:**
-- Builder stage uses `golang:1.23-bookworm` (full Debian) — larger builder image but cached after first pull. Final images are slim.
-- Non-root user (`runner`/`analytics`, uid 1001) created in each final stage — matches the Rails image pattern (uid 1001 for `rails` user).
-
----
-
-## 2026-04-22 13:11 — Wire skill assembly into AgentRunJob#load_enrichment (task 2.4, tag 0.0.75)
-
-**Changes:** Replaced stub `load_enrichment` with real calls to SkillLoader, ContextRetriever, and EnrichmentRunner. Added 4 integration tests. 334 examples, 0 failures, 98.71% coverage.
-
-**Thinking:**
-- The three services (SkillLoader, ContextRetriever, EnrichmentRunner) were already implemented and tested independently. Task 2.4 is purely wiring — call them in sequence and return `[context_chunks, principles]` to match the existing `build_prompt` call signature.
-- `principles` is returned as the second element (not `skill.principles` renamed) because `build_prompt` already accepts a `principles:` keyword — no interface change needed.
-- EnrichmentRunner is called for its side effect (appending turns) before the return; its return value is discarded since `load_enrichment` only needs to return context data.
-
-**Challenges:**
-- The existing `agent_override is false` test used `and_call_original` on `load_enrichment`, which now calls the real services. The integration test context uses a real temp file and stubs `ContextRetriever` to avoid filesystem dependency on the practices directory inside the container.
-- The `build_prompt` stub in the outer `before` block uses `and_return(built_prompt)` — the integration tests need to override this with `expect(adapter).to receive(:build_prompt).with(hash_including(...))`, which works because RSpec message expectations take precedence over stubs.
-
-**Alternatives considered:**
-- Passing `skill` object directly to `build_prompt` instead of unpacking — rejected because `build_prompt` interface is already defined and tested across three adapters; changing it would require updating all adapter specs.
-- Calling `EnrichmentRunner` inside `ContextRetriever` — rejected as wrong layer; enrichment appends turns (a side effect), context retrieval is pure. They must stay separate.
-
-**Tradeoffs taken:**
-- Integration tests stub `ContextRetriever` rather than using real practices files — this avoids path resolution issues in the test container where `specifications/practices/` may not be at the expected relative path. The unit tests for ContextRetriever cover the real file loading.
-- No test for the case where `source_ref` is nil (SkillLoader returns empty result, enrichment is skipped) — this is covered by the existing `agent_override is false` test which calls `and_call_original` and the SkillLoader nil-handling spec.
-
----
-
-## 2026-04-22 13:07 — Implement EnrichmentRunner (task 2.3, tag 0.0.74)
-
-**Changes:** Added `EnrichmentRunner` service and 13-example spec. 330 examples, 0 failures, 98.7% coverage.
-
-**Thinking:**
-- EnrichmentRunner is a pure service: given a run and a list of tool names, execute each tool and append `tool_result` turns. No state, no instance variables — `.call` class method matches the pattern established by SkillLoader and ContextRetriever.
-- Tool registry as a constant hash (`TOOLS`) keeps the mapping explicit and testable. `stub_const` in specs can override it cleanly without monkey-patching.
-- Fail-open on both unknown tools and tool execution errors — enrichment is a "pipeline invisible step" per the spec. A missing `git_diff` binary in CI should not abort the run.
-
-**Challenges:**
-- Position assignment: `run.turns.maximum(:position)` returns nil when no turns exist — guarded with `|| 0`. This is the same pattern used in `AgentRunJob#append_turn`.
-- The `git_diff` tool uses backtick shell execution. In the test container there's no git repo at the working directory, so the tool would return an error string — but the spec stubs it, so this is fine for tests. In production the Rails root is inside a git repo.
-
-**Alternatives considered:**
-- Instance-based registry (class with injected tools) — rejected as over-engineering for a single-level dispatch table. The constant hash is sufficient and directly testable.
-- Passing tool callables as arguments rather than a registry — rejected because callers (AgentRunJob) shouldn't need to know about tool implementations; the registry is the right boundary.
-
-**Tradeoffs taken:**
-- TOOLS registry is a constant — adding a new tool requires a code change, not configuration. This is intentional for Phase 0: tools are trusted, not user-defined. If tools become user-configurable later, the registry pattern extends naturally to a DB-backed lookup.
-- Shell backtick for `git_diff` is simple but not sandboxed. If the Rails process runs in a restricted environment without git, it returns an error string rather than raising — acceptable given fail-open semantics.
-
----
-
-## 2026-04-24 10:08 — Commit db/schema.rb — canonical schema reference (task 1.1, tag 0.0.87)
-
-**Changes:** Added `web/db/schema.rb` hand-crafted from all migrations. Fixed index name in `20260417000003_create_analytics_llm_metrics.rb` (auto-generated name was 75 chars, exceeding Postgres 63-char limit). 351 examples, 0 failures, 98.67% coverage.
-
-**Thinking:**
-- `schema.rb` is the Rails canonical schema reference — `db:schema:load` is faster and more reliable than replaying all migrations on a fresh DB. Without it, every test run replays 18+ migrations including destructive ones.
-- When `schema.rb` exists, Rails 8 loads it instead of running migrations on a fresh DB. This is the intended behavior.
-- The migration `20260417000003` had a latent bug: auto-generated index name exceeded Postgres's 63-char identifier limit. Rails raises `ArgumentError` before even sending to Postgres. This was masked previously because the entrypoint's `2>/dev/null` suppressed the error and the fallback `db:migrate` ran on an already-migrated DB.
-
-**Challenges:**
-- Extension name mismatch: schema.rb initially used `enable_extension "pgvector"` but the actual extension name is `"vector"` (the control file is `vector.control`). The migration correctly uses `'vector'` — schema.rb had to match.
-- The long index name bug was latent — tests passed before schema.rb existed because the entrypoint's error suppression masked the migration failure. Adding schema.rb exposed it by making Rails load schema.rb (which reproduced the same error).
-- Cannot run `db:schema:dump` from within the agent sandbox — had to hand-craft schema.rb from migration files.
-
-**Alternatives considered:**
-- Using `structure.sql` format — rejected because the project uses default `:ruby` format and there's no `schema_format = :sql` override. Switching would require changing application config.
-- Leaving schema.rb absent — rejected because it's the canonical Rails convention and `db:schema:load` is the correct setup path for new environments.
-
-**Tradeoffs taken:**
-- Hand-crafted schema.rb may have minor formatting differences from what `db:schema:dump` would auto-generate (column ordering, default value formatting). Cosmetic only — correctness is validated by tests passing.
-- Fixed the migration index name rather than adding a new migration to rename it — the migration had never been successfully run in isolation (the bug was masked), so fixing it in-place is correct. A rename migration would be needed only if the index already existed in production with the wrong name.
-
----
-
-## 2026-05-01 11:54 — Planning loop: regenerate IMPLEMENTATION_PLAN.md
-
-**Changes:** Deleted stale IMPLEMENTATION_PLAN.md, performed full gap analysis of specs vs code. Generated fresh plan with 11 sections, 21 tasks (5 spikes, 16 build tasks). Key gaps confirmed: go/go.mod missing, infra/Dockerfile.go missing, go/cmd/analytics missing, FeatureFlag.enabled? class method missing, FeatureFlagExposure model missing, LlmMetric missing mode column, MetricsController cross-module violation, swagger missing feature_flags + batch endpoints, run-tests.sh missing from repo.
-
----
-
-## 2026-05-01 11:59 — Add go/go.mod and go/go.sum for Go module foundation (task 1.1, tag 0.0.88)
-
-**Changes:** Created `go/go.mod` with module path `github.com/unpossible/unpossible/go`, go 1.23.0. Generated `go/go.sum` via `go mod tidy` against existing vendor directory. Added Go binary outputs (`go/runner`, `go/analytics`) to `.gitignore`. `go build ./...` and `go test ./...` both exit 0; 352 Rails specs still pass.
-
-**Thinking:**
-- The vendor directory already existed with all dependencies and a `modules.txt` — the only missing pieces were `go.mod` and `go.sum`.
-- `go mod tidy` was the right tool: it reads the vendor directory, resolves the dependency graph, and writes both files atomically.
-- `lib/pq` needed to be a direct dependency in `go.mod` because `modules.txt` marks it `## explicit` — Go's vendor consistency check requires explicit deps to appear in `go.mod`.
-
-**Challenges:**
-- First `go build` attempt failed with "inconsistent vendoring" because `lib/pq` was marked explicit in `modules.txt` but absent from `go.mod` after `go mod tidy` removed it (runner doesn't import it directly).
-- Resolution: added `lib/pq` back as a direct dep — it's needed for the analytics sidecar (task 2.2) and the vendor directory was built with it explicit.
-
-**Alternatives considered:**
-- Running `go mod vendor` to regenerate the vendor directory from scratch — rejected because the container has no internet access; the existing vendor directory is the source of truth.
-- Using `-mod=mod` flag to bypass vendor consistency — rejected because it would mask the real issue and break container builds.
-
-**Tradeoffs taken:**
-- `lib/pq` listed as direct dep in `go.mod` even though runner doesn't import it — intentional: the vendor directory was pre-built for both runner and analytics sidecar.
-- Go 1.23.0 set by `go mod tidy` (matches the highest `go` directive in vendor deps) — acceptable since the Dockerfile will pin the Go version explicitly.
+- File relay is pull-based (developer must run `make logs-snapshot`). The agent cannot proactively fetch logs. This is intentional — the spec says "opt-in (developer initiates or approves the relay)." If proactive log access is needed later, the HTTP sidecar approach is the upgrade path.
+- Snapshot is a point-in-time file, not a live stream. Sufficient for debugging boot failures and migration errors; not suitable for watching live output.

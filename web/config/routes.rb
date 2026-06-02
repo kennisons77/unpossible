@@ -27,6 +27,19 @@ Rails.application.routes.draw do
   patch '/api/feature_flags/:key', to: 'analytics/feature_flags#update', as: :api_feature_flag,
         constraints: { key: /[^\/]+/ }
 
+  # Agent runs — HTML UI
+  get '/agent_runs',     to: 'agents/agent_runs_html#index', as: :agent_runs
+  get '/agent_runs/:id', to: 'agents/agent_runs_html#show',  as: :agent_run
+
+  # Analytics dashboard — HTML UI
+  get '/analytics',     to: 'analytics/dashboard#index', as: :analytics
+  get '/analytics/llm', to: 'analytics/dashboard#llm',   as: :analytics_llm
+
+  # Reference graph — HTML UI
+  get '/graph/current',   to: 'reference_graph/graph#current',   as: :graph_current
+  get '/graph/open',      to: 'reference_graph/graph#open',      as: :graph_open
+  get '/graph/condensed', to: 'reference_graph/graph#condensed', as: :graph_condensed
+
   # Analytics metrics — Analytics::MetricsController (JSON API)
   get '/api/analytics/llm',          to: 'analytics/metrics#llm'
   get '/api/analytics/loops',        to: 'analytics/metrics#loops'

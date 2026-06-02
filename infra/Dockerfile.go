@@ -11,7 +11,8 @@ COPY go/cmd/ cmd/
 
 RUN CGO_ENABLED=0 GOFLAGS=-mod=vendor go build -o /out/runner ./cmd/runner && \
     CGO_ENABLED=0 GOFLAGS=-mod=vendor go build -o /out/analytics ./cmd/analytics && \
-    CGO_ENABLED=0 GOFLAGS=-mod=vendor go build -o /out/reference-parser ./cmd/reference-parser
+    CGO_ENABLED=0 GOFLAGS=-mod=vendor go build -o /out/reference-parser ./cmd/reference-parser && \
+    CGO_ENABLED=0 GOFLAGS=-mod=vendor go build -o /out/repo-map ./cmd/repo-map
 
 # ---- runner ----
 FROM debian:bookworm-slim AS runner

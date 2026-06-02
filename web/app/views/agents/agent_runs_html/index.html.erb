@@ -1,0 +1,61 @@
+<% content_for :title, "Agent Runs — Unpossible" %>
+
+<h1>Agent Runs</h1>
+
+<form class="filters" method="get" action="<%= agent_runs_path %>">
+  <select name="mode">
+    <option value="">All modes</option>
+    <% Agents::AgentRun::MODES.each do |m| %>
+      <option value="<%= m %>" <%= "selected" if params[:mode] == m %>><%= m %></option>
+    <% end %>
+  </select>
+  <select name="status">
+    <option value="">All statuses</option>
+    <% Agents::AgentRun::STATUSES.each do |s| %>
+      <option value="<%= s %>" <%= "selected" if params[:status] == s %>><%= s %></option>
+    <% end %>
+  </select>
+  <button type="submit">Filter</button>
+</form>
+
+<% if @runs.empty? %>
+  <p class="meta">No agent runs found.</p>
+<% else %>
+  <table>
+    <thead>
+      <tr>
+        <th>Mode</th>
+        <th>Status</th>
+        <th>Provider / Model</th>
+        <th>Tokens (in/out)</th>
+        <th>Cost (USD)</th>
+        <th>Duration</th>
+        <th>Created</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @runs.each do |run| %>
+        <tr>
+          <td><%= link_to run.mode, agent_run_path(run) %> <span class="badge badge-<%= run.mode %>"><%= run.mode %></span></td>
+          <td><span class="badge badge-<%= run.status %>"><%= run.status %></span></td>
+          <td class="meta"><%= run.provider %> / <%= run.model %></td>
+          <td class="meta"><%= run.input_tokens || "—" %> / <%= run.output_tokens || "—" %></td>
+          <td class="meta"><%= run.cost_estimate_usd ? "$#{"%.6f" % run.cost_estimate_usd}" : "—" %></td>
+          <td class="meta"><%= run.duration_ms ? "#{run.duration_ms}ms" : "—" %></td>
+          <td class="meta"><%= run.created_at.strftime("%Y-%m-%d %H:%M") %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+
+  <div class="pagination">
+    <% if @page > 1 %>
+      <%= link_to "← Prev", agent_runs_path(page: @page - 1, mode: params[:mode], status: params[:status]) %>
+    <% end %>
+    <span class="current"><%= @page %> / <%= [@total_pages, 1].max %></span>
+    <% if @page < @total_pages %>
+      <%= link_to "Next →", agent_runs_path(page: @page + 1, mode: params[:mode], status: params[:status]) %>
+    <% end %>
+    <span class="meta"><%= @total %> total</span>
+  </div>
+<% end %>

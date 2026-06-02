@@ -1,0 +1,76 @@
+<% content_for :title, "Analytics — Unpossible" %>
+
+<h1>Analytics Dashboard</h1>
+
+<div class="run-meta">
+  <div class="run-meta-item">
+    <div class="label">Cost this week</div>
+    <div class="value">$<%= "%.4f" % @total_cost_usd %></div>
+  </div>
+  <div class="run-meta-item">
+    <div class="label">Runs this week</div>
+    <div class="value"><%= @total_runs %></div>
+  </div>
+  <div class="run-meta-item">
+    <div class="label">Failure rate</div>
+    <div class="value"><%= @failure_rate %>%</div>
+  </div>
+</div>
+
+<h2>Cost by Provider / Model</h2>
+<% if @cost_by_provider.empty? %>
+  <p class="meta">No LLM metrics recorded yet.</p>
+<% else %>
+  <table>
+    <thead>
+      <tr>
+        <th>Provider</th>
+        <th>Model</th>
+        <th>Calls</th>
+        <th>Input tokens</th>
+        <th>Output tokens</th>
+        <th>Total cost (USD)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @cost_by_provider.each do |row| %>
+        <tr>
+          <td><%= row.provider %></td>
+          <td class="meta"><%= row.model %></td>
+          <td class="meta"><%= row.call_count %></td>
+          <td class="meta"><%= row.total_input_tokens %></td>
+          <td class="meta"><%= row.total_output_tokens %></td>
+          <td>$<%= "%.6f" % row.total_cost_usd.to_f %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% end %>
+
+<h2 style="margin-top:24px;">Recent Runs</h2>
+<% if @recent_runs.empty? %>
+  <p class="meta">No agent runs yet.</p>
+<% else %>
+  <table>
+    <thead>
+      <tr>
+        <th>Mode</th>
+        <th>Status</th>
+        <th>Provider / Model</th>
+        <th>Cost (USD)</th>
+        <th>Created</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @recent_runs.each do |run| %>
+        <tr>
+          <td><span class="badge badge-<%= run.mode %>"><%= run.mode %></span></td>
+          <td><span class="badge badge-<%= run.status %>"><%= run.status %></span></td>
+          <td class="meta"><%= run.provider %> / <%= run.model %></td>
+          <td class="meta"><%= run.cost_estimate_usd ? "$#{"%.6f" % run.cost_estimate_usd}" : "—" %></td>
+          <td class="meta"><%= run.created_at.strftime("%Y-%m-%d %H:%M") %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% end %>

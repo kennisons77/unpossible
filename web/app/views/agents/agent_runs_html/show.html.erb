@@ -1,0 +1,76 @@
+<% content_for :title, "Run #{@run.run_id.first(8)} — Unpossible" %>
+
+<div class="back"><%= link_to "← Agent Runs", agent_runs_path %></div>
+
+<h1>
+  <span class="badge badge-<%= @run.mode %>"><%= @run.mode %></span>
+  <span class="badge badge-<%= @run.status %>"><%= @run.status %></span>
+  <span class="meta" style="font-size:14px; margin-left:8px;"><%= @run.run_id %></span>
+</h1>
+
+<div class="run-meta">
+  <div class="run-meta-item">
+    <div class="label">Provider / Model</div>
+    <div class="value"><%= @run.provider %> / <%= @run.model %></div>
+  </div>
+  <div class="run-meta-item">
+    <div class="label">Input Tokens</div>
+    <div class="value"><%= @run.input_tokens || "—" %></div>
+  </div>
+  <div class="run-meta-item">
+    <div class="label">Output Tokens</div>
+    <div class="value"><%= @run.output_tokens || "—" %></div>
+  </div>
+  <div class="run-meta-item">
+    <div class="label">Cost (USD)</div>
+    <div class="value"><%= @run.cost_estimate_usd ? "$#{"%.6f" % @run.cost_estimate_usd}" : "—" %></div>
+  </div>
+  <div class="run-meta-item">
+    <div class="label">Duration</div>
+    <div class="value"><%= @run.duration_ms ? "#{@run.duration_ms}ms" : "—" %></div>
+  </div>
+  <div class="run-meta-item">
+    <div class="label">Created</div>
+    <div class="value"><%= @run.created_at.strftime("%Y-%m-%d %H:%M:%S") %></div>
+  </div>
+  <% if @run.source_ref.present? %>
+    <div class="run-meta-item">
+      <div class="label">Source Ref</div>
+      <div class="value"><%= @run.source_ref %></div>
+    </div>
+  <% end %>
+  <% if @run.parent_run_id.present? %>
+    <div class="run-meta-item">
+      <div class="label">Parent Run</div>
+      <div class="value">
+        <% parent = Agents::AgentRun.find_by(id: @run.parent_run_id) %>
+        <% if parent %>
+          <%= link_to parent.run_id.first(8), agent_run_path(parent) %>
+        <% else %>
+          <%= @run.parent_run_id %>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+</div>
+
+<h2>Turns (<%= @turns.size %>)</h2>
+
+<% @turns.each do |turn| %>
+  <div class="card">
+    <div class="card-header">
+      <span class="badge badge-<%= turn.kind %>"><%= turn.kind %></span>
+      <span class="meta">#<%= turn.position %></span>
+      <span class="meta"><%= turn.created_at.strftime("%H:%M:%S") %></span>
+    </div>
+    <% if turn.purged_at? %>
+      <p class="purged">Content purged at <%= turn.purged_at.strftime("%Y-%m-%d %H:%M:%S") %></p>
+    <% elsif turn.content.present? %>
+      <div class="turn-content"><%= render_markdown(turn.content) %></div>
+    <% end %>
+  </div>
+<% end %>
+
+<% if @turns.empty? %>
+  <p class="meta">No turns recorded.</p>
+<% end %>

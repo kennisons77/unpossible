@@ -123,3 +123,19 @@ in the same commit.
 |---|---|---|
 | Rails | `GET /up` | `docker compose logs rails` |
 | Postgres | `pg_isready` | `docker compose logs postgres` |
+
+## Log Snapshots (Agent Debugging)
+
+The agent cannot reach the host Docker daemon. To share logs with the agent, run on the host:
+
+```bash
+# Snapshot last 100 lines of rails logs → .data/logs-snapshot.txt
+make logs-snapshot
+
+# Snapshot a different service
+make logs-snapshot SERVICE=postgres
+```
+
+The agent reads the snapshot at `/workspace/.data/logs-snapshot.txt` (the repo root is
+mounted at `/workspace` in the agent container). The file is gitignored and overwritten
+on each `make logs-snapshot` call.

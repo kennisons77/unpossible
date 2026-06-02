@@ -1,0 +1,37 @@
+<% content_for :title, "Graph: Open — Unpossible" %>
+
+<h1>Open Beats</h1>
+
+<form class="filters" method="get" action="<%= graph_open_path %>">
+  <select name="status">
+    <option value="">All statuses</option>
+    <% %w[todo in_progress blocked].each do |s| %>
+      <option value="<%= s %>" <%= "selected" if params[:status] == s %>><%= s %></option>
+    <% end %>
+  </select>
+  <button type="submit">Filter</button>
+</form>
+
+<% if @beats.empty? %>
+  <p class="meta">No open beats found.</p>
+<% else %>
+  <table>
+    <thead>
+      <tr>
+        <th>Ref</th>
+        <th>Title</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @beats.each do |beat| %>
+        <tr>
+          <td class="meta"><%= beat['id'].delete_prefix('beat:') %></td>
+          <td><%= beat['label'] %></td>
+          <td><span class="badge badge-<%= beat['status'] == 'in_progress' ? 'running' : beat['status'] %>"><%= beat['status'] %></span></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+  <p class="meta" style="margin-top:8px;"><%= @beats.size %> open beat<%= @beats.size == 1 ? '' : 's' %></p>
+<% end %>

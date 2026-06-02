@@ -21,3 +21,7 @@ infra/debs-debian/*
 # Go binaries
 go/runner
 go/analytics
+go/repo-map
+
+# Generated repo map (derived artifact)
+REPO_MAP.md
